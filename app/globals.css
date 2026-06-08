@@ -491,3 +491,83 @@ p { color: var(--ct-soft); line-height: 1.65; }
     grid-template-columns: 1fr;
   }
 }
+
+/* Collectium login page */
+.ct-login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.7fr);
+  gap: 18px;
+  width: 100%;
+}
+
+.ct-login-card,
+.ct-login-info {
+  border: 1px solid rgba(38, 65, 99, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 22px;
+  box-shadow: 0 18px 45px rgba(16, 33, 55, 0.08);
+}
+
+.ct-kicker {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 11px;
+  color: rgba(36, 65, 99, 0.68);
+}
+
+.ct-login-card h1,
+.ct-login-info h2 {
+  margin: 0 0 10px;
+}
+
+.ct-login-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ct-login-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.ct-login-form input {
+  min-height: 42px;
+  border: 1px solid rgba(38, 65, 99, 0.24);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #122033;
+}
+
+.ct-login-form button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4f8f;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ct-login-form button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.ct-login-message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(140, 34, 34, 0.08);
+  color: #7b1d1d;
+}
+
+@media (max-width: 860px) {
+  .ct-login-page {
+    grid-template-columns: 1fr;
+  }
+}
