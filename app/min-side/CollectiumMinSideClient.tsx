@@ -40,6 +40,7 @@ type ProfileResponse =
   | {
       ok: false;
       message: string;
+      error?: string;
     };
 
 type SessionsResponse =
@@ -50,7 +51,18 @@ type SessionsResponse =
   | {
       ok: false;
       message: string;
+      error?: string;
     };
+
+async function readJsonSafe<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  return JSON.parse(text) as T;
+}
 
 export default function CollectiumMinSideClient() {
   const [loading, setLoading] = useState(true);
@@ -68,12 +80,19 @@ export default function CollectiumMinSideClient() {
         cache: "no-store",
       });
 
-      const profileData = (await profileResponse.json()) as ProfileResponse;
+      const profileData = await readJsonSafe<ProfileResponse>(profileResponse);
 
-      if (!profileResponse.ok || !profileData.ok) {
+      if (!profileData) {
         setUser(null);
         setSessions([]);
-        setError("Du er ikke logget inn.");
+        setError("Profil-API returnerte ikke JSON. Kontroller MariaDB-tilkobling.");
+        return;
+      }
+
+      if (!profileResponse.ok || profileData.ok === false) {
+        setUser(null);
+        setSessions([]);
+        setError(profileData.ok === false ? profileData.message : "Du er ikke logget inn.");
         return;
       }
 
@@ -84,10 +103,12 @@ export default function CollectiumMinSideClient() {
         cache: "no-store",
       });
 
-      const sessionsData = (await sessionsResponse.json()) as SessionsResponse;
+      const sessionsData = await readJsonSafe<SessionsResponse>(sessionsResponse);
 
-      if (sessionsResponse.ok && sessionsData.ok) {
+      if (sessionsData && sessionsResponse.ok && sessionsData.ok === true) {
         setSessions(sessionsData.sessions);
+      } else {
+        setSessions([]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kunne ikke hente Min side-data.");

@@ -4,25 +4,38 @@ import { getCurrentSessionUser, listCurrentUserSessions } from "@/lib/access/ses
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const user = await getCurrentSessionUser();
+  try {
+    const user = await getCurrentSessionUser();
 
-  if (!user) {
+    if (!user) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Not authenticated",
+        },
+        { status: 401 },
+      );
+    }
+
+    const sessions = await listCurrentUserSessions(user.id);
+
+    return NextResponse.json(
+      {
+        ok: true,
+        sessions,
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown profile sessions error";
+
     return NextResponse.json(
       {
         ok: false,
-        message: "Not authenticated",
+        message: "Profile sessions API failed",
+        error: message,
       },
-      { status: 401 },
+      { status: 500 },
     );
   }
-
-  const sessions = await listCurrentUserSessions(user.id);
-
-  return NextResponse.json(
-    {
-      ok: true,
-      sessions,
-    },
-    { status: 200 },
-  );
 }
