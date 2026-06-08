@@ -3,37 +3,51 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type LoginResponse =
-  | {
-      ok: true;
-      authenticated: true;
-      user: {
-        id: number;
-        public_id: string;
-        email: string;
-        display_name: string;
-        public_display_name: string | null;
-        preferred_language: string;
-        preferred_theme: string;
-        account_status: string;
-        email_status: string;
-        admin_approval_status: string;
-        role: string;
-        is_admin: number;
-        is_active: number;
-      };
-    }
-  | {
-      ok: false;
-      message: string;
-      error?: string;
-    };
+type LoginUser = {
+  id: number;
+  public_id: string;
+  email: string;
+  display_name: string;
+  public_display_name: string | null;
+  preferred_language: string;
+  preferred_theme: string;
+  account_status: string;
+  email_status: string;
+  admin_approval_status: string;
+  role: string;
+  is_admin: number;
+  is_active: number;
+};
+
+type LoginSuccessResponse = {
+  ok: true;
+  authenticated: true;
+  user: LoginUser;
+};
+
+type LoginErrorResponse = {
+  ok: false;
+  message: string;
+  error?: string;
+};
+
+type LoginResponse = LoginSuccessResponse | LoginErrorResponse;
+
+async function readJsonSafe(response: Response): Promise<LoginResponse | null> {
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  return JSON.parse(text) as LoginResponse;
+}
 
 export default function LoginClient() {
   const router = useRouter();
 
   const [email, setEmail] = useState("tsandvin@gmail.com");
-  const [password, setPassword] = useState("CollectiumTest123!");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -56,10 +70,20 @@ export default function LoginClient() {
         }),
       });
 
-      const data = (await response.json()) as LoginResponse;
+      const data = await readJsonSafe(response);
 
-      if (!response.ok || !data.ok) {
-        setMessage(data.message || "Innlogging feilet.");
+      if (!data) {
+        setMessage("Innlogging feilet. API-et returnerte ikke JSON.");
+        return;
+      }
+
+      if (data.ok === false) {
+        setMessage(data.error ? `${data.message}: ${data.error}` : data.message);
+        return;
+      }
+
+      if (!response.ok) {
+        setMessage("Innlogging feilet.");
         return;
       }
 
