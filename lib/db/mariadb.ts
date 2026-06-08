@@ -1,4 +1,4 @@
-﻿import mariadb from "mariadb";
+﻿import { createPool } from "mariadb";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -16,7 +16,7 @@ if (!Number.isInteger(databasePort) || databasePort <= 0) {
   throw new Error("Invalid CT_DB_PORT. Expected a positive integer.");
 }
 
-export const ctMariaDbPool = mariadb.createPool({
+export const ctMariaDbPool = createPool({
   host: requireEnv("CT_DB_HOST"),
   port: databasePort,
   user: requireEnv("CT_DB_USER"),
