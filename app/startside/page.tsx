@@ -1,64 +1,46 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Startside
+ * Startside page
  *
  * Definering / formål:
- * Ren startsideinnholdskomponent. Skal ikke eie topbar, sidebar eller shell.
+ * App-startside for app.collectium.no.
  *
  * Bruksområde:
- * Route /startside
+ * Brukes som tydelig inngang til katalog, login, Min side og offentlig collectium.no.
  *
  * Berørte sider / routes:
  * - /startside
  *
  * Berørte DB-brytere / feature_keys:
  * - landing.view
- * - landing.register
- * - landing.login
+ * - catalog.view
+ * - auth.login
+ * - user.dashboard.view
  *
  * Berørte API-ruter:
- * - Ingen i v1 clean template
+ * - Ingen i denne statiske gateway-versjonen.
  *
  * Berørte tabeller / views:
- * - Ingen i v1 clean template
+ * - Ingen direkte.
  *
  * Dataretning:
  * MariaDB -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
- * log_category: landing
- * log_action: view
+ * log_category: app
+ * log_action: startside.view
  *
  * Versjon:
- * CT-CLEAN-0001
+ * CT-FILE-STARTSIDE-PAGE-0001 / CHANGE-DOMAIN-LOCK-0001
+ *
+ * Endringsregel:
+ * Siden skal ikke lage egen sidebar, topbar, html, body eller globalt skall.
  */
-import Link from 'next/link';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { InfoCard } from '@/components/ui/InfoCard';
+
+import CollectiumAppStartside from "@/components/startside/CollectiumAppStartside";
 
 export default function StartsidePage() {
-  return (
-    <main className="ct-stack">
-      <PageHeader
-        eyebrow="For samlere · For historien · For markedet"
-        title="Collectium bygger katalog, samling og markedsforståelse i samme flate."
-        lead="Første rene versjon viser bare grunnstruktur. Katalogdata, tilgang, handlinger og medlemskap kobles senere via API og MariaDB."
-      />
-
-      <section className="ct-grid ct-grid--three">
-        <InfoCard title="Samler" label="Brukerstatus" text="Min samling, ønskeliste, favoritter og transaksjoner skal senere ligge bak tilgang og API." />
-        <InfoCard title="Historie" label="Relasjoner" text="Regenter, personer, produsenter, perioder, funn og kilder bygges som relasjonspresentasjoner." />
-        <InfoCard title="Finans" label="Marked" text="Markedsverdi, trend, auksjon, nettbutikk og index kobles til egne datakilder." />
-      </section>
-
-      <section className="ct-panel ct-signature-box">
-        <p className="ct-eyebrow">Ren base</p>
-        <h2>Ingen gamle komponentgenerasjoner er importert.</h2>
-        <p>Dette prosjektet skal bygges videre modul for modul, ikke ved å kopiere inn gamle startside-, katalog- eller shell-filer.</p>
-        <div className="ct-actions"><Link className="ct-button" href="/katalog">Se katalog placeholder</Link></div>
-      </section>
-    </main>
-  );
+  return <CollectiumAppStartside />;
 }
