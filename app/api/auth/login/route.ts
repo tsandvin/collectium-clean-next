@@ -12,7 +12,7 @@ import {
 export const dynamic = "force-dynamic";
 
 type LoginUserRow = {
-  id: number;
+  id: number | bigint;
   public_id: string;
   email: string;
   password_hash: string | null;
@@ -24,9 +24,13 @@ type LoginUserRow = {
   email_status: string;
   admin_approval_status: string;
   role: string;
-  is_admin: number;
-  is_active: number;
+  is_admin: number | bigint;
+  is_active: number | bigint;
 };
+
+function toNumber(value: number | bigint): number {
+  return typeof value === "bigint" ? Number(value) : value;
+}
 
 function normalizeBcryptHash(hash: string): string {
   if (hash.startsWith("$2y$")) {
@@ -91,7 +95,7 @@ export async function POST(request: Request) {
     if (!user || !user.password_hash) {
       await logLoginAttempt({
         email,
-        userId: user?.id ?? null,
+        userId: user ? toNumber(user.id) : null,
         success: false,
         failureReason: "invalid_credentials",
       });
@@ -105,10 +109,14 @@ export async function POST(request: Request) {
       );
     }
 
-    if (user.is_active !== 1 || user.account_status !== "active") {
+    const userId = toNumber(user.id);
+    const isActive = toNumber(user.is_active);
+    const isAdmin = toNumber(user.is_admin);
+
+    if (isActive !== 1 || user.account_status !== "active") {
       await logLoginAttempt({
         email,
-        userId: user.id,
+        userId,
         success: false,
         failureReason: "account_not_active",
       });
@@ -127,7 +135,7 @@ export async function POST(request: Request) {
     if (!passwordOk) {
       await logLoginAttempt({
         email,
-        userId: user.id,
+        userId,
         success: false,
         failureReason: "invalid_credentials",
       });
@@ -143,7 +151,7 @@ export async function POST(request: Request) {
 
     const token = createSessionToken();
 
-    await createUserSession(user.id, token);
+    await createUserSession(userId, token);
 
     await ctQuery(
       `
@@ -151,12 +159,12 @@ export async function POST(request: Request) {
         SET last_login_at = NOW(), last_active_at = NOW(), is_online = 1
         WHERE id = ?
       `,
-      [user.id],
+      [userId],
     );
 
     await logLoginAttempt({
       email,
-      userId: user.id,
+      userId,
       success: true,
       failureReason: null,
     });
@@ -176,7 +184,7 @@ export async function POST(request: Request) {
         ok: true,
         authenticated: true,
         user: {
-          id: user.id,
+          id: userId,
           public_id: user.public_id,
           email: user.email,
           display_name: user.display_name,
@@ -187,8 +195,8 @@ export async function POST(request: Request) {
           email_status: user.email_status,
           admin_approval_status: user.admin_approval_status,
           role: user.role,
-          is_admin: user.is_admin,
-          is_active: user.is_active,
+          is_admin: isAdmin,
+          is_active: isActive,
         },
       },
       { status: 200 },

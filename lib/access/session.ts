@@ -20,13 +20,40 @@ export type CtAuthUser = {
   is_active: number;
 };
 
-type SessionUserRow = CtAuthUser & {
-  session_id: number;
+type SessionUserRow = {
+  id: number | bigint;
+  public_id: string;
+  email: string;
+  display_name: string;
+  public_display_name: string | null;
+  preferred_language: string;
+  preferred_theme: string;
+  account_status: string;
+  email_status: string;
+  admin_approval_status: string;
+  role: string;
+  is_admin: number | bigint;
+  is_active: number | bigint;
+  session_id: number | bigint;
   expires_at: Date | string;
   revoked_at: Date | string | null;
 };
 
 type SessionRow = {
+  id: number | bigint;
+  user_id: number | bigint;
+  ip_address: string | null;
+  user_agent: string | null;
+  expires_at: Date | string;
+  revoked_at: Date | string | null;
+  created_at: Date | string;
+  started_at: Date | string | null;
+  ended_at: Date | string | null;
+  last_seen_at: Date | string | null;
+  device_type: string;
+};
+
+export type CtSessionListItem = {
   id: number;
   user_id: number;
   ip_address: string | null;
@@ -39,6 +66,44 @@ type SessionRow = {
   last_seen_at: Date | string | null;
   device_type: string;
 };
+
+function toNumber(value: number | bigint): number {
+  return typeof value === "bigint" ? Number(value) : value;
+}
+
+export function normalizeAuthUser(row: SessionUserRow): CtAuthUser {
+  return {
+    id: toNumber(row.id),
+    public_id: row.public_id,
+    email: row.email,
+    display_name: row.display_name,
+    public_display_name: row.public_display_name,
+    preferred_language: row.preferred_language,
+    preferred_theme: row.preferred_theme,
+    account_status: row.account_status,
+    email_status: row.email_status,
+    admin_approval_status: row.admin_approval_status,
+    role: row.role,
+    is_admin: toNumber(row.is_admin),
+    is_active: toNumber(row.is_active),
+  };
+}
+
+function normalizeSessionRow(row: SessionRow): CtSessionListItem {
+  return {
+    id: toNumber(row.id),
+    user_id: toNumber(row.user_id),
+    ip_address: row.ip_address,
+    user_agent: row.user_agent,
+    expires_at: row.expires_at,
+    revoked_at: row.revoked_at,
+    created_at: row.created_at,
+    started_at: row.started_at,
+    ended_at: row.ended_at,
+    last_seen_at: row.last_seen_at,
+    device_type: row.device_type,
+  };
+}
 
 export function sha256(value: string): string {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -122,7 +187,7 @@ export async function getCurrentSessionUser(): Promise<CtAuthUser | null> {
       SET last_seen_at = NOW()
       WHERE id = ?
     `,
-    [row.session_id],
+    [toNumber(row.session_id)],
   );
 
   await ctQuery(
@@ -131,24 +196,10 @@ export async function getCurrentSessionUser(): Promise<CtAuthUser | null> {
       SET last_active_at = NOW(), is_online = 1
       WHERE id = ?
     `,
-    [row.id],
+    [toNumber(row.id)],
   );
 
-  return {
-    id: row.id,
-    public_id: row.public_id,
-    email: row.email,
-    display_name: row.display_name,
-    public_display_name: row.public_display_name,
-    preferred_language: row.preferred_language,
-    preferred_theme: row.preferred_theme,
-    account_status: row.account_status,
-    email_status: row.email_status,
-    admin_approval_status: row.admin_approval_status,
-    role: row.role,
-    is_admin: row.is_admin,
-    is_active: row.is_active,
-  };
+  return normalizeAuthUser(row);
 }
 
 export async function revokeCurrentSession(): Promise<boolean> {
@@ -218,8 +269,8 @@ export async function createUserSession(userId: number, token: string): Promise<
   );
 }
 
-export async function listCurrentUserSessions(userId: number): Promise<SessionRow[]> {
-  return ctQuery<SessionRow>(
+export async function listCurrentUserSessions(userId: number): Promise<CtSessionListItem[]> {
+  const rows = await ctQuery<SessionRow>(
     `
       SELECT
         id,
@@ -240,6 +291,8 @@ export async function listCurrentUserSessions(userId: number): Promise<SessionRo
     `,
     [userId],
   );
+
+  return rows.map(normalizeSessionRow);
 }
 
 export async function logLoginAttempt(params: {
