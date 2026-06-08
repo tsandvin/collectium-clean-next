@@ -352,3 +352,142 @@ p { color: var(--ct-soft); line-height: 1.65; }
 }
 
 /* END COLLECTIUM STARTSIDE CONTENT PATCH 0001 */
+
+/* Collectium admin auth status */
+.ctAuthPage {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.ctAuthHeader {
+  margin-bottom: 24px;
+}
+
+.ctAuthEyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.68;
+}
+
+.ctAuthHeader h1 {
+  margin: 0 0 10px;
+  font-size: 34px;
+}
+
+.ctAuthHeader p {
+  max-width: 780px;
+  margin: 0;
+  line-height: 1.55;
+  opacity: 0.78;
+}
+
+.ctAuthPanel {
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid rgba(110, 132, 160, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 16px 40px rgba(20, 40, 70, 0.07);
+}
+
+.ctAuthPanel h2 {
+  margin: 0 0 14px;
+  font-size: 17px;
+}
+
+.ctAuthRows {
+  display: grid;
+  gap: 8px;
+}
+
+.ctAuthRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(245, 248, 252, 0.9);
+}
+
+.ctAuthRow span {
+  overflow-wrap: anywhere;
+}
+
+.ctAuthRow strong {
+  white-space: nowrap;
+}
+
+.ctAuthStatusOk {
+  color: #16703c;
+}
+
+.ctAuthStatusMissing {
+  color: #9a6500;
+}
+
+.ctAuthStatusError {
+  color: #a32626;
+}
+
+.ctAuthErrorBox {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(163, 38, 38, 0.08);
+  color: #8c1f1f;
+  overflow-wrap: anywhere;
+}
+
+.ctAuthSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ctAuthSummary div {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(245, 248, 252, 0.9);
+}
+
+.ctAuthSummary span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.ctAuthSummary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 24px;
+}
+
+.ctAuthPre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(11, 22, 38, 0.92);
+  color: #f4f7fb;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .ctAuthPage {
+    padding: 18px;
+  }
+
+  .ctAuthRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ctAuthSummary {
+    grid-template-columns: 1fr;
+  }
+}
