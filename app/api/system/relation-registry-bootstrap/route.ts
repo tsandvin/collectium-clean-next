@@ -56,6 +56,12 @@ async function ensureRegistrySchema() {
   await neonQuery(`
     alter table ct_relation_type_registry
       add column if not exists relation_type_key text,
+      add column if not exists relation_name_no text,
+      add column if not exists from_entity text,
+      add column if not exists to_entity text,
+      add column if not exists privacy_level text not null default 'internal',
+      add column if not exists status text not null default 'active',
+      add column if not exists payload_json jsonb not null default '{}'::jsonb,
       add column if not exists relation_type_label_no text,
       add column if not exists relation_domain text,
       add column if not exists source_entity_type text,
@@ -72,20 +78,38 @@ async function ensureRegistrySchema() {
     update ct_relation_type_registry
     set
       relation_type_key = coalesce(relation_type_key, 'legacy_relation_type_' || id::text),
-      relation_type_label_no = coalesce(relation_type_label_no, relation_type_key, 'Legacy relation type'),
+      relation_type_label_no = coalesce(relation_type_label_no, relation_name_no, relation_type_key, 'Legacy relation type'),
+      relation_name_no = coalesce(relation_name_no, relation_type_label_no, relation_type_key, 'Legacy relation type'),
       relation_domain = coalesce(relation_domain, 'legacy'),
-      source_entity_type = coalesce(source_entity_type, 'unknown'),
-      target_entity_type = coalesce(target_entity_type, 'unknown')
+      source_entity_type = coalesce(source_entity_type, from_entity, 'unknown'),
+      target_entity_type = coalesce(target_entity_type, to_entity, 'unknown'),
+      from_entity = coalesce(from_entity, source_entity_type, 'unknown'),
+      to_entity = coalesce(to_entity, target_entity_type, 'unknown'),
+      privacy_level = coalesce(privacy_level, 'internal'),
+      status = coalesce(status, 'active'),
+      payload_json = coalesce(payload_json, '{}'::jsonb)
     where relation_type_key is null
        or relation_type_label_no is null
+       or relation_name_no is null
        or relation_domain is null
        or source_entity_type is null
        or target_entity_type is null
+       or from_entity is null
+       or to_entity is null
+       or privacy_level is null
+       or status is null
+       or payload_json is null
   `);
 
   await neonQuery(`
     alter table ct_relation_type_registry
       alter column relation_type_key set not null,
+      alter column relation_name_no set not null,
+      alter column from_entity set not null,
+      alter column to_entity set not null,
+      alter column privacy_level set not null,
+      alter column status set not null,
+      alter column payload_json set not null,
       alter column relation_type_label_no set not null,
       alter column relation_domain set not null,
       alter column source_entity_type set not null,
@@ -106,6 +130,10 @@ async function ensureRegistrySchema() {
   await neonQuery(`
     alter table ct_relation_path_registry
       add column if not exists path_key text,
+      add column if not exists path_name_no text,
+      add column if not exists path_group text,
+      add column if not exists path_order integer,
+      add column if not exists path_definition_json jsonb not null default '{}'::jsonb,
       add column if not exists path_label_no text,
       add column if not exists relation_type_key text,
       add column if not exists source_table text,
@@ -127,7 +155,11 @@ async function ensureRegistrySchema() {
     update ct_relation_path_registry
     set
       path_key = coalesce(path_key, 'legacy_relation_path_' || id::text),
-      path_label_no = coalesce(path_label_no, path_key, 'Legacy relation path'),
+      path_label_no = coalesce(path_label_no, path_name_no, path_key, 'Legacy relation path'),
+      path_name_no = coalesce(path_name_no, path_label_no, path_key, 'Legacy relation path'),
+      path_group = coalesce(path_group, 'migration_control'),
+      path_order = coalesce(path_order, sort_order, 100),
+      path_definition_json = coalesce(path_definition_json, '{}'::jsonb),
       relation_type_key = coalesce(relation_type_key, 'manual_review'),
       source_table = coalesce(source_table, 'unknown_source_table'),
       target_table = coalesce(target_table, 'unknown_target_table')
@@ -141,6 +173,10 @@ async function ensureRegistrySchema() {
   await neonQuery(`
     alter table ct_relation_path_registry
       alter column path_key set not null,
+      alter column path_name_no set not null,
+      alter column path_group set not null,
+      alter column path_order set not null,
+      alter column path_definition_json set not null,
       alter column path_label_no set not null,
       alter column relation_type_key set not null,
       alter column source_table set not null,
@@ -203,6 +239,12 @@ async function seedRelationTypes() {
       `
         insert into ct_relation_type_registry (
           relation_type_key,
+          relation_name_no,
+          from_entity,
+          to_entity,
+          privacy_level,
+          status,
+          payload_json,
           relation_type_label_no,
           relation_domain,
           source_entity_type,
@@ -212,9 +254,15 @@ async function seedRelationTypes() {
           is_active,
           updated_at
         )
-        values ($1, $2, $3, $4, $5, $6, $7, true, now())
+        values ($1, $2, $4, $5, 'internal', 'active', '{}'::jsonb, $2, $3, $4, $5, $6, $7, true, now())
         on conflict (relation_type_key)
         do update set
+          relation_name_no = excluded.relation_name_no,
+          from_entity = excluded.from_entity,
+          to_entity = excluded.to_entity,
+          privacy_level = excluded.privacy_level,
+          status = excluded.status,
+          payload_json = excluded.payload_json,
           relation_type_label_no = excluded.relation_type_label_no,
           relation_domain = excluded.relation_domain,
           source_entity_type = excluded.source_entity_type,
@@ -246,6 +294,10 @@ async function seedRelationPaths() {
       `
         insert into ct_relation_path_registry (
           path_key,
+          path_name_no,
+          path_group,
+          path_order,
+          path_definition_json,
           path_label_no,
           relation_type_key,
           source_table,
@@ -261,9 +313,29 @@ async function seedRelationPaths() {
           is_active,
           updated_at
         )
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true, now())
+        values (
+          $1,
+          $2,
+          'catalog_relation',
+          $12,
+          jsonb_build_object(
+            'relation_type_key', $3,
+            'source_table', $4,
+            'source_key_field', $5,
+            'object_group_field', $6,
+            'source_id_field', $7,
+            'target_table', $8,
+            'target_id_field', $9,
+            'resolver_view', $10
+          ),
+          $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true, now()
+        )
         on conflict (path_key)
         do update set
+          path_name_no = excluded.path_name_no,
+          path_group = excluded.path_group,
+          path_order = excluded.path_order,
+          path_definition_json = excluded.path_definition_json,
           path_label_no = excluded.path_label_no,
           relation_type_key = excluded.relation_type_key,
           source_table = excluded.source_table,
@@ -380,3 +452,4 @@ export async function POST() {
     }), { status: 500 });
   }
 }
+
