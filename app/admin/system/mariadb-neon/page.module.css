@@ -346,3 +346,287 @@
     font-size: 24px;
   }
 }
+
+.controlList {
+  display: grid;
+  gap: 10px;
+}
+
+.controlLine {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #d5e2e8;
+  border-radius: 14px;
+  background: #f8fbfc;
+}
+
+.lineNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: #e9f1f4;
+  color: #16333d;
+}
+
+.lineMain {
+  min-width: 0;
+}
+
+.lineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lineMain p {
+  margin: 5px 0;
+  color: #405b65;
+}
+
+.lineMain small,
+.lineMain em {
+  display: block;
+  margin-top: 4px;
+  color: #607984;
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+.tableList {
+  display: grid;
+  gap: 8px;
+  max-height: 470px;
+  overflow: auto;
+}
+
+.tableLine {
+  display: grid;
+  grid-template-columns: 42px minmax(180px, 1fr) 120px 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid #d8e4e9;
+  border-radius: 12px;
+  background: #f8fbfc;
+  min-width: 620px;
+}
+
+.tableLine strong {
+  overflow-wrap: anywhere;
+}
+
+.tableLine span {
+  color: #617883;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.lineOk {
+  border-color: #b8dfc5;
+  background: #f2fbf5;
+}
+
+.lineOk .lineNumber {
+  background: #d9f3e2;
+  color: #146437;
+}
+
+.lineError {
+  border-color: #efb1b1;
+  background: #fff5f5;
+}
+
+.lineError .lineNumber {
+  background: #ffdada;
+  color: #8a1f1f;
+}
+
+.lineWarn {
+  border-color: #ead083;
+  background: #fffaf0;
+}
+
+.lineWarn .lineNumber {
+  background: #fff0bf;
+  color: #755500;
+}
+
+.lineBlocked {
+  border-color: #c7bbec;
+  background: #f6f2ff;
+}
+
+.lineBlocked .lineNumber {
+  background: #e7dcff;
+  color: #4b318b;
+}
+
+.lineInfo {
+  border-color: #b8cdeb;
+  background: #f3f7ff;
+}
+
+.lineInfo .lineNumber {
+  background: #dbe9ff;
+  color: #245493;
+}
+
+.badgeOk {
+  background: #d9f3e2;
+  color: #146437;
+}
+
+.badgeError {
+  background: #ffdada;
+  color: #8a1f1f;
+}
+
+.badgeWarn {
+  background: #fff0bf;
+  color: #755500;
+}
+
+.badgeBlocked {
+  background: #e7dcff;
+  color: #4b318b;
+}
+
+.badgeInfo {
+  background: #dbe9ff;
+  color: #245493;
+}
+
+.mappingSummary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.mappingSummary > div {
+  border: 1px solid #d4e1e7;
+  border-radius: 16px;
+  background: #f8fbfc;
+  padding: 12px;
+}
+
+.mappingSummary strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.numberPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 92px;
+  overflow: auto;
+}
+
+.redPill,
+.greenPill,
+.purplePill,
+.neutralPill {
+  border: 0;
+  border-radius: 999px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.redPill {
+  background: #ffdada;
+  color: #8a1f1f;
+}
+
+.greenPill {
+  background: #d9f3e2;
+  color: #146437;
+}
+
+.purplePill {
+  background: #e7dcff;
+  color: #4b318b;
+}
+
+.neutralPill {
+  background: #e9f1f4;
+  color: #16333d;
+}
+
+.pairedInventoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pairedInventoryGrid h3,
+.mappingDetails h3,
+.extraNeonBox h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.pairedList {
+  display: grid;
+  gap: 8px;
+  max-height: 470px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.mappingDetails {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.extraNeonBox {
+  margin-top: 18px;
+  border: 1px solid #c9d9e0;
+  border-radius: 16px;
+  background: #f8fbfc;
+  padding: 14px;
+}
+
+.extraNeonBox p {
+  margin: 0 0 12px;
+  color: #607984;
+}
+
+@media (max-width: 1100px) {
+  .mappingSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pairedInventoryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .mappingSummary {
+    grid-template-columns: 1fr;
+  }
+}

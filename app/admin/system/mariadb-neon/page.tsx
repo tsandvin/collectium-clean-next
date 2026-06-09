@@ -7,11 +7,12 @@
  * MariaDB Neon Control Page
  *
  * Definering / formål:
- * Kontrollside for MariaDB -> Neon overgang.
+ * Kontrollside for MariaDB -> Neon overgang, sidekrav, API-ruter, DB-brytere,
+ * template, skin, layout og linjemappet inventory.
  *
  * Bruksområde:
- * Viser databasekobling, schema inventory, migreringsstatus, fasekontroll,
- * diagnose, JSON og Svar til ChatGPT.
+ * Viser MariaDB og Neon på samme linjenummer slik at manglende tabeller,
+ * kontrolltabeller og ikke-migrerbare backup-tabeller kan ses direkte.
  *
  * Berørte sider / routes:
  * - /admin/system/mariadb-neon
@@ -20,26 +21,33 @@
  * - system.mariadb_neon.control
  * - system.db.overview
  * - system.schema.inventory
+ * - system.mariadb_neon.bootstrap
+ * - system.page.content.control
+ * - system.template.control
+ * - system.skin.control
+ * - system.layout.control
  *
  * Berørte API-ruter:
  * - GET /api/system/db-overview
  * - GET /api/system/schema-inventory
+ * - GET /api/system/mariadb-neon-bootstrap
  *
  * Berørte tabeller / views:
  * - MariaDB information_schema.tables
  * - MariaDB information_schema.columns
  * - Neon information_schema.tables
  * - Neon information_schema.columns
+ * - Neon ct_* kontrolltabeller
  *
  * Dataretning:
- * MariaDB + Neon -> API/backend -> Next.js route -> React -> UI
+ * MariaDB + Neon -> API/backend -> kontrollside
  *
  * Logging:
  * log_category: system
  * log_action: mariadb_neon.control.view
  *
  * Versjon:
- * CT-FILE-MARIADB-NEON-CONTROL-PAGE-0001
+ * CT-FILE-MARIADB-NEON-CONTROL-PAGE-0003
  *
  * Endringsregel:
  * Dette er en read-only kontrollside. Den skal ikke migrere kildedata.
@@ -49,6 +57,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 
 type LoadState = "idle" | "loading" | "ok" | "error";
+type LineStatus = "OK" | "FEIL" | "VARSEL" | "INFO" | "BLOKKERT";
 
 type JsonValue =
   | string
@@ -60,20 +69,33 @@ type JsonValue =
 
 type JsonObject = { [key: string]: JsonValue };
 
-type DiagnosticStatus = "OK" | "Varsel" | "Feil" | "Info" | "Blokkert";
+type RawSampleTable = {
+  table_name?: string;
+  table_type?: string;
+};
 
-type DiagnosticRow = {
-  status: DiagnosticStatus;
-  area: string;
-  test: string;
-  detail: string;
-  path: string;
+type InventoryPair = {
+  lineNo: number;
+  sourceTableName: string;
+  sourceTableType: string;
+  neonTableName: string;
+  neonTableType: string;
+  mariaStatus: LineStatus;
+  neonStatus: LineStatus;
+  mappingStatus: LineStatus;
+  message: string;
   suggestion: string;
 };
 
-type SampleTable = {
-  table_name?: string;
-  table_type?: string;
+type ControlLine = {
+  lineNo: number;
+  status: LineStatus;
+  title: string;
+  detail: string;
+  group: string;
+  route?: string;
+  featureKey?: string;
+  suggestion: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -84,10 +106,7 @@ function getPath(source: unknown, path: string[]): unknown {
   let current: unknown = source;
 
   for (const key of path) {
-    if (!isRecord(current)) {
-      return undefined;
-    }
-
+    if (!isRecord(current)) return undefined;
     current = current[key];
   }
 
@@ -95,18 +114,12 @@ function getPath(source: unknown, path: string[]): unknown {
 }
 
 function asString(value: unknown, fallback = "—"): string {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-
+  if (value === null || value === undefined || value === "") return fallback;
   return String(value);
 }
 
 function asCount(value: unknown): string {
-  if (value === null || value === undefined || value === "") {
-    return "0";
-  }
-
+  if (value === null || value === undefined || value === "") return "0";
   return String(value);
 }
 
@@ -114,18 +127,24 @@ function asBoolean(value: unknown): boolean {
   return value === true;
 }
 
-function statusClass(status: DiagnosticStatus): string {
-  if (status === "OK") return styles.statusOk;
-  if (status === "Varsel") return styles.statusWarn;
-  if (status === "Feil") return styles.statusError;
-  if (status === "Blokkert") return styles.statusBlocked;
-  return styles.statusInfo;
+function lineStatusClass(status: LineStatus): string {
+  if (status === "OK") return styles.lineOk;
+  if (status === "FEIL") return styles.lineError;
+  if (status === "BLOKKERT") return styles.lineBlocked;
+  if (status === "VARSEL") return styles.lineWarn;
+  return styles.lineInfo;
 }
 
-function sampleTablesFrom(value: unknown): SampleTable[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
+function badgeClass(status: LineStatus): string {
+  if (status === "OK") return styles.badgeOk;
+  if (status === "FEIL") return styles.badgeError;
+  if (status === "BLOKKERT") return styles.badgeBlocked;
+  if (status === "VARSEL") return styles.badgeWarn;
+  return styles.badgeInfo;
+}
+
+function sampleTablesFrom(value: unknown): RawSampleTable[] {
+  if (!Array.isArray(value)) return [];
 
   return value
     .filter((item): item is Record<string, unknown> => isRecord(item))
@@ -135,11 +154,245 @@ function sampleTablesFrom(value: unknown): SampleTable[] {
     }));
 }
 
+function isBackupTable(tableName: string): boolean {
+  return (
+    tableName.startsWith("backup_") ||
+    tableName.startsWith("bak_") ||
+    tableName.includes("_backup_") ||
+    tableName.includes("_before_")
+  );
+}
+
+function normalizeTableName(tableName: string): string {
+  return tableName.trim().toLowerCase();
+}
+
+function possibleNeonNames(mariaTableName: string): string[] {
+  const clean = normalizeTableName(mariaTableName);
+
+  return Array.from(
+    new Set([
+      clean,
+      `ct_${clean}`,
+      clean.replace(/^ct_/, ""),
+      clean.replace(/^catalog_/, "ct_catalog_"),
+      clean.replace(/^collection_/, "ct_collection_"),
+      clean.replace(/^auction_/, "ct_auction_"),
+      clean.replace(/^user_/, "ct_user_"),
+    ])
+  );
+}
+
+function buildInventoryPairs(
+  mariaTables: RawSampleTable[],
+  neonTables: RawSampleTable[]
+): InventoryPair[] {
+  const neonByName = new Map<string, RawSampleTable>();
+
+  for (const table of neonTables) {
+    const name = asString(table.table_name, "");
+    if (name) {
+      neonByName.set(normalizeTableName(name), table);
+    }
+  }
+
+  return mariaTables.map((maria, index) => {
+    const sourceTableName = asString(maria.table_name, "");
+    const sourceTableType = asString(maria.table_type, "");
+    const isBackup = isBackupTable(sourceTableName);
+
+    let neonMatch: RawSampleTable | null = null;
+    for (const candidate of possibleNeonNames(sourceTableName)) {
+      if (neonByName.has(candidate)) {
+        neonMatch = neonByName.get(candidate) ?? null;
+        break;
+      }
+    }
+
+    if (isBackup) {
+      return {
+        lineNo: index + 1,
+        sourceTableName,
+        sourceTableType,
+        neonTableName: "Skal ikke direkte migreres",
+        neonTableType: "—",
+        mariaStatus: "FEIL",
+        neonStatus: "BLOKKERT",
+        mappingStatus: "BLOKKERT",
+        message: "Backup-/midlertidig tabell",
+        suggestion:
+          "Marker som ikke-migrerbar i table mapping. Ikke opprett som kildetabell i Neon.",
+      };
+    }
+
+    if (neonMatch) {
+      return {
+        lineNo: index + 1,
+        sourceTableName,
+        sourceTableType,
+        neonTableName: asString(neonMatch.table_name, ""),
+        neonTableType: asString(neonMatch.table_type, ""),
+        mariaStatus: "OK",
+        neonStatus: "OK",
+        mappingStatus: "OK",
+        message: "Match funnet",
+        suggestion: "Kontroller feltmapping og radtelling.",
+      };
+    }
+
+    return {
+      lineNo: index + 1,
+      sourceTableName,
+      sourceTableType,
+      neonTableName: "Mangler i Neon",
+      neonTableType: "—",
+      mariaStatus: "OK",
+      neonStatus: "FEIL",
+      mappingStatus: "FEIL",
+      message: "Ingen Neon-match funnet",
+      suggestion:
+        "Legg inn table mapping før eventuell struktur- eller datamigrering.",
+    };
+  });
+}
+
+function extraNeonTables(
+  mariaTables: RawSampleTable[],
+  neonTables: RawSampleTable[]
+): RawSampleTable[] {
+  const mariaCandidateNames = new Set<string>();
+
+  for (const table of mariaTables) {
+    const name = asString(table.table_name, "");
+    for (const candidate of possibleNeonNames(name)) {
+      mariaCandidateNames.add(candidate);
+    }
+  }
+
+  return neonTables.filter((table) => {
+    const neonName = normalizeTableName(asString(table.table_name, ""));
+    return !mariaCandidateNames.has(neonName);
+  });
+}
+
+function makePageControlRows(args: {
+  dbMariaStatus: string;
+  dbNeonStatus: string;
+  schemaOk: boolean;
+  mariaTables: string;
+  neonTables: string;
+  migrationStatus: string;
+  neonTruthStatus: string;
+}): ControlLine[] {
+  return [
+    {
+      lineNo: 1,
+      status: args.dbMariaStatus === "OK" ? "OK" : "FEIL",
+      group: "Database",
+      title: "MariaDB-kobling",
+      detail: `${args.dbMariaStatus} / ${args.mariaTables} tabeller`,
+      route: "/api/system/mariadb-health",
+      featureKey: "system.mariadb.health",
+      suggestion: args.dbMariaStatus === "OK" ? "OK" : "Sjekk CT_DB_* i Vercel.",
+    },
+    {
+      lineNo: 2,
+      status: args.dbNeonStatus === "OK" ? "OK" : "FEIL",
+      group: "Database",
+      title: "Neon-kobling",
+      detail: `${args.dbNeonStatus} / ${args.neonTables} tabeller`,
+      route: "/api/system/neon-health",
+      featureKey: "system.neon.health",
+      suggestion: args.dbNeonStatus === "OK" ? "OK" : "Sjekk Neon env vars i Vercel.",
+    },
+    {
+      lineNo: 3,
+      status: args.schemaOk ? "OK" : "FEIL",
+      group: "API",
+      title: "Schema inventory",
+      detail: args.schemaOk ? "Schema inventory svarer OK" : "Schema inventory feiler",
+      route: "/api/system/schema-inventory",
+      featureKey: "system.schema.inventory",
+      suggestion: "Brukes som grunnlag for table mapping.",
+    },
+    {
+      lineNo: 4,
+      status: Number(args.neonTables) > 0 ? "OK" : "VARSEL",
+      group: "API",
+      title: "Bootstrap / Neon kontrollstruktur",
+      detail: `${args.neonTables} Neon-tabeller i inventory`,
+      route: "/api/system/mariadb-neon-bootstrap",
+      featureKey: "system.mariadb_neon.bootstrap",
+      suggestion:
+        Number(args.neonTables) > 0
+          ? "Kontrollstruktur finnes."
+          : "Kjør eller oppdater schema inventory etter bootstrap.",
+    },
+    {
+      lineNo: 5,
+      status: "BLOKKERT",
+      group: "Migrering",
+      title: "Kildedata",
+      detail: args.migrationStatus,
+      featureKey: "system.source_data.migration",
+      suggestion:
+        "Kildedata er blokkert til mapping, ID-kontroll, relasjoner og sidekrav er OK.",
+    },
+    {
+      lineNo: 6,
+      status: args.neonTruthStatus === "not_approved" ? "BLOKKERT" : "OK",
+      group: "Truth",
+      title: "Neon som sann database",
+      detail: args.neonTruthStatus,
+      featureKey: "system.database.truth_status",
+      suggestion: "Neon skal ikke godkjennes før hele kontrollkjeden er OK.",
+    },
+    {
+      lineNo: 7,
+      status: "VARSEL",
+      group: "Template",
+      title: "Template-kontroll per side",
+      detail: "Trenger egen kontroll for template, skin og layout per side.",
+      featureKey: "system.template.control",
+      suggestion: "Neste utvidelse: lag side-control registry for alle sider.",
+    },
+    {
+      lineNo: 8,
+      status: "VARSEL",
+      group: "Skin",
+      title: "Skin-kontroll",
+      detail: "Skin må kontrolleres mot valgt standard.",
+      featureKey: "system.skin.control",
+      suggestion: "Legg inn skin_status per side.",
+    },
+    {
+      lineNo: 9,
+      status: "VARSEL",
+      group: "Layout",
+      title: "Layout-kontroll",
+      detail: "Layout må kontrollere desktop, tablet, mobil og bredskjerm.",
+      featureKey: "system.layout.control",
+      suggestion: "Legg inn layout_status per side.",
+    },
+    {
+      lineNo: 10,
+      status: "VARSEL",
+      group: "Sidekrav",
+      title: "Side- og innholdskontroll",
+      detail: "Hver side må ha krav til komponenter, API, brytere, tabeller og innhold.",
+      featureKey: "system.page.content.control",
+      suggestion: "Neste API: source-relation-overview og page-control-overview.",
+    },
+  ];
+}
+
 export default function MariaDbNeonControlPage() {
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [dbOverview, setDbOverview] = useState<JsonObject | null>(null);
   const [schemaInventory, setSchemaInventory] = useState<JsonObject | null>(null);
+  const [bootstrapStatus, setBootstrapStatus] = useState<JsonObject | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [focusedLine, setFocusedLine] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -150,17 +403,21 @@ export default function MariaDbNeonControlPage() {
       setErrorMessage("");
 
       try {
-        const [overviewResponse, inventoryResponse] = await Promise.all([
-          fetch("/api/system/db-overview", { cache: "no-store" }),
-          fetch("/api/system/schema-inventory", { cache: "no-store" }),
-        ]);
+        const [overviewResponse, inventoryResponse, bootstrapResponse] =
+          await Promise.all([
+            fetch("/api/system/db-overview", { cache: "no-store" }),
+            fetch("/api/system/schema-inventory", { cache: "no-store" }),
+            fetch("/api/system/mariadb-neon-bootstrap", { cache: "no-store" }),
+          ]);
 
         const overviewJson = (await overviewResponse.json()) as JsonObject;
         const inventoryJson = (await inventoryResponse.json()) as JsonObject;
+        const bootstrapJson = (await bootstrapResponse.json()) as JsonObject;
 
         if (!cancelled) {
           setDbOverview(overviewJson);
           setSchemaInventory(inventoryJson);
+          setBootstrapStatus(bootstrapJson);
           setLoadState("ok");
         }
       } catch (error) {
@@ -211,6 +468,8 @@ export default function MariaDbNeonControlPage() {
     getPath(schemaInventory, ["inventory", "neon", "summary", "column_count"])
   );
 
+  const schemaOk = asBoolean(getPath(schemaInventory, ["ok"]));
+
   const mariaSampleTables = sampleTablesFrom(
     getPath(schemaInventory, ["inventory", "mariadb", "sample_tables"])
   );
@@ -219,99 +478,45 @@ export default function MariaDbNeonControlPage() {
     getPath(schemaInventory, ["inventory", "neon", "sample_tables"])
   );
 
-  const diagnosticRows = useMemo<DiagnosticRow[]>(() => {
-    const mariaDbName = asString(
-      getPath(dbOverview, ["databases", "mariadb", "database", "database_name"])
-    );
-    const mariaVersion = asString(
-      getPath(dbOverview, ["databases", "mariadb", "database", "mariadb_version"])
-    );
-    const neonDbName = asString(
-      getPath(dbOverview, ["databases", "neon", "database", "database_name"])
-    );
-    const neonUser = asString(
-      getPath(dbOverview, ["databases", "neon", "database", "database_user"])
-    );
+  const inventoryPairs = useMemo(
+    () => buildInventoryPairs(mariaSampleTables, neonSampleTables),
+    [mariaSampleTables, neonSampleTables]
+  );
 
-    const schemaOk = asBoolean(getPath(schemaInventory, ["ok"]));
+  const extraNeon = useMemo(
+    () => extraNeonTables(mariaSampleTables, neonSampleTables),
+    [mariaSampleTables, neonSampleTables]
+  );
 
-    return [
-      {
-        status: dbMariaStatus === "OK" ? "OK" : "Feil",
-        area: "Database",
-        test: "MariaDB-kobling",
-        detail: `${mariaDbName} / ${mariaVersion}`,
-        path: "/api/system/mariadb-health",
-        suggestion: dbMariaStatus === "OK" ? "OK" : "Sjekk CT_DB_* i Vercel.",
-      },
-      {
-        status: dbNeonStatus === "OK" ? "OK" : "Feil",
-        area: "Database",
-        test: "Neon-kobling",
-        detail: `${neonDbName} / ${neonUser}`,
-        path: "/api/system/neon-health",
-        suggestion: dbNeonStatus === "OK" ? "OK" : "Sjekk Neon env vars i Vercel.",
-      },
-      {
-        status: schemaOk ? "OK" : "Feil",
-        area: "Schema",
-        test: "MariaDB inventory",
-        detail: `${mariaTables} tabeller, ${mariaViews} views, ${mariaColumns} kolonner`,
-        path: "MariaDB information_schema",
-        suggestion: "Start source-relation overview og table mapping.",
-      },
-      {
-        status: Number(neonTables) === 0 ? "Varsel" : "OK",
-        area: "Neon",
-        test: "Neon målstruktur",
-        detail: `${neonTables} tabeller, ${neonViews} views, ${neonColumns} kolonner`,
-        path: "Neon public schema",
-        suggestion:
-          Number(neonTables) === 0
-            ? "Kjør M-N bootstrap for kontrolltabeller."
-            : "Kontroller struktur mot MariaDB mapping.",
-      },
-      {
-        status: "Blokkert",
-        area: "Migrering",
-        test: "Kildedata",
-        detail: "Kildedata skal ikke migreres ennå.",
-        path: "migration_allowed=false",
-        suggestion:
-          "Bygg struktur, regler, prosesser, mapping, ID-kontroll og relasjonsbaner først.",
-      },
-      {
-        status: "Varsel",
-        area: "Relasjoner",
-        test: "Relasjonsbaner",
-        detail: "Relasjonsbane-register er ikke opprettet i Neon ennå.",
-        path: "ct_relation_path_registry",
-        suggestion:
-          "Legg inn relation path registry: objekt -> kilde -> regent/person -> periode -> funn -> samling -> marked.",
-      },
-      {
-        status: "Info",
-        area: "Truth status",
-        test: "Neon som sann database",
-        detail: neonTruthStatus,
-        path: "ct_database_truth_status",
-        suggestion:
-          "Neon kan ikke godkjennes før struktur, regler, relasjoner og sidekrav er OK.",
-      },
-    ];
-  }, [
-    dbOverview,
-    schemaInventory,
-    dbMariaStatus,
-    dbNeonStatus,
-    mariaTables,
-    mariaViews,
-    mariaColumns,
-    neonTables,
-    neonViews,
-    neonColumns,
-    neonTruthStatus,
-  ]);
+  const missingLines = inventoryPairs.filter((row) => row.mappingStatus === "FEIL");
+  const okLines = inventoryPairs.filter((row) => row.mappingStatus === "OK");
+  const blockedLines = inventoryPairs.filter((row) => row.mappingStatus === "BLOKKERT");
+
+  const visibleInventoryPairs = focusedLine
+    ? inventoryPairs.filter((row) => row.lineNo === focusedLine)
+    : inventoryPairs;
+
+  const controlRows = useMemo(
+    () =>
+      makePageControlRows({
+        dbMariaStatus,
+        dbNeonStatus,
+        schemaOk,
+        mariaTables,
+        neonTables,
+        migrationStatus,
+        neonTruthStatus,
+      }),
+    [
+      dbMariaStatus,
+      dbNeonStatus,
+      schemaOk,
+      mariaTables,
+      neonTables,
+      migrationStatus,
+      neonTruthStatus,
+    ]
+  );
 
   const chatGptReport = useMemo(() => {
     return [
@@ -321,7 +526,7 @@ export default function MariaDbNeonControlPage() {
       `Lastestatus: ${loadState}`,
       `MariaDB: ${dbMariaStatus}`,
       `Neon: ${dbNeonStatus}`,
-      `Schema inventory: ${asBoolean(getPath(schemaInventory, ["ok"])) ? "OK" : "ukjent"}`,
+      `Schema inventory: ${schemaOk ? "OK" : "ukjent"}`,
       "",
       `MariaDB tabeller: ${mariaTables}`,
       `MariaDB views: ${mariaViews}`,
@@ -331,6 +536,11 @@ export default function MariaDbNeonControlPage() {
       `Neon views: ${neonViews}`,
       `Neon kolonner: ${neonColumns}`,
       "",
+      `Mangler i Neon sample: ${missingLines.length}`,
+      `OK i sample: ${okLines.length}`,
+      `Blokkert / backup i sample: ${blockedLines.length}`,
+      `Ekstra Neon kontrolltabeller: ${extraNeon.length}`,
+      "",
       `Migrering: ${migrationStatus}`,
       `Neon truth status: ${neonTruthStatus}`,
       `Neste steg: ${asString(
@@ -339,32 +549,67 @@ export default function MariaDbNeonControlPage() {
       )}`,
       "",
       "Kritisk regel:",
-      "Ingen kildedata migreres før struktur, regler, prosesser, table mapping, field mapping, ID mapping, relasjonsbaner, DB 8.4, sidekrav og innholdskrav er kontrollert.",
+      "Ingen kildedata migreres før struktur, regler, prosesser, table mapping, field mapping, ID mapping, relasjonsbaner, DB 8.4, auth/session, bruker/samling, admin/action-routes, sidekrav og innholdskrav er kontrollert.",
     ].join("\n");
   }, [
     loadState,
     dbMariaStatus,
     dbNeonStatus,
-    schemaInventory,
+    schemaOk,
     mariaTables,
     mariaViews,
     mariaColumns,
     neonTables,
     neonViews,
     neonColumns,
+    missingLines.length,
+    okLines.length,
+    blockedLines.length,
+    extraNeon.length,
     migrationStatus,
     neonTruthStatus,
+    schemaInventory,
   ]);
 
   const tabs = [
-    ["dashboard", "Dashboard / tiltak"],
-    ["structure", "Struktur"],
-    ["relations", "Relasjoner"],
+    ["dashboard", "Dashboard"],
     ["inventory", "Inventory"],
+    ["api", "API-ruter"],
+    ["features", "DB-brytere"],
+    ["template", "Template"],
+    ["skin", "Skin"],
+    ["layout", "Layout"],
+    ["pages", "Sidekrav"],
     ["diagnose", "Diagnose"],
     ["json", "JSON"],
     ["chatgpt", "Svar til ChatGPT"],
   ];
+
+  const renderControlRows = (filter?: string) => {
+    const rows = filter ? controlRows.filter((row) => row.group === filter) : controlRows;
+
+    return (
+      <div className={styles.controlList}>
+        {rows.map((row) => (
+          <article key={`${row.group}-${row.lineNo}`} className={`${styles.controlLine} ${lineStatusClass(row.status)}`}>
+            <div className={styles.lineNumber}>{row.lineNo}</div>
+            <div className={styles.lineMain}>
+              <div className={styles.lineHeader}>
+                <strong>{row.title}</strong>
+                <span className={`${styles.badge} ${badgeClass(row.status)}`}>{row.status}</span>
+              </div>
+              <p>{row.detail}</p>
+              <small>
+                {row.route ? `Route: ${row.route} · ` : ""}
+                {row.featureKey ? `Feature: ${row.featureKey}` : ""}
+              </small>
+              <em>{row.suggestion}</em>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <main className={styles.page}>
@@ -373,8 +618,8 @@ export default function MariaDbNeonControlPage() {
           <p className={styles.kicker}>Collectium System Control</p>
           <h1>MariaDB → Neon Control</h1>
           <p className={styles.lead}>
-            Kontrollside for struktur, regler, prosesser, kilder, relasjoner og
-            kildedata før Neon kan bli sann hoveddatabase.
+            Kontrollside for database, API, brytere, template, skin, layout og
+            sidekrav før Neon kan bli sann hoveddatabase.
           </p>
         </div>
 
@@ -410,9 +655,9 @@ export default function MariaDbNeonControlPage() {
         </article>
 
         <article className={styles.card}>
-          <span>Migrering</span>
-          <strong>{migrationStatus}</strong>
-          <small>Kildedata er blokkert</small>
+          <span>Mapping sample</span>
+          <strong>{okLines.length} OK / {missingLines.length} feil</strong>
+          <small>{blockedLines.length} blokkert / backup</small>
         </article>
 
         <article className={styles.card}>
@@ -438,172 +683,180 @@ export default function MariaDbNeonControlPage() {
       {activeTab === "dashboard" ? (
         <section className={styles.gridTwo}>
           <article className={styles.panel}>
-            <h2>Faser</h2>
-            <div className={styles.phaseList}>
-              <div>
-                <strong>1. Struktur først</strong>
-                <span>Ikke startet / bootstrap mangler</span>
-              </div>
-              <div>
-                <strong>2. Regler / metoder / prosesser</strong>
-                <span>Ikke startet / kontrolltabeller mangler</span>
-              </div>
-              <div>
-                <strong>3. Kildedata til slutt</strong>
-                <span>Blokkert til struktur og relasjoner er OK</span>
-              </div>
-            </div>
+            <h2>Kontrollstatus</h2>
+            {renderControlRows()}
           </article>
 
           <article className={styles.panel}>
             <h2>Neste tiltak</h2>
             <ol className={styles.actionList}>
-              <li>Opprett Neon kontrolltabeller.</li>
+              <li>Bygg full table mapping, ikke bare sample-visning.</li>
               <li>Lag source-relation-overview.</li>
-              <li>Lag table mapping.</li>
-              <li>Lag relation path registry.</li>
-              <li>Lagre MariaDB-Neon rapport i Neon.</li>
+              <li>Lag page-control-overview for alle sider.</li>
+              <li>Legg template, skin og layout inn som kontroller per side.</li>
+              <li>Ikke migrer kildedata før mapping og relasjoner er OK.</li>
             </ol>
           </article>
         </section>
       ) : null}
 
-      {activeTab === "structure" ? (
-        <section className={styles.panel}>
-          <h2>Struktur som må opprettes i Neon</h2>
-          <div className={styles.tagGrid}>
-            {[
-              "ct_migration_control_runs",
-              "ct_migration_control_steps",
-              "ct_migration_control_logs",
-              "ct_migration_table_inventory",
-              "ct_migration_table_map",
-              "ct_migration_field_map",
-              "ct_migration_report_files",
-              "ct_database_truth_status",
-              "ct_system_control_status",
-              "ct_source_inventory",
-              "ct_object_group_inventory",
-              "ct_object_inventory_summary",
-              "ct_relation_type_registry",
-              "ct_relation_path_registry",
-              "ct_relation_path_check_results",
-              "ct_relation_missing_links",
-              "ct_relation_privacy_rules",
-              "ct_market_channel_summary",
-              "ct_collection_summary",
-            ].map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {activeTab === "relations" ? (
-        <section className={styles.panel}>
-          <h2>Relasjonsbaner som må kontrolleres</h2>
-
-          <div className={styles.pathBox}>
-            <strong>Eksempelbane</strong>
-            <p>
-              Mynt → Konge Oscar II → Periode → Årstall → Produsent → Familie /
-              dynasti → Land → død / gravlagt → Funn → Samling → Auksjon →
-              Nettbutikk → Marked
-            </p>
-          </div>
-
-          <div className={styles.tagGrid}>
-            {[
-              "object_to_source",
-              "object_to_country",
-              "object_to_producer",
-              "object_to_year",
-              "object_to_period",
-              "object_to_ruler",
-              "object_to_dynasty",
-              "object_to_person",
-              "object_to_find",
-              "object_to_provenance",
-              "object_to_collection",
-              "object_to_auction",
-              "object_to_shop",
-              "object_to_market_observation",
-              "ruler_to_family",
-              "ruler_to_burial_place",
-              "find_to_location",
-              "find_to_person",
-            ].map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
       {activeTab === "inventory" ? (
-        <section className={styles.gridTwo}>
-          <article className={styles.panel}>
-            <h2>MariaDB sample tables</h2>
-            <div className={styles.scrollList}>
-              {mariaSampleTables.map((row) => (
-                <div key={row.table_name}>
-                  <strong>{row.table_name}</strong>
-                  <span>{row.table_type}</span>
+        <section className={styles.panel}>
+          <h2>Linjemappet inventory</h2>
+
+          <div className={styles.mappingSummary}>
+            <div>
+              <strong>Mangler i Neon</strong>
+              <div className={styles.numberPills}>
+                {missingLines.map((row) => (
+                  <button key={`missing-${row.lineNo}`} type="button" className={styles.redPill} onClick={() => setFocusedLine(row.lineNo)}>
+                    {row.lineNo}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <strong>OK</strong>
+              <div className={styles.numberPills}>
+                {okLines.map((row) => (
+                  <button key={`ok-${row.lineNo}`} type="button" className={styles.greenPill} onClick={() => setFocusedLine(row.lineNo)}>
+                    {row.lineNo}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <strong>Backup / blokkert</strong>
+              <div className={styles.numberPills}>
+                {blockedLines.map((row) => (
+                  <button key={`blocked-${row.lineNo}`} type="button" className={styles.purplePill} onClick={() => setFocusedLine(row.lineNo)}>
+                    {row.lineNo}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <strong>Visning</strong>
+              <div className={styles.numberPills}>
+                <button type="button" className={styles.neutralPill} onClick={() => setFocusedLine(null)}>
+                  Alle
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.pairedInventoryGrid}>
+            <article>
+              <h3>MariaDB sample tables</h3>
+              <div className={styles.pairedList}>
+                {visibleInventoryPairs.map((row) => (
+                  <div key={`maria-${row.lineNo}`} className={`${styles.tableLine} ${lineStatusClass(row.mariaStatus)}`}>
+                    <span className={styles.lineNumber}>{row.lineNo}</span>
+                    <strong>{row.sourceTableName}</strong>
+                    <span>{row.sourceTableType}</span>
+                    <span className={`${styles.badge} ${badgeClass(row.mariaStatus)}`}>{row.mariaStatus}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article>
+              <h3>Neon mapped result</h3>
+              <div className={styles.pairedList}>
+                {visibleInventoryPairs.map((row) => (
+                  <div key={`neon-${row.lineNo}`} className={`${styles.tableLine} ${lineStatusClass(row.neonStatus)}`}>
+                    <span className={styles.lineNumber}>{row.lineNo}</span>
+                    <strong>{row.neonTableName}</strong>
+                    <span>{row.neonTableType}</span>
+                    <span className={`${styles.badge} ${badgeClass(row.neonStatus)}`}>{row.neonStatus}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
+
+          <div className={styles.mappingDetails}>
+            <h3>Linjedetaljer</h3>
+            {visibleInventoryPairs.map((row) => (
+              <article key={`detail-${row.lineNo}`} className={`${styles.controlLine} ${lineStatusClass(row.mappingStatus)}`}>
+                <div className={styles.lineNumber}>{row.lineNo}</div>
+                <div className={styles.lineMain}>
+                  <div className={styles.lineHeader}>
+                    <strong>{row.sourceTableName}</strong>
+                    <span className={`${styles.badge} ${badgeClass(row.mappingStatus)}`}>{row.mappingStatus}</span>
+                  </div>
+                  <p>{row.message}</p>
+                  <small>MariaDB: {row.sourceTableName} → Neon: {row.neonTableName}</small>
+                  <em>{row.suggestion}</em>
                 </div>
+              </article>
+            ))}
+          </div>
+
+          <div className={styles.extraNeonBox}>
+            <h3>Ekstra Neon-tabeller uten MariaDB-linje</h3>
+            <p>
+              Dette er normalt etter bootstrap. Disse er kontrolltabeller og skal
+              ikke bety at kildedata er migrert.
+            </p>
+            <div className={styles.tagGrid}>
+              {extraNeon.map((table) => (
+                <span key={asString(table.table_name, "")}>{asString(table.table_name, "")}</span>
               ))}
             </div>
-          </article>
+          </div>
+        </section>
+      ) : null}
 
-          <article className={styles.panel}>
-            <h2>Neon sample tables</h2>
-            <div className={styles.scrollList}>
-              {neonSampleTables.length === 0 ? (
-                <p>Neon har ingen tabeller ennå.</p>
-              ) : (
-                neonSampleTables.map((row) => (
-                  <div key={row.table_name}>
-                    <strong>{row.table_name}</strong>
-                    <span>{row.table_type}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          </article>
+      {activeTab === "api" ? (
+        <section className={styles.panel}>
+          <h2>API-ruter</h2>
+          {renderControlRows("API")}
+        </section>
+      ) : null}
+
+      {activeTab === "features" ? (
+        <section className={styles.panel}>
+          <h2>DB-brytere / feature_keys</h2>
+          {renderControlRows()}
+        </section>
+      ) : null}
+
+      {activeTab === "template" ? (
+        <section className={styles.panel}>
+          <h2>Template-kontroll</h2>
+          {renderControlRows("Template")}
+        </section>
+      ) : null}
+
+      {activeTab === "skin" ? (
+        <section className={styles.panel}>
+          <h2>Skin-kontroll</h2>
+          {renderControlRows("Skin")}
+        </section>
+      ) : null}
+
+      {activeTab === "layout" ? (
+        <section className={styles.panel}>
+          <h2>Layout-kontroll</h2>
+          {renderControlRows("Layout")}
+        </section>
+      ) : null}
+
+      {activeTab === "pages" ? (
+        <section className={styles.panel}>
+          <h2>Sidekrav / innholdskrav</h2>
+          {renderControlRows("Sidekrav")}
         </section>
       ) : null}
 
       {activeTab === "diagnose" ? (
         <section className={styles.panel}>
-          <h2>Diagnose / sortering</h2>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>Område</th>
-                  <th>Test</th>
-                  <th>Detalj</th>
-                  <th>Bane / SQL / fil</th>
-                  <th>Forslag</th>
-                </tr>
-              </thead>
-              <tbody>
-                {diagnosticRows.map((row, index) => (
-                  <tr key={`${row.area}-${row.test}-${index}`}>
-                    <td>
-                      <span className={`${styles.status} ${statusClass(row.status)}`}>
-                        {row.status}
-                      </span>
-                    </td>
-                    <td>{row.area}</td>
-                    <td>{row.test}</td>
-                    <td>{row.detail}</td>
-                    <td>{row.path}</td>
-                    <td>{row.suggestion}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <h2>Diagnose med linjenummer</h2>
+          {renderControlRows()}
         </section>
       ) : null}
 
@@ -611,7 +864,7 @@ export default function MariaDbNeonControlPage() {
         <section className={styles.panel}>
           <h2>JSON</h2>
           <pre className={styles.codeBlock}>
-            {JSON.stringify({ dbOverview, schemaInventory }, null, 2)}
+            {JSON.stringify({ dbOverview, schemaInventory, bootstrapStatus }, null, 2)}
           </pre>
         </section>
       ) : null}
