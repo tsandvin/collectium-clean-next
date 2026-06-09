@@ -212,7 +212,7 @@ async function walkFiles(rootDir: string): Promise<string[]> {
   const output: string[] = [];
 
   async function walk(current: string) {
-    let entries: Awaited<ReturnType<typeof readdir>>;
+    let entries;
 
     try {
       entries = await readdir(current, { withFileTypes: true });
@@ -372,3 +372,4 @@ export async function GET() {
     );
   }
 }
+

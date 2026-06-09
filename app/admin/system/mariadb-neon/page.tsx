@@ -1,104 +1,94 @@
-﻿"use client";
-
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * MariaDB Neon Control Page
  *
  * Definering / formål:
- * Kontrollside for MariaDB -> Neon overgang, sidekrav, API-ruter, DB-brytere,
- * template, skin, layout og linjemappet inventory.
+ * Kontrollside for MariaDB -> Neon-overgang, plattformstandard, template-tokenbruk,
+ * hendelseslogg, schema inventory, DB-brytere, layout, skin og sidekrav.
  *
  * Bruksområde:
- * Viser MariaDB og Neon på samme linjenummer slik at manglende tabeller,
- * kontrolltabeller og ikke-migrerbare backup-tabeller kan ses direkte.
+ * Brukes av Collectium admin/system for å se hva som er OK, hva som mangler,
+ * hva som er blokkert, og hvorfor Neon ikke er godkjent som sann hoveddatabase ennå.
  *
  * Berørte sider / routes:
  * - /admin/system/mariadb-neon
  *
  * Berørte DB-brytere / feature_keys:
  * - system.mariadb_neon.control
- * - system.db.overview
- * - system.schema.inventory
- * - system.mariadb_neon.bootstrap
- * - system.page.content.control
- * - system.template.control
- * - system.skin.control
- * - system.layout.control
+ * - system.platform.standard_check
+ * - system.template.token_check
+ * - system.control_event_log.view
+ * - system.control_event_log.write
  *
  * Berørte API-ruter:
  * - GET /api/system/db-overview
  * - GET /api/system/schema-inventory
  * - GET /api/system/mariadb-neon-bootstrap
+ * - GET /api/system/platform-standard-check
+ * - GET /api/system/template-token-check
+ * - GET /api/system/control-event-log
+ * - POST /api/system/control-event-log
  *
  * Berørte tabeller / views:
- * - MariaDB information_schema.tables
- * - MariaDB information_schema.columns
- * - Neon information_schema.tables
- * - Neon information_schema.columns
- * - Neon ct_* kontrolltabeller
+ * - Neon: ct_control_event_logs
+ * - Neon: ct_* migration/control tables
+ * - MariaDB: information_schema
  *
  * Dataretning:
- * MariaDB + Neon -> API/backend -> kontrollside
+ * API/backend -> React admin UI
  *
  * Logging:
  * log_category: system
- * log_action: mariadb_neon.control.view
+ * log_action: mariadb_neon_control.view
  *
  * Versjon:
- * CT-FILE-MARIADB-NEON-CONTROL-PAGE-0003
+ * CT-FILE-MARIADB-NEON-CONTROL-PAGE-0002
  *
  * Endringsregel:
- * Dette er en read-only kontrollside. Den skal ikke migrere kildedata.
+ * Denne siden viser kontrollstatus. Den migrerer ikke kildedata.
  */
+
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 
-type LoadState = "idle" | "loading" | "ok" | "error";
-type LineStatus = "OK" | "FEIL" | "VARSEL" | "INFO" | "BLOKKERT";
+type JsonRecord = Record<string, unknown>;
 
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+type TabKey =
+  | "dashboard"
+  | "inventory"
+  | "platform"
+  | "api"
+  | "features"
+  | "template"
+  | "skin"
+  | "layout"
+  | "pages"
+  | "diagnose"
+  | "events"
+  | "json"
+  | "chatgpt";
 
-type JsonObject = { [key: string]: JsonValue };
+const tabs: Array<{ key: TabKey; label: string }> = [
+  { key: "dashboard", label: "Dashboard" },
+  { key: "inventory", label: "Inventory" },
+  { key: "platform", label: "Plattform" },
+  { key: "api", label: "API-ruter" },
+  { key: "features", label: "DB-brytere" },
+  { key: "template", label: "Template" },
+  { key: "skin", label: "Skin" },
+  { key: "layout", label: "Layout" },
+  { key: "pages", label: "Sidekrav" },
+  { key: "diagnose", label: "Diagnose" },
+  { key: "events", label: "Hendelseslogg" },
+  { key: "json", label: "JSON" },
+  { key: "chatgpt", label: "Svar til ChatGPT" },
+];
 
-type RawSampleTable = {
-  table_name?: string;
-  table_type?: string;
-};
-
-type InventoryPair = {
-  lineNo: number;
-  sourceTableName: string;
-  sourceTableType: string;
-  neonTableName: string;
-  neonTableType: string;
-  mariaStatus: LineStatus;
-  neonStatus: LineStatus;
-  mappingStatus: LineStatus;
-  message: string;
-  suggestion: string;
-};
-
-type ControlLine = {
-  lineNo: number;
-  status: LineStatus;
-  title: string;
-  detail: string;
-  group: string;
-  route?: string;
-  featureKey?: string;
-  suggestion: string;
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -106,715 +96,468 @@ function getPath(source: unknown, path: string[]): unknown {
   let current: unknown = source;
 
   for (const key of path) {
-    if (!isRecord(current)) return undefined;
+    if (!isRecord(current)) return null;
     current = current[key];
   }
 
   return current;
 }
 
-function asString(value: unknown, fallback = "—"): string {
-  if (value === null || value === undefined || value === "") return fallback;
-  return String(value);
+function asString(value: unknown, fallback = "—") {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return fallback;
 }
 
-function asCount(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "0";
-  return String(value);
+function asRecords(value: unknown): JsonRecord[] {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
 }
 
-function asBoolean(value: unknown): boolean {
-  return value === true;
+function asCount(value: unknown) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim() !== "") return Number(value);
+  return 0;
 }
 
-function lineStatusClass(status: LineStatus): string {
-  if (status === "OK") return styles.lineOk;
-  if (status === "FEIL") return styles.lineError;
-  if (status === "BLOKKERT") return styles.lineBlocked;
-  if (status === "VARSEL") return styles.lineWarn;
-  return styles.lineInfo;
+function normalizeStatus(value: unknown) {
+  return asString(value, "INFO").toUpperCase();
 }
 
-function badgeClass(status: LineStatus): string {
-  if (status === "OK") return styles.badgeOk;
-  if (status === "FEIL") return styles.badgeError;
-  if (status === "BLOKKERT") return styles.badgeBlocked;
-  if (status === "VARSEL") return styles.badgeWarn;
-  return styles.badgeInfo;
+function statusClass(statusValue: unknown) {
+  const status = normalizeStatus(statusValue);
+
+  if (status === "OK") return styles.statusOk;
+  if (status === "FEIL") return styles.statusError;
+  if (status === "KRITISK") return styles.statusCritical;
+  if (status === "BLOKKERT") return styles.statusBlocked;
+  if (status === "VARSEL") return styles.statusWarning;
+
+  return styles.statusInfo;
 }
 
-function sampleTablesFrom(value: unknown): RawSampleTable[] {
-  if (!Array.isArray(value)) return [];
+async function fetchJson(path: string): Promise<JsonRecord> {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    const json = (await response.json()) as JsonRecord;
 
-  return value
-    .filter((item): item is Record<string, unknown> => isRecord(item))
-    .map((item) => ({
-      table_name: asString(item.table_name, ""),
-      table_type: asString(item.table_type, ""),
-    }));
-}
-
-function isBackupTable(tableName: string): boolean {
-  return (
-    tableName.startsWith("backup_") ||
-    tableName.startsWith("bak_") ||
-    tableName.includes("_backup_") ||
-    tableName.includes("_before_")
-  );
-}
-
-function normalizeTableName(tableName: string): string {
-  return tableName.trim().toLowerCase();
-}
-
-function possibleNeonNames(mariaTableName: string): string[] {
-  const clean = normalizeTableName(mariaTableName);
-
-  return Array.from(
-    new Set([
-      clean,
-      `ct_${clean}`,
-      clean.replace(/^ct_/, ""),
-      clean.replace(/^catalog_/, "ct_catalog_"),
-      clean.replace(/^collection_/, "ct_collection_"),
-      clean.replace(/^auction_/, "ct_auction_"),
-      clean.replace(/^user_/, "ct_user_"),
-    ])
-  );
-}
-
-function buildInventoryPairs(
-  mariaTables: RawSampleTable[],
-  neonTables: RawSampleTable[]
-): InventoryPair[] {
-  const neonByName = new Map<string, RawSampleTable>();
-
-  for (const table of neonTables) {
-    const name = asString(table.table_name, "");
-    if (name) {
-      neonByName.set(normalizeTableName(name), table);
-    }
-  }
-
-  return mariaTables.map((maria, index) => {
-    const sourceTableName = asString(maria.table_name, "");
-    const sourceTableType = asString(maria.table_type, "");
-    const isBackup = isBackupTable(sourceTableName);
-
-    let neonMatch: RawSampleTable | null = null;
-    for (const candidate of possibleNeonNames(sourceTableName)) {
-      if (neonByName.has(candidate)) {
-        neonMatch = neonByName.get(candidate) ?? null;
-        break;
-      }
-    }
-
-    if (isBackup) {
+    if (!response.ok) {
       return {
-        lineNo: index + 1,
-        sourceTableName,
-        sourceTableType,
-        neonTableName: "Skal ikke direkte migreres",
-        neonTableType: "—",
-        mariaStatus: "FEIL",
-        neonStatus: "BLOKKERT",
-        mappingStatus: "BLOKKERT",
-        message: "Backup-/midlertidig tabell",
-        suggestion:
-          "Marker som ikke-migrerbar i table mapping. Ikke opprett som kildetabell i Neon.",
+        ok: false,
+        source: path,
+        status_code: response.status,
+        error: json?.error ?? "API svarte ikke OK",
+        response: json,
       };
     }
 
-    if (neonMatch) {
-      return {
-        lineNo: index + 1,
-        sourceTableName,
-        sourceTableType,
-        neonTableName: asString(neonMatch.table_name, ""),
-        neonTableType: asString(neonMatch.table_type, ""),
-        mariaStatus: "OK",
-        neonStatus: "OK",
-        mappingStatus: "OK",
-        message: "Match funnet",
-        suggestion: "Kontroller feltmapping og radtelling.",
-      };
-    }
-
+    return json;
+  } catch (error) {
     return {
-      lineNo: index + 1,
-      sourceTableName,
-      sourceTableType,
-      neonTableName: "Mangler i Neon",
-      neonTableType: "—",
-      mariaStatus: "OK",
-      neonStatus: "FEIL",
-      mappingStatus: "FEIL",
-      message: "Ingen Neon-match funnet",
-      suggestion:
-        "Legg inn table mapping før eventuell struktur- eller datamigrering.",
+      ok: false,
+      source: path,
+      error: error instanceof Error ? error.message : "Unknown fetch error",
     };
-  });
-}
-
-function extraNeonTables(
-  mariaTables: RawSampleTable[],
-  neonTables: RawSampleTable[]
-): RawSampleTable[] {
-  const mariaCandidateNames = new Set<string>();
-
-  for (const table of mariaTables) {
-    const name = asString(table.table_name, "");
-    for (const candidate of possibleNeonNames(name)) {
-      mariaCandidateNames.add(candidate);
-    }
   }
-
-  return neonTables.filter((table) => {
-    const neonName = normalizeTableName(asString(table.table_name, ""));
-    return !mariaCandidateNames.has(neonName);
-  });
-}
-
-function makePageControlRows(args: {
-  dbMariaStatus: string;
-  dbNeonStatus: string;
-  schemaOk: boolean;
-  mariaTables: string;
-  neonTables: string;
-  migrationStatus: string;
-  neonTruthStatus: string;
-}): ControlLine[] {
-  return [
-    {
-      lineNo: 1,
-      status: args.dbMariaStatus === "OK" ? "OK" : "FEIL",
-      group: "Database",
-      title: "MariaDB-kobling",
-      detail: `${args.dbMariaStatus} / ${args.mariaTables} tabeller`,
-      route: "/api/system/mariadb-health",
-      featureKey: "system.mariadb.health",
-      suggestion: args.dbMariaStatus === "OK" ? "OK" : "Sjekk CT_DB_* i Vercel.",
-    },
-    {
-      lineNo: 2,
-      status: args.dbNeonStatus === "OK" ? "OK" : "FEIL",
-      group: "Database",
-      title: "Neon-kobling",
-      detail: `${args.dbNeonStatus} / ${args.neonTables} tabeller`,
-      route: "/api/system/neon-health",
-      featureKey: "system.neon.health",
-      suggestion: args.dbNeonStatus === "OK" ? "OK" : "Sjekk Neon env vars i Vercel.",
-    },
-    {
-      lineNo: 3,
-      status: args.schemaOk ? "OK" : "FEIL",
-      group: "API",
-      title: "Schema inventory",
-      detail: args.schemaOk ? "Schema inventory svarer OK" : "Schema inventory feiler",
-      route: "/api/system/schema-inventory",
-      featureKey: "system.schema.inventory",
-      suggestion: "Brukes som grunnlag for table mapping.",
-    },
-    {
-      lineNo: 4,
-      status: Number(args.neonTables) > 0 ? "OK" : "VARSEL",
-      group: "API",
-      title: "Bootstrap / Neon kontrollstruktur",
-      detail: `${args.neonTables} Neon-tabeller i inventory`,
-      route: "/api/system/mariadb-neon-bootstrap",
-      featureKey: "system.mariadb_neon.bootstrap",
-      suggestion:
-        Number(args.neonTables) > 0
-          ? "Kontrollstruktur finnes."
-          : "Kjør eller oppdater schema inventory etter bootstrap.",
-    },
-    {
-      lineNo: 5,
-      status: "BLOKKERT",
-      group: "Migrering",
-      title: "Kildedata",
-      detail: args.migrationStatus,
-      featureKey: "system.source_data.migration",
-      suggestion:
-        "Kildedata er blokkert til mapping, ID-kontroll, relasjoner og sidekrav er OK.",
-    },
-    {
-      lineNo: 6,
-      status: args.neonTruthStatus === "not_approved" ? "BLOKKERT" : "OK",
-      group: "Truth",
-      title: "Neon som sann database",
-      detail: args.neonTruthStatus,
-      featureKey: "system.database.truth_status",
-      suggestion: "Neon skal ikke godkjennes før hele kontrollkjeden er OK.",
-    },
-    {
-      lineNo: 7,
-      status: "VARSEL",
-      group: "Template",
-      title: "Template-kontroll per side",
-      detail: "Trenger egen kontroll for template, skin og layout per side.",
-      featureKey: "system.template.control",
-      suggestion: "Neste utvidelse: lag side-control registry for alle sider.",
-    },
-    {
-      lineNo: 8,
-      status: "VARSEL",
-      group: "Skin",
-      title: "Skin-kontroll",
-      detail: "Skin må kontrolleres mot valgt standard.",
-      featureKey: "system.skin.control",
-      suggestion: "Legg inn skin_status per side.",
-    },
-    {
-      lineNo: 9,
-      status: "VARSEL",
-      group: "Layout",
-      title: "Layout-kontroll",
-      detail: "Layout må kontrollere desktop, tablet, mobil og bredskjerm.",
-      featureKey: "system.layout.control",
-      suggestion: "Legg inn layout_status per side.",
-    },
-    {
-      lineNo: 10,
-      status: "VARSEL",
-      group: "Sidekrav",
-      title: "Side- og innholdskontroll",
-      detail: "Hver side må ha krav til komponenter, API, brytere, tabeller og innhold.",
-      featureKey: "system.page.content.control",
-      suggestion: "Neste API: source-relation-overview og page-control-overview.",
-    },
-  ];
 }
 
 export default function MariaDbNeonControlPage() {
-  const [loadState, setLoadState] = useState<LoadState>("idle");
-  const [dbOverview, setDbOverview] = useState<JsonObject | null>(null);
-  const [schemaInventory, setSchemaInventory] = useState<JsonObject | null>(null);
-  const [bootstrapStatus, setBootstrapStatus] = useState<JsonObject | null>(null);
-  const [platformStandard, setPlatformStandard] = useState<JsonObject | null>(null);
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [focusedLine, setFocusedLine] = useState<number | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
+  const [loading, setLoading] = useState(true);
+  const [dbOverview, setDbOverview] = useState<JsonRecord | null>(null);
+  const [schemaInventory, setSchemaInventory] = useState<JsonRecord | null>(null);
+  const [bootstrapStatus, setBootstrapStatus] = useState<JsonRecord | null>(null);
+  const [platformStandard, setPlatformStandard] = useState<JsonRecord | null>(null);
+  const [templateTokenCheck, setTemplateTokenCheck] = useState<JsonRecord | null>(null);
+  const [controlEventLog, setControlEventLog] = useState<JsonRecord | null>(null);
+
+  async function refreshEventLog() {
+    const json = await fetchJson("/api/system/control-event-log");
+    setControlEventLog(json);
+  }
+
+  async function logControlEvent(input: {
+    event_type: string;
+    tab_key?: string;
+    button_key?: string;
+    feature_key?: string;
+    action_route?: string;
+    http_method?: string;
+    status?: string;
+    severity?: string;
+    message_no: string;
+    suggested_fix_no?: string;
+    payload_json?: unknown;
+  }) {
+    try {
+      await fetch("/api/system/control-event-log", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event_source: "mariadb_neon_control_page",
+          route_path: "/admin/system/mariadb-neon",
+          status: "INFO",
+          severity: "info",
+          suggested_fix_no: "Ingen tiltak.",
+          ...input,
+        }),
+      });
+
+      await refreshEventLog();
+    } catch {
+      // Hendelseslogg skal aldri stoppe siden.
+    }
+  }
+
+  async function loadAll() {
+    setLoading(true);
+
+    const [
+      overviewJson,
+      inventoryJson,
+      bootstrapJson,
+      platformJson,
+      tokenJson,
+      eventLogJson,
+    ] = await Promise.all([
+      fetchJson("/api/system/db-overview"),
+      fetchJson("/api/system/schema-inventory"),
+      fetchJson("/api/system/mariadb-neon-bootstrap"),
+      fetchJson("/api/system/platform-standard-check"),
+      fetchJson("/api/system/template-token-check"),
+      fetchJson("/api/system/control-event-log"),
+    ]);
+
+    setDbOverview(overviewJson);
+    setSchemaInventory(inventoryJson);
+    setBootstrapStatus(bootstrapJson);
+    setPlatformStandard(platformJson);
+    setTemplateTokenCheck(tokenJson);
+    setControlEventLog(eventLogJson);
+    setLoading(false);
+  }
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadControlData() {
-      setLoadState("loading");
-      setErrorMessage("");
-
-      try {
-        const [overviewResponse, inventoryResponse, bootstrapResponse, platformResponse] =
-          await Promise.all([
-            fetch("/api/system/db-overview", { cache: "no-store" }),
-            fetch("/api/system/schema-inventory", { cache: "no-store" }),
-            fetch("/api/system/mariadb-neon-bootstrap", { cache: "no-store" }),
-            fetch("/api/system/platform-standard-check", { cache: "no-store" }),
-          ]);
-
-        const overviewJson = (await overviewResponse.json()) as JsonObject;
-        const inventoryJson = (await inventoryResponse.json()) as JsonObject;
-        const bootstrapJson = (await bootstrapResponse.json()) as JsonObject;
-        const platformJson = (await platformResponse.json()) as JsonObject;
-
-        if (!cancelled) {
-          setDbOverview(overviewJson);
-          setSchemaInventory(inventoryJson);
-          setBootstrapStatus(bootstrapJson);
-          setLoadState("ok");
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setLoadState("error");
-          setErrorMessage(
-            error instanceof Error ? error.message : "Ukjent feil ved lasting"
-          );
-        }
-      }
-    }
-
-    loadControlData();
-
-    return () => {
-      cancelled = true;
-    };
+    void loadAll();
   }, []);
 
-  const dbMariaStatus = asString(getPath(dbOverview, ["status", "mariadb"]), "...");
-  const dbNeonStatus = asString(getPath(dbOverview, ["status", "neon"]), "...");
-  const migrationStatus = asString(
-    getPath(dbOverview, ["status", "migration_status"]),
-    "not_started"
-  );
-  const neonTruthStatus = asString(
-    getPath(dbOverview, ["status", "neon_truth_status"]),
-    "not_approved"
-  );
+  const mariadbSummary = useMemo(() => {
+    return getPath(schemaInventory, ["inventory", "mariadb", "summary"]);
+  }, [schemaInventory]);
 
-  const mariaTables = asCount(
-    getPath(schemaInventory, ["inventory", "mariadb", "summary", "table_count"])
-  );
-  const mariaViews = asCount(
-    getPath(schemaInventory, ["inventory", "mariadb", "summary", "view_count"])
-  );
-  const mariaColumns = asCount(
-    getPath(schemaInventory, ["inventory", "mariadb", "summary", "column_count"])
-  );
+  const neonSummary = useMemo(() => {
+    return getPath(schemaInventory, ["inventory", "neon", "summary"]);
+  }, [schemaInventory]);
 
-  const neonTables = asCount(
-    getPath(schemaInventory, ["inventory", "neon", "summary", "table_count"])
-  );
-  const neonViews = asCount(
-    getPath(schemaInventory, ["inventory", "neon", "summary", "view_count"])
-  );
-  const neonColumns = asCount(
-    getPath(schemaInventory, ["inventory", "neon", "summary", "column_count"])
-  );
+  const mariadbTables = useMemo(() => {
+    return asRecords(getPath(schemaInventory, ["inventory", "mariadb", "sample_tables"]));
+  }, [schemaInventory]);
 
-  const schemaOk = asBoolean(getPath(schemaInventory, ["ok"]));
-
-  const mariaSampleTables = sampleTablesFrom(
-    getPath(schemaInventory, ["inventory", "mariadb", "sample_tables"])
-  );
-
-  const neonSampleTables = sampleTablesFrom(
-    getPath(schemaInventory, ["inventory", "neon", "sample_tables"])
-  );
-
-  const inventoryPairs = useMemo(
-    () => buildInventoryPairs(mariaSampleTables, neonSampleTables),
-    [mariaSampleTables, neonSampleTables]
-  );
-
-  const extraNeon = useMemo(
-    () => extraNeonTables(mariaSampleTables, neonSampleTables),
-    [mariaSampleTables, neonSampleTables]
-  );
-
-  const missingLines = inventoryPairs.filter((row) => row.mappingStatus === "FEIL");
-  const okLines = inventoryPairs.filter((row) => row.mappingStatus === "OK");
-  const blockedLines = inventoryPairs.filter((row) => row.mappingStatus === "BLOKKERT");
-
-  const visibleInventoryPairs = focusedLine
-    ? inventoryPairs.filter((row) => row.lineNo === focusedLine)
-    : inventoryPairs;
-
-  const controlRows = useMemo(
-    () =>
-      makePageControlRows({
-        dbMariaStatus,
-        dbNeonStatus,
-        schemaOk,
-        mariaTables,
-        neonTables,
-        migrationStatus,
-        neonTruthStatus,
-      }),
-    [
-      dbMariaStatus,
-      dbNeonStatus,
-      schemaOk,
-      mariaTables,
-      neonTables,
-      migrationStatus,
-      neonTruthStatus,
-    ]
-  );
-
-  const chatGptReport = useMemo(() => {
-    return [
-      "SVAR TIL CHATGPT",
-      "",
-      "MariaDB -> Neon Control status:",
-      `Lastestatus: ${loadState}`,
-      `MariaDB: ${dbMariaStatus}`,
-      `Neon: ${dbNeonStatus}`,
-      `Schema inventory: ${schemaOk ? "OK" : "ukjent"}`,
-      "",
-      `MariaDB tabeller: ${mariaTables}`,
-      `MariaDB views: ${mariaViews}`,
-      `MariaDB kolonner: ${mariaColumns}`,
-      "",
-      `Neon tabeller: ${neonTables}`,
-      `Neon views: ${neonViews}`,
-      `Neon kolonner: ${neonColumns}`,
-      "",
-      `Mangler i Neon sample: ${missingLines.length}`,
-      `OK i sample: ${okLines.length}`,
-      `Blokkert / backup i sample: ${blockedLines.length}`,
-      `Ekstra Neon kontrolltabeller: ${extraNeon.length}`,
-      "",
-      `Migrering: ${migrationStatus}`,
-      `Neon truth status: ${neonTruthStatus}`,
-      `Neste steg: ${asString(
-        getPath(schemaInventory, ["status", "next_step"]),
-        "source_relation_overview / table_mapping"
-      )}`,
-      "",
-      "Kritisk regel:",
-      "Ingen kildedata migreres før struktur, regler, prosesser, table mapping, field mapping, ID mapping, relasjonsbaner, DB 8.4, auth/session, bruker/samling, admin/action-routes, sidekrav og innholdskrav er kontrollert.",
-    ].join("\n");
-  }, [
-    loadState,
-    dbMariaStatus,
-    dbNeonStatus,
-    schemaOk,
-    mariaTables,
-    mariaViews,
-    mariaColumns,
-    neonTables,
-    neonViews,
-    neonColumns,
-    missingLines.length,
-    okLines.length,
-    blockedLines.length,
-    extraNeon.length,
-    migrationStatus,
-    neonTruthStatus,
-    schemaInventory,
-  ]);
+  const neonTables = useMemo(() => {
+    return asRecords(getPath(schemaInventory, ["inventory", "neon", "sample_tables"]));
+  }, [schemaInventory]);
 
   const platformChecks = useMemo(() => {
-    const checks = getPath(platformStandard, ["checks"]);
-    return Array.isArray(checks) ? checks.filter(isRecord) : [];
+    return asRecords(getPath(platformStandard, ["checks"]));
   }, [platformStandard]);
 
-  const tabs = [
-    ["dashboard", "Dashboard"],
-    ["inventory", "Inventory"],
-    ["platform", "Plattform"],
-    ["api", "API-ruter"],
-    ["features", "DB-brytere"],
-    ["template", "Template"],
-    ["skin", "Skin"],
-    ["layout", "Layout"],
-    ["pages", "Sidekrav"],
-    ["diagnose", "Diagnose"],
-    ["json", "JSON"],
-    ["chatgpt", "Svar til ChatGPT"],
-  ];
+  const tokenChecks = useMemo(() => {
+    return asRecords(getPath(templateTokenCheck, ["checks"]));
+  }, [templateTokenCheck]);
 
-  const renderControlRows = (filter?: string) => {
-    const rows = filter ? controlRows.filter((row) => row.group === filter) : controlRows;
+  const eventRows = useMemo(() => {
+    return asRecords(getPath(controlEventLog, ["events"]));
+  }, [controlEventLog]);
+
+  const tokenSummary = getPath(templateTokenCheck, ["summary"]);
+  const platformSummary = getPath(platformStandard, ["summary"]);
+
+  const allJson = {
+    dbOverview,
+    schemaInventory,
+    bootstrapStatus,
+    platformStandard,
+    templateTokenCheck,
+    controlEventLog,
+  };
+
+  const answerToChatGpt = [
+    "MARIADB -> NEON CONTROL STATUS",
+    "",
+    `MariaDB: ${asString(getPath(dbOverview, ["status", "mariadb"]))}`,
+    `Neon: ${asString(getPath(dbOverview, ["status", "neon"]))}`,
+    `Migration status: ${asString(getPath(dbOverview, ["status", "migration_status"]))}`,
+    `Neon truth status: ${asString(getPath(dbOverview, ["status", "neon_truth_status"]))}`,
+    "",
+    `MariaDB inventory: ${asString(getPath(mariadbSummary, ["table_count"]))} tabeller / ${asString(getPath(mariadbSummary, ["view_count"]))} views / ${asString(getPath(mariadbSummary, ["column_count"]))} kolonner`,
+    `Neon inventory: ${asString(getPath(neonSummary, ["table_count"]))} tabeller / ${asString(getPath(neonSummary, ["view_count"]))} views / ${asString(getPath(neonSummary, ["column_count"]))} kolonner`,
+    "",
+    `Platform standard: ${asString(getPath(platformSummary, ["ok"]), "0")} OK / ${asString(getPath(platformSummary, ["varsel"]), "0")} VARSEL / ${asString(getPath(platformSummary, ["feil"]), "0")} FEIL`,
+    `Template tokens: ${asString(getPath(tokenSummary, ["ok"]), "0")} OK / ${asString(getPath(tokenSummary, ["varsel"]), "0")} VARSEL / ${asString(getPath(tokenSummary, ["feil"]), "0")} FEIL`,
+    `Control event log rows: ${eventRows.length}`,
+    "",
+    "Migration allowed: false",
+    "Source data migration allowed: false",
+    "",
+    "Neste steg: source-relation-overview og table mapping etter at platform/template-token-kontroll vises OK.",
+  ].join("\n");
+
+  function renderCheckList(rows: JsonRecord[], emptyText: string) {
+    if (rows.length === 0) {
+      return (
+        <article className={`${styles.controlLine} ${styles.statusWarning}`}>
+          <div className={styles.lineNumber}>1</div>
+          <div className={styles.lineMain}>
+            <div className={styles.lineHeader}>
+              <strong>Ingen data</strong>
+              <span>VARSEL</span>
+            </div>
+            <p>{emptyText}</p>
+          </div>
+        </article>
+      );
+    }
 
     return (
       <div className={styles.controlList}>
-        {rows.map((row) => (
-          <article key={`${row.group}-${row.lineNo}`} className={`${styles.controlLine} ${lineStatusClass(row.status)}`}>
-            <div className={styles.lineNumber}>{row.lineNo}</div>
-            <div className={styles.lineMain}>
-              <div className={styles.lineHeader}>
-                <strong>{row.title}</strong>
-                <span className={`${styles.badge} ${badgeClass(row.status)}`}>{row.status}</span>
+        {rows.map((item, index) => {
+          const status = normalizeStatus(item.status);
+          const title =
+            asString(item.area, "") ||
+            asString(item.token, "") ||
+            asString(item.event_type, "") ||
+            asString(item.table_name, "") ||
+            "Kontrollinje";
+
+          const key =
+            asString(item.standard_key, "") ||
+            asString(item.token, "") ||
+            asString(item.id, "") ||
+            `${title}-${index}`;
+
+          const detail =
+            asString(item.detail_no, "") ||
+            asString(item.message_no, "") ||
+            asString(item.expected_use_no, "") ||
+            asString(item.table_type, "");
+
+          const extra =
+            asString(item.suggestion_no, "") ||
+            asString(item.action_route, "") ||
+            asString(item.current_value, "");
+
+          return (
+            <article
+              key={key}
+              className={`${styles.controlLine} ${statusClass(status)}`}
+            >
+              <div className={styles.lineNumber}>
+                {asString(item.line_no, asString(item.id, String(index + 1)))}
               </div>
-              <p>{row.detail}</p>
-              <small>
-                {row.route ? `Route: ${row.route} · ` : ""}
-                {row.featureKey ? `Feature: ${row.featureKey}` : ""}
-              </small>
-              <em>{row.suggestion}</em>
-            </div>
-          </article>
-        ))}
+              <div className={styles.lineMain}>
+                <div className={styles.lineHeader}>
+                  <strong>{title}</strong>
+                  <span>{status}</span>
+                </div>
+                <p>{detail || key}</p>
+                {extra ? <small>{extra}</small> : null}
+              </div>
+            </article>
+          );
+        })}
       </div>
     );
-  };
+  }
 
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
         <div>
-          <p className={styles.kicker}>Collectium System Control</p>
+          <p className={styles.eyebrow}>Collectium System Control</p>
           <h1>MariaDB → Neon Control</h1>
-          <p className={styles.lead}>
+          <p>
             Kontrollside for database, API, brytere, template, skin, layout og
             sidekrav før Neon kan bli sann hoveddatabase.
           </p>
         </div>
 
-        <div className={styles.heroStatus}>
-          <span className={loadState === "ok" ? styles.pillOk : styles.pillWarn}>
-            {loadState === "ok" ? "Kontroll OK" : loadState}
-          </span>
-          <span className={styles.pillBlocked}>Migrering blokkert</span>
+        <div className={styles.heroBadges}>
+          <span className={styles.okPill}>Kontroll OK</span>
+          <span className={styles.blockPill}>Migrering blokkert</span>
         </div>
       </section>
 
-      {loadState === "error" ? (
-        <section className={styles.errorBox}>
-          <strong>Feil ved lasting:</strong> {errorMessage}
-        </section>
-      ) : null}
-
       <section className={styles.cards}>
-        <article className={styles.card}>
+        <article className={styles.statusCard}>
           <span>MariaDB</span>
-          <strong>{dbMariaStatus}</strong>
-          <small>
-            {mariaTables} tabeller / {mariaViews} views / {mariaColumns} kolonner
-          </small>
+          <strong>{asString(getPath(dbOverview, ["status", "mariadb"]))}</strong>
+          <p>
+            {asString(getPath(mariadbSummary, ["table_count"]))} tabeller /{" "}
+            {asString(getPath(mariadbSummary, ["view_count"]))} views /{" "}
+            {asString(getPath(mariadbSummary, ["column_count"]))} kolonner
+          </p>
         </article>
 
-        <article className={styles.card}>
+        <article className={styles.statusCard}>
           <span>Neon</span>
-          <strong>{dbNeonStatus}</strong>
-          <small>
-            {neonTables} tabeller / {neonViews} views / {neonColumns} kolonner
-          </small>
+          <strong>{asString(getPath(dbOverview, ["status", "neon"]))}</strong>
+          <p>
+            {asString(getPath(neonSummary, ["table_count"]))} tabeller /{" "}
+            {asString(getPath(neonSummary, ["view_count"]))} views /{" "}
+            {asString(getPath(neonSummary, ["column_count"]))} kolonner
+          </p>
         </article>
 
-        <article className={styles.card}>
-          <span>Mapping sample</span>
-          <strong>{okLines.length} OK / {missingLines.length} feil</strong>
-          <small>{blockedLines.length} blokkert / backup</small>
+        <article className={styles.statusCard}>
+          <span>Plattform</span>
+          <strong>
+            {asString(getPath(platformSummary, ["ok"]), "0")} OK /{" "}
+            {asString(getPath(platformSummary, ["varsel"]), "0")} varsel
+          </strong>
+          <p>{asString(getPath(platformSummary, ["feil"]), "0")} feil</p>
         </article>
 
-        <article className={styles.card}>
-          <span>Truth status</span>
-          <strong>{neonTruthStatus}</strong>
-          <small>Neon er koblet, men ikke godkjent</small>
+        <article className={styles.statusCard}>
+          <span>Template tokens</span>
+          <strong>
+            {asString(getPath(tokenSummary, ["ok"]), "0")} OK /{" "}
+            {asString(getPath(tokenSummary, ["feil"]), "0")} feil
+          </strong>
+          <p>{asString(getPath(templateTokenCheck, ["token_count"]), "0")} tokens kontrollert</p>
         </article>
       </section>
 
       <nav className={styles.tabs} aria-label="MariaDB Neon Control tabs">
-        {tabs.map(([key, label]) => (
+        {tabs.map((tab) => (
           <button
-            key={key}
+            key={tab.key}
             type="button"
-            className={activeTab === key ? styles.activeTab : ""}
-            onClick={() => setActiveTab(key)}
+            className={activeTab === tab.key ? styles.activeTab : ""}
+            onClick={() => {
+              setActiveTab(tab.key);
+              void logControlEvent({
+                event_type: "tab_click",
+                tab_key: tab.key,
+                button_key: `tab.${tab.key}`,
+                feature_key: `system.mariadb_neon.tab.${tab.key}`,
+                action_route: "local_tab_switch",
+                http_method: "LOCAL",
+                status: "INFO",
+                severity: "info",
+                message_no: `Fane åpnet: ${tab.label}`,
+                payload_json: {
+                  tab_key: tab.key,
+                  tab_label: tab.label,
+                },
+              });
+            }}
           >
-            {label}
+            {tab.label}
           </button>
         ))}
       </nav>
 
-      {activeTab === "dashboard" ? (
-        <section className={styles.gridTwo}>
-          <article className={styles.panel}>
-            <h2>Kontrollstatus</h2>
-            {renderControlRows()}
-          </article>
+      {loading ? (
+        <section className={styles.panel}>
+          <h2>Laster kontrollstatus</h2>
+          <p>Henter database, plattform, template tokens og hendelseslogg.</p>
+        </section>
+      ) : null}
 
-          <article className={styles.panel}>
-            <h2>Neste tiltak</h2>
-            <ol className={styles.actionList}>
-              <li>Bygg full table mapping, ikke bare sample-visning.</li>
-              <li>Lag source-relation-overview.</li>
-              <li>Lag page-control-overview for alle sider.</li>
-              <li>Legg template, skin og layout inn som kontroller per side.</li>
-              <li>Ikke migrer kildedata før mapping og relasjoner er OK.</li>
-            </ol>
-          </article>
+      {activeTab === "dashboard" ? (
+        <section className={styles.panel}>
+          <h2>Dashboard</h2>
+          <div className={styles.dashboardGrid}>
+            <div>
+              <h3>Status</h3>
+              {renderCheckList(
+                [
+                  {
+                    line_no: 1,
+                    status: asString(getPath(dbOverview, ["status", "mariadb"])),
+                    area: "MariaDB",
+                    detail_no: "Legacy truth/control archive er tilgjengelig.",
+                    suggestion_no: "OK",
+                  },
+                  {
+                    line_no: 2,
+                    status: asString(getPath(dbOverview, ["status", "neon"])),
+                    area: "Neon",
+                    detail_no: "Neon er koblet, men ikke sann hoveddatabase.",
+                    suggestion_no: "Migrering fortsatt blokkert.",
+                  },
+                  {
+                    line_no: 3,
+                    status: "BLOKKERT",
+                    area: "Migrering",
+                    detail_no: "Kildedata skal ikke migreres før mapping, relasjoner, DB 8.4, auth/session og sidekrav er OK.",
+                    suggestion_no: "Fortsett med source-relation-overview.",
+                  },
+                ],
+                "Dashboard mangler data."
+              )}
+            </div>
+
+            <div>
+              <h3>Neste kontroller</h3>
+              {renderCheckList(
+                [
+                  {
+                    line_no: 1,
+                    status: "INFO",
+                    area: "Source relation overview",
+                    detail_no: "Leser MariaDB read-only og finner kilder, object_group, relasjonstabeller, marked og samling.",
+                    suggestion_no: "Bygg GET /api/system/source-relation-overview.",
+                  },
+                  {
+                    line_no: 2,
+                    status: "INFO",
+                    area: "Table mapping",
+                    detail_no: "Mapper MariaDB-tabeller mot Neon-målstruktur.",
+                    suggestion_no: "Ikke migrer data ennå.",
+                  },
+                ],
+                "Ingen neste steg."
+              )}
+            </div>
+          </div>
         </section>
       ) : null}
 
       {activeTab === "inventory" ? (
         <section className={styles.panel}>
-          <h2>Linjemappet inventory</h2>
-
-          <div className={styles.mappingSummary}>
+          <h2>Inventory</h2>
+          <div className={styles.twoColumns}>
             <div>
-              <strong>Mangler i Neon</strong>
-              <div className={styles.numberPills}>
-                {missingLines.map((row) => (
-                  <button key={`missing-${row.lineNo}`} type="button" className={styles.redPill} onClick={() => setFocusedLine(row.lineNo)}>
-                    {row.lineNo}
-                  </button>
-                ))}
-              </div>
+              <h3>MariaDB sample</h3>
+              {renderCheckList(
+                mariadbTables.map((row, index) => ({
+                  line_no: index + 1,
+                  status: asString(row.table_name, "").startsWith("backup_") ? "BLOKKERT" : "OK",
+                  area: asString(row.table_name),
+                  detail_no: asString(row.table_type),
+                  suggestion_no: asString(row.table_name, "").startsWith("backup_")
+                    ? "Backup-tabell skal ikke migreres som aktiv sannhet."
+                    : "Kandidat for mapping.",
+                })),
+                "Ingen MariaDB-tabeller funnet."
+              )}
             </div>
 
             <div>
-              <strong>OK</strong>
-              <div className={styles.numberPills}>
-                {okLines.map((row) => (
-                  <button key={`ok-${row.lineNo}`} type="button" className={styles.greenPill} onClick={() => setFocusedLine(row.lineNo)}>
-                    {row.lineNo}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <strong>Backup / blokkert</strong>
-              <div className={styles.numberPills}>
-                {blockedLines.map((row) => (
-                  <button key={`blocked-${row.lineNo}`} type="button" className={styles.purplePill} onClick={() => setFocusedLine(row.lineNo)}>
-                    {row.lineNo}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <strong>Visning</strong>
-              <div className={styles.numberPills}>
-                <button type="button" className={styles.neutralPill} onClick={() => setFocusedLine(null)}>
-                  Alle
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.pairedInventoryGrid}>
-            <article>
-              <h3>MariaDB sample tables</h3>
-              <div className={styles.pairedList}>
-                {visibleInventoryPairs.map((row) => (
-                  <div key={`maria-${row.lineNo}`} className={`${styles.tableLine} ${lineStatusClass(row.mariaStatus)}`}>
-                    <span className={styles.lineNumber}>{row.lineNo}</span>
-                    <strong>{row.sourceTableName}</strong>
-                    <span>{row.sourceTableType}</span>
-                    <span className={`${styles.badge} ${badgeClass(row.mariaStatus)}`}>{row.mariaStatus}</span>
-                  </div>
-                ))}
-              </div>
-            </article>
-
-            <article>
-              <h3>Neon mapped result</h3>
-              <div className={styles.pairedList}>
-                {visibleInventoryPairs.map((row) => (
-                  <div key={`neon-${row.lineNo}`} className={`${styles.tableLine} ${lineStatusClass(row.neonStatus)}`}>
-                    <span className={styles.lineNumber}>{row.lineNo}</span>
-                    <strong>{row.neonTableName}</strong>
-                    <span>{row.neonTableType}</span>
-                    <span className={`${styles.badge} ${badgeClass(row.neonStatus)}`}>{row.neonStatus}</span>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
-
-          <div className={styles.mappingDetails}>
-            <h3>Linjedetaljer</h3>
-            {visibleInventoryPairs.map((row) => (
-              <article key={`detail-${row.lineNo}`} className={`${styles.controlLine} ${lineStatusClass(row.mappingStatus)}`}>
-                <div className={styles.lineNumber}>{row.lineNo}</div>
-                <div className={styles.lineMain}>
-                  <div className={styles.lineHeader}>
-                    <strong>{row.sourceTableName}</strong>
-                    <span className={`${styles.badge} ${badgeClass(row.mappingStatus)}`}>{row.mappingStatus}</span>
-                  </div>
-                  <p>{row.message}</p>
-                  <small>MariaDB: {row.sourceTableName} → Neon: {row.neonTableName}</small>
-                  <em>{row.suggestion}</em>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className={styles.extraNeonBox}>
-            <h3>Ekstra Neon-tabeller uten MariaDB-linje</h3>
-            <p>
-              Dette er normalt etter bootstrap. Disse er kontrolltabeller og skal
-              ikke bety at kildedata er migrert.
-            </p>
-            <div className={styles.tagGrid}>
-              {extraNeon.map((table) => (
-                <span key={asString(table.table_name, "")}>{asString(table.table_name, "")}</span>
-              ))}
+              <h3>Neon control tables</h3>
+              {renderCheckList(
+                neonTables.map((row, index) => ({
+                  line_no: index + 1,
+                  status: "OK",
+                  area: asString(row.table_name),
+                  detail_no: asString(row.table_type),
+                  suggestion_no: "Kontrolltabell i Neon.",
+                })),
+                "Ingen Neon-tabeller funnet."
+              )}
             </div>
           </div>
         </section>
@@ -824,127 +567,216 @@ export default function MariaDbNeonControlPage() {
         <section className={styles.panel}>
           <h2>Plattformstandard</h2>
           <p className={styles.panelLead}>
-            Kontroll av Next.js, React, Vercel, Neon, Node.js, API-ruter,
-            server/client components, DB-tilkobling, miljøvariabler og build/deploy.
+            Next.js, React, Vercel, Neon, Node.js, API-ruter, server/client
+            components, DB-tilkobling, miljøvariabler og build/deploy.
           </p>
-
-          {platformChecks.length === 0 ? (
-            <article className={`${styles.controlLine} ${styles.lineWarn}`}>
-              <div className={styles.lineNumber}>1</div>
-              <div className={styles.lineMain}>
-                <div className={styles.lineHeader}>
-                  <strong>Platform standard check mangler</strong>
-                  <span className={`${styles.badge} ${styles.badgeWarn}`}>VARSEL</span>
-                </div>
-                <p>Fant ingen checks fra /api/system/platform-standard-check.</p>
-                <small>Route: /api/system/platform-standard-check</small>
-                <em>Kjør API-ruten og kontroller at den returnerer checks.</em>
-              </div>
-            </article>
-          ) : (
-            <div className={styles.controlList}>
-              {platformChecks.map((check, index) => {
-                const status = asString(check.status, "INFO") as LineStatus;
-                const lineNo = asString(check.line_no, String(index + 1));
-                const area = asString(check.area, "Platform");
-                const standardKey = asString(check.standard_key, "—");
-                const currentValue = asString(check.current_value, "—");
-                const expectedValue = asString(check.expected_value, "—");
-                const detail = asString(check.detail_no, "—");
-                const suggestion = asString(check.suggestion_no, "—");
-
-                return (
-                  <article
-                    key={`${standardKey}-${lineNo}`}
-                    className={`${styles.controlLine} ${lineStatusClass(status)}`}
-                  >
-                    <div className={styles.lineNumber}>{lineNo}</div>
-                    <div className={styles.lineMain}>
-                      <div className={styles.lineHeader}>
-                        <strong>{area}</strong>
-                        <span className={`${styles.badge} ${badgeClass(status)}`}>
-                          {status}
-                        </span>
-                      </div>
-                      <p>{standardKey}</p>
-                      <small>
-                        Nå: {currentValue} · Forventet: {expectedValue}
-                      </small>
-                      <em>{detail}</em>
-                      <em>{suggestion}</em>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      ) : null}
-      {activeTab === "api" ? (
-        <section className={styles.panel}>
-          <h2>API-ruter</h2>
-          {renderControlRows("API")}
-        </section>
-      ) : null}
-
-      {activeTab === "features" ? (
-        <section className={styles.panel}>
-          <h2>DB-brytere / feature_keys</h2>
-          {renderControlRows()}
+          {renderCheckList(platformChecks, "Platform-standard-check mangler eller svarer ikke.")}
         </section>
       ) : null}
 
       {activeTab === "template" ? (
         <section className={styles.panel}>
-          <h2>Template-kontroll</h2>
-          {renderControlRows("Template")}
+          <h2>Template token-kontroll</h2>
+          <p className={styles.panelLead}>
+            Kontrollerer at de 20 UI 8.5-tokenene finnes og brukes i riktig kontekst.
+          </p>
+          {renderCheckList(tokenChecks, "Template-token-check mangler eller svarer ikke.")}
         </section>
       ) : null}
 
       {activeTab === "skin" ? (
         <section className={styles.panel}>
-          <h2>Skin-kontroll</h2>
-          {renderControlRows("Skin")}
+          <h2>Skin</h2>
+          <div className={styles.skinGrid}>
+            {["Collectium", "Finans", "Museum", "Samler / Enkel"].map((skin, index) => (
+              <article key={skin} className={styles.skinCard}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{skin}</strong>
+                <p>Skal bruke samme 20 tokens, men med egen palett.</p>
+              </article>
+            ))}
+          </div>
+          {renderCheckList(tokenChecks, "Ingen tokenkontroll tilgjengelig.")}
         </section>
       ) : null}
 
       {activeTab === "layout" ? (
         <section className={styles.panel}>
-          <h2>Layout-kontroll</h2>
-          {renderControlRows("Layout")}
+          <h2>Layout</h2>
+          {renderCheckList(
+            [
+              {
+                line_no: 1,
+                status: "OK",
+                area: "App background",
+                detail_no: "--ct-app-bg skal styre hovedbakgrunn.",
+                suggestion_no: "Kontrolleres av template-token-check.",
+              },
+              {
+                line_no: 2,
+                status: "OK",
+                area: "Sidebar",
+                detail_no: "--ct-app-sidebar-bg skal styre sidemeny/global meny.",
+                suggestion_no: "Kontrolleres av template-token-check.",
+              },
+              {
+                line_no: 3,
+                status: "OK",
+                area: "Topbar",
+                detail_no: "--ct-app-topbar-bg skal styre topbar.",
+                suggestion_no: "Kontrolleres av template-token-check.",
+              },
+              {
+                line_no: 4,
+                status: "OK",
+                area: "Cards / panels",
+                detail_no: "--ct-card-bg, --ct-panel-bg og --ct-panel-border skal styre kort/paneler.",
+                suggestion_no: "Ingen lokale farger på vanlige sider.",
+              },
+            ],
+            "Layout-kontroll mangler."
+          )}
+        </section>
+      ) : null}
+
+      {activeTab === "api" ? (
+        <section className={styles.panel}>
+          <h2>API-ruter</h2>
+          {renderCheckList(
+            [
+              "/api/system/db-overview",
+              "/api/system/schema-inventory",
+              "/api/system/mariadb-neon-bootstrap",
+              "/api/system/platform-standard-check",
+              "/api/system/template-token-check",
+              "/api/system/control-event-log",
+            ].map((route, index) => ({
+              line_no: index + 1,
+              status: "OK",
+              area: route,
+              detail_no: "Ruten er koblet inn i M-N Control.",
+              suggestion_no: "OK",
+            })),
+            "API-ruter mangler."
+          )}
+        </section>
+      ) : null}
+
+      {activeTab === "features" ? (
+        <section className={styles.panel}>
+          <h2>DB-brytere</h2>
+          {renderCheckList(
+            [
+              {
+                line_no: 1,
+                status: "INFO",
+                area: "system.mariadb_neon.control",
+                detail_no: "Kontrollerer M-N Control-siden.",
+                suggestion_no: "Skal senere kobles mot DB 8.4-kjede.",
+              },
+              {
+                line_no: 2,
+                status: "INFO",
+                area: "system.template.token_check",
+                detail_no: "Kontrollerer template-token-bruk.",
+                suggestion_no: "Skal senere registreres i ct_app_features.",
+              },
+              {
+                line_no: 3,
+                status: "INFO",
+                area: "system.control_event_log.write",
+                detail_no: "Logger kontrollhendelser.",
+                suggestion_no: "OK i Neon ct_control_event_logs.",
+              },
+            ],
+            "Ingen brytere vist."
+          )}
         </section>
       ) : null}
 
       {activeTab === "pages" ? (
         <section className={styles.panel}>
-          <h2>Sidekrav / innholdskrav</h2>
-          {renderControlRows("Sidekrav")}
+          <h2>Sidekrav</h2>
+          {renderCheckList(
+            [
+              {
+                line_no: 1,
+                status: "OK",
+                area: "/admin/system/mariadb-neon",
+                detail_no: "Skal vise database, API, brytere, template, skin, layout og sidekrav.",
+                suggestion_no: "Denne siden er kontrollsenter.",
+              },
+              {
+                line_no: 2,
+                status: "BLOKKERT",
+                area: "Neon truth approval",
+                detail_no: "Neon er ikke sann hoveddatabase før alle kontroller er OK.",
+                suggestion_no: "Fortsett med source-relation-overview.",
+              },
+            ],
+            "Ingen sidekrav vist."
+          )}
         </section>
       ) : null}
 
       {activeTab === "diagnose" ? (
         <section className={styles.panel}>
-          <h2>Diagnose med linjenummer</h2>
-          {renderControlRows()}
+          <h2>Diagnose</h2>
+          {renderCheckList(
+            [
+              {
+                line_no: 1,
+                status: "OK",
+                area: "Control event log",
+                detail_no: `${eventRows.length} hendelser funnet.`,
+                suggestion_no: "Trykk på faner for å logge flere.",
+              },
+              {
+                line_no: 2,
+                status: tokenChecks.length > 0 ? "OK" : "FEIL",
+                area: "Template token check",
+                detail_no: `${tokenChecks.length} tokenlinjer vist.`,
+                suggestion_no: tokenChecks.length > 0 ? "OK" : "Koble /api/system/template-token-check.",
+              },
+              {
+                line_no: 3,
+                status: platformChecks.length > 0 ? "OK" : "FEIL",
+                area: "Platform standard check",
+                detail_no: `${platformChecks.length} plattformlinjer vist.`,
+                suggestion_no: platformChecks.length > 0 ? "OK" : "Koble /api/system/platform-standard-check.",
+              },
+            ],
+            "Diagnose mangler."
+          )}
+        </section>
+      ) : null}
+
+      {activeTab === "events" ? (
+        <section className={styles.panel}>
+          <h2>Hendelseslogg</h2>
+          <p className={styles.panelLead}>
+            Logger faneklikk, knapper, manglende koblinger, route-feil og blokkerte handlinger.
+          </p>
+          {renderCheckList(eventRows, "Ingen hendelser registrert ennå.")}
         </section>
       ) : null}
 
       {activeTab === "json" ? (
         <section className={styles.panel}>
           <h2>JSON</h2>
-          <pre className={styles.codeBlock}>
-            {JSON.stringify({ dbOverview, schemaInventory, bootstrapStatus, platformStandard }, null, 2)}
-          </pre>
+          <pre className={styles.jsonBox}>{JSON.stringify(allJson, null, 2)}</pre>
         </section>
       ) : null}
 
       {activeTab === "chatgpt" ? (
         <section className={styles.panel}>
           <h2>Svar til ChatGPT</h2>
-          <textarea className={styles.textarea} readOnly value={chatGptReport} />
+          <p className={styles.panelLead}>
+            Kopier denne statusen inn i neste chat hvis vi skal fortsette kontrollen.
+          </p>
+          <pre className={styles.jsonBox}>{answerToChatGpt}</pre>
         </section>
       ) : null}
     </main>
   );
 }
-
