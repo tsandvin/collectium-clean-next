@@ -54,6 +54,37 @@ type NeonTableRow = {
   table_type: string;
 };
 
+
+function jsonSafe<T>(value: T): T {
+  return JSON.parse(
+    JSON.stringify(value, (_key, innerValue) =>
+      typeof innerValue === "bigint" ? innerValue.toString() : innerValue,
+    ),
+  ) as T;
+}
+
+function safeNumberOrNull(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === "bigint") {
+    const asNumber = Number(value);
+    return Number.isSafeInteger(asNumber) ? asNumber : null;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === "string") {
+    const asNumber = Number(value);
+    return Number.isFinite(asNumber) ? asNumber : null;
+  }
+
+  return null;
+}
+
 type TableMappingRow = {
   source_table: string;
   source_type: string;
@@ -217,7 +248,7 @@ function classifyTable(row: MariaDbTableRow, neonTableNames: Set<string>): Table
     mapping_status,
     priority,
     reason_no,
-    source_rows: row.table_rows,
+    source_rows: safeNumberOrNull(row.table_rows),
     neon_exists: target_table ? neonTableNames.has(target_table) : false,
   };
 }
@@ -256,7 +287,7 @@ export async function GET() {
         row.mapping_status !== "SKIP_BACKUP",
     );
 
-    return NextResponse.json({
+    return NextResponse.json(jsonSafe({
       ok: true,
       source: "table-mapping",
       checked_at: new Date().toISOString(),
@@ -287,7 +318,7 @@ export async function GET() {
         reason:
           "Dette er table mapping. Ingen kildedata skal migreres før field mapping, row count, ID mapping, relasjoner, DB 8.4, auth/session, bruker/samling, admin/action-routes, sidekrav og innholdskrav er kontrollert.",
       },
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
       {
@@ -302,3 +333,4 @@ export async function GET() {
     );
   }
 }
+
