@@ -96,13 +96,15 @@ async function getMariaDbInventory() {
     };
   }
 
+  const databaseName = String(config.database);
+
   let connection: mysql.Connection | null = null;
 
   try {
     connection = await mysql.createConnection({
       host: config.host,
       port: config.port,
-      database: config.database,
+      database: databaseName,
       user: config.user,
       password: config.password,
       connectTimeout: 10000,
@@ -116,7 +118,7 @@ async function getMariaDbInventory() {
       FROM information_schema.tables
       WHERE table_schema = ?
       `,
-      [config.database]
+      [databaseName]
     );
 
     const [columnRows] = await connection.execute(
@@ -125,7 +127,7 @@ async function getMariaDbInventory() {
       FROM information_schema.columns
       WHERE table_schema = ?
       `,
-      [config.database]
+      [databaseName]
     );
 
     const [sampleTables] = await connection.execute(
@@ -138,13 +140,13 @@ async function getMariaDbInventory() {
       ORDER BY table_name
       LIMIT 50
       `,
-      [config.database]
+      [databaseName]
     );
 
     return {
       ok: true,
       source: "mariadb",
-      database_name: config.database,
+      database_name: databaseName,
       summary: {
         ...(Array.isArray(summaryRows) ? summaryRows[0] : {}),
         ...(Array.isArray(columnRows) ? columnRows[0] : {}),
@@ -266,3 +268,4 @@ export async function GET() {
     },
   });
 }
+
