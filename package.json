@@ -15,6 +15,7 @@
     "@types/react-dom": "latest",
     "bcryptjs": "^3.0.3",
     "mariadb": "^3.5.2",
+    "mysql2": "^3.22.5",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
