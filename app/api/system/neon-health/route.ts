@@ -2,104 +2,117 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Neon Health Route
+ * Neon Health API
  *
  * Definering / formål:
- * Kontrollert API-rute for å teste at Next.js/Vercel kan lese fra Neon Postgres.
+ * Tester Neon/Postgres-kobling for MariaDB -> Neon kontrollsiden.
  *
  * Bruksområde:
- * Brukes som første tekniske Neon-koblingstest før MariaDB -> Neon migrering.
+ * Brukes av /admin/system/mariadb-neon for å vise om Neon er koblet.
  *
  * Berørte sider / routes:
- * - /api/system/neon-health
+ * - /admin/system/mariadb-neon
  *
  * Berørte DB-brytere / feature_keys:
- * - system.neon.health
+ * - admin.system.mariadb_neon.view
  *
  * Berørte API-ruter:
  * - GET /api/system/neon-health
  *
  * Berørte tabeller / views:
- * - Ingen tabell. Leser kun Postgres serverstatus.
+ * - PostgreSQL server/version
+ * - information_schema.tables
+ * - information_schema.views
+ * - information_schema.columns
  *
  * Dataretning:
- * Neon Postgres -> API/backend -> Next.js route -> JSON
+ * Neon -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
- * log_category: system
+ * log_category: system.database
  * log_action: neon.health
  *
  * Versjon:
- * CT-FILE-NEON-HEALTH-0001
- *
- * Endringsregel:
- * Dette er en kontrollrute. Den skal ikke skrive data.
+ * CT-FILE-NEON-0002 / CHANGE-2026-06-09-0002
  */
 
-import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
+import { neonQuery } from "@/lib/db/neon";
 
-export const runtime = "nodejs";
-
-function getDatabaseUrl() {
-  return (
-    process.env.DATABASE_URL ??
-    process.env.neon_DATABASE_URL ??
-    process.env.neon_POSTGRES_URL ??
-    process.env.POSTGRES_URL ??
-    null
-  );
-}
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const databaseUrl = getDatabaseUrl();
+    const versionRows = await neonQuery<{ version: string }>(
+      "select version() as version",
+    );
 
-    if (!databaseUrl) {
-      return NextResponse.json(
-        {
-          ok: false,
-          source: "neon",
-          error:
-            "Database URL mangler. Fant ikke DATABASE_URL, neon_DATABASE_URL, neon_POSTGRES_URL eller POSTGRES_URL.",
-        },
-        { status: 500 }
-      );
-    }
+    const currentRows = await neonQuery<{
+      current_database: string;
+      current_user: string;
+      current_schema: string;
+    }>(`
+      select
+        current_database() as current_database,
+        current_user as current_user,
+        current_schema() as current_schema
+    `);
 
-    const sql = neon(databaseUrl);
-
-    const result = await sql`
-      SELECT
-        now() AS server_time,
-        current_database() AS database_name,
-        current_user AS database_user,
-        version() AS postgres_version
-    `;
+    const inventoryRows = await neonQuery<{
+      table_count: string;
+      view_count: string;
+      column_count: string;
+    }>(`
+      select
+        (
+          select count(*)
+          from information_schema.tables
+          where table_schema = 'public'
+          and table_type = 'BASE TABLE'
+        )::text as table_count,
+        (
+          select count(*)
+          from information_schema.views
+          where table_schema = 'public'
+        )::text as view_count,
+        (
+          select count(*)
+          from information_schema.columns
+          where table_schema = 'public'
+        )::text as column_count
+    `);
 
     return NextResponse.json({
       ok: true,
-      source: "neon",
+      database: "neon",
+      status: "OK",
+      truth_status: process.env.COLLECTIUM_NEON_TRUTH_STATUS || "not_approved",
+      migration_status: process.env.COLLECTIUM_DB_MODE || "migration_control",
       connection: {
-        variable: process.env.DATABASE_URL
-          ? "DATABASE_URL"
-          : process.env.neon_DATABASE_URL
-            ? "neon_DATABASE_URL"
-            : process.env.neon_POSTGRES_URL
-              ? "neon_POSTGRES_URL"
-              : "POSTGRES_URL",
-        pooled: true,
+        database: currentRows[0]?.current_database || null,
+        user: currentRows[0]?.current_user || null,
+        schema: currentRows[0]?.current_schema || null,
       },
-      database: result[0],
+      version: versionRows[0]?.version || null,
+      inventory: {
+        tables: Number(inventoryRows[0]?.table_count || 0),
+        views: Number(inventoryRows[0]?.view_count || 0),
+        columns: Number(inventoryRows[0]?.column_count || 0),
+      },
+      next_step:
+        "If inventory is 0/0/0, run controlled Neon bootstrap before migrating source data.",
     });
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
-        source: "neon",
-        error: error instanceof Error ? error.message : "Unknown error",
+        database: "neon",
+        status: "FEIL",
+        truth_status: "not_approved",
+        migration_status: process.env.COLLECTIUM_DB_MODE || "migration_control",
+        error: error instanceof Error ? error.message : "Unknown Neon error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
