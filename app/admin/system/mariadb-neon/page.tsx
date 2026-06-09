@@ -304,6 +304,93 @@ export default function MariaDbNeonControlPage() {
     "Neste steg: source-relation-overview og table mapping etter at platform/template-token-kontroll vises OK.",
   ].join("\n");
 
+  function normalizeInventoryName(value: unknown) {
+    return asString(value, "").trim().toLowerCase();
+  }
+
+  function isBackupOrTempTable(tableName: string) {
+    const name = tableName.toLowerCase();
+    return (
+      name.startsWith("backup_") ||
+      name.startsWith("bak_") ||
+      name.includes("_backup") ||
+      name.includes("before_") ||
+      name.includes("_temp") ||
+      name.includes("tmp_")
+    );
+  }
+
+  function findNeonEquivalent(mariaTableName: string) {
+    const normalizedMaria = normalizeInventoryName(mariaTableName);
+
+    return neonTables.find((row) => {
+      const neonName = normalizeInventoryName(row.table_name);
+      return neonName === normalizedMaria;
+    });
+  }
+
+  function buildInventoryPair(row: JsonRecord, index: number) {
+    const tableName = asString(row.table_name);
+    const tableType = asString(row.table_type);
+    const neonEquivalent = findNeonEquivalent(tableName);
+    const backupOrTemp = isBackupOrTempTable(tableName);
+
+    if (backupOrTemp) {
+      return {
+        line_no: index + 1,
+        maria: {
+          status: "BLOKKERT",
+          table_name: tableName,
+          table_type: tableType,
+          detail_no: "Backup/temp-tabell skal ikke migreres som aktiv sannhet.",
+        },
+        neon: {
+          status: "BLOKKERT",
+          table_name: "Skal ikke opprettes",
+          table_type: "blocked",
+          detail_no: "Tabellen er historikk/backup og skal ikke bli Neon target table.",
+          suggestion_no: "Holdes utenfor migrering. Kan eventuelt arkiveres separat senere.",
+        },
+      };
+    }
+
+    if (neonEquivalent) {
+      return {
+        line_no: index + 1,
+        maria: {
+          status: "OK",
+          table_name: tableName,
+          table_type: tableType,
+          detail_no: "MariaDB-tabell finnes.",
+        },
+        neon: {
+          status: "VARSEL",
+          table_name: asString(neonEquivalent.table_name),
+          table_type: asString(neonEquivalent.table_type),
+          detail_no: "Tilsvarende tabell finnes i Neon, men mapping, kolonner og radtelling må godkjennes.",
+          suggestion_no: "Kjør table mapping, field mapping og row count før OK.",
+        },
+      };
+    }
+
+    return {
+      line_no: index + 1,
+      maria: {
+        status: "OK",
+        table_name: tableName,
+        table_type: tableType,
+        detail_no: "MariaDB-tabell finnes og må vurderes.",
+      },
+      neon: {
+        status: "FEIL",
+        table_name: "Mangler i Neon",
+        table_type: "missing",
+        detail_no: "Ingen tilsvarende Neon-tabell eller mapping funnet i kontrollgrunnlaget.",
+        suggestion_no: "Opprett table mapping eller marker tabellen som ikke-migrerbar.",
+      },
+    };
+  }
+
   function renderCheckList(rows: JsonRecord[], emptyText: string) {
     if (rows.length === 0) {
       return (
@@ -525,40 +612,68 @@ export default function MariaDbNeonControlPage() {
           </div>
         </section>
       ) : null}
-
       {activeTab === "inventory" ? (
         <section className={styles.panel}>
           <h2>Inventory</h2>
-          <div className={styles.twoColumns}>
-            <div>
-              <h3>MariaDB sample</h3>
-              {renderCheckList(
-                mariadbTables.map((row, index) => ({
-                  line_no: index + 1,
-                  status: asString(row.table_name, "").startsWith("backup_") ? "BLOKKERT" : "OK",
-                  area: asString(row.table_name),
-                  detail_no: asString(row.table_type),
-                  suggestion_no: asString(row.table_name, "").startsWith("backup_")
-                    ? "Backup-tabell skal ikke migreres som aktiv sannhet."
-                    : "Kandidat for mapping.",
-                })),
-                "Ingen MariaDB-tabeller funnet."
-              )}
-            </div>
+          <p className={styles.panelLead}>
+            Linje-for-linje kontroll: hver MariaDB-tabell til venstre må ha
+            tilsvarende Neon-status til høyre. Mangler vises rødt. Tabeller som
+            finnes, men trenger mapping/radtelling/kolonnekontroll, vises gult.
+          </p>
 
-            <div>
-              <h3>Neon control tables</h3>
-              {renderCheckList(
-                neonTables.map((row, index) => ({
-                  line_no: index + 1,
-                  status: "OK",
-                  area: asString(row.table_name),
-                  detail_no: asString(row.table_type),
-                  suggestion_no: "Kontrolltabell i Neon.",
-                })),
-                "Ingen Neon-tabeller funnet."
-              )}
-            </div>
+          <div className={styles.inventoryPairs}>
+            {mariadbTables.map((row, index) => {
+              const pair = buildInventoryPair(row, index);
+
+              return (
+                <article key={`${pair.line_no}-${pair.maria.table_name}`} className={styles.inventoryPair}>
+                  <div className={`${styles.controlLine} ${statusClass(pair.maria.status)}`}>
+                    <div className={styles.lineNumber}>{pair.line_no}</div>
+                    <div className={styles.lineMain}>
+                      <div className={styles.lineHeader}>
+                        <strong>{pair.maria.table_name}</strong>
+                        <span>{pair.maria.status}</span>
+                      </div>
+                      <p>{pair.maria.table_type}</p>
+                      <small>{pair.maria.detail_no}</small>
+                    </div>
+                  </div>
+
+                  <div className={`${styles.controlLine} ${statusClass(pair.neon.status)}`}>
+                    <div className={styles.lineNumber}>{pair.line_no}</div>
+                    <div className={styles.lineMain}>
+                      <div className={styles.lineHeader}>
+                        <strong>{pair.neon.table_name}</strong>
+                        <span>{pair.neon.status}</span>
+                      </div>
+                      <p>{pair.neon.table_type}</p>
+                      <small>{pair.neon.detail_no}</small>
+                      <small>{pair.neon.suggestion_no}</small>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className={styles.extraInventoryBox}>
+            <h3>Neon ekstra kontrolltabeller</h3>
+            <p>
+              Disse finnes i Neon som kontrolltabeller. De skal ikke nødvendigvis
+              ha samme linjenummer som MariaDB-tabellene, fordi de er laget for
+              migreringskontroll, mapping, logging og truth-status.
+            </p>
+
+            {renderCheckList(
+              neonTables.map((row, index) => ({
+                line_no: index + 1,
+                status: "OK",
+                area: asString(row.table_name),
+                detail_no: asString(row.table_type),
+                suggestion_no: "Neon kontrolltabell.",
+              })),
+              "Ingen Neon-tabeller funnet."
+            )}
           </div>
         </section>
       ) : null}
@@ -780,3 +895,4 @@ export default function MariaDbNeonControlPage() {
     </main>
   );
 }
+
