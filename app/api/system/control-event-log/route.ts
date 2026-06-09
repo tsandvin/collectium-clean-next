@@ -94,7 +94,7 @@ function normalizeStatus(value: unknown): EventStatus {
   return "INFO";
 }
 
-async function ensureTable(sql: ReturnType<typeof neon>) {
+async function ensureTable(sql: any) {
   await sql`
     CREATE TABLE IF NOT EXISTS ct_control_event_logs (
       id bigserial PRIMARY KEY,
@@ -281,4 +281,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
 
