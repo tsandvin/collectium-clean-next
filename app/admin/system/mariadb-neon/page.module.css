@@ -630,3 +630,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.panelLead {
+  margin: -4px 0 14px;
+  color: #607984;
+  line-height: 1.5;
+  font-size: 13px;
+}

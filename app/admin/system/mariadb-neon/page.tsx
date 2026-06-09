@@ -391,6 +391,7 @@ export default function MariaDbNeonControlPage() {
   const [dbOverview, setDbOverview] = useState<JsonObject | null>(null);
   const [schemaInventory, setSchemaInventory] = useState<JsonObject | null>(null);
   const [bootstrapStatus, setBootstrapStatus] = useState<JsonObject | null>(null);
+  const [platformStandard, setPlatformStandard] = useState<JsonObject | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [focusedLine, setFocusedLine] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -403,16 +404,18 @@ export default function MariaDbNeonControlPage() {
       setErrorMessage("");
 
       try {
-        const [overviewResponse, inventoryResponse, bootstrapResponse] =
+        const [overviewResponse, inventoryResponse, bootstrapResponse, platformResponse] =
           await Promise.all([
             fetch("/api/system/db-overview", { cache: "no-store" }),
             fetch("/api/system/schema-inventory", { cache: "no-store" }),
             fetch("/api/system/mariadb-neon-bootstrap", { cache: "no-store" }),
+            fetch("/api/system/platform-standard-check", { cache: "no-store" }),
           ]);
 
         const overviewJson = (await overviewResponse.json()) as JsonObject;
         const inventoryJson = (await inventoryResponse.json()) as JsonObject;
         const bootstrapJson = (await bootstrapResponse.json()) as JsonObject;
+        const platformJson = (await platformResponse.json()) as JsonObject;
 
         if (!cancelled) {
           setDbOverview(overviewJson);
@@ -571,9 +574,15 @@ export default function MariaDbNeonControlPage() {
     schemaInventory,
   ]);
 
+  const platformChecks = useMemo(() => {
+    const checks = getPath(platformStandard, ["checks"]);
+    return Array.isArray(checks) ? checks.filter(isRecord) : [];
+  }, [platformStandard]);
+
   const tabs = [
     ["dashboard", "Dashboard"],
     ["inventory", "Inventory"],
+    ["platform", "Plattform"],
     ["api", "API-ruter"],
     ["features", "DB-brytere"],
     ["template", "Template"],
@@ -811,6 +820,66 @@ export default function MariaDbNeonControlPage() {
         </section>
       ) : null}
 
+      {activeTab === "platform" ? (
+        <section className={styles.panel}>
+          <h2>Plattformstandard</h2>
+          <p className={styles.panelLead}>
+            Kontroll av Next.js, React, Vercel, Neon, Node.js, API-ruter,
+            server/client components, DB-tilkobling, miljøvariabler og build/deploy.
+          </p>
+
+          {platformChecks.length === 0 ? (
+            <article className={`${styles.controlLine} ${styles.lineWarn}`}>
+              <div className={styles.lineNumber}>1</div>
+              <div className={styles.lineMain}>
+                <div className={styles.lineHeader}>
+                  <strong>Platform standard check mangler</strong>
+                  <span className={`${styles.badge} ${styles.badgeWarn}`}>VARSEL</span>
+                </div>
+                <p>Fant ingen checks fra /api/system/platform-standard-check.</p>
+                <small>Route: /api/system/platform-standard-check</small>
+                <em>Kjør API-ruten og kontroller at den returnerer checks.</em>
+              </div>
+            </article>
+          ) : (
+            <div className={styles.controlList}>
+              {platformChecks.map((check, index) => {
+                const status = asString(check.status, "INFO") as LineStatus;
+                const lineNo = asString(check.line_no, String(index + 1));
+                const area = asString(check.area, "Platform");
+                const standardKey = asString(check.standard_key, "—");
+                const currentValue = asString(check.current_value, "—");
+                const expectedValue = asString(check.expected_value, "—");
+                const detail = asString(check.detail_no, "—");
+                const suggestion = asString(check.suggestion_no, "—");
+
+                return (
+                  <article
+                    key={`${standardKey}-${lineNo}`}
+                    className={`${styles.controlLine} ${lineStatusClass(status)}`}
+                  >
+                    <div className={styles.lineNumber}>{lineNo}</div>
+                    <div className={styles.lineMain}>
+                      <div className={styles.lineHeader}>
+                        <strong>{area}</strong>
+                        <span className={`${styles.badge} ${badgeClass(status)}`}>
+                          {status}
+                        </span>
+                      </div>
+                      <p>{standardKey}</p>
+                      <small>
+                        Nå: {currentValue} · Forventet: {expectedValue}
+                      </small>
+                      <em>{detail}</em>
+                      <em>{suggestion}</em>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      ) : null}
       {activeTab === "api" ? (
         <section className={styles.panel}>
           <h2>API-ruter</h2>
@@ -864,7 +933,7 @@ export default function MariaDbNeonControlPage() {
         <section className={styles.panel}>
           <h2>JSON</h2>
           <pre className={styles.codeBlock}>
-            {JSON.stringify({ dbOverview, schemaInventory, bootstrapStatus }, null, 2)}
+            {JSON.stringify({ dbOverview, schemaInventory, bootstrapStatus, platformStandard }, null, 2)}
           </pre>
         </section>
       ) : null}
@@ -878,3 +947,4 @@ export default function MariaDbNeonControlPage() {
     </main>
   );
 }
+
