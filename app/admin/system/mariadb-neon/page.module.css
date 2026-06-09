@@ -637,3 +637,126 @@
   line-height: 1.5;
   font-size: 13px;
 }
+
+/* COLLECTIUM M-N CONTROL ARCHIVE TABS 0001
+   Formål:
+   - Gir Dashboard / Inventory / Plattform / API-ruter / DB-brytere / Template / Skin / Layout / Sidekrav / Diagnose / JSON / Svar til ChatGPT
+     samme uttrykk som gammel aktiv arkivfane.
+   - Aktiv fane skal se tydelig valgt ut.
+   - Faner skal oppleves som kontrollerte arkiv-/mappefaner, ikke løse små knapper.
+*/
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0;
+  margin: 20px 0 0;
+  padding: 0 10px;
+  border-bottom: 1px solid #b9ccd5;
+}
+
+.tabs button {
+  position: relative;
+  min-height: 38px;
+  margin: 0 -1px -1px 0;
+  padding: 10px 16px 9px;
+  border: 1px solid #b9ccd5;
+  border-bottom-color: #b9ccd5;
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f8fa 100%);
+  color: #18343d;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.tabs button:hover {
+  z-index: 2;
+  background: #ffffff;
+  border-color: #87aabd;
+  color: #0f2f39;
+}
+
+.tabs button::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 5px;
+  height: 1px;
+  background: rgba(18, 49, 58, 0.12);
+  opacity: 0;
+}
+
+.tabs button:hover::after {
+  opacity: 1;
+}
+
+.tabs .activeTab {
+  z-index: 3;
+  min-height: 42px;
+  margin-bottom: -1px;
+  padding-top: 12px;
+  border-color: #12313a !important;
+  border-bottom-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #12313a !important;
+  font-weight: 800;
+  box-shadow:
+    0 -8px 22px rgba(16, 42, 55, 0.07),
+    inset 0 3px 0 #12313a;
+}
+
+.tabs .activeTab::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 6px;
+  height: 2px;
+  border-radius: 999px;
+  background: #12313a;
+}
+
+.tabs .activeTab::after {
+  opacity: 0;
+}
+
+@media (max-width: 900px) {
+  .tabs {
+    gap: 6px;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .tabs button,
+  .tabs .activeTab {
+    margin: 0;
+    min-height: 36px;
+    border-radius: 999px;
+    border-bottom-color: #b9ccd5 !important;
+    padding: 9px 13px;
+  }
+
+  .tabs .activeTab {
+    background: #12313a !important;
+    color: #ffffff !important;
+    border-color: #12313a !important;
+    box-shadow: 0 8px 18px rgba(16, 42, 55, 0.12);
+  }
+
+  .tabs .activeTab::before {
+    display: none;
+  }
+}
+
+.eventLogList {
+  display: grid;
+  gap: 10px;
+  max-height: 620px;
+  overflow: auto;
+  padding-right: 4px;
+}
