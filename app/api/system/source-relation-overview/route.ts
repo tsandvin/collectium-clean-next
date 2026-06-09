@@ -78,15 +78,14 @@ async function tableExists(
   sql: ReturnType<typeof neon>,
   tableName: string
 ): Promise<boolean> {
-  const rows = await sql<TableExistsRow[]>`
+  const rows = (await sql`
     SELECT
       table_name,
       table_type
     FROM information_schema.tables
     WHERE table_schema = 'public'
       AND table_name = ${tableName}
-    LIMIT 1
-  `;
+    LIMIT 1`) as TableExistsRow[];
 
   return rows.length > 0;
 }
@@ -113,10 +112,9 @@ async function safeCount(
     };
   }
 
-  const rows = await sql<CountRow[]>(`
+  const rows = (await sql(`
     SELECT COUNT(*)::int AS row_count
-    FROM ${tableName}
-  `);
+    FROM ${tableName}`)) as CountRow[];
 
   const rowCount = toNumber(rows[0]?.row_count);
 
@@ -152,7 +150,7 @@ export async function GET() {
     ]);
 
     const periodRows = periodFilterActiveView.exists
-      ? await sql<RegistrySampleRow[]>`
+      ? (await sql`
           SELECT
             period_filter_key,
             period_filter_label_no,
@@ -162,53 +160,42 @@ export async function GET() {
             page_route,
             sort_order
           FROM ct_v_period_filter_registry_active
-          ORDER BY sort_order, period_filter_key
-        `
+          ORDER BY sort_order, period_filter_key`) as RegistrySampleRow[]
       : [];
 
     const sourceRows = sourceInventory.exists
-      ? await sql<RegistrySampleRow[]>`
+      ? (await sql`
           SELECT *
           FROM ct_source_inventory
-          ORDER BY 1
-          LIMIT 25
-        `
+          ORDER BY 1 LIMIT 25`) as RegistrySampleRow[]
       : [];
 
     const objectGroupRows = objectGroupInventory.exists
-      ? await sql<RegistrySampleRow[]>`
+      ? (await sql`
           SELECT *
           FROM ct_object_group_inventory
-          ORDER BY 1
-          LIMIT 25
-        `
+          ORDER BY 1 LIMIT 25`) as RegistrySampleRow[]
       : [];
 
     const relationTypeRows = relationTypeRegistry.exists
-      ? await sql<RegistrySampleRow[]>`
+      ? (await sql`
           SELECT *
           FROM ct_relation_type_registry
-          ORDER BY 1
-          LIMIT 25
-        `
+          ORDER BY 1 LIMIT 25`) as RegistrySampleRow[]
       : [];
 
     const relationPathRows = relationPathRegistry.exists
-      ? await sql<RegistrySampleRow[]>`
+      ? (await sql`
           SELECT *
           FROM ct_relation_path_registry
-          ORDER BY 1
-          LIMIT 25
-        `
+          ORDER BY 1 LIMIT 25`) as RegistrySampleRow[]
       : [];
 
     const openMissingRelationRows = relationMissingLinks.exists
-      ? await sql<RegistrySampleRow[]>`
+      ? (await sql`
           SELECT *
           FROM ct_relation_missing_links
-          ORDER BY 1
-          LIMIT 25
-        `
+          ORDER BY 1 LIMIT 25`) as RegistrySampleRow[]
       : [];
 
     const checks = [
@@ -298,3 +285,4 @@ export async function GET() {
     );
   }
 }
+
