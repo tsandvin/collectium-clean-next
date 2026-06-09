@@ -117,8 +117,7 @@ async function ensureFilterSchema() {
       status text not null default 'active',
       description_no text,
       created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now(),
-      unique (object_group, coalesce(source_key, ''), filter_key)
+      updated_at timestamptz not null default now()
     )
   `);
 
@@ -165,6 +164,17 @@ async function ensureFilterSchema() {
   `);
 }
 
+
+async function ensureFilterObjectTypeIndex() {
+  await neonQuery(`
+    create unique index if not exists ct_filter_object_type_registry_uidx
+    on ct_filter_object_type_registry (
+      object_group,
+      (coalesce(source_key, '')),
+      filter_key
+    )
+  `);
+}
 async function seedFilterMaster() {
   await neonQuery(`
     insert into ct_filter_master_registry (
@@ -298,7 +308,7 @@ async function seedObjectTypeFilters() {
       ('banknote', 'norske_sedler', 'collection', 'Samling', 'collection_status_raw_no', 'collection_object', false, 'free', 190, 'Samling, hjerte og stjerne.', now()),
       ('banknote', 'norske_sedler', 'trend', 'Trend', 'trend_raw_no', 'market_object', true, 'silver', 200, 'Trendfilter for verdiutvikling.', now()),
       ('banknote', 'norske_sedler', 'value', 'Verdi', 'value_raw_no', 'market_object', true, 'silver', 210, 'Verdifilter.', now())
-    on conflict (object_group, coalesce(source_key, ''), filter_key)
+    on conflict (object_group, (coalesce(source_key, '')), filter_key)
     do update set
       filter_label_no = excluded.filter_label_no,
       source_field = excluded.source_field,
@@ -446,6 +456,7 @@ async function getMissingTables() {
 export async function GET() {
   try {
     await ensureFilterSchema();
+    await ensureFilterObjectTypeIndex();
 
     const counts = await getCounts();
     const missing = await getMissingTables();
@@ -488,6 +499,7 @@ export async function GET() {
 export async function POST() {
   try {
     await ensureFilterSchema();
+    await ensureFilterObjectTypeIndex();
     await seedFilterMaster();
     await seedObjectTypeFilters();
     await seedPeriodFilters();
@@ -529,3 +541,4 @@ export async function POST() {
     }), { status: 500 });
   }
 }
+

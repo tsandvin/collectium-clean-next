@@ -125,7 +125,7 @@ async function seedCoinFilters() {
       ('coin', 'norske_mynter', 'collection', 'Samling', 'collection_status_raw_no', 'collection_object', false, 'free', 210, 'Samling, hjerte og stjerne.', now()),
       ('coin', 'norske_mynter', 'trend', 'Trend', 'trend_raw_no', 'market_object', true, 'silver', 220, 'Trendfilter for verdiutvikling.', now()),
       ('coin', 'norske_mynter', 'value', 'Verdi', 'value_raw_no', 'market_object', true, 'silver', 230, 'Verdifilter.', now())
-    on conflict (object_group, coalesce(source_key, ''), filter_key)
+    on conflict (object_group, (coalesce(source_key, '')), filter_key)
     do update set
       filter_label_no = excluded.filter_label_no,
       source_field = excluded.source_field,
@@ -232,3 +232,4 @@ export async function POST() {
     }), { status: 500 });
   }
 }
+
