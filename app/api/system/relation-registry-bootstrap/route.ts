@@ -1,4 +1,53 @@
-﻿import { NextResponse } from "next/server";
+﻿/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Relation Registry Bootstrap
+ *
+ * Definering / formål:
+ * Reparerer og seeder Neon relation registry-tabeller med støtte for både
+ * eldre legacy-kolonner og ny Collectium relation registry-modell.
+ *
+ * Bruksområde:
+ * Brukes i MariaDB -> Neon overgang for å klargjøre relasjonstyper og
+ * relasjonsbaner før katalog-, objekt-, person-, konge-, kilde- og
+ * samlingsdata kan migreres trygt.
+ *
+ * Berørte sider / routes:
+ * - /admin/system/mariadb-neon
+ * - GET  /api/system/relation-registry-bootstrap
+ * - POST /api/system/relation-registry-bootstrap
+ *
+ * Berørte DB-brytere / feature_keys:
+ * - admin.system.mariadb_neon.view
+ * - admin.system.relation_registry.bootstrap
+ * - admin.system.relation_registry.check
+ *
+ * Berørte API-ruter:
+ * - GET  /api/system/relation-registry-bootstrap
+ * - POST /api/system/relation-registry-bootstrap
+ * - GET  /api/system/relation-path-check
+ *
+ * Berørte tabeller / views:
+ * - ct_relation_type_registry
+ * - ct_relation_path_registry
+ * - ct_relation_missing_links
+ *
+ * Dataretning:
+ * Neon control structure only. Ingen MariaDB kildedata migreres her.
+ *
+ * Logging:
+ * log_category: system.migration
+ * log_action: relation_registry.bootstrap
+ *
+ * Versjon:
+ * CT-FILE-RELATION-REGISTRY-BOOTSTRAP-0002
+ *
+ * Endringsregel:
+ * Denne ruten skriver kun Neon kontrollstruktur og registry-startverdier.
+ */
+
+import { NextResponse } from "next/server";
 import { neonQuery } from "@/lib/db/neon";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +60,38 @@ type CountRow = {
 type ColumnRow = {
   column_name: string;
   data_type: string;
+  is_nullable: string;
+};
+
+type TableExistsRow = {
+  table_name: string;
+};
+
+type RelationTypeSeed = {
+  relation_type_key: string;
+  relation_name_no: string;
+  relation_domain: string;
+  from_entity: string;
+  to_entity: string;
+  sort_order: number;
+  description_no: string;
+};
+
+type RelationPathSeed = {
+  path_key: string;
+  path_name_no: string;
+  path_group: string;
+  path_order: number;
+  relation_type_key: string;
+  source_table: string;
+  source_key_field: string | null;
+  object_group_field: string | null;
+  source_id_field: string | null;
+  target_table: string;
+  target_id_field: string | null;
+  resolver_view: string | null;
+  required_for_migration: boolean;
+  description_no: string;
 };
 
 function jsonSafe<T>(value: T): T {
@@ -21,8 +102,29 @@ function jsonSafe<T>(value: T): T {
   ) as T;
 }
 
+async function tableExists(tableName: string): Promise<boolean> {
+  const rows = await neonQuery<TableExistsRow>(
+    `
+      select table_name
+      from information_schema.tables
+      where table_schema = 'public'
+        and table_name = $1
+      limit 1
+    `,
+    [tableName],
+  );
+
+  return rows.length > 0;
+}
+
 async function countTable(tableName: string): Promise<string | null> {
   if (!/^[A-Za-z0-9_]+$/.test(tableName)) {
+    return null;
+  }
+
+  const exists = await tableExists(tableName);
+
+  if (!exists) {
     return null;
   }
 
@@ -36,7 +138,7 @@ async function countTable(tableName: string): Promise<string | null> {
 async function getColumns(tableName: string): Promise<ColumnRow[]> {
   return neonQuery<ColumnRow>(
     `
-      select column_name, data_type
+      select column_name, data_type, is_nullable
       from information_schema.columns
       where table_schema = 'public'
         and table_name = $1
@@ -46,7 +148,7 @@ async function getColumns(tableName: string): Promise<ColumnRow[]> {
   );
 }
 
-async function ensureRegistrySchema() {
+async function ensureRelationTypeRegistrySchema() {
   await neonQuery(`
     create table if not exists ct_relation_type_registry (
       id bigserial primary key
@@ -78,27 +180,34 @@ async function ensureRegistrySchema() {
     update ct_relation_type_registry
     set
       relation_type_key = coalesce(relation_type_key, 'legacy_relation_type_' || id::text),
-      relation_type_label_no = coalesce(relation_type_label_no, relation_name_no, relation_type_key, 'Legacy relation type'),
       relation_name_no = coalesce(relation_name_no, relation_type_label_no, relation_type_key, 'Legacy relation type'),
-      relation_domain = coalesce(relation_domain, 'legacy'),
-      source_entity_type = coalesce(source_entity_type, from_entity, 'unknown'),
-      target_entity_type = coalesce(target_entity_type, to_entity, 'unknown'),
       from_entity = coalesce(from_entity, source_entity_type, 'unknown'),
       to_entity = coalesce(to_entity, target_entity_type, 'unknown'),
       privacy_level = coalesce(privacy_level, 'internal'),
       status = coalesce(status, 'active'),
-      payload_json = coalesce(payload_json, '{}'::jsonb)
+      payload_json = coalesce(payload_json, '{}'::jsonb),
+      relation_type_label_no = coalesce(relation_type_label_no, relation_name_no, relation_type_key, 'Legacy relation type'),
+      relation_domain = coalesce(relation_domain, 'legacy'),
+      source_entity_type = coalesce(source_entity_type, from_entity, 'unknown'),
+      target_entity_type = coalesce(target_entity_type, to_entity, 'unknown'),
+      direction_mode = coalesce(direction_mode, 'directed'),
+      is_active = coalesce(is_active, true),
+      sort_order = coalesce(sort_order, 100),
+      updated_at = now()
     where relation_type_key is null
-       or relation_type_label_no is null
        or relation_name_no is null
-       or relation_domain is null
-       or source_entity_type is null
-       or target_entity_type is null
        or from_entity is null
        or to_entity is null
        or privacy_level is null
        or status is null
        or payload_json is null
+       or relation_type_label_no is null
+       or relation_domain is null
+       or source_entity_type is null
+       or target_entity_type is null
+       or direction_mode is null
+       or is_active is null
+       or sort_order is null
   `);
 
   await neonQuery(`
@@ -113,14 +222,19 @@ async function ensureRegistrySchema() {
       alter column relation_type_label_no set not null,
       alter column relation_domain set not null,
       alter column source_entity_type set not null,
-      alter column target_entity_type set not null
+      alter column target_entity_type set not null,
+      alter column direction_mode set not null,
+      alter column is_active set not null,
+      alter column sort_order set not null
   `);
 
   await neonQuery(`
     create unique index if not exists ct_relation_type_registry_key_uidx
     on ct_relation_type_registry (relation_type_key)
   `);
+}
 
+async function ensureRelationPathRegistrySchema() {
   await neonQuery(`
     create table if not exists ct_relation_path_registry (
       id bigserial primary key
@@ -134,6 +248,11 @@ async function ensureRegistrySchema() {
       add column if not exists path_group text,
       add column if not exists path_order integer,
       add column if not exists path_definition_json jsonb not null default '{}'::jsonb,
+      add column if not exists required_for_migration boolean not null default false,
+      add column if not exists privacy_level text not null default 'internal',
+      add column if not exists status text not null default 'active',
+      add column if not exists created_at timestamptz not null default now(),
+      add column if not exists updated_at timestamptz not null default now(),
       add column if not exists path_label_no text,
       add column if not exists relation_type_key text,
       add column if not exists source_table text,
@@ -143,31 +262,43 @@ async function ensureRegistrySchema() {
       add column if not exists target_table text,
       add column if not exists target_id_field text,
       add column if not exists resolver_view text,
-      add column if not exists required_for_migration boolean not null default false,
       add column if not exists is_active boolean not null default true,
       add column if not exists sort_order integer not null default 100,
-      add column if not exists description_no text,
-      add column if not exists created_at timestamptz not null default now(),
-      add column if not exists updated_at timestamptz not null default now()
+      add column if not exists description_no text
   `);
 
   await neonQuery(`
     update ct_relation_path_registry
     set
       path_key = coalesce(path_key, 'legacy_relation_path_' || id::text),
-      path_label_no = coalesce(path_label_no, path_name_no, path_key, 'Legacy relation path'),
       path_name_no = coalesce(path_name_no, path_label_no, path_key, 'Legacy relation path'),
       path_group = coalesce(path_group, 'migration_control'),
       path_order = coalesce(path_order, sort_order, 100),
       path_definition_json = coalesce(path_definition_json, '{}'::jsonb),
+      required_for_migration = coalesce(required_for_migration, false),
+      privacy_level = coalesce(privacy_level, 'internal'),
+      status = coalesce(status, 'active'),
+      path_label_no = coalesce(path_label_no, path_name_no, path_key, 'Legacy relation path'),
       relation_type_key = coalesce(relation_type_key, 'manual_review'),
       source_table = coalesce(source_table, 'unknown_source_table'),
-      target_table = coalesce(target_table, 'unknown_target_table')
+      target_table = coalesce(target_table, 'unknown_target_table'),
+      is_active = coalesce(is_active, true),
+      sort_order = coalesce(sort_order, path_order, 100),
+      updated_at = now()
     where path_key is null
+       or path_name_no is null
+       or path_group is null
+       or path_order is null
+       or path_definition_json is null
+       or required_for_migration is null
+       or privacy_level is null
+       or status is null
        or path_label_no is null
        or relation_type_key is null
        or source_table is null
        or target_table is null
+       or is_active is null
+       or sort_order is null
   `);
 
   await neonQuery(`
@@ -177,17 +308,24 @@ async function ensureRegistrySchema() {
       alter column path_group set not null,
       alter column path_order set not null,
       alter column path_definition_json set not null,
+      alter column required_for_migration set not null,
+      alter column privacy_level set not null,
+      alter column status set not null,
       alter column path_label_no set not null,
       alter column relation_type_key set not null,
       alter column source_table set not null,
-      alter column target_table set not null
+      alter column target_table set not null,
+      alter column is_active set not null,
+      alter column sort_order set not null
   `);
 
   await neonQuery(`
     create unique index if not exists ct_relation_path_registry_key_uidx
     on ct_relation_path_registry (path_key)
   `);
+}
 
+async function ensureRelationMissingLinksSchema() {
   await neonQuery(`
     create table if not exists ct_relation_missing_links (
       id bigserial primary key
@@ -211,6 +349,12 @@ async function ensureRegistrySchema() {
       add column if not exists created_at timestamptz not null default now(),
       add column if not exists updated_at timestamptz not null default now()
   `);
+}
+
+async function ensureRegistrySchema() {
+  await ensureRelationTypeRegistrySchema();
+  await ensureRelationPathRegistrySchema();
+  await ensureRelationMissingLinksSchema();
 
   return {
     ct_relation_type_registry_columns: await getColumns("ct_relation_type_registry"),
@@ -220,18 +364,106 @@ async function ensureRegistrySchema() {
 }
 
 async function seedRelationTypes() {
-  const relationTypes = [
-    ["manual_review", "Manuell vurdering", "control", "unknown", "unknown", 1, "Fallback for relasjoner som må vurderes manuelt."],
-    ["object_person", "Objekt til person", "catalog", "object", "person", 10, "Kobler katalogobjekt til person, signaturperson, motivperson eller historisk person."],
-    ["object_ruler", "Objekt til regent / konge", "catalog_history", "object", "ruler", 20, "Kobler objekt til regent, konge, lokal hersker eller historisk maktperson."],
-    ["object_producer", "Objekt til produsent / utsteder", "catalog", "object", "producer", 30, "Kobler objekt til produsent, utsteder, trykkeri, myntverk eller autoritet."],
-    ["object_source", "Objekt til kilde", "catalog_source", "object", "source", 40, "Kobler objekt til katalogkilde som Norske sedler, Norske mynter eller annen kilde."],
-    ["object_historical_period", "Objekt til historisk periode", "catalog_history", "object", "historical_period", 50, "Kobler objekt til historisk periode, tidslag, dynasti eller maktstruktur."],
-    ["object_year_context", "Objekt til årskontekst", "catalog_history", "object", "year_context", 60, "Kobler objektets årstall/publiseringsår til historisk og finansiell kontekst."],
-    ["object_variant", "Objekt til variant / litra / signatur", "catalog", "object", "variant", 70, "Kobler objekt til variant, litra, signaturkombinasjon eller typevariant."],
-    ["collection_object", "Samling til objekt", "collection", "collection", "object", 80, "Kobler brukerens samling, ønskeliste, stjerne eller eierstatus til objekt."],
-    ["market_object", "Marked til objekt", "market", "market_observation", "object", 90, "Kobler auksjon, prisobservasjon, forhandlerobjekt eller markedsverdi til objekt."],
-    ["source_object_group", "Kilde til objektgruppe", "catalog_source", "source", "object_group", 100, "Kobler kilde/source_key til objektgruppe, for eksempel norske_sedler + banknote."],
+  const relationTypes: RelationTypeSeed[] = [
+    {
+      relation_type_key: "manual_review",
+      relation_name_no: "Manuell vurdering",
+      relation_domain: "control",
+      from_entity: "unknown",
+      to_entity: "unknown",
+      sort_order: 1,
+      description_no: "Fallback for relasjoner som må vurderes manuelt.",
+    },
+    {
+      relation_type_key: "object_person",
+      relation_name_no: "Objekt til person",
+      relation_domain: "catalog",
+      from_entity: "object",
+      to_entity: "person",
+      sort_order: 10,
+      description_no: "Kobler katalogobjekt til person, signaturperson, motivperson eller historisk person.",
+    },
+    {
+      relation_type_key: "object_ruler",
+      relation_name_no: "Objekt til regent / konge",
+      relation_domain: "catalog_history",
+      from_entity: "object",
+      to_entity: "ruler",
+      sort_order: 20,
+      description_no: "Kobler objekt til regent, konge, lokal hersker eller historisk maktperson.",
+    },
+    {
+      relation_type_key: "object_producer",
+      relation_name_no: "Objekt til produsent / utsteder",
+      relation_domain: "catalog",
+      from_entity: "object",
+      to_entity: "producer",
+      sort_order: 30,
+      description_no: "Kobler objekt til produsent, utsteder, trykkeri, myntverk eller autoritet.",
+    },
+    {
+      relation_type_key: "object_source",
+      relation_name_no: "Objekt til kilde",
+      relation_domain: "catalog_source",
+      from_entity: "object",
+      to_entity: "source",
+      sort_order: 40,
+      description_no: "Kobler objekt til katalogkilde som Norske sedler, Norske mynter eller annen kilde.",
+    },
+    {
+      relation_type_key: "object_historical_period",
+      relation_name_no: "Objekt til historisk periode",
+      relation_domain: "catalog_history",
+      from_entity: "object",
+      to_entity: "historical_period",
+      sort_order: 50,
+      description_no: "Kobler objekt til historisk periode, tidslag, dynasti eller maktstruktur.",
+    },
+    {
+      relation_type_key: "object_year_context",
+      relation_name_no: "Objekt til årskontekst",
+      relation_domain: "catalog_history",
+      from_entity: "object",
+      to_entity: "year_context",
+      sort_order: 60,
+      description_no: "Kobler objektets årstall/publiseringsår til historisk og finansiell kontekst.",
+    },
+    {
+      relation_type_key: "object_variant",
+      relation_name_no: "Objekt til variant / litra / signatur",
+      relation_domain: "catalog",
+      from_entity: "object",
+      to_entity: "variant",
+      sort_order: 70,
+      description_no: "Kobler objekt til variant, litra, signaturkombinasjon eller typevariant.",
+    },
+    {
+      relation_type_key: "collection_object",
+      relation_name_no: "Samling til objekt",
+      relation_domain: "collection",
+      from_entity: "collection",
+      to_entity: "object",
+      sort_order: 80,
+      description_no: "Kobler brukerens samling, ønskeliste, stjerne eller eierstatus til objekt.",
+    },
+    {
+      relation_type_key: "market_object",
+      relation_name_no: "Marked til objekt",
+      relation_domain: "market",
+      from_entity: "market_observation",
+      to_entity: "object",
+      sort_order: 90,
+      description_no: "Kobler auksjon, prisobservasjon, forhandlerobjekt eller markedsverdi til objekt.",
+    },
+    {
+      relation_type_key: "source_object_group",
+      relation_name_no: "Kilde til objektgruppe",
+      relation_domain: "catalog_source",
+      from_entity: "source",
+      to_entity: "object_group",
+      sort_order: 100,
+      description_no: "Kobler kilde/source_key til objektgruppe, for eksempel norske_sedler + banknote.",
+    },
   ];
 
   for (const item of relationTypes) {
@@ -249,12 +481,30 @@ async function seedRelationTypes() {
           relation_domain,
           source_entity_type,
           target_entity_type,
+          direction_mode,
+          is_active,
           sort_order,
           description_no,
-          is_active,
           updated_at
         )
-        values ($1, $2, $4, $5, 'internal', 'active', '{}'::jsonb, $2, $3, $4, $5, $6, $7, true, now())
+        values (
+          $1,
+          $2,
+          $4,
+          $5,
+          'internal',
+          'active',
+          '{}'::jsonb,
+          $2,
+          $3,
+          $4,
+          $5,
+          'directed',
+          true,
+          $6,
+          $7,
+          now()
+        )
         on conflict (relation_type_key)
         do update set
           relation_name_no = excluded.relation_name_no,
@@ -267,12 +517,21 @@ async function seedRelationTypes() {
           relation_domain = excluded.relation_domain,
           source_entity_type = excluded.source_entity_type,
           target_entity_type = excluded.target_entity_type,
+          direction_mode = excluded.direction_mode,
+          is_active = true,
           sort_order = excluded.sort_order,
           description_no = excluded.description_no,
-          is_active = true,
           updated_at = now()
       `,
-      item,
+      [
+        item.relation_type_key,
+        item.relation_name_no,
+        item.relation_domain,
+        item.from_entity,
+        item.to_entity,
+        item.sort_order,
+        item.description_no,
+      ],
     );
   }
 
@@ -280,13 +539,103 @@ async function seedRelationTypes() {
 }
 
 async function seedRelationPaths() {
-  const relationPaths = [
-    ["ct_catalog_object_person_motif_links", "Katalogobjekt til personmotiv", "object_person", "ct_catalog_object_person_motif_links", "source_key", "object_group", "object_id", "ct_person_motifs", "person_motif_id", "ct_v_catalog_object_person_motifs", true, 10, "Brukes for personmotiv og objekt-person-relasjoner i katalogen."],
-    ["ct_catalog_object_ruler_relations", "Katalogobjekt til regent", "object_ruler", "ct_catalog_object_ruler_relations", "source_key", "object_group", "object_id", "ct_historical_rulers", "ruler_id", "ct_v_catalog_relation_ruler_candidates", true, 20, "Brukes for objekt til konge/regent/historisk hersker."],
-    ["ct_catalog_object_producer_links", "Katalogobjekt til produsent", "object_producer", "ct_catalog_object_producer_links", "source_key", "object_group", "object_id", "ct_producers", "producer_id", "ct_v_catalog_object_producer_link_requests", true, 30, "Brukes for produsent, utsteder, trykkeri, myntverk og tilsvarende autoritet."],
-    ["ct_catalog_sources", "Katalogkilder", "object_source", "ct_catalog_objects", "source_key", "object_group", "object_id", "ct_catalog_sources", "source_key", "ct_v_catalog_sources", true, 40, "Brukes for kilde/source_key, blant annet norske_sedler og andre katalogkilder."],
-    ["ct_historical_year_contexts", "Historisk årskontekst", "object_year_context", "ct_catalog_objects", "source_key", "object_group", "object_year_label", "ct_historical_year_contexts", "year_label", "ct_v_catalog_historical_year_context", true, 50, "Brukes for underliggende årslinje, kontekst, regent, periode og historisk sammenheng."],
-    ["ct_collection_items", "Samling til objekt", "collection_object", "ct_collection_items", "source_key", "object_group", "object_id", "ct_catalog_objects", "object_id", "ct_v_user_private_collection_summary", true, 60, "Brukes for Min samling og brukerens objekttilknytninger."],
+  const relationPaths: RelationPathSeed[] = [
+    {
+      path_key: "ct_catalog_object_person_motif_links",
+      path_name_no: "Katalogobjekt til personmotiv",
+      path_group: "catalog_relation",
+      path_order: 10,
+      relation_type_key: "object_person",
+      source_table: "ct_catalog_object_person_motif_links",
+      source_key_field: "source_key",
+      object_group_field: "object_group",
+      source_id_field: "object_id",
+      target_table: "ct_person_motifs",
+      target_id_field: "person_motif_id",
+      resolver_view: "ct_v_catalog_object_person_motifs",
+      required_for_migration: true,
+      description_no: "Brukes for personmotiv og objekt-person-relasjoner i katalogen.",
+    },
+    {
+      path_key: "ct_catalog_object_ruler_relations",
+      path_name_no: "Katalogobjekt til regent",
+      path_group: "catalog_relation",
+      path_order: 20,
+      relation_type_key: "object_ruler",
+      source_table: "ct_catalog_object_ruler_relations",
+      source_key_field: "source_key",
+      object_group_field: "object_group",
+      source_id_field: "object_id",
+      target_table: "ct_historical_rulers",
+      target_id_field: "ruler_id",
+      resolver_view: "ct_v_catalog_relation_ruler_candidates",
+      required_for_migration: true,
+      description_no: "Brukes for objekt til konge/regent/historisk hersker.",
+    },
+    {
+      path_key: "ct_catalog_object_producer_links",
+      path_name_no: "Katalogobjekt til produsent",
+      path_group: "catalog_relation",
+      path_order: 30,
+      relation_type_key: "object_producer",
+      source_table: "ct_catalog_object_producer_links",
+      source_key_field: "source_key",
+      object_group_field: "object_group",
+      source_id_field: "object_id",
+      target_table: "ct_producers",
+      target_id_field: "producer_id",
+      resolver_view: "ct_v_catalog_object_producer_link_requests",
+      required_for_migration: true,
+      description_no: "Brukes for produsent, utsteder, trykkeri, myntverk og tilsvarende autoritet.",
+    },
+    {
+      path_key: "ct_catalog_sources",
+      path_name_no: "Katalogkilder",
+      path_group: "catalog_relation",
+      path_order: 40,
+      relation_type_key: "object_source",
+      source_table: "ct_catalog_objects",
+      source_key_field: "source_key",
+      object_group_field: "object_group",
+      source_id_field: "object_id",
+      target_table: "ct_catalog_sources",
+      target_id_field: "source_key",
+      resolver_view: "ct_v_catalog_sources",
+      required_for_migration: true,
+      description_no: "Brukes for kilde/source_key, blant annet norske_sedler og andre katalogkilder.",
+    },
+    {
+      path_key: "ct_historical_year_contexts",
+      path_name_no: "Historisk årskontekst",
+      path_group: "catalog_relation",
+      path_order: 50,
+      relation_type_key: "object_year_context",
+      source_table: "ct_catalog_objects",
+      source_key_field: "source_key",
+      object_group_field: "object_group",
+      source_id_field: "object_year_label",
+      target_table: "ct_historical_year_contexts",
+      target_id_field: "year_label",
+      resolver_view: "ct_v_catalog_historical_year_context",
+      required_for_migration: true,
+      description_no: "Brukes for underliggende årslinje, kontekst, regent, periode og historisk sammenheng.",
+    },
+    {
+      path_key: "ct_collection_items",
+      path_name_no: "Samling til objekt",
+      path_group: "collection_relation",
+      path_order: 60,
+      relation_type_key: "collection_object",
+      source_table: "ct_collection_items",
+      source_key_field: "source_key",
+      object_group_field: "object_group",
+      source_id_field: "object_id",
+      target_table: "ct_catalog_objects",
+      target_id_field: "object_id",
+      resolver_view: "ct_v_user_private_collection_summary",
+      required_for_migration: true,
+      description_no: "Brukes for Min samling og brukerens objekttilknytninger.",
+    },
   ];
 
   for (const item of relationPaths) {
@@ -298,6 +647,9 @@ async function seedRelationPaths() {
           path_group,
           path_order,
           path_definition_json,
+          required_for_migration,
+          privacy_level,
+          status,
           path_label_no,
           relation_type_key,
           source_table,
@@ -307,28 +659,42 @@ async function seedRelationPaths() {
           target_table,
           target_id_field,
           resolver_view,
-          required_for_migration,
+          is_active,
           sort_order,
           description_no,
-          is_active,
           updated_at
         )
         values (
           $1,
           $2,
-          'catalog_relation',
-          $12,
+          $3,
+          $4,
           jsonb_build_object(
-            'relation_type_key', $3,
-            'source_table', $4,
-            'source_key_field', $5,
-            'object_group_field', $6,
-            'source_id_field', $7,
-            'target_table', $8,
-            'target_id_field', $9,
-            'resolver_view', $10
+            'relation_type_key', $5,
+            'source_table', $6,
+            'source_key_field', $7,
+            'object_group_field', $8,
+            'source_id_field', $9,
+            'target_table', $10,
+            'target_id_field', $11,
+            'resolver_view', $12
           ),
-          $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true, now()
+          $13,
+          'internal',
+          'active',
+          $2,
+          $5,
+          $6,
+          $7,
+          $8,
+          $9,
+          $10,
+          $11,
+          $12,
+          true,
+          $4,
+          $14,
+          now()
         )
         on conflict (path_key)
         do update set
@@ -336,6 +702,9 @@ async function seedRelationPaths() {
           path_group = excluded.path_group,
           path_order = excluded.path_order,
           path_definition_json = excluded.path_definition_json,
+          required_for_migration = excluded.required_for_migration,
+          privacy_level = excluded.privacy_level,
+          status = excluded.status,
           path_label_no = excluded.path_label_no,
           relation_type_key = excluded.relation_type_key,
           source_table = excluded.source_table,
@@ -345,13 +714,27 @@ async function seedRelationPaths() {
           target_table = excluded.target_table,
           target_id_field = excluded.target_id_field,
           resolver_view = excluded.resolver_view,
-          required_for_migration = excluded.required_for_migration,
+          is_active = true,
           sort_order = excluded.sort_order,
           description_no = excluded.description_no,
-          is_active = true,
           updated_at = now()
       `,
-      item,
+      [
+        item.path_key,
+        item.path_name_no,
+        item.path_group,
+        item.path_order,
+        item.relation_type_key,
+        item.source_table,
+        item.source_key_field,
+        item.object_group_field,
+        item.source_id_field,
+        item.target_table,
+        item.target_id_field,
+        item.resolver_view,
+        item.required_for_migration,
+        item.description_no,
+      ],
     );
   }
 
@@ -360,8 +743,9 @@ async function seedRelationPaths() {
 
 export async function GET() {
   try {
-    const typeColumns = await getColumns("ct_relation_type_registry");
-    const pathColumns = await getColumns("ct_relation_path_registry");
+    const typeExists = await tableExists("ct_relation_type_registry");
+    const pathExists = await tableExists("ct_relation_path_registry");
+    const missingLinksExists = await tableExists("ct_relation_missing_links");
 
     return NextResponse.json(jsonSafe({
       ok: true,
@@ -376,13 +760,17 @@ export async function GET() {
         next_step: "POST this route to repair and seed relation registry",
       },
       relation_registry: {
+        ct_relation_type_registry_exists: typeExists,
         ct_relation_type_registry_rows: await countTable("ct_relation_type_registry"),
+        ct_relation_path_registry_exists: pathExists,
         ct_relation_path_registry_rows: await countTable("ct_relation_path_registry"),
+        ct_relation_missing_links_exists: missingLinksExists,
         ct_relation_missing_links_rows: await countTable("ct_relation_missing_links"),
       },
       columns: {
-        ct_relation_type_registry: typeColumns,
-        ct_relation_path_registry: pathColumns,
+        ct_relation_type_registry: typeExists ? await getColumns("ct_relation_type_registry") : [],
+        ct_relation_path_registry: pathExists ? await getColumns("ct_relation_path_registry") : [],
+        ct_relation_missing_links: missingLinksExists ? await getColumns("ct_relation_missing_links") : [],
       },
       collectium_rule: {
         write_allowed_on_get: false,
@@ -390,6 +778,8 @@ export async function GET() {
         write_scope: "neon_relation_registry_control_only",
         migration_allowed: false,
         source_data_migration_allowed: false,
+        relation_definition:
+          "Relasjon er både datakobling og frontend-navigasjon til relasjonspresentasjon.",
       },
     }));
   } catch (error) {
@@ -439,6 +829,8 @@ export async function POST() {
         source_data_migration_allowed: false,
         reason:
           "Denne ruten reparerer og seeder kun Neon relation registry. Den migrerer ikke MariaDB kildedata.",
+        relation_definition:
+          "Relasjon er både datakobling og frontend-navigasjon til relasjonspresentasjon.",
       },
     }));
   } catch (error) {
@@ -452,4 +844,3 @@ export async function POST() {
     }), { status: 500 });
   }
 }
-
