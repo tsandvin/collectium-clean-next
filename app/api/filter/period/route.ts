@@ -43,6 +43,7 @@ import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 type PeriodFilterRow = {
   period_filter_key: string;
@@ -58,7 +59,9 @@ function getDatabaseUrl(): string {
   const databaseUrl = process.env.DATABASE_URL;
 
   if (!databaseUrl) {
-    throw new Error("DATABASE_URL mangler. Legg Neon connection string i Vercel Environment Variables eller .env.local.");
+    throw new Error(
+      "DATABASE_URL mangler. Legg Neon connection string i Vercel Environment Variables eller .env.local."
+    );
   }
 
   return databaseUrl;
@@ -68,7 +71,7 @@ export async function GET() {
   try {
     const sql = neon(getDatabaseUrl());
 
-    const rows = await sql<PeriodFilterRow[]>`
+    const result = await sql`
       SELECT
         period_filter_key,
         period_filter_label_no,
@@ -80,6 +83,8 @@ export async function GET() {
       FROM ct_v_period_filter_registry_active
       ORDER BY sort_order, period_filter_key
     `;
+
+    const rows = result as PeriodFilterRow[];
 
     return NextResponse.json({
       ok: true,
