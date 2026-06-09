@@ -488,21 +488,21 @@ async function seedRelationTypes() {
           updated_at
         )
         values (
-          $1,
-          $2,
-          $4,
-          $5,
+          $1::text,
+          $2::text,
+          $4::integer,
+          $5::text,
           'internal',
           'active',
           '{}'::jsonb,
-          $2,
-          $3,
-          $4,
-          $5,
+          $2::text,
+          $3::text,
+          $4::integer,
+          $5::text,
           'directed',
           true,
-          $6,
-          $7,
+          $6::text,
+          $7::text,
           now()
         )
         on conflict (relation_type_key)
@@ -665,35 +665,35 @@ async function seedRelationPaths() {
           updated_at
         )
         values (
-          $1,
-          $2,
-          $3,
-          $4,
+          $1::text,
+          $2::text,
+          $3::text,
+          $4::integer,
           jsonb_build_object(
-            'relation_type_key', $5,
-            'source_table', $6,
-            'source_key_field', $7,
-            'object_group_field', $8,
-            'source_id_field', $9,
-            'target_table', $10,
-            'target_id_field', $11,
-            'resolver_view', $12
+            'relation_type_key', $5::text,
+            'source_table', $6::text,
+            'source_key_field', $7::text,
+            'object_group_field', $8::text,
+            'source_id_field', $9::text,
+            'target_table', $10::text,
+            'target_id_field', $11::text,
+            'resolver_view', ::text$12
           ),
-          $13,
+          $13::boolean,
           'internal',
           'active',
-          $2,
-          $5,
-          $6,
-          $7,
-          $8,
-          $9,
-          $10,
-          $11,
-          $12,
+          $2::text,
+          $5::text,
+          $6::text,
+          $7::text,
+          $8::text,
+          $9::text,
+          $10::text,
+          $11::text,
+          $12::text,
           true,
-          $4,
-          $14,
+          $4::integer,
+          $14::text,
           now()
         )
         on conflict (path_key)
@@ -844,3 +844,4 @@ export async function POST() {
     }), { status: 500 });
   }
 }
+
