@@ -387,6 +387,11 @@ export async function GET() {
   }
 }
 
+function sqlLiteral(value: unknown) {
+  if (value === null || value === undefined) return "NULL";
+  return "'" + String(value).replace(/'/g, "''") + "'";
+}
+
 export async function POST() {
   const databaseUrl = getNeonDatabaseUrl();
 
@@ -458,8 +463,30 @@ export async function POST() {
 
     const runId = runRows[0].id;
 
-    for (const item of classified) {
-      await sql`
+    const valuesSql = classified
+      .map((item) => {
+        const payload = JSON.stringify({
+          table_name: item.table_name,
+          table_type: item.table_type,
+          column_count: item.column_count,
+        });
+
+        return `(
+          ${sqlLiteral(runId)},
+          ${sqlLiteral(maria.database_name)},
+          ${sqlLiteral(item.table_name)},
+          ${sqlLiteral(item.table_type)},
+          ${Number(item.column_count) || 0},
+          ${sqlLiteral(item.migration_role)},
+          ${sqlLiteral(item.migration_status)},
+          ${sqlLiteral(item.suggested_action_no)},
+          ${sqlLiteral(payload)}::jsonb
+        )`;
+      })
+      .join(",");
+
+    if (valuesSql.length > 0) {
+      await sql.query(`
         INSERT INTO ct_schema_inventory_tables (
           run_id,
           source_database,
@@ -471,22 +498,8 @@ export async function POST() {
           suggested_action_no,
           source_payload_json
         )
-        VALUES (
-          ${runId},
-          ${maria.database_name},
-          ${item.table_name},
-          ${item.table_type},
-          ${item.column_count},
-          ${item.migration_role},
-          ${item.migration_status},
-          ${item.suggested_action_no},
-          ${JSON.stringify({
-            table_name: item.table_name,
-            table_type: item.table_type,
-            column_count: item.column_count,
-          })}
-        )
-      `;
+        VALUES ${valuesSql}
+      `);
     }
 
     return NextResponse.json({
@@ -527,3 +540,4 @@ export async function POST() {
     );
   }
 }
+
