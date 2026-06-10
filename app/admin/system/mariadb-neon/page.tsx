@@ -470,14 +470,14 @@ export default function MariaDbNeonControlPage() {
         <div>
           <p className={styles.eyebrow}>Collectium System Control</p>
           <h1>MariaDB - Neon Postgres Control</h1>
-          <div className="mariadbNeonLayoutGuideHost">
-</div>
-          <div className="mariadbNeonLayoutGuideHost">
-</div>
-          <p>
+
+<p>
             Kontrollside for database, API, brytere, template, skin, layout og
             sidekrav før Neon kan bli sann hoveddatabase.
           </p>
+          <div className="mariadbNeonLayoutGuideHost">
+            <MariaDbNeonLayoutGuide />
+          </div>
         </div>
 
         <div className={styles.heroBadges}>
@@ -885,6 +885,11 @@ export default function MariaDbNeonControlPage() {
           {renderCheckList(eventRows, "Ingen hendelser registrert ennå.")}
         </section>
       ) : null}
+      {activeTab === "transfer" ? (
+        <MariaDbNeonTransferMatrix />
+      ) : null}
+
+      
 
       {activeTab === "json" ? (
         <section className={styles.panel}>
@@ -895,19 +900,17 @@ export default function MariaDbNeonControlPage() {
 
       {activeTab === "chatgpt" ? (
         <section className={styles.panel}>
-          <h2>Overføringsmatrise
-            Overføringsmatrise
-            Svar til ChatGPT</h2>
+          <h2>Svar til ChatGPT</h2>
           <p className={styles.panelLead}>
             Kopier denne statusen inn i neste chat hvis vi skal fortsette kontrollen.
           </p>
           <pre className={styles.jsonBox}>{answerToChatGpt}</pre>
         </section>
       ) : null}
-          <MariaDbNeonTransferMatrix />
 </main>
   );
 }
+
 
 
 
