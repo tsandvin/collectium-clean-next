@@ -16,7 +16,7 @@
   margin-bottom: 16px;
 }
 
-.kicker {
+.header p {
   margin: 0 0 4px;
   font-size: 11px;
   text-transform: uppercase;
@@ -28,8 +28,8 @@
   margin: 0 0 6px;
 }
 
-.header p {
-  margin: 0;
+.header span {
+  display: block;
   line-height: 1.45;
   opacity: 0.74;
 }
@@ -65,7 +65,7 @@
 }
 
 .summaryGrid span,
-.infoItem span {
+.infoGrid span {
   display: block;
   margin-bottom: 4px;
   font-size: 10px;
@@ -77,7 +77,7 @@
 
 .summaryGrid strong,
 .summaryGrid small,
-.infoItem strong {
+.infoGrid strong {
   display: block;
   overflow-wrap: anywhere;
 }
@@ -175,7 +175,7 @@
   gap: 8px;
 }
 
-.infoItem {
+.infoGrid article {
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 12px;
   padding: 9px;
@@ -183,7 +183,7 @@
   min-width: 0;
 }
 
-.infoItem strong {
+.infoGrid strong {
   font-size: 12px;
   line-height: 1.35;
 }
@@ -194,13 +194,13 @@
   opacity: 0.76;
 }
 
-.generatedAt {
+.generated {
   margin: 12px 0 0;
   font-size: 12px;
   opacity: 0.66;
 }
 
-.errorText {
+.error {
   color: #991b1b;
   font-weight: 800;
 }

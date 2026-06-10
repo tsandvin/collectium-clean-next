@@ -1,20 +1,10 @@
 ﻿/*
- * Overskrift:
  * Collectium Application Runtime Overview API
  *
- * Definering / formål:
- * Returnerer aktiv applikasjons-, deploy-, GitHub-, Vercel-, Next.js-, React- og Neon-status.
+ * Formål:
+ * Viser aktiv Vercel/GitHub/Next.js/React/Neon-runtime for admin-kontroll.
  *
- * Bruksområde:
- * Brukes av MariaDB - Neon Postgres Control for å vise hvilken kode, deploy og databasekobling som faktisk kjører.
- *
- * Berørte DB-brytere / feature_keys:
- * system.application_runtime_overview
- * system.mariadb_neon.control
- * system.active_integrations.control
- *
- * Berørte sider/routes:
- * /admin/system/mariadb-neon
+ * Route:
  * /api/system/application-runtime-overview
  */
 
@@ -25,218 +15,152 @@ export const dynamic = "force-dynamic";
 
 const require = createRequire(import.meta.url);
 
-type PackageJson = {
-  version?: string;
-};
+function env(name: string): string | null {
+  const value = process.env[name];
+  return value && value.trim() !== "" ? value : null;
+}
 
-function readPackageVersion(packageName: string): string {
+function readVersion(pkgName: string): string {
   try {
-    const pkg = require(`${packageName}/package.json`) as PackageJson;
+    const pkg = require(`${pkgName}/package.json`) as { version?: string };
     return pkg.version || "unknown";
   } catch {
     return "unknown";
   }
 }
 
-function safeEnv(name: string): string | null {
-  const value = process.env[name];
-  if (!value || value.trim() === "") {
-    return null;
-  }
-  return value;
-}
-
-function redact(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  if (value.length <= 10) {
-    return "***";
-  }
-
-  return `${value.slice(0, 4)}***${value.slice(-4)}`;
-}
-
-function parseDatabaseUrl(rawUrl: string | null) {
-  if (!rawUrl) {
+function parseDbUrl(raw: string | null) {
+  if (!raw) {
     return {
       exists: false,
-      protocol: null,
       user: null,
       host: null,
       database: null,
       endpoint: null,
-      projectHint: null,
-      redactedUrl: null,
+      redacted_url: null,
     };
   }
 
   try {
-    const url = new URL(rawUrl);
-    const host = url.hostname || null;
-    const user = url.username || null;
-    const database = url.pathname ? url.pathname.replace("/", "") : null;
-    const endpoint = host ? host.split(".")[0] : null;
-
+    const url = new URL(raw);
     return {
       exists: true,
-      protocol: url.protocol.replace(":", ""),
-      user,
-      host,
-      database,
-      endpoint,
-      projectHint: endpoint,
-      redactedUrl: `${url.protocol}//${user ? `${user}:***@` : ""}${host}${url.pathname || ""}`,
+      user: url.username || null,
+      host: url.hostname || null,
+      database: url.pathname ? url.pathname.replace("/", "") : null,
+      endpoint: url.hostname ? url.hostname.split(".")[0] : null,
+      redacted_url: `${url.protocol}//${url.username ? `${url.username}:***@` : ""}${url.hostname}${url.pathname}`,
     };
   } catch {
     return {
       exists: true,
-      protocol: null,
       user: null,
       host: null,
       database: null,
       endpoint: null,
-      projectHint: null,
-      redactedUrl: redact(rawUrl),
+      redacted_url: "Kunne ikke parse connection string",
     };
   }
 }
 
-function buildGithubUrl(owner: string | null, repo: string | null, sha: string | null) {
-  if (!owner || !repo) {
-    return null;
-  }
-
-  if (sha) {
-    return `https://github.com/${owner}/${repo}/commit/${sha}`;
-  }
-
-  return `https://github.com/${owner}/${repo}`;
-}
-
-function buildProjectUrl() {
-  const production = safeEnv("VERCEL_PROJECT_PRODUCTION_URL");
-  const deployment = safeEnv("VERCEL_URL");
-
-  if (production) {
-    return `https://${production}`;
-  }
-
-  if (deployment) {
-    return `https://${deployment}`;
-  }
-
-  return null;
-}
-
 export async function GET() {
-  const repoOwner = safeEnv("VERCEL_GIT_REPO_OWNER");
-  const repoSlug = safeEnv("VERCEL_GIT_REPO_SLUG");
-  const commitSha = safeEnv("VERCEL_GIT_COMMIT_SHA");
-  const commitRef = safeEnv("VERCEL_GIT_COMMIT_REF");
-  const commitMessage = safeEnv("VERCEL_GIT_COMMIT_MESSAGE");
-  const commitAuthorName = safeEnv("VERCEL_GIT_COMMIT_AUTHOR_NAME");
-  const commitAuthorLogin = safeEnv("VERCEL_GIT_COMMIT_AUTHOR_LOGIN");
+  const owner = env("VERCEL_GIT_REPO_OWNER");
+  const repo = env("VERCEL_GIT_REPO_SLUG");
+  const sha = env("VERCEL_GIT_COMMIT_SHA");
+  const branch = env("VERCEL_GIT_COMMIT_REF");
 
-  const databaseUrl = parseDatabaseUrl(safeEnv("DATABASE_URL"));
-  const directUrl = parseDatabaseUrl(safeEnv("DIRECT_URL"));
-  const neonDatabaseUrl = parseDatabaseUrl(safeEnv("NEON_DATABASE_URL"));
+  const databaseUrl = parseDbUrl(env("DATABASE_URL"));
+  const directUrl = parseDbUrl(env("DIRECT_URL"));
+  const neonUrl = parseDbUrl(env("NEON_DATABASE_URL"));
 
-  const nowIso = new Date().toISOString();
-
-  const runtime = {
+  const payload = {
     ok: true,
-    generated_at: nowIso,
-    source: "application-runtime-overview",
+    generated_at: new Date().toISOString(),
     collectium: {
       application_name: "Collectium",
-      application_domain: "app.collectium.no",
-      control_page: "/admin/system/mariadb-neon",
-      control_page_name: "MariaDB - Neon Postgres Control",
-      current_runtime_route: "/api/system/application-runtime-overview",
+      active_domain: "app.collectium.no",
+      active_page: "/admin/system/mariadb-neon",
+      active_page_name: "MariaDB - Neon Postgres Control",
     },
     vercel: {
-      environment: safeEnv("VERCEL_ENV"),
-      region: safeEnv("VERCEL_REGION"),
-      deployment_id: safeEnv("VERCEL_DEPLOYMENT_ID"),
-      deployment_url: safeEnv("VERCEL_URL") ? `https://${safeEnv("VERCEL_URL")}` : null,
-      production_url: safeEnv("VERCEL_PROJECT_PRODUCTION_URL") ? `https://${safeEnv("VERCEL_PROJECT_PRODUCTION_URL")}` : null,
-      project_url: buildProjectUrl(),
-      git_provider: safeEnv("VERCEL_GIT_PROVIDER"),
-      git_previous_sha: safeEnv("VERCEL_GIT_PREVIOUS_SHA"),
+      environment: env("VERCEL_ENV"),
+      region: env("VERCEL_REGION"),
+      deployment_id: env("VERCEL_DEPLOYMENT_ID"),
+      deployment_url: env("VERCEL_URL") ? `https://${env("VERCEL_URL")}` : null,
+      production_url: env("VERCEL_PROJECT_PRODUCTION_URL") ? `https://${env("VERCEL_PROJECT_PRODUCTION_URL")}` : null,
+      git_provider: env("VERCEL_GIT_PROVIDER"),
     },
     github: {
-      owner: repoOwner,
-      repository: repoSlug,
-      branch: commitRef,
-      commit_sha: commitSha,
-      commit_short_sha: commitSha ? commitSha.slice(0, 7) : null,
-      commit_message: commitMessage,
-      commit_author_name: commitAuthorName,
-      commit_author_login: commitAuthorLogin,
-      commit_url: buildGithubUrl(repoOwner, repoSlug, commitSha),
-      repository_url: repoOwner && repoSlug ? `https://github.com/${repoOwner}/${repoSlug}` : null,
+      owner,
+      repository: repo,
+      branch,
+      commit_sha: sha,
+      commit_short_sha: sha ? sha.slice(0, 7) : null,
+      commit_message: env("VERCEL_GIT_COMMIT_MESSAGE"),
+      commit_author_name: env("VERCEL_GIT_COMMIT_AUTHOR_NAME"),
+      commit_author_login: env("VERCEL_GIT_COMMIT_AUTHOR_LOGIN"),
+      repository_url: owner && repo ? `https://github.com/${owner}/${repo}` : null,
+      commit_url: owner && repo && sha ? `https://github.com/${owner}/${repo}/commit/${sha}` : null,
     },
     framework: {
       node_version: process.version,
-      next_version: readPackageVersion("next"),
-      react_version: readPackageVersion("react"),
-      react_dom_version: readPackageVersion("react-dom"),
+      next_version: readVersion("next"),
+      react_version: readVersion("react"),
+      react_dom_version: readVersion("react-dom"),
       runtime: "Next.js App Router",
     },
     neon: {
       database_url: databaseUrl,
       direct_url: directUrl,
-      neon_database_url: neonDatabaseUrl,
-      active_connection_hint:
-        databaseUrl.exists ? "DATABASE_URL" : directUrl.exists ? "DIRECT_URL" : neonDatabaseUrl.exists ? "NEON_DATABASE_URL" : null,
+      neon_database_url: neonUrl,
+      active_connection:
+        databaseUrl.exists ? "DATABASE_URL" :
+        directUrl.exists ? "DIRECT_URL" :
+        neonUrl.exists ? "NEON_DATABASE_URL" :
+        "Mangler",
     },
     integrations: [
       {
         name: "Vercel",
-        status: safeEnv("VERCEL") === "1" || safeEnv("VERCEL_ENV") ? "OK" : "UNKNOWN",
-        detail: "Deployment/runtime environment",
+        status: env("VERCEL_ENV") ? "OK" : "Mangler miljødata",
+        detail: env("VERCEL_ENV") || "Ikke Vercel runtime",
       },
       {
         name: "GitHub",
-        status: repoOwner && repoSlug && commitSha ? "OK" : "MISSING_ENV",
-        detail: repoOwner && repoSlug ? `${repoOwner}/${repoSlug}` : "Mangler Vercel GitHub metadata",
+        status: owner && repo && sha ? "OK" : "Mangler metadata",
+        detail: owner && repo ? `${owner}/${repo}` : "Mangler repo",
       },
       {
         name: "Next.js",
-        status: readPackageVersion("next") !== "unknown" ? "OK" : "UNKNOWN",
-        detail: readPackageVersion("next"),
+        status: readVersion("next") !== "unknown" ? "OK" : "Ukjent",
+        detail: readVersion("next"),
       },
       {
         name: "React",
-        status: readPackageVersion("react") !== "unknown" ? "OK" : "UNKNOWN",
-        detail: readPackageVersion("react"),
+        status: readVersion("react") !== "unknown" ? "OK" : "Ukjent",
+        detail: readVersion("react"),
       },
       {
         name: "Neon",
-        status: databaseUrl.exists || directUrl.exists || neonDatabaseUrl.exists ? "OK" : "MISSING_ENV",
-        detail: databaseUrl.host || directUrl.host || neonDatabaseUrl.host || "Ingen Neon connection string funnet",
+        status: databaseUrl.exists || directUrl.exists || neonUrl.exists ? "OK" : "Mangler connection string",
+        detail: databaseUrl.host || directUrl.host || neonUrl.host || "Ingen host funnet",
       },
     ],
     last_human_process: {
-      status: "CONTROL_PLACEHOLDER",
-      source: "manual_process_log_not_connected_yet",
-      text:
-        "Sist registrert menneskelig prosess må kobles til egen prosess-/loggtabell. Inntil dette er koblet, viser denne ruten deploy og commit som siste tekniske prosess.",
-      fallback_process: {
+      status: "Ikke koblet til menneskelig prosesslogg ennå",
+      explanation:
+        "Denne fanen viser teknisk runtime nå. Neste steg er å koble dette til Collectium prosesslogg slik at siste menneskelige handling/godkjenning vises.",
+      fallback: {
         type: "git_deploy",
-        by: commitAuthorName || commitAuthorLogin || repoOwner || "unknown",
-        commit_sha: commitSha,
-        commit_short_sha: commitSha ? commitSha.slice(0, 7) : null,
-        commit_message: commitMessage,
-        branch: commitRef,
-        time: nowIso,
+        by: env("VERCEL_GIT_COMMIT_AUTHOR_NAME") || env("VERCEL_GIT_COMMIT_AUTHOR_LOGIN") || owner,
+        branch,
+        commit_short_sha: sha ? sha.slice(0, 7) : null,
+        commit_message: env("VERCEL_GIT_COMMIT_MESSAGE"),
       },
     },
   };
 
-  return NextResponse.json(runtime, {
+  return NextResponse.json(payload, {
     headers: {
       "Cache-Control": "no-store",
     },
