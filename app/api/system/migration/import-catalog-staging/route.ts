@@ -134,7 +134,8 @@ function getMariaDbConnectionOptions(): ConnectionOptions {
     password,
     supportBigNumbers: true,
     bigNumberStrings: true,
-    dateStrings: true
+    dateStrings: true,
+    charset: "utf8mb4"
   };
 }
 
@@ -586,6 +587,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
