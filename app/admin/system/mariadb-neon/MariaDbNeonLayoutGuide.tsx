@@ -5,150 +5,380 @@ import styles from "./MariaDbNeonLayoutGuide.module.css";
 
 type ScreenMode = "mobile" | "tablet" | "desktop" | "wide" | "tv";
 
-const screenText: Record<ScreenMode, { title: string; range: string; shortText: string; rules: string[] }> = {
+type LayoutField = {
+  nr: string;
+  name: string;
+  react: string;
+  field: string;
+  role: string;
+  laneMobile: string;
+  laneTablet: string;
+  laneDesktop: string;
+  laneWide: string;
+  laneTv: string;
+};
+
+const screenModes: Array<{ key: ScreenMode; label: string }> = [
+  { key: "mobile", label: "Mobil" },
+  { key: "tablet", label: "Tablet" },
+  { key: "desktop", label: "Desktop" },
+  { key: "wide", label: "Bredskjerm" },
+  { key: "tv", label: "TV / presentasjon" },
+];
+
+const screenText: Record<
+  ScreenMode,
+  {
+    title: string;
+    range: string;
+    lanes: string;
+    contentCap: string;
+    selectedRule: string;
+    diagramRule: string;
+    laneRule: string;
+    fieldSort: string;
+  }
+> = {
   mobile: {
     title: "Mobil",
     range: "0-719px",
-    shortText:
-      "Mobil bruker toppbar som hovedkontroll. Sidemeny skjules som egen kolonne og erstattes av mobilmeny. Filter, varsler, designvalg og søk åpnes kompakt.",
-    rules: [
-      "01 Sidemeny: skjules som fast venstremeny og åpnes via menyknapp.",
-      "02 Toppmeny: inneholder meny, søk, varsler/aktiviteter, design og filter.",
-      "03 Overskriftsfelt: komprimeres til tittel, status og viktigste handling.",
-      "04 Faner: vises som chips eller kompakt horisontal tab-rad.",
-      "05-09 Feltgrupper: én kolonne, ingen brede tabeller direkte i body.",
-      "10 Workspace: deaktivert som sideveis arbeidsflate på mobil."
-    ]
+    lanes: "1 lane",
+    contentCap: "Ingen desktop-cap. Alt brytes til mobil.",
+    selectedRule: "Mobil bruker toppbar som hovedkontroll. Sidemeny skjules, filter åpnes som overlay, og alle felt går i én kolonne.",
+    diagramRule: "01-10 sorteres vertikalt. Alle underfelt 05A-09B vises som én kolonne.",
+    laneRule: "Workspace lanes er av.",
+    fieldSort: "Én kolonne"
   },
   tablet: {
     title: "Tablet",
     range: "720-1100px",
-    shortText:
-      "Tablet er mellommodus. Filter og sidevalg løftes over innholdet, og indrefelt kan gå fra én til to kolonner.",
-    rules: [
-      "01 Sidemeny: kompakt eller skjult bak menyknapp.",
-      "02 Toppmeny: behold søk, brukerstatus og viktigste handlinger synlig.",
-      "03 Overskriftsfelt: vises over faner og felt.",
-      "04 Faner: kan ligge i to linjer hvis det er mange faner.",
-      "05 Fire felt: blir 2 + 2.",
-      "06-09 Splitfelt: går til 1 eller 2 kolonner etter bredde."
-    ]
+    lanes: "1-2 lanes",
+    contentCap: "Mellomvisning før desktop-standard.",
+    selectedRule: "Tablet løfter filter og sidevalg over innholdet. Felt kan bruke 1-2 kolonner.",
+    diagramRule: "05 fire felt blir 2 + 2. 06 tre felt kan bli 2 + 1. 07-09 kan være 1 eller 2 kolonner.",
+    laneRule: "Workspace lanes er av, men siden kan dele felt i to kolonner.",
+    fieldSort: "1-2 kolonner"
   },
   desktop: {
-    title: "Desktop",
+    title: "Desktop standard",
     range: "1101-1899px",
-    shortText:
-      "Desktop er normal Collectium-visning. Innholdet bruker desktop cap 1101-1899px og skal ikke strekkes uendelig selv om skjermen er større.",
-    rules: [
-      "01 Sidemeny: fast venstre meny, ca. 220-260px.",
-      "02 Toppmeny: søk, bruker, snarveier og status ligger globalt.",
-      "03 Overskriftsfelt: sideforklaring, status og Layout / DB URL-knapp.",
-      "04 Faner: normal tab-rad under statuskort/hero.",
-      "05-09 Feltgrupper: følger valgte gridmønstre.",
-      "10 Workspace: ikke aktiv som sideveis lane-modus før 1900px+."
-    ]
+    lanes: "1 hovedlane",
+    contentCap: "Dette er normal feltbredde. Innholdet skal ikke strekkes større bare fordi skjermen er større.",
+    selectedRule: "Desktop viser normal Collectium-side med fast sidemeny, toppmeny, overskriftsfelt, faner og ett hovedinnhold.",
+    diagramRule: "05 vises som 4 felt, 06 som 3 felt, 07 som 2 felt, 08/09 som asymmetriske splitfelt.",
+    laneRule: "Ingen workspace lanes. Horisontal scroll skal ligge i tabeller/paneler, ikke i hele siden.",
+    fieldSort: "Normal side"
   },
   wide: {
-    title: "Bredskjerm",
+    title: "Bredskjerm / workspace",
     range: "1900px+",
-    shortText:
-      "Bredskjerm er workspace-modus. Skjermen deles i sideveis arbeidsflater på ca. 1000px slik at flere skjermområder kan vises samtidig.",
-    rules: [
-      "01 Sidemeny: kan være smalere, men fortsatt fast.",
-      "02 Toppmeny: global, men må ikke bruke unødig høyde.",
-      "03-04 Header og faner: styrer hvilke lanes som vises.",
-      "05-09 Feltgrupper: kan plasseres i egne arbeidsbaner.",
-      "10 Workspace lanes: bruk baner på ca. 900-1100px.",
-      "Scroll: horisontal scroll skal ligge i workspace, ikke på hele body."
-    ]
+    lanes: "2 lanes ved ca. 2400px",
+    contentCap: "Desktop cap beholdes som lesbar modul. Ekstra bredde brukes til flere arbeidsflater.",
+    selectedRule: "Bredskjerm betyr ikke at ett felt strekkes. Siden deles i flere skjermområder på ca. 1000px.",
+    diagramRule: "Faner/tabs kan vises som egne sider/lanes. Katalogresultat, objektpresentasjon og relasjon kan ligge ved siden av kontrollfelt.",
+    laneRule: "Eksempel 2400px / 27 tommer: lane 1 = sidemeny + toppmeny + kontroll/filter. lane 2 = tabside, søkeresultat, objektpresentasjon eller relasjon.",
+    fieldSort: "2 workspace lanes"
   },
   tv: {
     title: "TV / presentasjon",
     range: "2900px+",
-    shortText:
-      "TV er presentasjonsmodus. TV skal ikke bare vise mer bredde, men færre felt, større typografi og tydeligere status på avstand.",
-    rules: [
-      "01 Sidemeny: minimal eller skjult.",
-      "02 Toppmeny: forenklet, bare status og hovedvalg.",
-      "03 Overskriftsfelt: større tittel og status.",
-      "04 Faner: færre valg, større knapper og mer avstand.",
-      "05-09 Feltgrupper: vis bare de viktigste.",
-      "10 TV-modus: presentasjon, ikke detaljstøy."
-    ]
+    lanes: "2-3 presentasjonslanes",
+    contentCap: "Presentasjonsmodus overstyrer vanlig workspace.",
+    selectedRule: "TV skal vise færre felt, større tekst og tydelig status. Ikke vis alle små kontrollfelt samtidig.",
+    diagramRule: "01-04 forenkles. 05-09 bør oppsummeres. 10 brukes som presentasjonsflate, ikke detaljflate.",
+    laneRule: "Færre aktive lanes. Større typografi. Mer luft.",
+    fieldSort: "Presentasjon"
   }
 };
 
-
-const screenCalculator: Record<ScreenMode, {
-  activeLabel: string;
-  widthRange: string;
-  standardRule: string;
-  fieldRule: string;
-  workspaceRule: string;
-  visualMode: string;
-}> = {
-  mobile: {
-    activeLabel: "Mobilvisning",
-    widthRange: "0-719px",
-    standardRule: "Desktop-standarden er ikke aktiv. Siden bruker mobil toppbar og én kolonne.",
-    fieldRule: "Alle felt brytes til én kolonne. Tabeller og matriser må scrolle inne i eget panel.",
-    workspaceRule: "Workspace lanes er deaktivert.",
-    visualMode: "Kompakt kontrollflate"
+const fieldRegister: LayoutField[] = [
+  {
+    nr: "01",
+    name: "Sidemeny",
+    react: "AppShell / Sidebar",
+    field: "global_navigation",
+    role: "Global navigasjon",
+    laneMobile: "Mobilmeny",
+    laneTablet: "Kompakt meny",
+    laneDesktop: "Lane 1: global side",
+    laneWide: "Lane 1: global kontroll",
+    laneTv: "Skjult/minimal"
   },
-  tablet: {
-    activeLabel: "Tabletvisning",
-    widthRange: "720-1100px",
-    standardRule: "Desktop-standarden er ikke aktiv. Tablet bruker mellomlayout.",
-    fieldRule: "Fire felt blir normalt 2 + 2. Tre felt kan bli 1 + 1 + 1 eller 2 + 1.",
-    workspaceRule: "Workspace lanes er deaktivert.",
-    visualMode: "Mellomflate"
+  {
+    nr: "02",
+    name: "Toppmeny / søk / bruker",
+    react: "Topbar / Search / UserMenu",
+    field: "topbar_search_user",
+    role: "Global toppkontroll",
+    laneMobile: "Lane 1: topp",
+    laneTablet: "Lane 1: topp",
+    laneDesktop: "Lane 1: global side",
+    laneWide: "Lane 1: global kontroll",
+    laneTv: "Lane 1: status/topp"
   },
-  desktop: {
-    activeLabel: "Desktop standard",
-    widthRange: "1101-1899px",
-    standardRule: "Dette er standard desktop-visning. Sidebredden stopper bredskjerm-funksjon her.",
-    fieldRule: "Felt vises etter standard: 4 felt, 3 felt, 2 felt, lang/liten og liten/lang inne i én normal arbeidsflate.",
-    workspaceRule: "Ingen sideveis workspace lanes. Horisontal scroll skal bare finnes i tabeller/paneler.",
-    visualMode: "Normal Collectium-side"
+  {
+    nr: "03",
+    name: "Overskriftsfelt",
+    react: "PageHeader / HeroPanel",
+    field: "page_title_status",
+    role: "Sideidentitet og status",
+    laneMobile: "Lane 1: topp",
+    laneTablet: "Lane 1: topp",
+    laneDesktop: "Lane 1: global side",
+    laneWide: "Lane 1: global kontroll",
+    laneTv: "Lane 1: hovedstatus"
   },
-  wide: {
-    activeLabel: "Bredskjerm / workspace",
-    widthRange: "1900px+",
-    standardRule: "Desktop-standarden overstyres. Bredskjerm-funksjon aktiveres.",
-    fieldRule: "Felt kan fordeles i arbeidsbaner: kontroll/filter, matrise, detaljer, relasjoner og logg.",
-    workspaceRule: "Workspace lanes brukes. Hver lane bør være ca. 900-1100px.",
-    visualMode: "Sideveis arbeidsflate"
+  {
+    nr: "04",
+    name: "Faner / tabs / arkivlag",
+    react: "Tabs / TabPanel",
+    field: "active_tab",
+    role: "Arkivlag / seksjonsvalg",
+    laneMobile: "Lane 1: chips",
+    laneTablet: "Lane 1: tabs",
+    laneDesktop: "Lane 1: tabs",
+    laneWide: "Lane 1 eller lane 2: egne tab-sider",
+    laneTv: "Forenklet valg"
   },
-  tv: {
-    activeLabel: "TV / presentasjon",
-    widthRange: "2900px+",
-    standardRule: "Bredskjerm workspace overstyres av presentasjonsmodus.",
-    fieldRule: "Færre felt vises samtidig. Viktigste status og hovedtall prioriteres.",
-    workspaceRule: "Ikke vis alle lanes. TV skal være lesbar på avstand med større typografi.",
-    visualMode: "Presentasjonsflate"
+  {
+    nr: "05A",
+    name: "MariaDB",
+    react: "StatCard",
+    field: "mariadb_status",
+    role: "Read-only kontrollarkiv",
+    laneMobile: "Lane 1: status",
+    laneTablet: "Lane 1: status",
+    laneDesktop: "Lane 1: firefelt",
+    laneWide: "Lane 1: kontrollkort",
+    laneTv: "Oppsummering"
+  },
+  {
+    nr: "05B",
+    name: "Neon",
+    react: "StatCard",
+    field: "neon_status",
+    role: "Ny staging/kontrollbase",
+    laneMobile: "Lane 1: status",
+    laneTablet: "Lane 1: status",
+    laneDesktop: "Lane 1: firefelt",
+    laneWide: "Lane 1: kontrollkort",
+    laneTv: "Oppsummering"
+  },
+  {
+    nr: "05C",
+    name: "Plattform",
+    react: "StatCard",
+    field: "platform_status",
+    role: "DB 8.4 / API / brytere",
+    laneMobile: "Lane 1: status",
+    laneTablet: "Lane 1: status",
+    laneDesktop: "Lane 1: firefelt",
+    laneWide: "Lane 1: kontrollkort",
+    laneTv: "Oppsummering"
+  },
+  {
+    nr: "05D",
+    name: "Template",
+    react: "StatCard",
+    field: "template_token_status",
+    role: "Template/skin/layout-status",
+    laneMobile: "Lane 1: status",
+    laneTablet: "Lane 1: status",
+    laneDesktop: "Lane 1: firefelt",
+    laneWide: "Lane 1: kontrollkort",
+    laneTv: "Oppsummering"
+  },
+  {
+    nr: "06A",
+    name: "Status",
+    react: "ControlCard",
+    field: "control_status",
+    role: "Viser OK/varsel/blokkert",
+    laneMobile: "Lane 1: kontroll",
+    laneTablet: "Lane 1: kontroll",
+    laneDesktop: "Lane 1: trefelt",
+    laneWide: "Lane 1: kontroll",
+    laneTv: "Lane 1: hovedstatus"
+  },
+  {
+    nr: "06B",
+    name: "Neste kontroll",
+    react: "ControlCard",
+    field: "next_control",
+    role: "Neste kontrollsteg",
+    laneMobile: "Lane 1: kontroll",
+    laneTablet: "Lane 1: kontroll",
+    laneDesktop: "Lane 1: trefelt",
+    laneWide: "Lane 1: kontroll",
+    laneTv: "Skjult eller kort"
+  },
+  {
+    nr: "06C",
+    name: "Regel",
+    react: "ControlCard",
+    field: "control_rule",
+    role: "Forklarer regel/tiltak",
+    laneMobile: "Lane 1: kontroll",
+    laneTablet: "Lane 1: kontroll",
+    laneDesktop: "Lane 1: trefelt",
+    laneWide: "Lane 1: kontroll",
+    laneTv: "Skjult eller kort"
+  },
+  {
+    nr: "07A",
+    name: "Venstre panel",
+    react: "SplitPanelLeft",
+    field: "left_panel",
+    role: "Sammenligning/filter/kontroll",
+    laneMobile: "Lane 1",
+    laneTablet: "Lane 1",
+    laneDesktop: "Lane 1: split",
+    laneWide: "Lane 1: kontroll/filter",
+    laneTv: "Skjult"
+  },
+  {
+    nr: "07B",
+    name: "Høyre panel",
+    react: "SplitPanelRight",
+    field: "right_panel",
+    role: "Sammenligning/resultat",
+    laneMobile: "Lane 1",
+    laneTablet: "Lane 1 eller 2",
+    laneDesktop: "Lane 1: split",
+    laneWide: "Lane 2: resultat",
+    laneTv: "Lane 2: hovedvisning"
+  },
+  {
+    nr: "08A",
+    name: "Hovedmatrise / rapport",
+    react: "WideMain",
+    field: "main_wide_panel",
+    role: "Primært stort innhold",
+    laneMobile: "Lane 1",
+    laneTablet: "Lane 1",
+    laneDesktop: "Lane 1: lang venstre",
+    laneWide: "Lane 2: hovedmatrise/rapport",
+    laneTv: "Lane 2: hovedrapport"
+  },
+  {
+    nr: "08B",
+    name: "Status",
+    react: "AsideSmall",
+    field: "aside_status",
+    role: "Kort status/tiltak",
+    laneMobile: "Lane 1",
+    laneTablet: "Lane 1",
+    laneDesktop: "Lane 1: liten høyre",
+    laneWide: "Lane 1 eller 3: status",
+    laneTv: "Lane 1: status"
+  },
+  {
+    nr: "09A",
+    name: "Filter",
+    react: "AsideSmall",
+    field: "aside_filter",
+    role: "Valg/filter/kontroll",
+    laneMobile: "Overlay",
+    laneTablet: "Over innhold",
+    laneDesktop: "Lane 1: liten venstre",
+    laneWide: "Lane 1: filter/kontroll",
+    laneTv: "Skjult"
+  },
+  {
+    nr: "09B",
+    name: "Resultat / detaljer",
+    react: "WideResult",
+    field: "main_result_panel",
+    role: "Stort resultatfelt",
+    laneMobile: "Lane 1",
+    laneTablet: "Lane 1",
+    laneDesktop: "Lane 1: lang høyre",
+    laneWide: "Lane 2: resultat/objekt/relasjon",
+    laneTv: "Lane 2: hovedvisning"
+  },
+  {
+    nr: "10",
+    name: "Bredskjerm / workspace lanes",
+    react: "WorkspaceLanes",
+    field: "wide_workspace_lanes",
+    role: "Sideveis arbeidsflate",
+    laneMobile: "Av",
+    laneTablet: "Av",
+    laneDesktop: "Av",
+    laneWide: "2 lanes: global kontroll + innhold",
+    laneTv: "2-3 presentasjonslanes"
   }
-};
-
-const fieldRegister = [
-  { nr: "01", name: "Sidemeny", react: "AppShell / Sidebar", field: "global_navigation", role: "Global navigasjon", db: "Menyregister / sidekontroll senere", responsive: "Desktop fast venstre. Mobil skjult bak meny." },
-  { nr: "02", name: "Toppmeny / søk / bruker", react: "Topbar / Search / UserMenu", field: "topbar_search_user", role: "Global toppkontroll", db: "Auth/session + søk via API", responsive: "Alltid øverst. Mobil kompakt." },
-  { nr: "03", name: "Overskriftsfelt", react: "PageHeader / HeroPanel", field: "page_title_status", role: "Sideidentitet og status", db: "Sidekrav / kontrollstatus", responsive: "Forkortes på mobil." },
-  { nr: "04", name: "Faner / tabs / arkivlag", react: "Tabs / TabPanel", field: "active_tab", role: "Arkivlag / seksjonsvalg", db: "Feature/page-control senere", responsive: "Desktop tab-rad. Mobil chips." },
-  { nr: "05A", name: "MariaDB", react: "StatCard", field: "mariadb_status", role: "Read-only kontrollarkiv", db: "MariaDB tables/views/columns", responsive: "Del av firefeltsrad." },
-  { nr: "05B", name: "Neon", react: "StatCard", field: "neon_status", role: "Ny staging/kontrollbase", db: "Neon tables/views/columns", responsive: "Del av firefeltsrad." },
-  { nr: "05C", name: "Plattform", react: "StatCard", field: "platform_status", role: "DB 8.4 / API / brytere", db: "Platform standard checks", responsive: "Del av firefeltsrad." },
-  { nr: "05D", name: "Template", react: "StatCard", field: "template_token_status", role: "Template/skin/layout-status", db: "Template token check", responsive: "Del av firefeltsrad." },
-  { nr: "06A", name: "Status", react: "ControlCard", field: "control_status", role: "Viser OK/varsel/blokkert", db: "System check API", responsive: "Del av trefeltsrad." },
-  { nr: "06B", name: "Neste kontroll", react: "ControlCard", field: "next_control", role: "Neste kontrollsteg", db: "Route/check registry", responsive: "Del av trefeltsrad." },
-  { nr: "06C", name: "Regel", react: "ControlCard", field: "control_rule", role: "Forklarer regel/tiltak", db: "DB 8.4 / sidekrav", responsive: "Del av trefeltsrad." },
-  { nr: "07A", name: "Venstre panel", react: "SplitPanelLeft", field: "left_panel", role: "Sammenligning/filter/kontroll", db: "Valgfri kontrollkilde", responsive: "2 felt desktop, 1 kolonne mobil." },
-  { nr: "07B", name: "Høyre panel", react: "SplitPanelRight", field: "right_panel", role: "Sammenligning/resultat", db: "Valgfri kontrollkilde", responsive: "2 felt desktop, 1 kolonne mobil." },
-  { nr: "08A", name: "Hovedmatrise / rapport", react: "WideMain", field: "main_wide_panel", role: "Primært stort innhold", db: "Transfer matrix / rapport", responsive: "Lang venstre." },
-  { nr: "08B", name: "Status", react: "AsideSmall", field: "aside_status", role: "Kort status/tiltak", db: "Status API", responsive: "Liten høyre." },
-  { nr: "09A", name: "Filter", react: "AsideSmall", field: "aside_filter", role: "Valg/filter/kontroll", db: "Filter master API", responsive: "Liten venstre." },
-  { nr: "09B", name: "Resultat / detaljer", react: "WideResult", field: "main_result_panel", role: "Stort resultatfelt", db: "Catalog/control-data API", responsive: "Lang høyre." },
-  { nr: "10", name: "Bredskjerm / workspace lanes", react: "WorkspaceLanes", field: "wide_workspace_lanes", role: "Sideveis arbeidsflate", db: "Kontroll-, filter-, relasjons- og matrise-API", responsive: "1900px+ lanes. 2900px+ TV." }
 ];
+
+function getLaneValue(field: LayoutField, mode: ScreenMode) {
+  if (mode === "mobile") return field.laneMobile;
+  if (mode === "tablet") return field.laneTablet;
+  if (mode === "wide") return field.laneWide;
+  if (mode === "tv") return field.laneTv;
+  return field.laneDesktop;
+}
+
+function getLaneGroups(mode: ScreenMode) {
+  if (mode === "wide") {
+    return [
+      {
+        title: "Lane 1 · global kontroll",
+        text: "Sidemeny, toppmeny, overskrift, faner, filter og kontrollstatus.",
+        fields: ["01", "02", "03", "04", "05A", "05B", "05C", "05D", "06A", "06B", "06C", "07A", "08B", "09A"]
+      },
+      {
+        title: "Lane 2 · innhold / resultat",
+        text: "Tabside, søkeresultat, overføringsmatrise, objektpresentasjon eller relasjonspresentasjon.",
+        fields: ["07B", "08A", "09B", "10"]
+      }
+    ];
+  }
+
+  if (mode === "tv") {
+    return [
+      {
+        title: "Lane 1 · presentasjonsstatus",
+        text: "Topp, hovedstatus og forenklede valg.",
+        fields: ["02", "03", "06A", "08B"]
+      },
+      {
+        title: "Lane 2 · hovedvisning",
+        text: "Rapport, objektpresentasjon, relasjon eller hovedresultat.",
+        fields: ["07B", "08A", "09B", "10"]
+      },
+      {
+        title: "Lane 3 · valgfri støtte",
+        text: "Ekstra relasjoner/logg hvis skjermen er svært bred.",
+        fields: ["04", "05A", "05B", "05C", "05D"]
+      }
+    ];
+  }
+
+  if (mode === "tablet") {
+    return [
+      {
+        title: "Lane 1 · tablet topp/kontroll",
+        text: "Toppmeny, overskrift, faner og status.",
+        fields: ["01", "02", "03", "04", "05A", "05B", "05C", "05D", "06A", "06B", "06C"]
+      },
+      {
+        title: "Lane 2 · tablet innhold",
+        text: "Resultatfelt, splitpanel og større innhold.",
+        fields: ["07A", "07B", "08A", "08B", "09A", "09B"]
+      }
+    ];
+  }
+
+  return [
+    {
+      title: mode === "mobile" ? "Lane 1 · mobilflyt" : "Lane 1 · desktop standard",
+      text: mode === "mobile"
+        ? "Alt sorteres vertikalt i én mobilflyt."
+        : "Alt ligger i én normal desktop-side innen 1101-1899px.",
+      fields: fieldRegister.map((field) => field.nr)
+    }
+  ];
+}
 
 export default function MariaDbNeonLayoutGuide() {
   const [isOpen, setIsOpen] = useState(false);
@@ -176,15 +406,20 @@ export default function MariaDbNeonLayoutGuide() {
     return "TV / presentasjon mulig";
   }, [viewportWidth]);
 
-  const laneEstimate = useMemo(() => {
-    if (viewportWidth < 1900) return 1;
-    return Math.max(1, Math.floor(viewportWidth / 1000));
-  }, [viewportWidth]);
+  const modeClass = useMemo(() => {
+    if (screenMode === "mobile") return styles.modeMobile;
+    if (screenMode === "tablet") return styles.modeTablet;
+    if (screenMode === "wide") return styles.modeWide;
+    if (screenMode === "tv") return styles.modeTv;
+    return styles.modeDesktop;
+  }, [screenMode]);
+
+  const laneGroups = useMemo(() => getLaneGroups(screenMode), [screenMode]);
 
   return (
     <>
       <button type="button" className={styles.toggleButton} onClick={() => setIsOpen(true)}>
-        Layout / DB URL
+        Vis Layout / DB URL
       </button>
 
       {isOpen ? (
@@ -195,10 +430,9 @@ export default function MariaDbNeonLayoutGuide() {
             <header className={styles.header}>
               <div>
                 <p className={styles.kicker}>Collectium layout-control</p>
-                <h2>Vis Layout / DB URL</h2>
+                <h2>Layout / DB URL</h2>
                 <p>
-                  Feltregisteret under gir nummer og navn til alle layoutfelt. Radfargene viser responsiv sortering:
-                  global struktur først, deretter firefelt, trefelt, tofelt, asymmetrisk split og workspace.
+                  Velg skjermmodus. Feltlisten, lane-fordelingen og diagrammet endrer seg etter aktiv organisering.
                 </p>
               </div>
               <button className={styles.closeButton} type="button" onClick={() => setIsOpen(false)}>
@@ -210,115 +444,74 @@ export default function MariaDbNeonLayoutGuide() {
               <div className={styles.sectionHeader}>
                 <span>00</span>
                 <div>
-                  <h3>Systemlayout med radfarger, nummer og feltnavn</h3>
-                  <p>Hver rad har egen farge for å vise responsiv rekkefølge og sortering.</p>
+                  <h3>Systemlayout med lane-justerte felt</h3>
+                  <p>01-10 og 05A-09B flyttes mellom lanes etter valgt skjermmodus.</p>
                 </div>
               </div>
 
-                            <div className={styles.screenCalculator}>
-                <div className={styles.calculatorHeader}>
-                  <div>
-                    <strong>Skjermkalkulator</strong>
-                    <span>Aktiv regel for valgt skjermfunksjon</span>
-                  </div>
-                  <em>{screenCalculator[screenMode].widthRange}</em>
+              <div className={styles.modeSwitchPanel}>
+                <div>
+                  <strong>Velg skjermfunksjon</strong>
+                  <span>Dette endrer både kalkulator, lane-fordeling og feltregister.</span>
                 </div>
 
-                <div className={styles.calculatorGrid}>
-                  <article>
-                    <span>Aktiv visning</span>
-                    <strong>{screenCalculator[screenMode].activeLabel}</strong>
-                    <small>{screenCalculator[screenMode].visualMode}</small>
-                  </article>
-
-                  <article>
-                    <span>Standardgrense</span>
-                    <strong>Desktop stopper ved 1899px</strong>
-                    <small>1101-1899px er normal feltvisning.</small>
-                  </article>
-
-                  <article>
-                    <span>Feltregel</span>
-                    <strong>{screenCalculator[screenMode].fieldRule}</strong>
-                  </article>
-
-                  <article>
-                    <span>Workspace-regel</span>
-                    <strong>{screenCalculator[screenMode].workspaceRule}</strong>
-                  </article>
+                <div className={styles.screenButtons}>
+                  {screenModes.map((mode) => (
+                    <button
+                      key={mode.key}
+                      type="button"
+                      className={screenMode === mode.key ? styles.activeScreen : ""}
+                      onClick={() => setScreenMode(mode.key)}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
                 </div>
-
-                <p className={styles.calculatorNote}>
-                  {screenCalculator[screenMode].standardRule}
-                </p>
               </div>
 
-                            <div className={styles.actualScreenSizeBox}>
+              <div className={styles.actualScreenSizeBox}>
                 <div className={styles.actualScreenHeader}>
                   <div>
                     <strong>Aktuell skjermstørrelse</strong>
-                    <span>Dette feltet viser hva nettleseren faktisk ser akkurat nå.</span>
+                    <span>Faktisk nettleserbredde og valgt skjermfunksjon.</span>
                   </div>
                   <em>{viewportWidth > 0 ? `${viewportWidth}px` : "Måles ..."}</em>
                 </div>
 
                 <div className={styles.screenRuleGrid}>
                   <article>
-                    <span>Faktisk visning</span>
+                    <span>Faktisk skjerm</span>
                     <strong>{actualViewportLabel}</strong>
-                    <small>Basert på aktiv nettleserbredde.</small>
+                    <small>Basert på nettleserbredde.</small>
                   </article>
 
                   <article>
-                    <span>Desktop cap</span>
-                    <strong>1101–1899px</strong>
-                    <small>Normal desktop skal ikke strekke innholdet uendelig.</small>
-                  </article>
-
-                  <article>
-                    <span>Valgt funksjon</span>
+                    <span>Valgt modus</span>
                     <strong>{screenText[screenMode].title}</strong>
                     <small>{screenText[screenMode].range}</small>
                   </article>
 
                   <article>
-                    <span>Estimert lanes</span>
-                    <strong>{screenMode === "wide" || screenMode === "tv" ? `${laneEstimate} x ca. 1000px` : "1 normal arbeidsflate"}</strong>
-                    <small>Bredskjerm deler skjermen i arbeidsområder.</small>
+                    <span>Antall lanes</span>
+                    <strong>{screenText[screenMode].lanes}</strong>
+                    <small>{screenText[screenMode].fieldSort}</small>
+                  </article>
+
+                  <article>
+                    <span>Desktop cap</span>
+                    <strong>1101-1899px</strong>
+                    <small>Innhold strekkes ikke uendelig.</small>
                   </article>
                 </div>
 
-                <div className={styles.contentWidthRule}>
-                  <strong>Regel for feltbredde</strong>
-                  <p>
-                    Når skjermen er større enn desktop-standard, skal ikke innholdsfeltet bare bli bredere.
-                    Desktop-innholdet holdes innen normal lesbar bredde. Bredskjerm og TV er egne skjermfunksjoner
-                    som organiserer innholdet annerledes.
-                  </p>
+                <div className={styles.modeExplanation}>
+                  <strong>{screenText[screenMode].selectedRule}</strong>
+                  <p>{screenText[screenMode].diagramRule}</p>
+                  <p>{screenText[screenMode].laneRule}</p>
                 </div>
-
-                <div className={styles.lanePreview}>
-                  <div className={styles.laneBox}>
-                    <strong>Lane 1</strong>
-                    <span>Sidemeny + toppmeny + kontroll/filter</span>
-                  </div>
-                  <div className={styles.laneBox}>
-                    <strong>Lane 2</strong>
-                    <span>Tabside, søkeresultat, objektpresentasjon eller relasjonsvisning</span>
-                  </div>
-                  <div className={styles.laneBoxMuted}>
-                    <strong>Lane 3</strong>
-                    <span>Ekstra relasjoner/logg ved svært bred skjerm</span>
-                  </div>
-                </div>
-
-                <p className={styles.wideExample}>
-                  Eksempel: På en 2400px skjerm / 27&quot; med Bredskjerm aktivert kan Collectium vise to arbeidsflater:
-                  én for global kontroll og én for tabside, søkeresultat, objektpresentasjon eller relasjonspresentasjon.
-                </p>
               </div>
 
-              <div className={styles.layoutDiagram}>
+              <div className={`${styles.layoutDiagram} ${modeClass}`}>
                 <aside className={styles.diagramSide}>
                   <strong>01</strong>
                   <h4>Sidemeny</h4>
@@ -391,59 +584,34 @@ export default function MariaDbNeonLayoutGuide() {
                   </div>
                 </div>
               </div>
-            </section>
 
-            <section className={styles.screenSection}>
-              <h3>Skjermvisning</h3>
-              <p>Bytt forklaringsvisning for å se hvordan radene sorteres og brytes på ulike skjermstørrelser.</p>
-
-              <div className={styles.screenButtons}>
-                {(["mobile", "tablet", "desktop", "wide", "tv"] as ScreenMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    className={screenMode === mode ? styles.activeScreen : ""}
-                    onClick={() => setScreenMode(mode)}
-                  >
-                    {screenText[mode].title}
-                  </button>
-                ))}
-              </div>
-
-              <article className={styles.screenExplanation}>
-                <strong>{screenText[screenMode].title}</strong>
-                <span>{screenText[screenMode].range}</span>
-                <p>{screenText[screenMode].shortText}</p>
-                <ul>
-                  {screenText[screenMode].rules.map((rule) => (
-                    <li key={rule}>{rule}</li>
+              <section className={styles.laneMap}>
+                <h3>Lane-fordeling for valgt modus</h3>
+                <div className={styles.laneGrid}>
+                  {laneGroups.map((lane) => (
+                    <article key={lane.title}>
+                      <h4>{lane.title}</h4>
+                      <p>{lane.text}</p>
+                      <div>
+                        {lane.fields.map((nr) => (
+                          <span key={nr}>{nr}</span>
+                        ))}
+                      </div>
+                    </article>
                   ))}
-                </ul>
-              </article>
-            </section>
-
-            <section className={styles.viewportRules}>
-              <h3>Skjermstørrelse-brytere og layoutregler</h3>
-              <div className={styles.viewportGrid}>
-                {Object.entries(screenText).map(([key, item]) => (
-                  <article key={key}>
-                    <strong>{item.title}</strong>
-                    <span>{item.range}</span>
-                    <p>{item.shortText}</p>
-                  </article>
-                ))}
-              </div>
+                </div>
+              </section>
             </section>
 
             <section className={styles.fieldRegister}>
-              <h3>Feltregister: nummer, navn og funksjon</h3>
+              <h3>Feltregister: nummer, navn, funksjon og aktiv lane</h3>
               <div className={styles.fieldTable}>
                 <div className={styles.fieldTableHead}>
                   <span>Nr.</span>
                   <span>Navn</span>
                   <span>React / Next.js</span>
-                  <span>Felt / DB/API-rolle</span>
-                  <span>Responsiv regel</span>
+                  <span>Felt / rolle</span>
+                  <span>Aktiv lane</span>
                 </div>
 
                 {fieldRegister.map((item) => (
@@ -451,8 +619,8 @@ export default function MariaDbNeonLayoutGuide() {
                     <span>{item.nr}</span>
                     <span>{item.name}</span>
                     <span>{item.react}</span>
-                    <span><b>{item.field}</b><small>{item.role} · {item.db}</small></span>
-                    <span>{item.responsive}</span>
+                    <span><b>{item.field}</b><small>{item.role}</small></span>
+                    <span>{getLaneValue(item, screenMode)}</span>
                   </div>
                 ))}
               </div>
@@ -463,6 +631,3 @@ export default function MariaDbNeonLayoutGuide() {
     </>
   );
 }
-
-
-
