@@ -2,14 +2,14 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift: Collectium UI85 Icons
- * Definering / formal: Inline SVG icons in Laravel Blade / Heroicons direction.
- * Bruksomrade: UI85 template actions and navigation.
- * Berorte DB-brytere / feature_keys: template.ui85.preview.view
- * Berorte API-ruter: Ingen
- * Berorte tabeller / views: Ingen
+ * Definering / formål: Inline SVG icons in Laravel Blade / Heroicons direction.
+ * Bruksområde: UI85 template actions and preview navigation.
+ * Berørte DB-brytere / feature_keys: template.ui85.preview.view
+ * Berørte API-ruter: Ingen
+ * Berørte tabeller / views: Ingen
  * Dataretning: Static UI icons only
  * Logging: Ingen runtime logging
- * Versjon: UI85-REACT-TEMPLATE-V17C
+ * Versjon: UI85-REACT-TEMPLATE-V18
  */
 
 export function HeartIcon() {
@@ -26,8 +26,4 @@ export function PlusIcon() {
 
 export function ShareIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /><path d="M6 7.5v10.2c0 .9.7 1.6 1.6 1.6h8.9" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" /></svg>;
-}
-
-export function MenuDotIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M5 6h14M5 18h14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
 }

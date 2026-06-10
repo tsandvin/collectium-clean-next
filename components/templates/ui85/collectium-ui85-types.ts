@@ -2,21 +2,23 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift: Collectium UI85 template types
- * Definering / formal: Shared UI85 preview type contracts.
- * Bruksomrade: components/templates/ui85
- * Berorte DB-brytere / feature_keys: template.ui85.preview.view
- * Berorte API-ruter: Ingen
- * Berorte tabeller / views: Ingen
+ * Definering / formål: Shared UI85 preview type contracts.
+ * Bruksområde: components/templates/ui85
+ * Berørte DB-brytere / feature_keys: template.ui85.preview.view
+ * Berørte API-ruter: Ingen
+ * Berørte tabeller / views: Ingen
  * Dataretning: Type definitions only
  * Logging: Ingen runtime logging
- * Versjon: UI85-REACT-TEMPLATE-V17C
+ * Versjon: UI85-REACT-TEMPLATE-V18
  */
+
+import type { ReactNode } from "react";
 
 export type CollectiumUi85Skin = "collectium" | "samler" | "museum" | "finans";
 
 export type CollectiumUi85TemplateProps = {
   skin?: CollectiumUi85Skin;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export type CollectiumUi85Action = {
