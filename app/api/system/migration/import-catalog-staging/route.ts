@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import mysql, { type ConnectionOptions } from "mysql2/promise";
 import { Pool } from "pg";
 
 export const runtime = "nodejs";
@@ -224,7 +224,11 @@ async function fetchMariaDbRows(sourceTable: string, fieldMap: FieldMapRow[], li
   const fields = Array.from(new Set(fieldMap.map((field) => field.source_field)));
   const selectFields = fields.map((field) => `\`${field}\``).join(", ");
 
-  const conn = await mysql.createConnection(getMariaDbConfig());
+    const mariaConfig = getMariaDbConfig();
+  const conn =
+    typeof mariaConfig === "string"
+      ? await mysql.createConnection(mariaConfig)
+      : await mysql.createConnection(mariaConfig as ConnectionOptions);
 
   try {
     const [rows] = await conn.query(
@@ -563,3 +567,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
