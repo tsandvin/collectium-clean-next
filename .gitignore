@@ -63,3 +63,7 @@ app/admin/system/mariadb-neon/MariaDbNeonLayoutGuide.module.css.backup-*
 /collectium-neon-rule-establishment-install-test-v1.ps1
 /collectium-neon-rule-package-check-v1.ps1
 /neon-truth-status.json
+
+# Collectium generated local folders
+docs/backups/
+docs/sandbox-reports/
