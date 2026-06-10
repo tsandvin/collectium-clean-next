@@ -91,9 +91,7 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "diagnose", label: "Diagnose" },
   { key: "events", label: "Hendelseslogg" },
   { key: "json", label: "JSON" },
-  { key: "chatgpt", label: "Overføringsmatrise
-            Overføringsmatrise
-            Svar til ChatGPT" },
+  { key: "chatgpt", label: "Svar til ChatGPT" },
 ];
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -473,8 +471,7 @@ export default function MariaDbNeonControlPage() {
           <p className={styles.eyebrow}>Collectium System Control</p>
           <h1>MariaDB - Neon Postgres Control</h1>
           <div className="mariadbNeonLayoutGuideHost">
-            <MariaDbNeonLayoutGuide />
-          </div>
+</div>
           <div className="mariadbNeonLayoutGuideHost">
 </div>
           <p>
@@ -911,6 +908,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
