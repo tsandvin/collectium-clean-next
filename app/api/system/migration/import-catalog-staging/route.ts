@@ -14,26 +14,6 @@ type TableMapRow = {
   row_count: number | null;
 };
 
-function repairMojibakeText(value: unknown): unknown {
-  if (typeof value !== "string") {
-    return value;
-  }
-
-  return value
-    .replaceAll("Ã¸", "ø")
-    .replaceAll("Ã˜", "Ø")
-    .replaceAll("Ã¥", "å")
-    .replaceAll("Ã…", "Å")
-    .replaceAll("Ã¦", "æ")
-    .replaceAll("Ã†", "Æ")
-    .replaceAll("â¢", "•")
-    .replaceAll("Â·", "·")
-    .replaceAll("Â©", "©")
-    .replaceAll("Â«", "«")
-    .replaceAll("Â»", "»")
-    .replaceAll("Â ", " ")
-    .replaceAll("Â", "");
-}
 
 function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
   const repaired: Record<string, unknown> = {};
@@ -43,6 +23,45 @@ function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
   }
 
   return repaired as T;
+}
+
+
+function repairMojibakeText(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+
+  return value
+    .replaceAll("Ã¸", "ø")
+    .replaceAll("Ã˜", "Ø")
+    .replaceAll("Ã¥", "å")
+    .replaceAll("Ã…", "Å")
+    .replaceAll("Ã¦", "æ")
+    .replaceAll("Ã†", "Æ")
+    .replaceAll("â¢", "•")
+    .replaceAll("â€¢", "•")
+    .replaceAll("Â·", "·")
+    .replaceAll("Â©", "©")
+    .replaceAll("Â«", "«")
+    .replaceAll("Â»", "»")
+    .replaceAll("Â ", " ")
+    .replaceAll("Â", "");
+}
+
+function repairMojibakeDeep(value: unknown): unknown {
+  if (typeof value === "string") return repairMojibakeText(value);
+
+  if (Array.isArray(value)) {
+    return value.map((item) => repairMojibakeDeep(item));
+  }
+
+  if (value && typeof value === "object") {
+    const repaired: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      repaired[key] = repairMojibakeDeep(item);
+    }
+    return repaired;
+  }
+
+  return value;
 }
 
 type FieldMapRow = {
@@ -58,26 +77,6 @@ type FieldMapRow = {
   is_market_field: boolean;
 };
 
-function repairMojibakeText(value: unknown): unknown {
-  if (typeof value !== "string") {
-    return value;
-  }
-
-  return value
-    .replaceAll("Ã¸", "ø")
-    .replaceAll("Ã˜", "Ø")
-    .replaceAll("Ã¥", "å")
-    .replaceAll("Ã…", "Å")
-    .replaceAll("Ã¦", "æ")
-    .replaceAll("Ã†", "Æ")
-    .replaceAll("â¢", "•")
-    .replaceAll("Â·", "·")
-    .replaceAll("Â©", "©")
-    .replaceAll("Â«", "«")
-    .replaceAll("Â»", "»")
-    .replaceAll("Â ", " ")
-    .replaceAll("Â", "");
-}
 
 function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
   const repaired: Record<string, unknown> = {};
@@ -130,7 +129,7 @@ const STAGING_COLUMNS = new Set([
 ]);
 
 function jsonResponse(data: unknown, status = 200) {
-  return NextResponse.json(repairMojibakeDeep(data, { status }));
+  return NextResponse.json(data, { status });
 }
 
 function getNeonUrl(): string {
@@ -591,7 +590,7 @@ async function handleRequest(req: NextRequest) {
     const mariaRows = await fetchMariaDbRows(tableMap.source_table, fieldMap, limit, offset);
 
     const stagingRows = mariaRows.map((row) =>
-      buildStagingRow(sourceKey, objectGroup, tableMap.source_table as string, fieldMap, row)
+      repairMojibakeDeep(buildStagingRow(sourceKey, objectGroup, tableMap.source_table as string, fieldMap, row)) as ReturnType<typeof buildStagingRow>
     );
 
     let importedRows = 0;
@@ -652,6 +651,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
