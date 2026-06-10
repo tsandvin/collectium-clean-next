@@ -1,0 +1,140 @@
+﻿.page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef6fb 45%, #ffffff 100%);
+}
+
+.card {
+  width: min(100%, 520px);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(31, 84, 122, 0.18);
+  border-radius: 22px;
+  box-shadow: 0 24px 80px rgba(21, 54, 82, 0.12);
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: "________________ Collectium";
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: rgba(31, 84, 122, 0.42);
+}
+
+.kicker {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #376a92;
+  margin-bottom: 8px;
+}
+
+.card h1 {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.05;
+  color: #0d2d44;
+}
+
+.subtitle {
+  margin: 12px 0 24px;
+  color: #4e6374;
+  line-height: 1.55;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  color: #24445d;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid rgba(31, 84, 122, 0.24);
+  border-radius: 14px;
+  padding: 13px 14px;
+  font: inherit;
+  color: #0d2d44;
+  background: #fbfdff;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: rgba(29, 94, 145, 0.72);
+  box-shadow: 0 0 0 4px rgba(29, 94, 145, 0.1);
+}
+
+.button {
+  border: 0;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #1e5f8d, #123b5c);
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.error,
+.success {
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.error {
+  background: #fff1f1;
+  color: #8d1f1f;
+  border: 1px solid rgba(141, 31, 31, 0.18);
+}
+
+.success {
+  background: #effaf4;
+  color: #17623d;
+  border: 1px solid rgba(23, 98, 61, 0.18);
+}
+
+.links {
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.links a {
+  color: #1e5f8d;
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.statusBox {
+  margin-top: 22px;
+  display: grid;
+  gap: 4px;
+  border-radius: 16px;
+  background: rgba(238, 246, 251, 0.72);
+  border: 1px solid rgba(31, 84, 122, 0.12);
+  padding: 14px;
+  color: #476273;
+  font-size: 12px;
+}
+
+.statusBox strong {
+  color: #183b55;
+}

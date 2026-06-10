@@ -1,18 +1,57 @@
-﻿import { cookies } from "next/headers";
+﻿/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Neon auth login API
+ *
+ * Definering / formÃ¥l:
+ * Logger inn bruker mot Neon/Postgres og oppretter session-cookie.
+ *
+ * BruksomrÃ¥de:
+ * Brukes av /login.
+ *
+ * BerÃ¸rte sider / routes:
+ * - /login
+ * - /api/auth/login
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - auth.login
+ * - auth.session.create
+ *
+ * BerÃ¸rte API-ruter:
+ * - POST /api/auth/login
+ *
+ * BerÃ¸rte tabeller / views:
+ * - ct_users
+ * - ct_user_sessions
+ * - ct_login_attempts
+ *
+ * Dataretning:
+ * Neon/Postgres -> API/backend -> Next.js -> React -> UI
+ *
+ * Logging:
+ * log_category: auth
+ * log_action: login
+ *
+ * Versjon:
+ * CT-FILE-AUTH-NEON-0004 / CHANGE-2026-06-10-0002
+ */
+
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { ctQuery } from "@/lib/db/mariadb";
+import { neonOne, neonQuery } from "@/lib/db/neon";
+import { verifyPassword } from "@/lib/auth/password";
 import {
   CT_SESSION_COOKIE,
   createSessionToken,
   createUserSession,
   logLoginAttempt,
-} from "@/lib/access/session";
+} from "@/lib/auth/neon-session";
 
 export const dynamic = "force-dynamic";
 
 type LoginUserRow = {
-  id: number | bigint;
+  id: number;
   public_id: string;
   email: string;
   password_hash: string | null;
@@ -24,21 +63,10 @@ type LoginUserRow = {
   email_status: string;
   admin_approval_status: string;
   role: string;
-  is_admin: number | bigint;
-  is_active: number | bigint;
+  membership_level: string;
+  is_admin: boolean;
+  is_active: boolean;
 };
-
-function toNumber(value: number | bigint): number {
-  return typeof value === "bigint" ? Number(value) : value;
-}
-
-function normalizeBcryptHash(hash: string): string {
-  if (hash.startsWith("$2y$")) {
-    return `$2b$${hash.slice(4)}`;
-  }
-
-  return hash;
-}
 
 export async function POST(request: Request) {
   let email: string | null = null;
@@ -55,18 +83,15 @@ export async function POST(request: Request) {
         userId: null,
         success: false,
         failureReason: "missing_credentials",
-      });
+      }).catch(() => undefined);
 
       return NextResponse.json(
-        {
-          ok: false,
-          message: "E-post og passord må fylles ut.",
-        },
+        { ok: false, message: "E-post og passord mÃ¥ fylles ut.", mode: "neon_login" },
         { status: 400 },
       );
     }
 
-    const users = await ctQuery<LoginUserRow>(
+    const user = await neonOne<LoginUserRow>(
       `
         SELECT
           id,
@@ -81,96 +106,80 @@ export async function POST(request: Request) {
           email_status,
           admin_approval_status,
           role,
+          membership_level,
           is_admin,
           is_active
         FROM ct_users
-        WHERE email = ?
+        WHERE lower(email) = lower($1)
         LIMIT 1
       `,
       [email],
     );
 
-    const user = users[0] ?? null;
-
     if (!user || !user.password_hash) {
       await logLoginAttempt({
         email,
-        userId: user ? toNumber(user.id) : null,
+        userId: user?.id ?? null,
         success: false,
         failureReason: "invalid_credentials",
-      });
+      }).catch(() => undefined);
 
       return NextResponse.json(
-        {
-          ok: false,
-          message: "Feil e-post eller passord.",
-        },
+        { ok: false, message: "Feil e-post eller passord.", mode: "neon_login" },
         { status: 401 },
       );
     }
 
-    const userId = toNumber(user.id);
-    const isActive = toNumber(user.is_active);
-    const isAdmin = toNumber(user.is_admin);
-
-    if (isActive !== 1 || user.account_status !== "active") {
+    if (!user.is_active || user.account_status !== "active") {
       await logLoginAttempt({
         email,
-        userId,
+        userId: user.id,
         success: false,
         failureReason: "account_not_active",
-      });
+      }).catch(() => undefined);
 
       return NextResponse.json(
-        {
-          ok: false,
-          message: "Brukerkontoen er ikke aktiv.",
-        },
+        { ok: false, message: "Brukerkontoen er ikke aktiv.", mode: "neon_login" },
         { status: 403 },
       );
     }
 
-    const passwordOk = await bcrypt.compare(password, normalizeBcryptHash(user.password_hash));
+    const passwordOk = await verifyPassword(password, user.password_hash);
 
     if (!passwordOk) {
       await logLoginAttempt({
         email,
-        userId,
+        userId: user.id,
         success: false,
         failureReason: "invalid_credentials",
-      });
+      }).catch(() => undefined);
 
       return NextResponse.json(
-        {
-          ok: false,
-          message: "Feil e-post eller passord.",
-        },
+        { ok: false, message: "Feil e-post eller passord.", mode: "neon_login" },
         { status: 401 },
       );
     }
 
     const token = createSessionToken();
+    await createUserSession(user.id, token);
 
-    await createUserSession(userId, token);
-
-    await ctQuery(
+    await neonQuery(
       `
         UPDATE ct_users
-        SET last_login_at = NOW(), last_active_at = NOW(), is_online = 1
-        WHERE id = ?
+        SET last_login_at = now(), last_active_at = now(), is_online = true
+        WHERE id = $1
       `,
-      [userId],
+      [user.id],
     );
 
     await logLoginAttempt({
       email,
-      userId,
+      userId: user.id,
       success: true,
       failureReason: null,
-    });
+    }).catch(() => undefined);
 
     const cookieStore = await cookies();
-
     cookieStore.set(CT_SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: "lax",
@@ -183,8 +192,9 @@ export async function POST(request: Request) {
       {
         ok: true,
         authenticated: true,
+        mode: "neon_login",
         user: {
-          id: userId,
+          id: user.id,
           public_id: user.public_id,
           email: user.email,
           display_name: user.display_name,
@@ -195,8 +205,9 @@ export async function POST(request: Request) {
           email_status: user.email_status,
           admin_approval_status: user.admin_approval_status,
           role: user.role,
-          is_admin: isAdmin,
-          is_active: isActive,
+          membership_level: user.membership_level,
+          is_admin: user.is_admin,
+          is_active: user.is_active,
         },
       },
       { status: 200 },
@@ -212,11 +223,7 @@ export async function POST(request: Request) {
     }).catch(() => undefined);
 
     return NextResponse.json(
-      {
-        ok: false,
-        message: "Login failed",
-        error: message,
-      },
+      { ok: false, message: "Login failed", error: message, mode: "neon_login" },
       { status: 500 },
     );
   }

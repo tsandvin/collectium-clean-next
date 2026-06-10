@@ -2,84 +2,93 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Neon database connection
+ * Neon database helper
  *
- * Definering / formål:
- * Kobler Collectium Next.js til Neon Postgres under MariaDB -> Neon migreringskontroll.
- * Koblingen er lazy slik at build ikke feiler hvis lokal Neon-env mangler.
+ * Definering / formÃ¥l:
+ * Felles Postgres/Neon databasekobling for Next.js API-ruter.
  *
- * Bruksområde:
- * Brukes av admin/system/mariadb-neon og API-ruter for Neon health, schema inventory,
- * table mapping og migreringskontroll.
+ * BruksomrÃ¥de:
+ * Brukes av auth API og senere Neon-baserte Collectium-ruter.
  *
- * Berørte sider / routes:
- * - /admin/system/mariadb-neon
+ * BerÃ¸rte sider / routes:
+ * - /api/auth/login
+ * - /api/auth/register
+ * - /api/auth/logout
+ * - /api/auth/session
  *
- * Berørte DB-brytere / feature_keys:
- * - admin.system.mariadb_neon.view
- * - admin.system.mariadb_neon.run_check
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - auth.login
+ * - auth.register
+ * - auth.logout
+ * - auth.session.view
  *
- * Berørte API-ruter:
- * - GET /api/system/neon-health
- * - GET /api/system/db-overview
- * - GET /api/system/table-mapping
- * - GET /api/system/field-mapping
+ * BerÃ¸rte API-ruter:
+ * - /api/auth/*
  *
- * Berørte tabeller / views:
- * - Neon public schema
- * - ct_migration_control_runs
- * - ct_database_truth_status
+ * BerÃ¸rte tabeller / views:
+ * - ct_users
+ * - ct_user_sessions
+ * - ct_login_attempts
  *
  * Dataretning:
- * Neon -> API/backend -> Next.js -> React -> UI
+ * Neon/Postgres -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
- * log_category: system.database
- * log_action: neon.query
+ * log_category: auth
+ * log_action: db.query
  *
  * Versjon:
- * CT-FILE-NEON-0001 / CHANGE-2026-06-09-0004
+ * CT-FILE-AUTH-NEON-0001 / CHANGE-2026-06-10-0002
  */
 
-import { Pool } from "pg";
+import { Pool, type QueryResultRow } from "pg";
 
-let neonPool: Pool | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var collectiumNeonPool: Pool | undefined;
+}
 
 function getConnectionString(): string {
-  const connectionString =
-    process.env.NEON_DATABASE_URL ||
-    process.env.POSTGRES_URL ||
+  const value =
     process.env.DATABASE_URL ||
-    process.env.neon_DATABASE_URL;
+    process.env.POSTGRES_URL ||
+    process.env.NEON_DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
 
-  if (!connectionString) {
-    throw new Error(
-      "Missing Neon/Postgres connection string. Set NEON_DATABASE_URL, POSTGRES_URL, DATABASE_URL or neon_DATABASE_URL in Vercel Environment Variables.",
-    );
+  if (!value) {
+    throw new Error("Missing Neon/Postgres connection string. Set DATABASE_URL or POSTGRES_URL in Vercel Environment Variables.");
   }
 
-  return connectionString;
+  return value;
 }
 
-function getNeonPool(): Pool {
-  if (neonPool) {
-    return neonPool;
+export function getNeonPool(): Pool {
+  if (!global.collectiumNeonPool) {
+    global.collectiumNeonPool = new Pool({
+      connectionString: getConnectionString(),
+      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+      max: 5,
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
+    });
   }
 
-  neonPool = new Pool({
-    connectionString: getConnectionString(),
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  return neonPool;
+  return global.collectiumNeonPool;
 }
 
-export async function neonQuery<T = unknown>(
+export async function neonQuery<T extends QueryResultRow = QueryResultRow>(
   sql: string,
   params: unknown[] = [],
 ): Promise<T[]> {
-  const result = await getNeonPool().query(sql, params);
-  return result.rows as T[];
+  const result = await getNeonPool().query<T>(sql, params);
+  return result.rows;
+}
+
+export async function neonOne<T extends QueryResultRow = QueryResultRow>(
+  sql: string,
+  params: unknown[] = [],
+): Promise<T | null> {
+  const rows = await neonQuery<T>(sql, params);
+  return rows[0] ?? null;
 }

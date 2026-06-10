@@ -2,46 +2,45 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Login page
+ * Registration page
  *
  * Definering / formÃ¥l:
- * Next.js-side for Neon-basert Collectium-login.
+ * Next.js-side for Neon-basert Collectium-registrering.
  *
  * BruksomrÃ¥de:
- * Brukes av brukere som skal logge inn.
+ * Brukes av nye brukere som skal registrere konto.
  *
  * BerÃ¸rte sider / routes:
- * - /login
+ * - /registrering
  *
  * BerÃ¸rte DB-brytere / feature_keys:
- * - auth.login
+ * - auth.register
  *
  * BerÃ¸rte API-ruter:
- * - POST /api/auth/login
+ * - POST /api/auth/register
  *
  * BerÃ¸rte tabeller / views:
  * - ct_users
  * - ct_user_sessions
- * - ct_login_attempts
  *
  * Dataretning:
  * Neon/Postgres -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
  * log_category: auth
- * log_action: login.page
+ * log_action: register.page
  *
  * Versjon:
- * CT-FILE-AUTH-NEON-0009 / CHANGE-2026-06-10-0002
+ * CT-FILE-AUTH-NEON-0010 / CHANGE-2026-06-10-0002
  */
 
 import CollectiumAuthForm from "@/components/auth/CollectiumAuthForm";
 
 export const metadata = {
-  title: "Logg inn | Collectium",
-  description: "Logg inn pÃ¥ Collectium med Neon-basert auth.",
+  title: "Registrer deg | Collectium",
+  description: "Opprett Collectium-konto med Neon-basert auth.",
 };
 
-export default function LoginPage() {
-  return <CollectiumAuthForm mode="login" />;
+export default function RegistrationPage() {
+  return <CollectiumAuthForm mode="register" />;
 }
