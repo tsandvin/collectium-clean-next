@@ -1,172 +1,360 @@
 ﻿"use client";
 
-/*
- * MariaDB - Neon Application Runtime Overview
+/**
+ * COLLECTIUM FILE HEADER
  *
- * Formål:
- * Viser aktive applikasjoner, deploy, GitHub, Vercel, Next.js, React, Neon og siste prosess.
+ * Overskrift:
+ * MariaDB Neon Application Runtime Overview
+ *
+ * Definering / formål:
+ * Viser aktive moduler, brukeraktivitet, Blob/filer og Vercel Sandbox
+ * på MariaDB -> Neon kontrollsiden.
+ *
+ * Bruksområde:
+ * - /admin/system/mariadb-neon
+ *
+ * Berørte API-ruter:
+ * - GET /api/system/application-runtime-overview
+ *
+ * Berørte DB-brytere / feature_keys:
+ * - admin.system.active_modules.view
+ * - admin.system.user_activity.view
+ * - admin.system.blob_files.view
+ * - admin.system.vercel_sandbox.view
+ *
+ * Dataretning:
+ * Runtime/API -> React-komponent -> admin UI
+ *
+ * Logging:
+ * log_category: system
+ * log_action: application_runtime_overview.view
+ *
+ * Versjon:
+ * CT-COMPONENT-APPLICATION-RUNTIME-OVERVIEW-0002 / CHANGE-2026-06-10-RUNTIME-MODES
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./MariaDbNeonApplicationRuntimeOverview.module.css";
 
-type RuntimeData = Record<string, any>;
+type RuntimeMode = "modules" | "userActivity" | "blobFiles" | "vercelSandbox" | "all";
 
-function text(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "Mangler";
-  if (typeof value === "object") return JSON.stringify(value);
+type JsonRecord = Record<string, unknown>;
+
+type RuntimeData = {
+  ok?: boolean;
+  source?: string;
+  route?: string;
+  checked_at?: string;
+  project?: JsonRecord;
+  env_status?: JsonRecord;
+  summary?: JsonRecord;
+  active_modules?: JsonRecord[];
+  module_activity?: JsonRecord[];
+  user_activity?: JsonRecord;
+  blob_activity?: JsonRecord[];
+  sandbox_activity?: JsonRecord[];
+  svar_til_chatgpt?: JsonRecord;
+};
+
+function asString(value: unknown, fallback = "Mangler") {
+  if (value === null || value === undefined || value === "") return fallback;
+  if (typeof value === "boolean") return value ? "Ja" : "Nei";
   return String(value);
 }
 
-function Badge({ value }: { value: unknown }) {
-  const label = text(value);
-  const lower = label.toLowerCase();
-
-  let className = styles.badgeInfo;
-  if (lower.includes("ok")) className = styles.badgeOk;
-  if (lower.includes("mangler")) className = styles.badgeMissing;
-  if (lower.includes("ukjent") || lower.includes("ikke koblet")) className = styles.badgeWarn;
-
-  return <span className={className}>{label}</span>;
+function asRows(value: unknown): JsonRecord[] {
+  return Array.isArray(value) ? value.filter((row): row is JsonRecord => Boolean(row && typeof row === "object")) : [];
 }
 
-function InfoPanel({ title, data }: { title: string; data?: RuntimeData }) {
+function statusClass(value: unknown) {
+  const status = asString(value, "").toLowerCase();
+
+  if (status.includes("ok") || status.includes("klar") || status.includes("aktiv")) return styles.ok;
+  if (status.includes("varsel") || status.includes("venter")) return styles.warning;
+  if (status.includes("mangler") || status.includes("not_installed")) return styles.missing;
+  if (status.includes("feil")) return styles.error;
+  if (status.includes("blokkert")) return styles.blocked;
+  if (status.includes("planlagt")) return styles.planned;
+
+  return styles.neutral;
+}
+
+function getValue(row: JsonRecord, keys: string[], fallback = "Mangler") {
+  for (const key of keys) {
+    if (row[key] !== undefined && row[key] !== null && row[key] !== "") {
+      return row[key];
+    }
+  }
+
+  return fallback;
+}
+
+function RuntimeTable({ rows }: { rows: JsonRecord[] }) {
+  const columns = useMemo(() => {
+    const priority = [
+      "line_no",
+      "module_name",
+      "package_name",
+      "version",
+      "status",
+      "activity_status",
+      "usage_no",
+      "next_action_no",
+      "token_present",
+      "last_seen_no",
+    ];
+
+    const keys = new Set<string>();
+
+    for (const column of priority) {
+      if (rows.some((row) => Object.prototype.hasOwnProperty.call(row, column))) {
+        keys.add(column);
+      }
+    }
+
+    for (const row of rows) {
+      for (const key of Object.keys(row)) {
+        keys.add(key);
+      }
+    }
+
+    return Array.from(keys);
+  }, [rows]);
+
+  if (!rows.length) {
+    return <p className={styles.empty}>Ingen rader i denne kontrollen ennå.</p>;
+  }
+
   return (
-    <section className={styles.panel}>
-      <h3>{title}</h3>
-      <div className={styles.infoGrid}>
-        {Object.entries(data || {}).map(([key, value]) => (
-          <article key={key}>
-            <span>{key}</span>
-            <strong>{text(value)}</strong>
-          </article>
-        ))}
-      </div>
-    </section>
+    <div className={styles.tableWrap}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th key={column}>{column}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr key={index}>
+              {columns.map((column) => {
+                const value = row[column];
+
+                return (
+                  <td key={column}>
+                    {column === "status" || column === "activity_status" ? (
+                      <span className={`${styles.badge} ${statusClass(value)}`}>{asString(value)}</span>
+                    ) : (
+                      <span>{asString(value, "-")}</span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
-export default function MariaDbNeonApplicationRuntimeOverview() {
-  const [data, setData] = useState<RuntimeData | null>(null);
-  const [error, setError] = useState<string | null>(null);
+function MetricCard({
+  label,
+  value,
+  status,
+}: {
+  label: string;
+  value: unknown;
+  status?: unknown;
+}) {
+  return (
+    <article className={styles.metricCard}>
+      <span>{label}</span>
+      <strong>{asString(value)}</strong>
+      {status !== undefined ? <em className={statusClass(status)}>{asString(status)}</em> : null}
+    </article>
+  );
+}
 
-  async function load() {
-    setError(null);
+export default function MariaDbNeonApplicationRuntimeOverview({
+  mode = "modules",
+}: {
+  mode?: RuntimeMode;
+}) {
+  const [data, setData] = useState<RuntimeData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorText, setErrorText] = useState("");
+
+  async function loadRuntime() {
+    setLoading(true);
+    setErrorText("");
 
     try {
       const response = await fetch("/api/system/application-runtime-overview", {
         cache: "no-store",
       });
 
+      const json = (await response.json()) as RuntimeData;
+
       if (!response.ok) {
         throw new Error(`API svarte ${response.status}`);
       }
 
-      setData(await response.json());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Ukjent feil");
+      setData(json);
+    } catch (error) {
+      setErrorText(error instanceof Error ? error.message : "Ukjent runtime-feil");
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
+    void loadRuntime();
   }, []);
 
-  if (error) {
-    return (
-      <section className={styles.runtimeBox}>
-        <h2>Aktive applikasjoner / tilknytninger</h2>
-        <p className={styles.error}>Kunne ikke hente runtime-status: {error}</p>
-        <button type="button" onClick={load}>Prøv igjen</button>
-      </section>
-    );
-  }
+  const title = {
+    modules: "Aktive moduler",
+    userActivity: "Brukeraktivitet",
+    blobFiles: "Blob / filer",
+    vercelSandbox: "Vercel Sandbox",
+    all: "Aktive applikasjoner / tilknytninger",
+  }[mode];
 
-  if (!data) {
-    return (
-      <section className={styles.runtimeBox}>
-        <h2>Aktive applikasjoner / tilknytninger</h2>
-        <p>Laster runtime-status ...</p>
-      </section>
-    );
-  }
+  const lead = {
+    modules: "Viser installerte og aktive runtime-moduler som Next.js, React, Neon, pg, MariaDB, Blob og Sandbox.",
+    userActivity: "Viser planlagt og faktisk brukeraktivitet, online-brukere, medlemskap og nødvendige usage-tabeller.",
+    blobFiles: "Viser status for Vercel Blob, token, fil-/bildelagring og neste test.",
+    vercelSandbox: "Viser status for Vercel Sandbox og neste kontrollerte sandbox-test.",
+    all: "Viser hvilken Vercel-deploy, GitHub-commit, Next.js/React-versjon og Neon-kobling som faktisk kjører.",
+  }[mode];
+
+  const activeModules = asRows(data?.active_modules);
+  const moduleActivity = asRows(data?.module_activity);
+  const blobActivity = asRows(data?.blob_activity);
+  const sandboxActivity = asRows(data?.sandbox_activity);
+  const userActivity = (data?.user_activity || {}) as JsonRecord;
+  const envStatus = (data?.env_status || {}) as JsonRecord;
+  const summary = (data?.summary || {}) as JsonRecord;
+  const project = (data?.project || {}) as JsonRecord;
+
+  const renderedRows =
+    mode === "modules"
+      ? activeModules.length
+        ? activeModules
+        : moduleActivity
+      : mode === "blobFiles"
+        ? blobActivity
+        : mode === "vercelSandbox"
+          ? sandboxActivity
+          : [];
 
   return (
-    <section className={styles.runtimeBox}>
-      <header className={styles.header}>
+    <section className={styles.runtimePanel}>
+      <div className={styles.header}>
         <div>
-          <p>Runtime truth</p>
-          <h2>Aktive applikasjoner / tilknytninger</h2>
-          <span>
-            Viser hvilken Vercel-deploy, GitHub-commit, Next.js/React-versjon og Neon-kobling som faktisk kjører.
-          </span>
+          <p className={styles.kicker}>Runtime truth</p>
+          <h2>{title}</h2>
+          <p>{lead}</p>
         </div>
-        <button type="button" onClick={load}>Oppdater</button>
-      </header>
 
-      <div className={styles.summaryGrid}>
-        <article>
-          <span>Aktiv side</span>
-          <strong>{text(data.collectium?.active_page_name)}</strong>
-          <small>{text(data.collectium?.active_page)}</small>
-        </article>
-
-        <article>
-          <span>Vercel miljø</span>
-          <strong>{text(data.vercel?.environment)}</strong>
-          <small>{text(data.vercel?.production_url || data.vercel?.deployment_url)}</small>
-        </article>
-
-        <article>
-          <span>GitHub commit</span>
-          <strong>{text(data.github?.commit_short_sha)}</strong>
-          <small>{text(data.github?.branch)}</small>
-        </article>
-
-        <article>
-          <span>Neon</span>
-          <strong>{text(data.neon?.active_connection)}</strong>
-          <small>{text(data.neon?.database_url?.host || data.neon?.direct_url?.host || data.neon?.neon_database_url?.host)}</small>
-        </article>
+        <button type="button" className={styles.refreshButton} onClick={() => void loadRuntime()}>
+          Oppdater
+        </button>
       </div>
 
-      <section className={styles.panel}>
-        <h3>Integrasjonsstatus</h3>
-        <div className={styles.integrationList}>
-          {(data.integrations || []).map((item: RuntimeData, index: number) => (
-            <article key={`${item.name}-${index}`}>
-              <div>
-                <strong>{text(item.name)}</strong>
-                <span>{text(item.detail)}</span>
+      {loading ? (
+        <div className={styles.notice}>Henter runtime-status...</div>
+      ) : null}
+
+      {errorText ? (
+        <div className={`${styles.notice} ${styles.errorBox}`}>
+          Kunne ikke hente /api/system/application-runtime-overview: {errorText}
+        </div>
+      ) : null}
+
+      {!loading && !errorText ? (
+        <>
+          <div className={styles.metrics}>
+            <MetricCard label="API source" value={data?.source} status={data?.ok ? "OK" : "VARSEL"} />
+            <MetricCard label="Prosjekt" value={project.name} />
+            <MetricCard label="Node" value={project.node} />
+            <MetricCard label="Vercel miljø" value={envStatus.vercel_env} status={envStatus.vercel ? "OK" : "LOCAL"} />
+            <MetricCard label="Neon env" value={envStatus.database_url_present} status={envStatus.database_url_present ? "OK" : "VARSEL"} />
+            <MetricCard label="MariaDB env" value={envStatus.mariadb_env_present} status={envStatus.mariadb_env_present ? "OK" : "VARSEL"} />
+            <MetricCard label="Blob token" value={envStatus.blob_token_present} status={envStatus.blob_token_present ? "OK" : "VARSEL"} />
+            <MetricCard label="Sist hentet" value={data?.checked_at} />
+          </div>
+
+          {mode === "modules" || mode === "all" ? (
+            <div className={styles.sectionBlock}>
+              <h3>Aktive moduler</h3>
+              <RuntimeTable rows={activeModules.length ? activeModules : moduleActivity} />
+            </div>
+          ) : null}
+
+          {mode === "userActivity" || mode === "all" ? (
+            <div className={styles.sectionBlock}>
+              <h3>Brukeraktivitet</h3>
+
+              <div className={styles.metrics}>
+                <MetricCard label="Status" value={userActivity.status} status={userActivity.status} />
+                <MetricCard label="Online nå" value={userActivity.online_now} />
+                <MetricCard label="Anonyme online" value={userActivity.anonymous_online} />
+                <MetricCard label="Innloggede online" value={userActivity.logged_in_online} />
+                <MetricCard label="Aktive 24 timer" value={userActivity.active_24h} />
+                <MetricCard label="Aktive 7 dager" value={userActivity.active_7d} />
+                <MetricCard label="Free" value={userActivity.free_users_active} />
+                <MetricCard label="Bronze" value={userActivity.bronze_users_active} />
+                <MetricCard label="Silver" value={userActivity.silver_users_active} />
+                <MetricCard label="Gold" value={userActivity.gold_users_active} />
+                <MetricCard label="Platinum" value={userActivity.platinum_users_active} />
+                <MetricCard label="Forhandlere" value={userActivity.dealers_active} />
+                <MetricCard label="Admin" value={userActivity.admins_active} />
               </div>
-              <Badge value={item.status} />
-            </article>
-          ))}
-        </div>
-      </section>
 
-      <div className={styles.columns}>
-        <InfoPanel title="Vercel" data={data.vercel} />
-        <InfoPanel title="GitHub" data={data.github} />
-      </div>
+              <div className={styles.infoBox}>
+                <strong>Datagrunnlag:</strong> {asString(userActivity.source_no)}
+              </div>
 
-      <div className={styles.columns}>
-        <InfoPanel title="Next.js / React" data={data.framework} />
-        <InfoPanel title="Collectium" data={data.collectium} />
-      </div>
+              <div className={styles.infoBox}>
+                <strong>Neste tiltak:</strong> {asString(userActivity.next_action_no)}
+              </div>
 
-      <InfoPanel title="Neon / database" data={data.neon} />
+              <h4>Nødvendige tabeller</h4>
+              <div className={styles.chips}>
+                {Array.isArray(userActivity.required_tables)
+                  ? userActivity.required_tables.map((table) => (
+                      <span key={String(table)}>{String(table)}</span>
+                    ))
+                  : null}
+              </div>
+            </div>
+          ) : null}
 
-      <section className={styles.panel}>
-        <h3>Sist registrert menneskelig prosess</h3>
-        <div className={styles.processBox}>
-          <Badge value={data.last_human_process?.status} />
-          <p>{text(data.last_human_process?.explanation)}</p>
-          <InfoPanel title="Teknisk fallback / siste deploy" data={data.last_human_process?.fallback} />
-        </div>
-      </section>
+          {mode === "blobFiles" || mode === "all" ? (
+            <div className={styles.sectionBlock}>
+              <h3>Blob / filer</h3>
+              <RuntimeTable rows={blobActivity} />
+            </div>
+          ) : null}
 
-      <p className={styles.generated}>Sist hentet: {text(data.generated_at)}</p>
+          {mode === "vercelSandbox" || mode === "all" ? (
+            <div className={styles.sectionBlock}>
+              <h3>Vercel Sandbox</h3>
+              <RuntimeTable rows={sandboxActivity} />
+            </div>
+          ) : null}
+
+          <div className={styles.footerLine}>
+            <span>Moduler totalt: {asString(summary.active_modules_total, "0")}</span>
+            <span>OK: {asString(summary.active_modules_ok, "0")}</span>
+            <span>Mangler: {asString(summary.active_modules_missing, "0")}</span>
+            <span>Neon truth: {asString(summary.neon_truth_status)}</span>
+            <span>Migrering tillatt: {asString(summary.migration_allowed)}</span>
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }

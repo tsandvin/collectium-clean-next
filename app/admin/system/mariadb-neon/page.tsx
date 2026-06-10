@@ -896,19 +896,19 @@ export default function MariaDbNeonControlPage() {
       ) : null}
 
         {activeTab === "applications" ? (
-        <MariaDbNeonApplicationRuntimeOverview />
+        <MariaDbNeonApplicationRuntimeOverview mode="modules" />
       ) : null}
 
       {activeTab === "userActivity" ? (
-        <MariaDbNeonApplicationRuntimeOverview />
+        <MariaDbNeonApplicationRuntimeOverview mode="modules" />
       ) : null}
 
       {activeTab === "blobFiles" ? (
-        <MariaDbNeonApplicationRuntimeOverview />
+        <MariaDbNeonApplicationRuntimeOverview mode="modules" />
       ) : null}
 
       {activeTab === "vercelSandbox" ? (
-        <MariaDbNeonApplicationRuntimeOverview />
+        <MariaDbNeonApplicationRuntimeOverview mode="modules" />
       ) : null}
 
       
@@ -932,6 +932,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
