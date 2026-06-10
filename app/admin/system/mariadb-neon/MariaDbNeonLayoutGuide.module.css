@@ -452,3 +452,116 @@
     grid-template-columns: 1fr;
   }
 }
+
+.screenCalculator {
+  margin: 14px 0 16px;
+  border: 1px solid rgba(49, 104, 176, 0.28);
+  border-bottom: 2px solid #3168b0;
+  border-radius: 16px;
+  padding: 14px;
+  background:
+    linear-gradient(135deg, rgba(219, 234, 254, 0.68), rgba(255, 255, 255, 0.74));
+}
+
+.calculatorHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.calculatorHeader div {
+  display: grid;
+  gap: 2px;
+}
+
+.calculatorHeader strong {
+  font-size: 13px;
+  color: #052f2a;
+}
+
+.calculatorHeader span {
+  font-size: 12px;
+  color: rgba(5, 47, 42, 0.66);
+}
+
+.calculatorHeader em {
+  font-style: normal;
+  border: 1px solid rgba(49, 104, 176, 0.38);
+  border-bottom: 2px solid #3168b0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #1e3a8a;
+  white-space: nowrap;
+}
+
+.calculatorGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.calculatorGrid article {
+  border: 1px solid rgba(49, 104, 176, 0.2);
+  border-bottom: 2px solid rgba(49, 104, 176, 0.46);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.calculatorGrid span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(5, 47, 42, 0.6);
+}
+
+.calculatorGrid strong {
+  display: block;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #052f2a;
+}
+
+.calculatorGrid small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(5, 47, 42, 0.66);
+}
+
+.calculatorNote {
+  margin: 12px 0 0;
+  border-left: 4px solid #3168b0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(5, 47, 42, 0.76);
+}
+
+@media (max-width: 1200px) {
+  .calculatorGrid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .calculatorHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .calculatorGrid {
+    grid-template-columns: 1fr;
+  }
+}

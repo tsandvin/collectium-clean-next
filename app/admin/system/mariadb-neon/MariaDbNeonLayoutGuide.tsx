@@ -78,6 +78,57 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
   }
 };
 
+
+const screenCalculator: Record<ScreenMode, {
+  activeLabel: string;
+  widthRange: string;
+  standardRule: string;
+  fieldRule: string;
+  workspaceRule: string;
+  visualMode: string;
+}> = {
+  mobile: {
+    activeLabel: "Mobilvisning",
+    widthRange: "0-719px",
+    standardRule: "Desktop-standarden er ikke aktiv. Siden bruker mobil toppbar og én kolonne.",
+    fieldRule: "Alle felt brytes til én kolonne. Tabeller og matriser må scrolle inne i eget panel.",
+    workspaceRule: "Workspace lanes er deaktivert.",
+    visualMode: "Kompakt kontrollflate"
+  },
+  tablet: {
+    activeLabel: "Tabletvisning",
+    widthRange: "720-1100px",
+    standardRule: "Desktop-standarden er ikke aktiv. Tablet bruker mellomlayout.",
+    fieldRule: "Fire felt blir normalt 2 + 2. Tre felt kan bli 1 + 1 + 1 eller 2 + 1.",
+    workspaceRule: "Workspace lanes er deaktivert.",
+    visualMode: "Mellomflate"
+  },
+  desktop: {
+    activeLabel: "Desktop standard",
+    widthRange: "1101-1899px",
+    standardRule: "Dette er standard desktop-visning. Sidebredden stopper bredskjerm-funksjon her.",
+    fieldRule: "Felt vises etter standard: 4 felt, 3 felt, 2 felt, lang/liten og liten/lang inne i én normal arbeidsflate.",
+    workspaceRule: "Ingen sideveis workspace lanes. Horisontal scroll skal bare finnes i tabeller/paneler.",
+    visualMode: "Normal Collectium-side"
+  },
+  wide: {
+    activeLabel: "Bredskjerm / workspace",
+    widthRange: "1900px+",
+    standardRule: "Desktop-standarden overstyres. Bredskjerm-funksjon aktiveres.",
+    fieldRule: "Felt kan fordeles i arbeidsbaner: kontroll/filter, matrise, detaljer, relasjoner og logg.",
+    workspaceRule: "Workspace lanes brukes. Hver lane bør være ca. 900-1100px.",
+    visualMode: "Sideveis arbeidsflate"
+  },
+  tv: {
+    activeLabel: "TV / presentasjon",
+    widthRange: "2900px+",
+    standardRule: "Bredskjerm workspace overstyres av presentasjonsmodus.",
+    fieldRule: "Færre felt vises samtidig. Viktigste status og hovedtall prioriteres.",
+    workspaceRule: "Ikke vis alle lanes. TV skal være lesbar på avstand med større typografi.",
+    visualMode: "Presentasjonsflate"
+  }
+};
+
 const fieldRegister = [
   { nr: "01", name: "Sidemeny", react: "AppShell / Sidebar", field: "global_navigation", role: "Global navigasjon", db: "Menyregister / sidekontroll senere", responsive: "Desktop fast venstre. Mobil skjult bak meny." },
   { nr: "02", name: "Toppmeny / søk / bruker", react: "Topbar / Search / UserMenu", field: "topbar_search_user", role: "Global toppkontroll", db: "Auth/session + søk via API", responsive: "Alltid øverst. Mobil kompakt." },
@@ -135,6 +186,44 @@ export default function MariaDbNeonLayoutGuide() {
                   <h3>Systemlayout med radfarger, nummer og feltnavn</h3>
                   <p>Hver rad har egen farge for å vise responsiv rekkefølge og sortering.</p>
                 </div>
+              </div>
+
+                            <div className={styles.screenCalculator}>
+                <div className={styles.calculatorHeader}>
+                  <div>
+                    <strong>Skjermkalkulator</strong>
+                    <span>Aktiv regel for valgt skjermfunksjon</span>
+                  </div>
+                  <em>{screenCalculator[screenMode].widthRange}</em>
+                </div>
+
+                <div className={styles.calculatorGrid}>
+                  <article>
+                    <span>Aktiv visning</span>
+                    <strong>{screenCalculator[screenMode].activeLabel}</strong>
+                    <small>{screenCalculator[screenMode].visualMode}</small>
+                  </article>
+
+                  <article>
+                    <span>Standardgrense</span>
+                    <strong>Desktop stopper ved 1899px</strong>
+                    <small>1101-1899px er normal feltvisning.</small>
+                  </article>
+
+                  <article>
+                    <span>Feltregel</span>
+                    <strong>{screenCalculator[screenMode].fieldRule}</strong>
+                  </article>
+
+                  <article>
+                    <span>Workspace-regel</span>
+                    <strong>{screenCalculator[screenMode].workspaceRule}</strong>
+                  </article>
+                </div>
+
+                <p className={styles.calculatorNote}>
+                  {screenCalculator[screenMode].standardRule}
+                </p>
               </div>
 
               <div className={styles.layoutDiagram}>
@@ -282,4 +371,5 @@ export default function MariaDbNeonLayoutGuide() {
     </>
   );
 }
+
 
