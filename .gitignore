@@ -31,3 +31,19 @@ collectium-neon-rule-establishment-v1.zip
 collectium-neon-rule-establishment-install-test-v1.ps1
 collectium-neon-rule-package-check-v1.ps1
 neon-truth-status.json
+
+# Collectium precise local backup/test ignores
+app/admin/system/mariadb-neon/*.backup-*
+app/admin/system/mariadb-neon/*.bak
+app/admin/system/mariadb-neon/page.tsx.backup-*
+app/admin/system/mariadb-neon/MariaDbNeonLayoutGuide.tsx.backup-*
+app/admin/system/mariadb-neon/MariaDbNeonLayoutGuide.module.css.backup-*
+
+/docs/backups/
+/docs/control-reports/
+/zip-check-neon-rule/
+/collectium-neon-rule-establishment-v1/
+/collectium-neon-rule-establishment-v1.zip
+/collectium-neon-rule-establishment-install-test-v1.ps1
+/collectium-neon-rule-package-check-v1.ps1
+/neon-truth-status.json
