@@ -1,168 +1,359 @@
-﻿/*
- * Collectium Application Runtime Overview API
- *
- * Formål:
- * Viser aktiv Vercel/GitHub/Next.js/React/Neon-runtime for admin-kontroll.
- *
- * Route:
- * /api/system/application-runtime-overview
- */
-
+﻿import mysql from "mysql2/promise";
+import { Pool } from "pg";
 import { NextResponse } from "next/server";
-import { createRequire } from "module";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const require = createRequire(import.meta.url);
+type TransferStatus = "OK" | "VARSEL" | "MANGLER" | "INFO";
 
-function env(name: string): string | null {
-  const value = process.env[name];
-  return value && value.trim() !== "" ? value : null;
+type TransferRow = {
+  line_no: number;
+  source_key: string;
+  object_group: string;
+  mariadb_table: string | null;
+  neon_table: string | null;
+  mariadb_exists: boolean;
+  neon_exists: boolean;
+  mariadb_rows: number | null;
+  neon_rows: number | null;
+  status: TransferStatus;
+  status_color: "green" | "yellow" | "red" | "blue";
+  deviation_no: string;
+  next_action_no: string;
+};
+
+type MigrationTableMapRow = {
+  source_key: string | null;
+  object_group: string | null;
+  source_table: string | null;
+  mariadb_table_name?: string | null;
+  source_role?: string | null;
+  source_status?: string | null;
+  row_count?: number | string | null;
+  notes_no?: string | null;
+};
+
+function getNeonConnectionString(): string {
+  const value =
+    process.env.NEON_DATABASE_URL ||
+    process.env.neon_DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.DATABASE_URL;
+
+  if (!value) {
+    throw new Error("Neon env mangler. Bruk DATABASE_URL eller neon_DATABASE_URL.");
+  }
+
+  return value;
 }
 
-function readVersion(pkgName: string): string {
+function getMariaDbConnectionOptions(): mysql.ConnectionOptions {
+  return {
+    host: process.env.CT_DB_HOST || process.env.MARIADB_HOST || process.env.MYSQL_HOST || process.env.DB_HOST,
+    port: Number(process.env.CT_DB_PORT || process.env.MARIADB_PORT || process.env.MYSQL_PORT || process.env.DB_PORT || 3306),
+    database: process.env.CT_DB_NAME || process.env.CT_DB_DATABASE || process.env.MARIADB_DATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME,
+    user: process.env.CT_DB_USER || process.env.MARIADB_USER || process.env.MYSQL_USER || process.env.DB_USER,
+    password: process.env.CT_DB_PASSWORD || process.env.MARIADB_PASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD,
+    charset: "utf8mb4",
+    supportBigNumbers: true,
+    bigNumberStrings: true,
+    dateStrings: true
+  };
+}
+
+function escapeIdentifier(identifier: string): string {
+  if (!/^[A-Za-z0-9_]+$/.test(identifier)) {
+    throw new Error(`Ugyldig SQL-identifikator: ${identifier}`);
+  }
+
+  return `\`${identifier}\``;
+}
+
+async function getMariaDbTables(conn: mysql.Connection): Promise<Set<string>> {
+  const [rows] = await conn.query(
+    `
+      select table_name
+      from information_schema.tables
+      where table_schema = database()
+    `
+  );
+
+  return new Set(
+    (rows as Array<{ table_name: string }>).map((row) => row.table_name)
+  );
+}
+
+async function countMariaDbRows(
+  conn: mysql.Connection,
+  tableName: string | null
+): Promise<number | null> {
+  if (!tableName || tableName === "NO_MARIADB_SOURCE") {
+    return null;
+  }
+
   try {
-    const pkg = require(`${pkgName}/package.json`) as { version?: string };
-    return pkg.version || "unknown";
+    const [rows] = await conn.query(
+      `select count(*) as row_count from ${escapeIdentifier(tableName)}`
+    );
+
+    const first = (rows as Array<{ row_count: number | string }>)[0];
+    return Number(first?.row_count ?? 0);
   } catch {
-    return "unknown";
+    return null;
   }
 }
 
-function parseDbUrl(raw: string | null) {
-  if (!raw) {
+async function getNeonTables(pool: Pool): Promise<Set<string>> {
+  const result = await pool.query(
+    `
+      select table_name
+      from information_schema.tables
+      where table_schema = 'public'
+    `
+  );
+
+  return new Set(result.rows.map((row) => String(row.table_name)));
+}
+
+async function getMigrationTableMap(pool: Pool): Promise<MigrationTableMapRow[]> {
+  const exists = await pool.query(
+    `
+      select exists (
+        select 1
+        from information_schema.tables
+        where table_schema = 'public'
+          and table_name = 'ct_migration_table_map'
+      ) as exists
+    `
+  );
+
+  if (!exists.rows[0]?.exists) {
+    return [];
+  }
+
+  const result = await pool.query(
+    `
+      select
+        source_key,
+        object_group,
+        source_table,
+        mariadb_table_name,
+        source_role,
+        source_status,
+        row_count,
+        notes_no
+      from ct_migration_table_map
+      order by source_key, object_group, source_table
+    `
+  );
+
+  return result.rows as MigrationTableMapRow[];
+}
+
+async function countNeonStagingRows(
+  pool: Pool,
+  sourceKey: string,
+  objectGroup: string,
+  sourceTable: string | null
+): Promise<number | null> {
+  const exists = await pool.query(
+    `
+      select exists (
+        select 1
+        from information_schema.tables
+        where table_schema = 'public'
+          and table_name = 'ct_migration_catalog_object_staging'
+      ) as exists
+    `
+  );
+
+  if (!exists.rows[0]?.exists) {
+    return null;
+  }
+
+  const result = await pool.query(
+    `
+      select count(*)::int as row_count
+      from ct_migration_catalog_object_staging
+      where source_key = $1
+        and object_group = $2
+        and source_table is not distinct from $3
+    `,
+    [sourceKey, objectGroup, sourceTable]
+  );
+
+  return Number(result.rows[0]?.row_count ?? 0);
+}
+
+function resolveStatus(input: {
+  mariadbTable: string | null;
+  neonTable: string | null;
+  mariadbExists: boolean;
+  neonExists: boolean;
+  mariaRows: number | null;
+  neonRows: number | null;
+}): Pick<TransferRow, "status" | "status_color" | "deviation_no" | "next_action_no"> {
+  const { mariadbTable, neonTable, mariadbExists, neonExists, mariaRows, neonRows } = input;
+
+  if (!mariadbTable || mariadbTable === "NO_MARIADB_SOURCE") {
     return {
-      exists: false,
-      user: null,
-      host: null,
-      database: null,
-      endpoint: null,
-      redacted_url: null,
+      status: "INFO",
+      status_color: "blue",
+      deviation_no: "Kilden finnes ikke i MariaDB og er definert som Neon-first.",
+      next_action_no: "Opprett Neon kilde-/filter-/objektstruktur når denne objektgruppen skal bygges."
     };
   }
 
-  try {
-    const url = new URL(raw);
+  if (!mariadbExists) {
     return {
-      exists: true,
-      user: url.username || null,
-      host: url.hostname || null,
-      database: url.pathname ? url.pathname.replace("/", "") : null,
-      endpoint: url.hostname ? url.hostname.split(".")[0] : null,
-      redacted_url: `${url.protocol}//${url.username ? `${url.username}:***@` : ""}${url.hostname}${url.pathname}`,
-    };
-  } catch {
-    return {
-      exists: true,
-      user: null,
-      host: null,
-      database: null,
-      endpoint: null,
-      redacted_url: "Kunne ikke parse connection string",
+      status: "MANGLER",
+      status_color: "red",
+      deviation_no: "MariaDB-tabell finnes ikke.",
+      next_action_no: "Kontroller ct_migration_table_map eller MariaDB schema."
     };
   }
+
+  if (!neonTable || !neonExists) {
+    return {
+      status: "MANGLER",
+      status_color: "red",
+      deviation_no: "Neon-måltabell finnes ikke.",
+      next_action_no: "Opprett Neon staging-/måltabell før import."
+    };
+  }
+
+  if (mariaRows !== null && neonRows !== null && mariaRows === neonRows) {
+    return {
+      status: "OK",
+      status_color: "green",
+      deviation_no: "MariaDB og Neon samsvarer på radtall.",
+      next_action_no: "Kan gå videre til ID-, relasjons- og filterkontroll."
+    };
+  }
+
+  if (neonRows !== null && neonRows > 0) {
+    return {
+      status: "VARSEL",
+      status_color: "yellow",
+      deviation_no: `Delvis overført eller radtall avviker. MariaDB=${mariaRows ?? "ukjent"}, Neon=${neonRows}.`,
+      next_action_no: "Kjør kontrollert import/row-count-sjekk før truth-godkjenning."
+    };
+  }
+
+  return {
+    status: "MANGLER",
+    status_color: "red",
+    deviation_no: `Ikke overført. MariaDB=${mariaRows ?? "ukjent"}, Neon=${neonRows ?? 0}.`,
+    next_action_no: "Kjør staging-import etter at UTF-8/import-ruten er stabil."
+  };
 }
 
 export async function GET() {
-  const owner = env("VERCEL_GIT_REPO_OWNER");
-  const repo = env("VERCEL_GIT_REPO_SLUG");
-  const sha = env("VERCEL_GIT_COMMIT_SHA");
-  const branch = env("VERCEL_GIT_COMMIT_REF");
-
-  const databaseUrl = parseDbUrl(env("DATABASE_URL"));
-  const directUrl = parseDbUrl(env("DIRECT_URL"));
-  const neonUrl = parseDbUrl(env("NEON_DATABASE_URL"));
-
-  const payload = {
-    ok: true,
-    generated_at: new Date().toISOString(),
-    collectium: {
-      application_name: "Collectium",
-      active_domain: "app.collectium.no",
-      active_page: "/admin/system/mariadb-neon",
-      active_page_name: "MariaDB - Neon Postgres Control",
-    },
-    vercel: {
-      environment: env("VERCEL_ENV"),
-      region: env("VERCEL_REGION"),
-      deployment_id: env("VERCEL_DEPLOYMENT_ID"),
-      deployment_url: env("VERCEL_URL") ? `https://${env("VERCEL_URL")}` : null,
-      production_url: env("VERCEL_PROJECT_PRODUCTION_URL") ? `https://${env("VERCEL_PROJECT_PRODUCTION_URL")}` : null,
-      git_provider: env("VERCEL_GIT_PROVIDER"),
-    },
-    github: {
-      owner,
-      repository: repo,
-      branch,
-      commit_sha: sha,
-      commit_short_sha: sha ? sha.slice(0, 7) : null,
-      commit_message: env("VERCEL_GIT_COMMIT_MESSAGE"),
-      commit_author_name: env("VERCEL_GIT_COMMIT_AUTHOR_NAME"),
-      commit_author_login: env("VERCEL_GIT_COMMIT_AUTHOR_LOGIN"),
-      repository_url: owner && repo ? `https://github.com/${owner}/${repo}` : null,
-      commit_url: owner && repo && sha ? `https://github.com/${owner}/${repo}/commit/${sha}` : null,
-    },
-    framework: {
-      node_version: process.version,
-      next_version: readVersion("next"),
-      react_version: readVersion("react"),
-      react_dom_version: readVersion("react-dom"),
-      runtime: "Next.js App Router",
-    },
-    neon: {
-      database_url: databaseUrl,
-      direct_url: directUrl,
-      neon_database_url: neonUrl,
-      active_connection:
-        databaseUrl.exists ? "DATABASE_URL" :
-        directUrl.exists ? "DIRECT_URL" :
-        neonUrl.exists ? "NEON_DATABASE_URL" :
-        "Mangler",
-    },
-    integrations: [
-      {
-        name: "Vercel",
-        status: env("VERCEL_ENV") ? "OK" : "Mangler miljødata",
-        detail: env("VERCEL_ENV") || "Ikke Vercel runtime",
-      },
-      {
-        name: "GitHub",
-        status: owner && repo && sha ? "OK" : "Mangler metadata",
-        detail: owner && repo ? `${owner}/${repo}` : "Mangler repo",
-      },
-      {
-        name: "Next.js",
-        status: readVersion("next") !== "unknown" ? "OK" : "Ukjent",
-        detail: readVersion("next"),
-      },
-      {
-        name: "React",
-        status: readVersion("react") !== "unknown" ? "OK" : "Ukjent",
-        detail: readVersion("react"),
-      },
-      {
-        name: "Neon",
-        status: databaseUrl.exists || directUrl.exists || neonUrl.exists ? "OK" : "Mangler connection string",
-        detail: databaseUrl.host || directUrl.host || neonUrl.host || "Ingen host funnet",
-      },
-    ],
-    last_human_process: {
-      status: "Ikke koblet til menneskelig prosesslogg ennå",
-      explanation:
-        "Denne fanen viser teknisk runtime nå. Neste steg er å koble dette til Collectium prosesslogg slik at siste menneskelige handling/godkjenning vises.",
-      fallback: {
-        type: "git_deploy",
-        by: env("VERCEL_GIT_COMMIT_AUTHOR_NAME") || env("VERCEL_GIT_COMMIT_AUTHOR_LOGIN") || owner,
-        branch,
-        commit_short_sha: sha ? sha.slice(0, 7) : null,
-        commit_message: env("VERCEL_GIT_COMMIT_MESSAGE"),
-      },
-    },
-  };
-
-  return NextResponse.json(payload, {
-    headers: {
-      "Cache-Control": "no-store",
-    },
+  const neonPool = new Pool({
+    connectionString: getNeonConnectionString(),
+    ssl: { rejectUnauthorized: false }
   });
+
+  const mariaConn = await mysql.createConnection(getMariaDbConnectionOptions());
+
+  try {
+    await mariaConn.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+    const [mariaTables, neonTables, tableMap] = await Promise.all([
+      getMariaDbTables(mariaConn),
+      getNeonTables(neonPool),
+      getMigrationTableMap(neonPool)
+    ]);
+
+    const rows: TransferRow[] = [];
+
+    for (const mapRow of tableMap) {
+      const sourceKey = String(mapRow.source_key || "");
+      const objectGroup = String(mapRow.object_group || "");
+      const mariaTable =
+        mapRow.mariadb_table_name ||
+        mapRow.source_table ||
+        null;
+
+      const neonTable = "ct_migration_catalog_object_staging";
+
+      const mariadbExists =
+        !!mariaTable &&
+        mariaTable !== "NO_MARIADB_SOURCE" &&
+        mariaTables.has(mariaTable);
+
+      const neonExists = neonTables.has(neonTable);
+
+      const mariaRows =
+        typeof mapRow.row_count === "number"
+          ? mapRow.row_count
+          : mapRow.row_count
+            ? Number(mapRow.row_count)
+            : await countMariaDbRows(mariaConn, mariaTable);
+
+      const neonRows =
+        sourceKey && objectGroup
+          ? await countNeonStagingRows(neonPool, sourceKey, objectGroup, mapRow.source_table || null)
+          : null;
+
+      const status = resolveStatus({
+        mariadbTable: mariaTable,
+        neonTable,
+        mariadbExists,
+        neonExists,
+        mariaRows,
+        neonRows
+      });
+
+      rows.push({
+        line_no: rows.length + 1,
+        source_key: sourceKey,
+        object_group: objectGroup,
+        mariadb_table: mariaTable,
+        neon_table: neonTable,
+        mariadb_exists: mariadbExists,
+        neon_exists: neonExists,
+        mariadb_rows: mariaRows,
+        neon_rows: neonRows,
+        ...status
+      });
+    }
+
+    const summary = rows.reduce(
+      (acc, row) => {
+        acc.total += 1;
+        if (row.status === "OK") acc.ok += 1;
+        if (row.status === "VARSEL") acc.varsel += 1;
+        if (row.status === "MANGLER") acc.mangler += 1;
+        if (row.status === "INFO") acc.info += 1;
+        return acc;
+      },
+      { total: 0, ok: 0, varsel: 0, mangler: 0, info: 0 }
+    );
+
+    return NextResponse.json({
+      ok: summary.mangler === 0 && summary.varsel === 0,
+      source: "mariadb-neon-transfer-matrix",
+      checked_at: new Date().toISOString(),
+      summary,
+      rows,
+      database_summary: {
+        mariadb_table_or_view_count: mariaTables.size,
+        neon_table_or_view_count: neonTables.size
+      },
+      collectium_rule: {
+        migration_allowed: false,
+        neon_truth_approval_allowed: false,
+        reason:
+          "Overføringsmatrisen viser om MariaDB-kilder har tilsvarende Neon-staging/mål og om radtall samsvarer. Den migrerer ikke data."
+      }
+    });
+  } finally {
+    await mariaConn.end();
+    await neonPool.end();
+  }
 }
+
