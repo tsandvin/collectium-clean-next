@@ -77,11 +77,16 @@ type TabKey =
   | "pages"
   | "diagnose"
   | "events"
-  | "applications" | "transfer" | "applications" | "json" | "chatgpt";
+  | "transfer" | "applications" | "userActivity" | "blobFiles" | "vercelSandbox" | "json" | "chatgpt";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "dashboard", label: "Dashboard" },
   { key: "inventory", label: "Inventory" },
+  { key: "transfer", label: "Overføringsmatrise" },
+  { key: "applications", label: "Aktive moduler" },
+  { key: "userActivity", label: "Brukeraktivitet" },
+  { key: "blobFiles", label: "Blob / filer" },
+  { key: "vercelSandbox", label: "Vercel Sandbox" },
   { key: "platform", label: "Plattform" },
   { key: "api", label: "API-ruter" },
   { key: "features", label: "DB-brytere" },
@@ -891,8 +896,20 @@ export default function MariaDbNeonControlPage() {
       ) : null}
 
         {activeTab === "applications" ? (
-          <MariaDbNeonApplicationRuntimeOverview />
-        ) : null}
+        <MariaDbNeonApplicationRuntimeOverview />
+      ) : null}
+
+      {activeTab === "userActivity" ? (
+        <MariaDbNeonApplicationRuntimeOverview />
+      ) : null}
+
+      {activeTab === "blobFiles" ? (
+        <MariaDbNeonApplicationRuntimeOverview />
+      ) : null}
+
+      {activeTab === "vercelSandbox" ? (
+        <MariaDbNeonApplicationRuntimeOverview />
+      ) : null}
 
       
 
@@ -915,6 +932,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
