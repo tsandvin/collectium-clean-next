@@ -130,7 +130,7 @@ const STAGING_COLUMNS = new Set([
 ]);
 
 function jsonResponse(data: unknown, status = 200) {
-  return NextResponse.json(data, { status });
+  return NextResponse.json(repairMojibakeDeep(data, { status }));
 }
 
 function getNeonUrl(): string {
@@ -652,6 +652,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
