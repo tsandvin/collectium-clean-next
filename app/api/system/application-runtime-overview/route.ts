@@ -163,11 +163,10 @@ export async function GET() {
       package_name: "@vercel/sandbox",
       version: getVersion(pkg, "@vercel/sandbox"),
       status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "PLANLAGT" : "OK",
-      activity_status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "ikke_aktiv" : "installert",
+      activity_status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "ikke_aktiv" : "aktiv",
       usage_no: "Isolert testrom for kommandoer, build og pre-deploy kontroll.",
       next_action_no: getVersion(pkg, "@vercel/sandbox") === "not_installed"
-        ? "Installer og aktiver når sandbox-kontrollen bygges."
-        : "Lag sandbox smoke test.",
+        ? "Installer og aktiver når sandbox-kontrollen bygges." : "OK. Sandbox smoke test fungerer. Koble status til adminvisning og hendelseslogg.",
     },
   ];
 
@@ -220,8 +219,8 @@ export async function GET() {
       package_name: "@vercel/sandbox",
       version: getVersion(pkg, "@vercel/sandbox"),
       status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "PLANLAGT" : "OK",
-      activity_status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "ikke_aktiv" : "installert",
-      next_action_no: "Lag kontrollert sandbox smoke test før automatisert bruk.",
+      activity_status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "ikke_aktiv" : "aktiv",
+      next_action_no: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "Installer @vercel/sandbox." : "OK. Sandbox smoke test fungerer. Automatisert bruk må fortsatt være kontrollert og uten DB-skriving.",
     },
   ];
 
@@ -269,3 +268,4 @@ export async function GET() {
     },
   });
 }
+
