@@ -73,7 +73,7 @@ function jsonResponse(data: unknown, status = 200) {
 
 function getNeonUrl(): string {
   const url =
-    process.env.NEON_DATABASE_URL ||
+    process.env.NEON_DATABASE_URL || process.env.neon_DATABASE_URL ||
     process.env.POSTGRES_URL ||
     process.env.POSTGRES_PRISMA_URL ||
     process.env.POSTGRES_URL_NON_POOLING ||
@@ -586,6 +586,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
