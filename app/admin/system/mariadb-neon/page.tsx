@@ -1,4 +1,5 @@
-﻿/**
+﻿import MariaDbNeonTransferMatrix from "./MariaDbNeonTransferMatrix";
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -892,7 +893,9 @@ export default function MariaDbNeonControlPage() {
           <pre className={styles.jsonBox}>{answerToChatGpt}</pre>
         </section>
       ) : null}
-    </main>
+          <MariaDbNeonTransferMatrix />
+</main>
   );
 }
+
 
