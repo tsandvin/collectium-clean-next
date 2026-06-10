@@ -52,14 +52,13 @@
 
 "use client";
 
+
 import MariaDbNeonApplicationRuntimeOverview from "./MariaDbNeonApplicationRuntimeOverview";
-
 import MariaDbNeonLayoutGuide from "./MariaDbNeonLayoutGuide";
-
+import MariaDbNeonTransferMatrix from "./MariaDbNeonTransferMatrix";
 import NeonRelationDbTree from "../../../../components/system/NeonRelationDbTree";
 
 
-import MariaDbNeonTransferMatrix from "./MariaDbNeonTransferMatrix";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 
@@ -77,7 +76,10 @@ type TabKey =
   | "pages"
   | "diagnose"
   | "events"
-  | "applications" | "transfer" | "applications" | "json" | "chatgpt";
+  | "transfer"
+  | "applications"
+  | "json"
+  | "chatgpt";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "dashboard", label: "Dashboard" },
@@ -91,6 +93,8 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "pages", label: "Sidekrav" },
   { key: "diagnose", label: "Diagnose" },
   { key: "events", label: "Hendelseslogg" },
+  { key: "transfer", label: "Overføringsmatrise" },
+  { key: "applications", label: "Aktive applikasjoner" },
   { key: "json", label: "JSON" },
   { key: "chatgpt", label: "Svar til ChatGPT" },
 ];
@@ -484,7 +488,7 @@ export default function MariaDbNeonControlPage() {
           <div className="mariadbNeonLayoutGuideHost">
             <MariaDbNeonLayoutGuide />
           </div>
-        </div>
+</div>
       </section>
 
       <section className={styles.cards}>
@@ -894,8 +898,6 @@ export default function MariaDbNeonControlPage() {
           <MariaDbNeonApplicationRuntimeOverview />
         ) : null}
 
-      
-
       {activeTab === "json" ? (
         <section className={styles.panel}>
           <h2>JSON</h2>
@@ -915,6 +917,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
