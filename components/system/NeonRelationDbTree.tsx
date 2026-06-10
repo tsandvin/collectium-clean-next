@@ -9,7 +9,7 @@
  * - Felles React-komponent for å vise Neon namespace-, relasjons- og katalogmapping-tree.
  *
  * Bruksområde:
- * - /admin/system/mariadb-neon
+ * - /admin/system/MariaDB - Neon Postgres
  * - /katalog/kontroll/eksempel
  *
  * Berørte API-ruter:
@@ -211,3 +211,4 @@ export default function NeonRelationDbTree() {
     </section>
   );
 }
+

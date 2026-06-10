@@ -336,7 +336,7 @@ export async function GET() {
 
     return NextResponse.json({
       ok: summary.mangler === 0 && summary.varsel === 0,
-      source: "mariadb-neon-transfer-matrix",
+      source: "MariaDB - Neon Postgres-transfer-matrix",
       checked_at: new Date().toISOString(),
       summary,
       rows,
@@ -356,4 +356,6 @@ export async function GET() {
     await neonPool.end();
   }
 }
+
+
 

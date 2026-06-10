@@ -51,7 +51,7 @@ export default function MariaDbNeonTransferMatrix() {
 
     async function load() {
       try {
-        const response = await fetch("/api/system/mariadb-neon-transfer-matrix", {
+        const response = await fetch("/api/system/MariaDB - Neon Postgres-transfer-matrix", {
           cache: "no-store"
         });
 
@@ -159,4 +159,6 @@ export default function MariaDbNeonTransferMatrix() {
     </section>
   );
 }
+
+
 
