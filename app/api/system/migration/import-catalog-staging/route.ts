@@ -250,6 +250,9 @@ async function fetchMariaDbRows(sourceTable: string, fieldMap: FieldMapRow[], li
     ? await mysql.createConnection(mariaDbUrl)
     : await mysql.createConnection(getMariaDbConnectionOptions());
 
+  await conn.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+  await conn.query("SET character_set_results = utf8mb4");
+
   try {
     const [rows] = await conn.query(
       `select ${selectFields} from \`${sourceTable}\` limit ? offset ?`,
@@ -587,6 +590,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
