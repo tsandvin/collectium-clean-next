@@ -1,0 +1,377 @@
+﻿.toggleButton {
+  position: fixed;
+  right: 24px;
+  bottom: 92px;
+  z-index: 80;
+  border: 1px solid rgba(10, 87, 73, 0.36);
+  border-radius: 999px;
+  background: #0a5749;
+  color: #fffaf0;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: 0 16px 36px rgba(10, 87, 73, 0.22);
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 20, 22, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  position: absolute;
+  inset: 28px;
+  overflow: auto;
+  border: 1px solid rgba(217, 198, 161, 0.82);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top left, rgba(227, 204, 154, 0.34), transparent 34%),
+    linear-gradient(135deg, #fff9ec 0%, #f5eddc 48%, #fffaf2 100%);
+  color: #052f2a;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+  padding: 28px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.kicker {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.66;
+}
+
+.header h2 {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 4vw, 44px);
+  line-height: 1;
+}
+
+.header p {
+  max-width: 860px;
+  margin: 0;
+  line-height: 1.55;
+  opacity: 0.75;
+}
+
+.closeButton {
+  border: 1px solid rgba(10, 87, 73, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #052f2a;
+  padding: 9px 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.diagram {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid rgba(10, 87, 73, 0.24);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.sideMenu,
+.topbar,
+.tabs,
+.innerPanel,
+.widePanel {
+  border: 2px solid rgba(10, 87, 73, 0.42);
+  background: rgba(255, 250, 240, 0.82);
+  box-shadow: inset 0 -2px 0 rgba(10, 87, 73, 0.28);
+}
+
+.sideMenu {
+  min-height: 410px;
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.sideMenu strong,
+.topbar strong,
+.tabs strong,
+.innerPanel strong,
+.widePanel strong {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  align-items: center;
+  justify-content: center;
+  background: #0a5749;
+  color: #fffaf0;
+  font-size: 12px;
+}
+
+.sideMenu span,
+.topbar span,
+.tabs span,
+.innerPanel span,
+.widePanel span {
+  font-weight: 900;
+}
+
+.sideMenu small,
+.innerPanel small,
+.widePanel small {
+  opacity: 0.68;
+}
+
+.screen {
+  display: grid;
+  gap: 12px;
+}
+
+.topbar,
+.tabs {
+  min-height: 64px;
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tabs {
+  border-color: rgba(49, 104, 176, 0.42);
+  box-shadow: inset 0 -2px 0 rgba(49, 104, 176, 0.28);
+}
+
+.tabs strong {
+  background: #3168b0;
+}
+
+.innerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.innerPanel,
+.widePanel {
+  min-height: 150px;
+  border-radius: 18px;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.innerPanel:nth-child(2) {
+  border-color: rgba(198, 75, 70, 0.42);
+  box-shadow: inset 0 -2px 0 rgba(198, 75, 70, 0.32);
+}
+
+.innerPanel:nth-child(2) strong {
+  background: #c64b46;
+}
+
+.widePanel {
+  grid-column: 1 / -1;
+  border-color: rgba(210, 154, 23, 0.48);
+  box-shadow: inset 0 -2px 0 rgba(210, 154, 23, 0.35);
+}
+
+.widePanel strong {
+  background: #9a6500;
+}
+
+.viewportRules,
+.guideList,
+.footer {
+  margin-top: 18px;
+}
+
+.viewportRules {
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 20px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.viewportRules h3 {
+  margin: 0 0 12px;
+}
+
+.viewportGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.viewportGrid article {
+  border: 1px solid rgba(10, 87, 73, 0.18);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 250, 240, 0.8);
+}
+
+.viewportGrid strong,
+.viewportGrid span {
+  display: block;
+}
+
+.viewportGrid span {
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: 0.68;
+}
+
+.viewportGrid p {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.guideList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.guideCard {
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.guideCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.number {
+  font-weight: 950;
+  color: #0a5749;
+}
+
+.statusBadge {
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 900;
+  border: 1px solid transparent;
+}
+
+.ok {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.warning {
+  color: #854d0e;
+  background: #fef9c3;
+  border-color: #fde68a;
+}
+
+.info {
+  color: #1e3a8a;
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.guideCard h3 {
+  margin: 12px 0 4px;
+}
+
+.area {
+  margin: 0 0 12px;
+  font-size: 12px;
+  opacity: 0.68;
+}
+
+.guideCard dl {
+  margin: 0;
+}
+
+.guideCard dt {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.68;
+}
+
+.guideCard dd {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  gap: 8px;
+  border: 1px solid rgba(10, 87, 73, 0.24);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(10, 87, 73, 0.08);
+}
+
+@media (max-width: 1100px) {
+  .modal {
+    inset: 14px;
+    padding: 18px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .diagram {
+    grid-template-columns: 1fr;
+  }
+
+  .sideMenu {
+    min-height: auto;
+  }
+
+  .viewportGrid,
+  .guideList {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .toggleButton {
+    right: 14px;
+    bottom: 80px;
+  }
+
+  .innerGrid,
+  .viewportGrid,
+  .guideList {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}
