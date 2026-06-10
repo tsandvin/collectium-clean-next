@@ -13,11 +13,11 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
       "Mobil bruker toppbar som hovedkontroll. Sidemeny skjules som egen kolonne og erstattes av mobilmeny. Filter, varsler, designvalg og søk åpnes kompakt.",
     rules: [
       "01 Sidemeny: skjules som fast venstremeny og åpnes via menyknapp.",
-      "02 Toppmeny: skal inneholde meny, søk, varsler/aktiviteter, design og filter.",
-      "03 Faner: vises som chips eller kompakt horisontal tab-rad.",
-      "04 Indrefelt: én kolonne. Ingen brede tabeller direkte i body.",
-      "05 Tabeller/matriser: skal ha egen scroll inne i felt/panel.",
-      "06 Handlinger: store trykkflater og korte tekster."
+      "02 Toppmeny: inneholder meny, søk, varsler/aktiviteter, design og filter.",
+      "03 Overskriftsfelt: komprimeres til tittel, status og viktigste handling.",
+      "04 Faner: vises som chips eller kompakt horisontal tab-rad.",
+      "05-09 Feltgrupper: én kolonne, ingen brede tabeller direkte i body.",
+      "10 Workspace: deaktivert som sideveis arbeidsflate på mobil."
     ]
   },
   tablet: {
@@ -28,10 +28,10 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
     rules: [
       "01 Sidemeny: kompakt eller skjult bak menyknapp.",
       "02 Toppmeny: behold søk, brukerstatus og viktigste handlinger synlig.",
-      "03 Faner: kan ligge i to linjer hvis det er mange faner.",
-      "04 Indrefelt: 1-2 kolonner. Statuskort kan ligge side om side.",
-      "05 Tabeller: intern scroll, ikke presse hele siden bred.",
-      "06 Filter: åpnes over resultatfelt eller som overlay."
+      "03 Overskriftsfelt: vises over faner og felt.",
+      "04 Faner: kan ligge i to linjer hvis det er mange faner.",
+      "05 Fire felt: blir 2 + 2.",
+      "06-09 Splitfelt: går til 1 eller 2 kolonner etter bredde."
     ]
   },
   desktop: {
@@ -44,8 +44,8 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
       "02 Toppmeny: søk, bruker, snarveier og status ligger globalt.",
       "03 Overskriftsfelt: sideforklaring, status og Layout / DB URL-knapp.",
       "04 Faner: normal tab-rad under statuskort/hero.",
-      "05 Indrefelt: dashboardkort, kontrollpanel og matriser ligger i PageContent.",
-      "06 DB-felt: source_key, object_group, source_role og API-ruter vises i egne felt."
+      "05-09 Feltgrupper: følger valgte gridmønstre.",
+      "10 Workspace: ikke aktiv som sideveis lane-modus før 1900px+."
     ]
   },
   wide: {
@@ -56,10 +56,10 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
     rules: [
       "01 Sidemeny: kan være smalere, men fortsatt fast.",
       "02 Toppmeny: global, men må ikke bruke unødig høyde.",
-      "03 Workspace lanes: bruk baner på ca. 900-1100px per arbeidsområde.",
-      "04 Eksempel lanes: filter/kontroll, overføringsmatrise, relasjoner, logg.",
-      "05 Faner: kan styre hvilke lanes som vises eller låses.",
-      "06 Scroll: horisontal scroll skal ligge i workspace, ikke på hele siden."
+      "03-04 Header og faner: styrer hvilke lanes som vises.",
+      "05-09 Feltgrupper: kan plasseres i egne arbeidsbaner.",
+      "10 Workspace lanes: bruk baner på ca. 900-1100px.",
+      "Scroll: horisontal scroll skal ligge i workspace, ikke på hele body."
     ]
   },
   tv: {
@@ -70,105 +70,33 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
     rules: [
       "01 Sidemeny: minimal eller skjult.",
       "02 Toppmeny: forenklet, bare status og hovedvalg.",
-      "03 Faner: færre valg, større knapper og mer avstand.",
-      "04 Indrefelt: store statusfelt og færre detaljer samtidig.",
-      "05 Tabeller: bør oppsummeres, ikke vise alle små kolonner.",
-      "06 Grense: 2900px+ betyr presentasjon, ikke mer detaljstøy."
+      "03 Overskriftsfelt: større tittel og status.",
+      "04 Faner: færre valg, større knapper og mer avstand.",
+      "05-09 Feltgrupper: vis bare de viktigste.",
+      "10 TV-modus: presentasjon, ikke detaljstøy."
     ]
   }
 };
 
-const detailCards = [
-  {
-    number: "01",
-    name: "Sidemeny",
-    react: "AppShell / Sidebar",
-    field: "global_navigation",
-    db: "Meny skal senere styres fra side-/menyregister, ikke hardkodes per side.",
-    api: "/api/system/db-overview og senere /api/navigation/menu",
-    layout: "Desktop: fast venstre. Mobil: mobilmeny/topplinje."
-  },
-  {
-    number: "02",
-    name: "Toppmeny / søk / bruker",
-    react: "Topbar / Search / UserMenu",
-    field: "topbar_search_user",
-    db: "Søk og brukerstatus skal gå via API, ikke direkte database fra React.",
-    api: "/api/auth/session, /api/filter/master, /api/catalog/* senere",
-    layout: "Global toppbar på alle sider."
-  },
-  {
-    number: "03",
-    name: "Overskriftsfelt",
-    react: "PageHeader / HeroPanel",
-    field: "page_title_status",
-    db: "Viser sidekrav, status og kontrollnivå for aktuell side.",
-    api: "/api/system/platform-standard-check",
-    layout: "Skal ligge øverst i PageFrame."
-  },
-  {
-    number: "04",
-    name: "Faner / tabs / arkivlag",
-    react: "Tabs / TabList / TabPanel",
-    field: "active_tab",
-    db: "Faner skal senere kunne styres av side-/feature-kontroll.",
-    api: "Sidekontroll + feature/action-route-register",
-    layout: "Tab-rad under hero/statusfelt. Mobil: chips."
-  },
-  {
-    number: "05",
-    name: "Fire felt",
-    react: "GridFour / StatCards",
-    field: "four_metric_fields",
-    db: "Brukes til MariaDB, Neon, Plattform og Template tokens.",
-    api: "/api/system/db-overview, /api/system/schema-inventory",
-    layout: "4 bokser desktop, 2+2 tablet, 1 kolonne mobil."
-  },
-  {
-    number: "06",
-    name: "Tre felt",
-    react: "GridThree / ControlCards",
-    field: "three_control_fields",
-    db: "Brukes til status, neste kontroller og kontrollregel.",
-    api: "/api/system/*-check",
-    layout: "3 bokser desktop, 1 kolonne på mindre skjerm."
-  },
-  {
-    number: "07",
-    name: "To felt",
-    react: "GridTwo / SplitPanel",
-    field: "two_panel_split",
-    db: "Brukes når to kontrollområder skal sammenlignes.",
-    api: "/api/system/mariadb-neon-transfer-matrix",
-    layout: "2 bokser desktop/tablet, 1 kolonne mobil."
-  },
-  {
-    number: "08",
-    name: "Lang venstre + liten høyre",
-    react: "WideMainAside",
-    field: "main_wide_aside_small",
-    db: "Brukes når matrise eller rapport er hovedfelt og status er sidefelt.",
-    api: "/api/system/source-relation-overview",
-    layout: "70/30 eller 75/25-fordeling."
-  },
-  {
-    number: "09",
-    name: "Liten venstre + lang høyre",
-    react: "AsideMainWide",
-    field: "aside_small_main_wide",
-    db: "Brukes når filter eller kontrollvalg styrer stort resultatfelt.",
-    api: "/api/filter/master, /api/catalog/control-data",
-    layout: "25/75 eller 30/70-fordeling."
-  },
-  {
-    number: "10",
-    name: "Workspace lanes",
-    react: "WorkspaceLanes",
-    field: "wide_workspace_lanes",
-    db: "Brukes for bredskjerm med flere aktive arbeidsbaner.",
-    api: "Kontroll-, relasjons-, filter- og matrise-API",
-    layout: "1900px+: 900-1100px lanes. 2900px+: TV/presentasjon."
-  }
+const fieldRegister = [
+  { nr: "01", name: "Sidemeny", react: "AppShell / Sidebar", field: "global_navigation", role: "Global navigasjon", db: "Menyregister / sidekontroll senere", responsive: "Desktop fast venstre. Mobil skjult bak meny." },
+  { nr: "02", name: "Toppmeny / søk / bruker", react: "Topbar / Search / UserMenu", field: "topbar_search_user", role: "Global toppkontroll", db: "Auth/session + søk via API", responsive: "Alltid øverst. Mobil kompakt." },
+  { nr: "03", name: "Overskriftsfelt", react: "PageHeader / HeroPanel", field: "page_title_status", role: "Sideidentitet og status", db: "Sidekrav / kontrollstatus", responsive: "Forkortes på mobil." },
+  { nr: "04", name: "Faner / tabs / arkivlag", react: "Tabs / TabPanel", field: "active_tab", role: "Arkivlag / seksjonsvalg", db: "Feature/page-control senere", responsive: "Desktop tab-rad. Mobil chips." },
+  { nr: "05A", name: "MariaDB", react: "StatCard", field: "mariadb_status", role: "Read-only kontrollarkiv", db: "MariaDB tables/views/columns", responsive: "Del av firefeltsrad." },
+  { nr: "05B", name: "Neon", react: "StatCard", field: "neon_status", role: "Ny staging/kontrollbase", db: "Neon tables/views/columns", responsive: "Del av firefeltsrad." },
+  { nr: "05C", name: "Plattform", react: "StatCard", field: "platform_status", role: "DB 8.4 / API / brytere", db: "Platform standard checks", responsive: "Del av firefeltsrad." },
+  { nr: "05D", name: "Template", react: "StatCard", field: "template_token_status", role: "Template/skin/layout-status", db: "Template token check", responsive: "Del av firefeltsrad." },
+  { nr: "06A", name: "Status", react: "ControlCard", field: "control_status", role: "Viser OK/varsel/blokkert", db: "System check API", responsive: "Del av trefeltsrad." },
+  { nr: "06B", name: "Neste kontroll", react: "ControlCard", field: "next_control", role: "Neste kontrollsteg", db: "Route/check registry", responsive: "Del av trefeltsrad." },
+  { nr: "06C", name: "Regel", react: "ControlCard", field: "control_rule", role: "Forklarer regel/tiltak", db: "DB 8.4 / sidekrav", responsive: "Del av trefeltsrad." },
+  { nr: "07A", name: "Venstre panel", react: "SplitPanelLeft", field: "left_panel", role: "Sammenligning/filter/kontroll", db: "Valgfri kontrollkilde", responsive: "2 felt desktop, 1 kolonne mobil." },
+  { nr: "07B", name: "Høyre panel", react: "SplitPanelRight", field: "right_panel", role: "Sammenligning/resultat", db: "Valgfri kontrollkilde", responsive: "2 felt desktop, 1 kolonne mobil." },
+  { nr: "08A", name: "Hovedmatrise / rapport", react: "WideMain", field: "main_wide_panel", role: "Primært stort innhold", db: "Transfer matrix / rapport", responsive: "Lang venstre." },
+  { nr: "08B", name: "Status", react: "AsideSmall", field: "aside_status", role: "Kort status/tiltak", db: "Status API", responsive: "Liten høyre." },
+  { nr: "09A", name: "Filter", react: "AsideSmall", field: "aside_filter", role: "Valg/filter/kontroll", db: "Filter master API", responsive: "Liten venstre." },
+  { nr: "09B", name: "Resultat / detaljer", react: "WideResult", field: "main_result_panel", role: "Stort resultatfelt", db: "Catalog/control-data API", responsive: "Lang høyre." },
+  { nr: "10", name: "Bredskjerm / workspace lanes", react: "WorkspaceLanes", field: "wide_workspace_lanes", role: "Sideveis arbeidsflate", db: "Kontroll-, filter-, relasjons- og matrise-API", responsive: "1900px+ lanes. 2900px+ TV." }
 ];
 
 export default function MariaDbNeonLayoutGuide() {
@@ -177,12 +105,7 @@ export default function MariaDbNeonLayoutGuide() {
 
   return (
     <>
-      <button
-        type="button"
-        className={styles.toggleButton}
-        onClick={() => setIsOpen(true)}
-        aria-label="Åpne layout og DB URL forklaring"
-      >
+      <button type="button" className={styles.toggleButton} onClick={() => setIsOpen(true)}>
         Layout / DB URL
       </button>
 
@@ -196,11 +119,10 @@ export default function MariaDbNeonLayoutGuide() {
                 <p className={styles.kicker}>Collectium layout-control</p>
                 <h2>Layout / DB URL</h2>
                 <p>
-                  Dette laget definerer standard feltstruktur for React / Next.js, navn på felt/bokser,
-                  DB/API-regler og hvordan sidemeny, toppmeny, faner, kontrollfelt og workspace skal oppføre seg.
+                  Feltregisteret under gir nummer og navn til alle layoutfelt. Radfargene viser responsiv sortering:
+                  global struktur først, deretter firefelt, trefelt, tofelt, asymmetrisk split og workspace.
                 </p>
               </div>
-
               <button className={styles.closeButton} type="button" onClick={() => setIsOpen(false)}>
                 Lukk
               </button>
@@ -210,11 +132,8 @@ export default function MariaDbNeonLayoutGuide() {
               <div className={styles.sectionHeader}>
                 <span>00</span>
                 <div>
-                  <h3>Systemlayout med nummererte felt</h3>
-                  <p>
-                    Diagrammet viser sidemeny, toppmeny og standard kombinasjoner: 4 felt, 3 felt,
-                    2 felt, lang venstre/liten høyre, liten venstre/lang høyre og bredskjerm/workspace.
-                  </p>
+                  <h3>Systemlayout med radfarger, nummer og feltnavn</h3>
+                  <p>Hver rad har egen farge for å vise responsiv rekkefølge og sortering.</p>
                 </div>
               </div>
 
@@ -223,45 +142,27 @@ export default function MariaDbNeonLayoutGuide() {
                   <strong>01</strong>
                   <h4>Sidemeny</h4>
                   <p>Global AppShell</p>
-                  <small>AppShell / Sidebar</small>
+                  <small>React: AppShell / Sidebar</small>
                 </aside>
 
                 <div className={styles.diagramRows}>
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>02</strong>
-                      <span>Toppmeny / søk / bruker</span>
-                    </div>
-                    <div className={styles.rowFields}>
-                      <i><b>02</b><span>Topbar</span></i>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowTopbar}`}>
+                    <div className={styles.rowLabel}><strong>02</strong><span>Toppmeny / søk / bruker</span></div>
+                    <div className={styles.rowFields}><i><b>02</b><span>Topbar</span></i></div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>03</strong>
-                      <span>Overskriftsfelt</span>
-                    </div>
-                    <div className={styles.rowFields}>
-                      <i><b>03</b><span>PageHeader / HeroPanel</span></i>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowHeader}`}>
+                    <div className={styles.rowLabel}><strong>03</strong><span>Overskriftsfelt</span></div>
+                    <div className={styles.rowFields}><i><b>03</b><span>PageHeader / HeroPanel</span></i></div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>04</strong>
-                      <span>Faner / tabs / arkivlag</span>
-                    </div>
-                    <div className={styles.rowFields}>
-                      <i><b>04</b><span>Tabs / TabPanel</span></i>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowTabs}`}>
+                    <div className={styles.rowLabel}><strong>04</strong><span>Faner / tabs / arkivlag</span></div>
+                    <div className={styles.rowFields}><i><b>04</b><span>Tabs / TabPanel</span></i></div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>05</strong>
-                      <span>Fire felt</span>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowFour}`}>
+                    <div className={styles.rowLabel}><strong>05</strong><span>Fire felt</span></div>
                     <div className={styles.rowFieldsFour}>
                       <i><b>05A</b><span>MariaDB</span></i>
                       <i><b>05B</b><span>Neon</span></i>
@@ -270,11 +171,8 @@ export default function MariaDbNeonLayoutGuide() {
                     </div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>06</strong>
-                      <span>Tre felt</span>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowThree}`}>
+                    <div className={styles.rowLabel}><strong>06</strong><span>Tre felt</span></div>
                     <div className={styles.rowFieldsThree}>
                       <i><b>06A</b><span>Status</span></i>
                       <i><b>06B</b><span>Neste kontroll</span></i>
@@ -282,47 +180,33 @@ export default function MariaDbNeonLayoutGuide() {
                     </div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>07</strong>
-                      <span>To felt</span>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowTwo}`}>
+                    <div className={styles.rowLabel}><strong>07</strong><span>To felt</span></div>
                     <div className={styles.rowFieldsTwo}>
                       <i><b>07A</b><span>Venstre panel</span></i>
                       <i><b>07B</b><span>Høyre panel</span></i>
                     </div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>08</strong>
-                      <span>Lang venstre + liten høyre</span>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowLongLeft}`}>
+                    <div className={styles.rowLabel}><strong>08</strong><span>Lang venstre + liten høyre</span></div>
                     <div className={styles.rowFieldsLongLeft}>
                       <i><b>08A</b><span>Hovedmatrise / rapport</span></i>
                       <i><b>08B</b><span>Status</span></i>
                     </div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>09</strong>
-                      <span>Liten venstre + lang høyre</span>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowLongRight}`}>
+                    <div className={styles.rowLabel}><strong>09</strong><span>Liten venstre + lang høyre</span></div>
                     <div className={styles.rowFieldsLongRight}>
                       <i><b>09A</b><span>Filter</span></i>
                       <i><b>09B</b><span>Resultat / detaljer</span></i>
                     </div>
                   </div>
 
-                  <div className={styles.diagramRow}>
-                    <div className={styles.rowLabel}>
-                      <strong>10</strong>
-                      <span>Bredskjerm / workspace lanes</span>
-                    </div>
-                    <div className={styles.rowFields}>
-                      <i><b>10</b><span>1900px+ lanes · 2900px+ TV/presentasjon</span></i>
-                    </div>
+                  <div className={`${styles.diagramRow} ${styles.rowWorkspace}`}>
+                    <div className={styles.rowLabel}><strong>10</strong><span>Bredskjerm / workspace lanes</span></div>
+                    <div className={styles.rowFields}><i><b>10</b><span>1900px+ lanes · 2900px+ TV/presentasjon</span></i></div>
                   </div>
                 </div>
               </div>
@@ -330,10 +214,7 @@ export default function MariaDbNeonLayoutGuide() {
 
             <section className={styles.screenSection}>
               <h3>Skjermvisning</h3>
-              <p>
-                Bytt forklaringsvisning for å se hva som skjer med sidemeny, toppmeny, filter,
-                faner, indrefelt, tabeller og workspace.
-              </p>
+              <p>Bytt forklaringsvisning for å se hvordan radene sorteres og brytes på ulike skjermstørrelser.</p>
 
               <div className={styles.screenButtons}>
                 {(["mobile", "tablet", "desktop", "wide", "tv"] as ScreenMode[]).map((mode) => (
@@ -373,29 +254,27 @@ export default function MariaDbNeonLayoutGuide() {
               </div>
             </section>
 
-            <section className={styles.guideList}>
-              {detailCards.map((card) => (
-                <article className={styles.guideCard} key={card.number}>
-                  <div className={styles.guideCardTop}>
-                    <span className={styles.number}>{card.number}</span>
-                    <span className={styles.statusBadge}>INFO</span>
+            <section className={styles.fieldRegister}>
+              <h3>Feltregister: nummer, navn og funksjon</h3>
+              <div className={styles.fieldTable}>
+                <div className={styles.fieldTableHead}>
+                  <span>Nr.</span>
+                  <span>Navn</span>
+                  <span>React / Next.js</span>
+                  <span>Felt / DB/API-rolle</span>
+                  <span>Responsiv regel</span>
+                </div>
+
+                {fieldRegister.map((item) => (
+                  <div className={styles.fieldTableRow} key={item.nr}>
+                    <span>{item.nr}</span>
+                    <span>{item.name}</span>
+                    <span>{item.react}</span>
+                    <span><b>{item.field}</b><small>{item.role} · {item.db}</small></span>
+                    <span>{item.responsive}</span>
                   </div>
-
-                  <h3>{card.name}</h3>
-                  <p className={styles.area}>{card.react}</p>
-
-                  <dl>
-                    <dt>Felt / boksnavn</dt>
-                    <dd>{card.field}</dd>
-                    <dt>DB / URL-regel</dt>
-                    <dd>{card.db}</dd>
-                    <dt>API-regel</dt>
-                    <dd>{card.api}</dd>
-                    <dt>Layoutregel</dt>
-                    <dd>{card.layout}</dd>
-                  </dl>
-                </article>
-              ))}
+                ))}
+              </div>
             </section>
           </section>
         </div>
