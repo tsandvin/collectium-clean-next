@@ -1,17 +1,19 @@
 ﻿.toggleButton {
-  position: fixed;
-  right: 24px;
-  bottom: 92px;
-  z-index: 80;
+  position: static;
+  z-index: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(10, 87, 73, 0.36);
   border-radius: 999px;
   background: #0a5749;
   color: #fffaf0;
-  padding: 10px 16px;
-  font-size: 13px;
+  padding: 9px 15px;
+  font-size: 12px;
   font-weight: 850;
-  box-shadow: 0 16px 36px rgba(10, 87, 73, 0.22);
+  box-shadow: 0 10px 24px rgba(10, 87, 73, 0.16);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .overlay {
@@ -360,11 +362,6 @@
 }
 
 @media (max-width: 720px) {
-  .toggleButton {
-    right: 14px;
-    bottom: 80px;
-  }
-
   .innerGrid,
   .viewportGrid,
   .guideList {
@@ -375,3 +372,9 @@
     flex-direction: column;
   }
 }
+
+  .footer {
+    flex-direction: column;
+  }
+}
+
