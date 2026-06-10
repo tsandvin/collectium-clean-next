@@ -14,6 +14,37 @@ type TableMapRow = {
   row_count: number | null;
 };
 
+function repairMojibakeText(value: unknown): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  return value
+    .replaceAll("Ã¸", "ø")
+    .replaceAll("Ã˜", "Ø")
+    .replaceAll("Ã¥", "å")
+    .replaceAll("Ã…", "Å")
+    .replaceAll("Ã¦", "æ")
+    .replaceAll("Ã†", "Æ")
+    .replaceAll("â¢", "•")
+    .replaceAll("Â·", "·")
+    .replaceAll("Â©", "©")
+    .replaceAll("Â«", "«")
+    .replaceAll("Â»", "»")
+    .replaceAll("Â ", " ")
+    .replaceAll("Â", "");
+}
+
+function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
+  const repaired: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(row)) {
+    repaired[key] = repairMojibakeText(value);
+  }
+
+  return repaired as T;
+}
+
 type FieldMapRow = {
   source_field: string;
   target_field: string;
@@ -26,6 +57,37 @@ type FieldMapRow = {
   is_period_field: boolean;
   is_market_field: boolean;
 };
+
+function repairMojibakeText(value: unknown): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  return value
+    .replaceAll("Ã¸", "ø")
+    .replaceAll("Ã˜", "Ø")
+    .replaceAll("Ã¥", "å")
+    .replaceAll("Ã…", "Å")
+    .replaceAll("Ã¦", "æ")
+    .replaceAll("Ã†", "Æ")
+    .replaceAll("â¢", "•")
+    .replaceAll("Â·", "·")
+    .replaceAll("Â©", "©")
+    .replaceAll("Â«", "«")
+    .replaceAll("Â»", "»")
+    .replaceAll("Â ", " ")
+    .replaceAll("Â", "");
+}
+
+function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
+  const repaired: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(row)) {
+    repaired[key] = repairMojibakeText(value);
+  }
+
+  return repaired as T;
+}
 
 type ImportMode = "preview" | "import";
 
@@ -590,6 +652,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
