@@ -64,7 +64,7 @@ const screenText: Record<
     range: "1101-1899px",
     lanes: "1 hovedlane",
     contentCap: "Dette er normal feltbredde. Innholdet skal ikke strekkes større bare fordi skjermen er større.",
-    selectedRule: "Desktop viser normal Collectium-side med fast sidemeny, toppmeny, overskriftsfelt, faner og ett hovedinnhold.",
+    selectedRule: "Desktop viser normal Collectium-side innen desktop cap. Selv om faktisk skjerm er 2422px, skal desktop-innhold ikke strekkes bredere enn 1101-1899px.",
     diagramRule: "05 vises som 4 felt, 06 som 3 felt, 07 som 2 felt, 08/09 som asymmetriske splitfelt.",
     laneRule: "Ingen workspace lanes. Horisontal scroll skal ligge i tabeller/paneler, ikke i hele siden.",
     fieldSort: "Normal side"
@@ -74,7 +74,7 @@ const screenText: Record<
     range: "1900px+",
     lanes: "2 lanes ved ca. 2400px",
     contentCap: "Desktop cap beholdes som lesbar modul. Ekstra bredde brukes til flere arbeidsflater.",
-    selectedRule: "Bredskjerm betyr ikke at ett felt strekkes. Siden deles i flere skjermområder på ca. 1000px.",
+    selectedRule: "Bredskjerm betyr at ekstra bredde brukes til flere lanes. Ett felt skal ikke strekkes uendelig; skjermen deles i sidemeny ca. 200-300px + lane 1 ca. 1000px + lane 2 ca. 1000px.",
     diagramRule: "Faner/tabs kan vises som egne sider/lanes. Katalogresultat, objektpresentasjon og relasjon kan ligge ved siden av kontrollfelt.",
     laneRule: "Eksempel 2400px / 27 tommer: lane 1 = sidemeny + toppmeny + kontroll/filter. lane 2 = tabside, søkeresultat, objektpresentasjon eller relasjon.",
     fieldSort: "2 workspace lanes"
@@ -384,6 +384,7 @@ export default function MariaDbNeonLayoutGuide() {
   const [isOpen, setIsOpen] = useState(false);
   const [screenMode, setScreenMode] = useState<ScreenMode>("desktop");
   const [viewportWidth, setViewportWidth] = useState<number>(0);
+  const [laneOnePercent, setLaneOnePercent] = useState<number>(50);
 
   useEffect(() => {
     function updateViewportWidth() {
@@ -405,6 +406,29 @@ export default function MariaDbNeonLayoutGuide() {
     if (viewportWidth < 2900) return "Bredskjerm mulig";
     return "TV / presentasjon mulig";
   }, [viewportWidth]);
+
+  
+  const laneSizing = useMemo(() => {
+    const sideMenuWidth = 260;
+    const desktopMaxWidth = 1899;
+    const desktopMinWidth = 1101;
+    const availableWorkspace = Math.max(0, viewportWidth - sideMenuWidth);
+    const canUseTwoLanes = viewportWidth >= 2200;
+    const laneAreaWidth = canUseTwoLanes ? availableWorkspace : Math.min(viewportWidth, desktopMaxWidth);
+    const laneOneWidth = canUseTwoLanes ? Math.round(laneAreaWidth * (laneOnePercent / 100)) : Math.min(laneAreaWidth, desktopMaxWidth);
+    const laneTwoWidth = canUseTwoLanes ? Math.max(0, laneAreaWidth - laneOneWidth) : 0;
+
+    return {
+      sideMenuWidth,
+      desktopMinWidth,
+      desktopMaxWidth,
+      availableWorkspace,
+      canUseTwoLanes,
+      laneAreaWidth,
+      laneOneWidth,
+      laneTwoWidth,
+    };
+  }, [viewportWidth, laneOnePercent]);
 
   const modeClass = useMemo(() => {
     if (screenMode === "mobile") return styles.modeMobile;
@@ -508,7 +532,80 @@ export default function MariaDbNeonLayoutGuide() {
                   <strong>{screenText[screenMode].selectedRule}</strong>
                   <p>{screenText[screenMode].diagramRule}</p>
                   <p>{screenText[screenMode].laneRule}</p>
+                
+                <div className={styles.resizableLaneCalculator}>
+                  <div className={styles.laneCalcHeader}>
+                    <div>
+                      <strong>Lane-kalkulator</strong>
+                      <span>Desktop cap beholdes. Bredskjerm bruker ekstra bredde til flere arbeidsflater.</span>
+                    </div>
+                    <em>{laneSizing.canUseTwoLanes ? "2 lanes mulig" : "1 desktopflate"}</em>
+                  </div>
+
+                  <div className={styles.laneCalcGrid}>
+                    <article>
+                      <span>Sidemeny</span>
+                      <strong>{laneSizing.sideMenuWidth}px</strong>
+                      <small>Normal bredde ca. 200-300px.</small>
+                    </article>
+
+                    <article>
+                      <span>Desktop cap</span>
+                      <strong>{laneSizing.desktopMinWidth}-{laneSizing.desktopMaxWidth}px</strong>
+                      <small>Desktop-innhold strekkes ikke over dette.</small>
+                    </article>
+
+                    <article>
+                      <span>Lane 1</span>
+                      <strong>{laneSizing.laneOneWidth}px</strong>
+                      <small>Kontroll, filter, faner eller global side.</small>
+                    </article>
+
+                    <article>
+                      <span>Lane 2</span>
+                      <strong>{laneSizing.laneTwoWidth > 0 ? `${laneSizing.laneTwoWidth}px` : "Ikke aktiv"}</strong>
+                      <small>Resultat, objektpresentasjon, relasjon eller tabside.</small>
+                    </article>
+                  </div>
+
+                  <div className={styles.laneResizeControl}>
+                    <label htmlFor="laneSplitRange">
+                      Juster skjermkant mellom Lane 1 og Lane 2
+                      <span>{laneOnePercent}% / {100 - laneOnePercent}%</span>
+                    </label>
+                    <input
+                      id="laneSplitRange"
+                      type="range"
+                      min="35"
+                      max="65"
+                      step="5"
+                      value={laneOnePercent}
+                      onChange={(event) => setLaneOnePercent(Number(event.target.value))}
+                      disabled={!laneSizing.canUseTwoLanes}
+                    />
+                    <small>
+                      Aktiv når faktisk skjermbredde gir plass til sidemeny + to arbeidsflater. På ca. 2500px kan dette gi ca.
+                      260px sidemeny + to felt rundt 1000px.
+                    </small>
+                  </div>
+
+                  <div className={styles.resizableLanePreview}>
+                    <div className={styles.previewSide} style={{ width: `${Math.min(18, Math.max(10, (laneSizing.sideMenuWidth / Math.max(viewportWidth, 1)) * 100))}%` }}>
+                      <strong>Sidemeny</strong>
+                      <span>200-300px</span>
+                    </div>
+                    <div className={styles.previewLaneOne} style={{ flex: laneSizing.canUseTwoLanes ? laneOnePercent : 100 }}>
+                      <strong>Lane 1</strong>
+                      <span>{laneSizing.canUseTwoLanes ? "Kontroll / filter / faner" : "Desktop cap 1101-1899px"}</span>
+                    </div>
+                    <div className={styles.previewDivider} />
+                    <div className={styles.previewLaneTwo} style={{ flex: laneSizing.canUseTwoLanes ? 100 - laneOnePercent : 0 }}>
+                      <strong>Lane 2</strong>
+                      <span>{laneSizing.canUseTwoLanes ? "Resultat / objekt / relasjon" : "Ikke aktiv"}</span>
+                    </div>
+                  </div>
                 </div>
+              </div>
               </div>
 
               <div className={`${styles.layoutDiagram} ${modeClass}`}>
@@ -631,3 +728,4 @@ export default function MariaDbNeonLayoutGuide() {
     </>
   );
 }
+
