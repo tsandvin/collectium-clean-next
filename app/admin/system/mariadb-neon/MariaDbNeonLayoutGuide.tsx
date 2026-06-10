@@ -117,7 +117,7 @@ export default function MariaDbNeonLayoutGuide() {
             <header className={styles.header}>
               <div>
                 <p className={styles.kicker}>Collectium layout-control</p>
-                <h2>Layout / DB URL</h2>
+                <h2>Vis Layout / DB URL</h2>
                 <p>
                   Feltregisteret under gir nummer og navn til alle layoutfelt. Radfargene viser responsiv sortering:
                   global struktur først, deretter firefelt, trefelt, tofelt, asymmetrisk split og workspace.
@@ -282,3 +282,4 @@ export default function MariaDbNeonLayoutGuide() {
     </>
   );
 }
+

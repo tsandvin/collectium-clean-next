@@ -52,7 +52,7 @@
 
 "use client";
 
-import MariaDbNeonAdminLayoutGuideSwitch from "./MariaDbNeonAdminLayoutGuideSwitch";
+import MariaDbNeonLayoutGuide from "./MariaDbNeonLayoutGuide";
 
 import NeonRelationDbTree from "../../../../components/system/NeonRelationDbTree";
 
@@ -474,14 +474,14 @@ export default function MariaDbNeonControlPage() {
             Kontrollside for database, API, brytere, template, skin, layout og
             sidekrav før Neon kan bli sann hoveddatabase.
           </p>
-          <div className="mariadbNeonLayoutGuideHost">
-            <MariaDbNeonAdminLayoutGuideSwitch />
-          </div>
-        </div>
+</div>
 
         <div className={styles.heroBadges}>
           <span className={styles.okPill}>Kontroll OK</span>
           <span className={styles.blockPill}>Migrering blokkert</span>
+          <div className="mariadbNeonLayoutGuideHost">
+            <MariaDbNeonLayoutGuide />
+          </div>
         </div>
       </section>
 
@@ -909,6 +909,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
