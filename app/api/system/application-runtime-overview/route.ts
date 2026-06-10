@@ -1,359 +1,271 @@
-﻿import mysql from "mysql2/promise";
-import { Pool } from "pg";
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
-export const runtime = "nodejs";
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Application Runtime Overview API
+ *
+ * Definering / formål:
+ * Returnerer runtime-, modul-, brukeraktivitets-, Blob-, Sandbox- og kapasitetsstatus
+ * for MariaDB -> Neon kontrollsiden.
+ *
+ * Bruksområde:
+ * - /admin/system/mariadb-neon
+ *
+ * Berørte sider / routes:
+ * - /admin/system/mariadb-neon
+ * - GET /api/system/application-runtime-overview
+ *
+ * Berørte DB-brytere / feature_keys:
+ * - admin.system.application_runtime.view
+ * - admin.system.active_modules.view
+ * - admin.system.user_activity.view
+ *
+ * Dataretning:
+ * package.json / env / runtime -> API -> admin kontrollside
+ *
+ * Logging:
+ * log_category: system
+ * log_action: application_runtime_overview
+ *
+ * Versjon:
+ * CT-API-APPLICATION-RUNTIME-OVERVIEW-0002 / CHANGE-2026-06-10-RUNTIME-TABS
+ */
+
 export const dynamic = "force-dynamic";
 
-type TransferStatus = "OK" | "VARSEL" | "MANGLER" | "INFO";
+type Status = "OK" | "VARSEL" | "MANGLER" | "FEIL" | "BLOKKERT" | "INFO" | "PLANLAGT";
 
-type TransferRow = {
-  line_no: number;
-  source_key: string;
-  object_group: string;
-  mariadb_table: string | null;
-  neon_table: string | null;
-  mariadb_exists: boolean;
-  neon_exists: boolean;
-  mariadb_rows: number | null;
-  neon_rows: number | null;
-  status: TransferStatus;
-  status_color: "green" | "yellow" | "red" | "blue";
-  deviation_no: string;
-  next_action_no: string;
+type PackageJson = {
+  name?: string;
+  version?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
 };
 
-type MigrationTableMapRow = {
-  source_key: string | null;
-  object_group: string | null;
-  source_table: string | null;
-  mariadb_table_name?: string | null;
-  source_role?: string | null;
-  source_status?: string | null;
-  row_count?: number | string | null;
-  notes_no?: string | null;
-};
-
-function getNeonConnectionString(): string {
-  const value =
-    process.env.NEON_DATABASE_URL ||
-    process.env.neon_DATABASE_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.POSTGRES_URL_NON_POOLING ||
-    process.env.DATABASE_URL;
-
-  if (!value) {
-    throw new Error("Neon env mangler. Bruk DATABASE_URL eller neon_DATABASE_URL.");
-  }
-
-  return value;
-}
-
-function getMariaDbConnectionOptions(): mysql.ConnectionOptions {
-  return {
-    host: process.env.CT_DB_HOST || process.env.MARIADB_HOST || process.env.MYSQL_HOST || process.env.DB_HOST,
-    port: Number(process.env.CT_DB_PORT || process.env.MARIADB_PORT || process.env.MYSQL_PORT || process.env.DB_PORT || 3306),
-    database: process.env.CT_DB_NAME || process.env.CT_DB_DATABASE || process.env.MARIADB_DATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME,
-    user: process.env.CT_DB_USER || process.env.MARIADB_USER || process.env.MYSQL_USER || process.env.DB_USER,
-    password: process.env.CT_DB_PASSWORD || process.env.MARIADB_PASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD,
-    charset: "utf8mb4",
-    supportBigNumbers: true,
-    bigNumberStrings: true,
-    dateStrings: true
-  };
-}
-
-function escapeIdentifier(identifier: string): string {
-  if (!/^[A-Za-z0-9_]+$/.test(identifier)) {
-    throw new Error(`Ugyldig SQL-identifikator: ${identifier}`);
-  }
-
-  return `\`${identifier}\``;
-}
-
-async function getMariaDbTables(conn: mysql.Connection): Promise<Set<string>> {
-  const [rows] = await conn.query(
-    `
-      select table_name
-      from information_schema.tables
-      where table_schema = database()
-    `
-  );
-
-  return new Set(
-    (rows as Array<{ table_name: string }>).map((row) => row.table_name)
-  );
-}
-
-async function countMariaDbRows(
-  conn: mysql.Connection,
-  tableName: string | null
-): Promise<number | null> {
-  if (!tableName || tableName === "NO_MARIADB_SOURCE") {
-    return null;
-  }
-
+function readPackageJson(): PackageJson {
   try {
-    const [rows] = await conn.query(
-      `select count(*) as row_count from ${escapeIdentifier(tableName)}`
-    );
-
-    const first = (rows as Array<{ row_count: number | string }>)[0];
-    return Number(first?.row_count ?? 0);
+    const filePath = path.join(process.cwd(), "package.json");
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch {
-    return null;
+    return {};
   }
 }
 
-async function getNeonTables(pool: Pool): Promise<Set<string>> {
-  const result = await pool.query(
-    `
-      select table_name
-      from information_schema.tables
-      where table_schema = 'public'
-    `
-  );
-
-  return new Set(result.rows.map((row) => String(row.table_name)));
+function getVersion(pkg: PackageJson, packageName: string): string {
+  return pkg.dependencies?.[packageName] || pkg.devDependencies?.[packageName] || "not_installed";
 }
 
-async function getMigrationTableMap(pool: Pool): Promise<MigrationTableMapRow[]> {
-  const exists = await pool.query(
-    `
-      select exists (
-        select 1
-        from information_schema.tables
-        where table_schema = 'public'
-          and table_name = 'ct_migration_table_map'
-      ) as exists
-    `
-  );
-
-  if (!exists.rows[0]?.exists) {
-    return [];
-  }
-
-  const result = await pool.query(
-    `
-      select
-        source_key,
-        object_group,
-        source_table,
-        mariadb_table_name,
-        source_role,
-        source_status,
-        row_count,
-        notes_no
-      from ct_migration_table_map
-      order by source_key, object_group, source_table
-    `
-  );
-
-  return result.rows as MigrationTableMapRow[];
+function envPresent(...names: string[]): boolean {
+  return names.some((name) => Boolean(process.env[name] && String(process.env[name]).trim().length > 0));
 }
 
-async function countNeonStagingRows(
-  pool: Pool,
-  sourceKey: string,
-  objectGroup: string,
-  sourceTable: string | null
-): Promise<number | null> {
-  const exists = await pool.query(
-    `
-      select exists (
-        select 1
-        from information_schema.tables
-        where table_schema = 'public'
-          and table_name = 'ct_migration_catalog_object_staging'
-      ) as exists
-    `
-  );
-
-  if (!exists.rows[0]?.exists) {
-    return null;
-  }
-
-  const result = await pool.query(
-    `
-      select count(*)::int as row_count
-      from ct_migration_catalog_object_staging
-      where source_key = $1
-        and object_group = $2
-        and source_table is not distinct from $3
-    `,
-    [sourceKey, objectGroup, sourceTable]
-  );
-
-  return Number(result.rows[0]?.row_count ?? 0);
-}
-
-function resolveStatus(input: {
-  mariadbTable: string | null;
-  neonTable: string | null;
-  mariadbExists: boolean;
-  neonExists: boolean;
-  mariaRows: number | null;
-  neonRows: number | null;
-}): Pick<TransferRow, "status" | "status_color" | "deviation_no" | "next_action_no"> {
-  const { mariadbTable, neonTable, mariadbExists, neonExists, mariaRows, neonRows } = input;
-
-  if (!mariadbTable || mariadbTable === "NO_MARIADB_SOURCE") {
-    return {
-      status: "INFO",
-      status_color: "blue",
-      deviation_no: "Kilden finnes ikke i MariaDB og er definert som Neon-first.",
-      next_action_no: "Opprett Neon kilde-/filter-/objektstruktur når denne objektgruppen skal bygges."
-    };
-  }
-
-  if (!mariadbExists) {
-    return {
-      status: "MANGLER",
-      status_color: "red",
-      deviation_no: "MariaDB-tabell finnes ikke.",
-      next_action_no: "Kontroller ct_migration_table_map eller MariaDB schema."
-    };
-  }
-
-  if (!neonTable || !neonExists) {
-    return {
-      status: "MANGLER",
-      status_color: "red",
-      deviation_no: "Neon-måltabell finnes ikke.",
-      next_action_no: "Opprett Neon staging-/måltabell før import."
-    };
-  }
-
-  if (mariaRows !== null && neonRows !== null && mariaRows === neonRows) {
-    return {
-      status: "OK",
-      status_color: "green",
-      deviation_no: "MariaDB og Neon samsvarer på radtall.",
-      next_action_no: "Kan gå videre til ID-, relasjons- og filterkontroll."
-    };
-  }
-
-  if (neonRows !== null && neonRows > 0) {
-    return {
-      status: "VARSEL",
-      status_color: "yellow",
-      deviation_no: `Delvis overført eller radtall avviker. MariaDB=${mariaRows ?? "ukjent"}, Neon=${neonRows}.`,
-      next_action_no: "Kjør kontrollert import/row-count-sjekk før truth-godkjenning."
-    };
-  }
-
-  return {
-    status: "MANGLER",
-    status_color: "red",
-    deviation_no: `Ikke overført. MariaDB=${mariaRows ?? "ukjent"}, Neon=${neonRows ?? 0}.`,
-    next_action_no: "Kjør staging-import etter at UTF-8/import-ruten er stabil."
-  };
+function statusFromInstalled(version: string): Status {
+  return version === "not_installed" ? "MANGLER" : "OK";
 }
 
 export async function GET() {
-  const neonPool = new Pool({
-    connectionString: getNeonConnectionString(),
-    ssl: { rejectUnauthorized: false }
+  const pkg = readPackageJson();
+
+  const activeModules = [
+    {
+      module_key: "next",
+      module_name: "Next.js",
+      package_name: "next",
+      version: getVersion(pkg, "next"),
+      status: statusFromInstalled(getVersion(pkg, "next")),
+      activity_status: "aktiv",
+      usage_no: "App Router, API-ruter, server rendering og admin/system.",
+      next_action_no: "OK.",
+    },
+    {
+      module_key: "react",
+      module_name: "React",
+      package_name: "react",
+      version: getVersion(pkg, "react"),
+      status: statusFromInstalled(getVersion(pkg, "react")),
+      activity_status: "aktiv",
+      usage_no: "UI-komponenter, fanevalg og klientinteraksjon.",
+      next_action_no: "OK.",
+    },
+    {
+      module_key: "react_dom",
+      module_name: "React DOM",
+      package_name: "react-dom",
+      version: getVersion(pkg, "react-dom"),
+      status: statusFromInstalled(getVersion(pkg, "react-dom")),
+      activity_status: "aktiv",
+      usage_no: "Rendering av React i Next.js.",
+      next_action_no: "OK.",
+    },
+    {
+      module_key: "typescript",
+      module_name: "TypeScript",
+      package_name: "typescript",
+      version: getVersion(pkg, "typescript"),
+      status: statusFromInstalled(getVersion(pkg, "typescript")),
+      activity_status: "aktiv",
+      usage_no: "Typekontroll og build.",
+      next_action_no: "OK.",
+    },
+    {
+      module_key: "neon_serverless",
+      module_name: "Neon serverless",
+      package_name: "@neondatabase/serverless",
+      version: getVersion(pkg, "@neondatabase/serverless"),
+      status: statusFromInstalled(getVersion(pkg, "@neondatabase/serverless")),
+      activity_status: envPresent("DATABASE_URL", "POSTGRES_URL", "NEON_DATABASE_URL") ? "klar" : "venter_env",
+      usage_no: "Neon Postgres-kobling.",
+      next_action_no: envPresent("DATABASE_URL", "POSTGRES_URL", "NEON_DATABASE_URL")
+        ? "Test live query."
+        : "Legg DATABASE_URL / POSTGRES_URL / NEON_DATABASE_URL i Vercel Production.",
+    },
+    {
+      module_key: "pg",
+      module_name: "Postgres pg",
+      package_name: "pg",
+      version: getVersion(pkg, "pg"),
+      status: statusFromInstalled(getVersion(pkg, "pg")),
+      activity_status: envPresent("DATABASE_URL", "POSTGRES_URL", "NEON_DATABASE_URL") ? "klar" : "venter_env",
+      usage_no: "Fallback/stabil Postgres runtime-driver.",
+      next_action_no: "Kan brukes i API-ruter der Neon serverless import feiler.",
+    },
+    {
+      module_key: "mariadb",
+      module_name: "MariaDB driver",
+      package_name: "mariadb/mysql2",
+      version: `${getVersion(pkg, "mariadb")} / ${getVersion(pkg, "mysql2")}`,
+      status: getVersion(pkg, "mariadb") !== "not_installed" || getVersion(pkg, "mysql2") !== "not_installed" ? "OK" : "MANGLER",
+      activity_status: envPresent("MARIADB_HOST", "DB_HOST", "MYSQL_HOST") ? "klar" : "venter_env",
+      usage_no: "MariaDB read-only kontrollarkiv.",
+      next_action_no: envPresent("MARIADB_HOST", "DB_HOST", "MYSQL_HOST")
+        ? "Kjør MariaDB health check."
+        : "Legg MariaDB read-only env i Vercel.",
+    },
+    {
+      module_key: "vercel_blob",
+      module_name: "Vercel Blob",
+      package_name: "@vercel/blob",
+      version: getVersion(pkg, "@vercel/blob"),
+      status: statusFromInstalled(getVersion(pkg, "@vercel/blob")),
+      activity_status: envPresent("BLOB_READ_WRITE_TOKEN") ? "klar" : "venter_env",
+      usage_no: "Bilder, dokumenter, thumbnails og objektfiler.",
+      next_action_no: envPresent("BLOB_READ_WRITE_TOKEN")
+        ? "Kjør Blob upload/download test senere."
+        : "Legg BLOB_READ_WRITE_TOKEN i Vercel.",
+    },
+    {
+      module_key: "vercel_sandbox",
+      module_name: "Vercel Sandbox",
+      package_name: "@vercel/sandbox",
+      version: getVersion(pkg, "@vercel/sandbox"),
+      status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "PLANLAGT" : "OK",
+      activity_status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "ikke_aktiv" : "installert",
+      usage_no: "Isolert testrom for kommandoer, build og pre-deploy kontroll.",
+      next_action_no: getVersion(pkg, "@vercel/sandbox") === "not_installed"
+        ? "Installer og aktiver når sandbox-kontrollen bygges."
+        : "Lag sandbox smoke test.",
+    },
+  ];
+
+  const moduleActivity = activeModules.map((item, index) => ({
+    line_no: index + 1,
+    ...item,
+    last_seen_no: "runtime check",
+  }));
+
+  const userActivity = {
+    status: "PLANLAGT" as Status,
+    source_no: "Brukeraktivitet krever session-/usage-logging mot Neon eller MariaDB.",
+    online_now: 0,
+    anonymous_online: 0,
+    logged_in_online: 0,
+    active_24h: 0,
+    active_7d: 0,
+    free_users_active: 0,
+    bronze_users_active: 0,
+    silver_users_active: 0,
+    gold_users_active: 0,
+    platinum_users_active: 0,
+    dealers_active: 0,
+    admins_active: 0,
+    required_tables: [
+      "ct_user_sessions",
+      "ct_usage_events",
+      "ct_usage_daily_summary",
+      "ct_usage_user_daily_summary",
+      "ct_membership_usage_summary",
+    ],
+    next_action_no: "Opprett/valider usage-tabeller og session last_seen_at før ekte tall vises.",
+  };
+
+  const blobActivity = [
+    {
+      line_no: 1,
+      module_name: "Vercel Blob",
+      status: envPresent("BLOB_READ_WRITE_TOKEN") ? "OK" : "VARSEL",
+      token_present: envPresent("BLOB_READ_WRITE_TOKEN"),
+      activity_status: envPresent("BLOB_READ_WRITE_TOKEN") ? "klar" : "venter_env",
+      next_action_no: envPresent("BLOB_READ_WRITE_TOKEN") ? "Kjør upload/download test." : "Legg BLOB_READ_WRITE_TOKEN i Vercel.",
+    },
+  ];
+
+  const sandboxActivity = [
+    {
+      line_no: 1,
+      module_name: "Vercel Sandbox",
+      package_name: "@vercel/sandbox",
+      version: getVersion(pkg, "@vercel/sandbox"),
+      status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "PLANLAGT" : "OK",
+      activity_status: getVersion(pkg, "@vercel/sandbox") === "not_installed" ? "ikke_aktiv" : "installert",
+      next_action_no: "Lag kontrollert sandbox smoke test før automatisert bruk.",
+    },
+  ];
+
+  const envStatus = {
+    vercel: Boolean(process.env.VERCEL),
+    vercel_env: process.env.VERCEL_ENV || "local",
+    database_url_present: envPresent("DATABASE_URL", "POSTGRES_URL", "NEON_DATABASE_URL"),
+    mariadb_env_present: envPresent("MARIADB_HOST", "DB_HOST", "MYSQL_HOST"),
+    blob_token_present: envPresent("BLOB_READ_WRITE_TOKEN"),
+  };
+
+  const summary = {
+    active_modules_total: activeModules.length,
+    active_modules_ok: activeModules.filter((item) => item.status === "OK").length,
+    active_modules_warning: activeModules.filter((item) => item.status === "VARSEL").length,
+    active_modules_missing: activeModules.filter((item) => item.status === "MANGLER").length,
+    user_activity_status: userActivity.status,
+    blob_status: blobActivity[0]?.status || "INFO",
+    sandbox_status: sandboxActivity[0]?.status || "INFO",
+    migration_allowed: false,
+    neon_truth_status: "not_approved",
+  };
+
+  return NextResponse.json({
+    ok: true,
+    source: "application-runtime-overview",
+    route: "/api/system/application-runtime-overview",
+    checked_at: new Date().toISOString(),
+    project: {
+      name: pkg.name || "unknown",
+      version: pkg.version || "unknown",
+      node: process.version,
+    },
+    env_status: envStatus,
+    summary,
+    active_modules: activeModules,
+    module_activity: moduleActivity,
+    user_activity: userActivity,
+    blob_activity: blobActivity,
+    sandbox_activity: sandboxActivity,
+    svar_til_chatgpt: {
+      api_route: "/api/system/application-runtime-overview",
+      status: "OK",
+      message: "Runtime, aktive moduler, brukeraktivitet, Blob og Sandbox er nå egen API-kontrakt. Overføringsmatrise skal ligge i /api/system/mariadb-neon-transfer-matrix.",
+    },
   });
-
-  const mariaConn = await mysql.createConnection(getMariaDbConnectionOptions());
-
-  try {
-    await mariaConn.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
-
-    const [mariaTables, neonTables, tableMap] = await Promise.all([
-      getMariaDbTables(mariaConn),
-      getNeonTables(neonPool),
-      getMigrationTableMap(neonPool)
-    ]);
-
-    const rows: TransferRow[] = [];
-
-    for (const mapRow of tableMap) {
-      const sourceKey = String(mapRow.source_key || "");
-      const objectGroup = String(mapRow.object_group || "");
-      const mariaTable =
-        mapRow.mariadb_table_name ||
-        mapRow.source_table ||
-        null;
-
-      const neonTable = "ct_migration_catalog_object_staging";
-
-      const mariadbExists =
-        !!mariaTable &&
-        mariaTable !== "NO_MARIADB_SOURCE" &&
-        mariaTables.has(mariaTable);
-
-      const neonExists = neonTables.has(neonTable);
-
-      const mariaRows =
-        typeof mapRow.row_count === "number"
-          ? mapRow.row_count
-          : mapRow.row_count
-            ? Number(mapRow.row_count)
-            : await countMariaDbRows(mariaConn, mariaTable);
-
-      const neonRows =
-        sourceKey && objectGroup
-          ? await countNeonStagingRows(neonPool, sourceKey, objectGroup, mapRow.source_table || null)
-          : null;
-
-      const status = resolveStatus({
-        mariadbTable: mariaTable,
-        neonTable,
-        mariadbExists,
-        neonExists,
-        mariaRows,
-        neonRows
-      });
-
-      rows.push({
-        line_no: rows.length + 1,
-        source_key: sourceKey,
-        object_group: objectGroup,
-        mariadb_table: mariaTable,
-        neon_table: neonTable,
-        mariadb_exists: mariadbExists,
-        neon_exists: neonExists,
-        mariadb_rows: mariaRows,
-        neon_rows: neonRows,
-        ...status
-      });
-    }
-
-    const summary = rows.reduce(
-      (acc, row) => {
-        acc.total += 1;
-        if (row.status === "OK") acc.ok += 1;
-        if (row.status === "VARSEL") acc.varsel += 1;
-        if (row.status === "MANGLER") acc.mangler += 1;
-        if (row.status === "INFO") acc.info += 1;
-        return acc;
-      },
-      { total: 0, ok: 0, varsel: 0, mangler: 0, info: 0 }
-    );
-
-    return NextResponse.json({
-      ok: summary.mangler === 0 && summary.varsel === 0,
-      source: "mariadb-neon-transfer-matrix",
-      checked_at: new Date().toISOString(),
-      summary,
-      rows,
-      database_summary: {
-        mariadb_table_or_view_count: mariaTables.size,
-        neon_table_or_view_count: neonTables.size
-      },
-      collectium_rule: {
-        migration_allowed: false,
-        neon_truth_approval_allowed: false,
-        reason:
-          "Overføringsmatrisen viser om MariaDB-kilder har tilsvarende Neon-staging/mål og om radtall samsvarer. Den migrerer ikke data."
-      }
-    });
-  } finally {
-    await mariaConn.end();
-    await neonPool.end();
-  }
 }
-
