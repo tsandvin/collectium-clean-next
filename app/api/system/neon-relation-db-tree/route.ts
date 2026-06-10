@@ -11,7 +11,7 @@
  * - Brukes av NeonRelationDbTree-komponenten.
  *
  * Berørte sider / routes:
- * - /admin/system/MariaDB - Neon Postgres
+ * - /admin/system/mariadb-neon
  * - /katalog/kontroll/eksempel
  *
  * Berørte API-ruter:
@@ -363,4 +363,5 @@ export async function GET() {
     await pool.end();
   }
 }
+
 
