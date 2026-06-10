@@ -19,3 +19,15 @@ pnpm-debug.log*
 Thumbs.db
 
 .env.local
+
+# Collectium local backup/test files
+*.backup-*
+*.bak
+docs/backups/
+docs/control-reports/
+zip-check-neon-rule/
+collectium-neon-rule-establishment-v1/
+collectium-neon-rule-establishment-v1.zip
+collectium-neon-rule-establishment-install-test-v1.ps1
+collectium-neon-rule-package-check-v1.ps1
+neon-truth-status.json
