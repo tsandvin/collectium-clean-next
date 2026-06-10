@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import styles from "./MariaDbNeonTransferMatrix.module.css";
+
 import { useEffect, useState } from "react";
 
 type TransferRow = {
@@ -42,6 +44,22 @@ function statusStyle(color: TransferRow["status_color"]) {
   return { color: "#991b1b", background: "#fee2e2", border: "1px solid #fecaca" };
 }
 
+
+function getTransferStatusClass(status: string): string {
+  if (status === "OK") return styles.statusOK;
+  if (status === "VARSEL") return styles.statusVARSEL;
+  if (status === "MANGLER") return styles.statusMANGLER;
+  if (status === "INFO") return styles.statusINFO;
+  return styles.statusINFO;
+}
+
+function getTransferBadgeClass(status: string): string {
+  if (status === "OK") return styles.badgeOK;
+  if (status === "VARSEL") return styles.badgeVARSEL;
+  if (status === "MANGLER") return styles.badgeMANGLER;
+  if (status === "INFO") return styles.badgeINFO;
+  return styles.badgeINFO;
+}
 export default function MariaDbNeonTransferMatrix() {
   const [data, setData] = useState<TransferMatrixResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +123,7 @@ export default function MariaDbNeonTransferMatrix() {
       </p>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <div className={styles.transferMatrixTableWrap}>`r`n        <table className={styles.transferMatrixTable} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr>
               <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #ddd" }}>#</th>
@@ -154,11 +172,12 @@ export default function MariaDbNeonTransferMatrix() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>`r`n      </div>
       </div>
     </section>
   );
 }
+
 
 
 
