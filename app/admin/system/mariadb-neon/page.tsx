@@ -75,8 +75,7 @@ type TabKey =
   | "pages"
   | "diagnose"
   | "events"
-  | "json"
-  | "chatgpt";
+  | "transfer" | "json" | "chatgpt";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "dashboard", label: "Dashboard" },
@@ -910,6 +909,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
