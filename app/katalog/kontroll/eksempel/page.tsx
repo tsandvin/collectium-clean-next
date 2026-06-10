@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import NeonRelationDbTree from "../../../../components/system/NeonRelationDbTree";
+
 /**
  * COLLECTIUM FILE HEADER
  * Fil: app/katalog/kontroll/eksempel/page.tsx
@@ -187,3 +189,4 @@ export default function CatalogSampleObjectsPage() {
     </main>
   );
 }
+

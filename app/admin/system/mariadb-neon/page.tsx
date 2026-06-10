@@ -2,7 +2,7 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * MariaDB Neon Control Page
+ * MariaDB - Neon Postgres Control Page
  *
  * Definering / formål:
  * Kontrollside for MariaDB -> Neon-overgang, plattformstandard, template-tokenbruk,
@@ -13,7 +13,7 @@
  * hva som er blokkert, og hvorfor Neon ikke er godkjent som sann hoveddatabase ennå.
  *
  * Berørte sider / routes:
- * - /admin/system/mariadb-neon
+ * - /admin/system/MariaDB - Neon Postgres
  *
  * Berørte DB-brytere / feature_keys:
  * - system.mariadb_neon.control
@@ -25,7 +25,7 @@
  * Berørte API-ruter:
  * - GET /api/system/db-overview
  * - GET /api/system/schema-inventory
- * - GET /api/system/mariadb-neon-bootstrap
+ * - GET /api/system/MariaDB - Neon Postgres-bootstrap
  * - GET /api/system/platform-standard-check
  * - GET /api/system/template-token-check
  * - GET /api/system/control-event-log
@@ -44,13 +44,15 @@
  * log_action: mariadb_neon_control.view
  *
  * Versjon:
- * CT-FILE-MARIADB-NEON-CONTROL-PAGE-0002
+ * CT-FILE-MariaDB - Neon Postgres-CONTROL-PAGE-0002
  *
  * Endringsregel:
  * Denne siden viser kontrollstatus. Den migrerer ikke kildedata.
  */
 
 "use client";
+
+import NeonRelationDbTree from "../../../../components/system/NeonRelationDbTree";
 
 
 import MariaDbNeonTransferMatrix from "./MariaDbNeonTransferMatrix";
@@ -199,7 +201,7 @@ export default function MariaDbNeonControlPage() {
         },
         body: JSON.stringify({
           event_source: "mariadb_neon_control_page",
-          route_path: "/admin/system/mariadb-neon",
+          route_path: "/admin/system/MariaDB - Neon Postgres",
           status: "INFO",
           severity: "info",
           suggested_fix_no: "Ingen tiltak.",
@@ -226,7 +228,7 @@ export default function MariaDbNeonControlPage() {
     ] = await Promise.all([
       fetchJson("/api/system/db-overview"),
       fetchJson("/api/system/schema-inventory"),
-      fetchJson("/api/system/mariadb-neon-bootstrap"),
+      fetchJson("/api/system/MariaDB - Neon Postgres-bootstrap"),
       fetchJson("/api/system/platform-standard-check"),
       fetchJson("/api/system/template-token-check"),
       fetchJson("/api/system/control-event-log"),
@@ -465,7 +467,7 @@ export default function MariaDbNeonControlPage() {
       <section className={styles.hero}>
         <div>
           <p className={styles.eyebrow}>Collectium System Control</p>
-          <h1>MariaDB → Neon Control</h1>
+          <h1>MariaDB - Neon Postgres Control</h1>
           <p>
             Kontrollside for database, API, brytere, template, skin, layout og
             sidekrav før Neon kan bli sann hoveddatabase.
@@ -518,7 +520,7 @@ export default function MariaDbNeonControlPage() {
         </article>
       </section>
 
-      <nav className={styles.tabs} aria-label="MariaDB Neon Control tabs">
+      <nav className={styles.tabs} aria-label="MariaDB - Neon Postgres Control tabs">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -763,7 +765,7 @@ export default function MariaDbNeonControlPage() {
             [
               "/api/system/db-overview",
               "/api/system/schema-inventory",
-              "/api/system/mariadb-neon-bootstrap",
+              "/api/system/MariaDB - Neon Postgres-bootstrap",
               "/api/system/platform-standard-check",
               "/api/system/template-token-check",
               "/api/system/control-event-log",
@@ -771,7 +773,7 @@ export default function MariaDbNeonControlPage() {
               line_no: index + 1,
               status: "OK",
               area: route,
-              detail_no: "Ruten er koblet inn i M-N Control.",
+              detail_no: "Ruten er koblet inn i MariaDB - Neon Postgres Control.",
               suggestion_no: "OK",
             })),
             "API-ruter mangler."
@@ -788,7 +790,7 @@ export default function MariaDbNeonControlPage() {
                 line_no: 1,
                 status: "INFO",
                 area: "system.mariadb_neon.control",
-                detail_no: "Kontrollerer M-N Control-siden.",
+                detail_no: "Kontrollerer MariaDB - Neon Postgres Control-siden.",
                 suggestion_no: "Skal senere kobles mot DB 8.4-kjede.",
               },
               {
@@ -819,7 +821,7 @@ export default function MariaDbNeonControlPage() {
               {
                 line_no: 1,
                 status: "OK",
-                area: "/admin/system/mariadb-neon",
+                area: "/admin/system/MariaDB - Neon Postgres",
                 detail_no: "Skal vise database, API, brytere, template, skin, layout og sidekrav.",
                 suggestion_no: "Denne siden er kontrollsenter.",
               },
@@ -898,6 +900,8 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
+
 
 
 
