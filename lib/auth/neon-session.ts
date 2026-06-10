@@ -1,47 +1,4 @@
-﻿/**
- * COLLECTIUM FILE HEADER
- *
- * Overskrift:
- * Neon session helper
- *
- * Definering / formÃ¥l:
- * Oppretter, leser og avslutter session i Neon/Postgres.
- *
- * BruksomrÃ¥de:
- * Brukes av auth API-rutene.
- *
- * BerÃ¸rte sider / routes:
- * - /login
- * - /registrering
- * - /api/auth/session
- *
- * BerÃ¸rte DB-brytere / feature_keys:
- * - auth.login
- * - auth.logout
- * - auth.session.view
- *
- * BerÃ¸rte API-ruter:
- * - /api/auth/login
- * - /api/auth/logout
- * - /api/auth/session
- *
- * BerÃ¸rte tabeller / views:
- * - ct_users
- * - ct_user_sessions
- * - ct_login_attempts
- *
- * Dataretning:
- * Neon/Postgres -> API/backend -> Next.js -> React -> UI
- *
- * Logging:
- * log_category: auth
- * log_action: session
- *
- * Versjon:
- * CT-FILE-AUTH-NEON-0003 / CHANGE-2026-06-10-0002
- */
-
-import crypto from "crypto";
+﻿import crypto from "crypto";
 import { cookies, headers } from "next/headers";
 import { neonOne, neonQuery } from "@/lib/db/neon";
 
@@ -67,37 +24,59 @@ export type CtAuthUser = {
 type SessionUserRow = CtAuthUser & {
   is_admin: boolean | number;
   is_active: boolean | number;
+  session_id: number;
 };
 
 function asBool(value: boolean | number): boolean {
   return value === true || value === 1;
 }
 
+function sha256(value: string): string {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
 export function createSessionToken(): string {
-  return crypto.randomBytes(48).toString("hex");
+  return crypto.randomBytes(48).toString("base64url");
+}
+
+function getClientIpFromHeaders(headerStore: Headers): string | null {
+  const forwardedFor = headerStore.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  return headerStore.get("x-real-ip");
 }
 
 export async function createUserSession(userId: number, token: string): Promise<void> {
   const headerStore = await headers();
   const userAgent = headerStore.get("user-agent");
-  const forwardedFor = headerStore.get("x-forwarded-for");
-  const ipAddress = forwardedFor?.split(",")[0]?.trim() || headerStore.get("x-real-ip");
+  const ipAddress = getClientIpFromHeaders(headerStore);
+  const tokenHash = sha256(token);
 
   await neonQuery(
     `
       INSERT INTO ct_user_sessions (
         user_id,
-        session_token,
+        session_token_hash,
         ip_address,
         user_agent,
         created_at,
         last_seen_at,
-        expires_at,
-        is_active
+        expires_at
       )
-      VALUES ($1, $2, $3, $4, now(), now(), now() + interval '7 days', true)
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        now(),
+        now(),
+        now() + interval '7 days'
+      )
     `,
-    [userId, token, ipAddress, userAgent],
+    [userId, tokenHash, ipAddress, userAgent],
   );
 }
 
@@ -108,6 +87,8 @@ export async function getCurrentSessionUser(): Promise<CtAuthUser | null> {
   if (!token) {
     return null;
   }
+
+  const tokenHash = sha256(token);
 
   const user = await neonOne<SessionUserRow>(
     `
@@ -125,16 +106,18 @@ export async function getCurrentSessionUser(): Promise<CtAuthUser | null> {
         u.role,
         u.membership_level,
         u.is_admin,
-        u.is_active
+        u.is_active,
+        s.id as session_id
       FROM ct_user_sessions s
       JOIN ct_users u ON u.id = s.user_id
-      WHERE s.session_token = $1
-        AND s.is_active = true
+      WHERE s.session_token_hash = $1
+        AND s.revoked_at IS NULL
         AND s.expires_at > now()
         AND u.is_active = true
+        AND u.account_status = 'active'
       LIMIT 1
     `,
-    [token],
+    [tokenHash],
   );
 
   if (!user) {
@@ -145,9 +128,9 @@ export async function getCurrentSessionUser(): Promise<CtAuthUser | null> {
     `
       UPDATE ct_user_sessions
       SET last_seen_at = now()
-      WHERE session_token = $1
+      WHERE id = $1
     `,
-    [token],
+    [user.session_id],
   ).catch(() => undefined);
 
   await neonQuery(
@@ -160,7 +143,18 @@ export async function getCurrentSessionUser(): Promise<CtAuthUser | null> {
   ).catch(() => undefined);
 
   return {
-    ...user,
+    id: user.id,
+    public_id: user.public_id,
+    email: user.email,
+    display_name: user.display_name,
+    public_display_name: user.public_display_name,
+    preferred_language: user.preferred_language,
+    preferred_theme: user.preferred_theme,
+    account_status: user.account_status,
+    email_status: user.email_status,
+    admin_approval_status: user.admin_approval_status,
+    role: user.role,
+    membership_level: user.membership_level,
     is_admin: asBool(user.is_admin),
     is_active: asBool(user.is_active),
   };
@@ -171,17 +165,26 @@ export async function revokeCurrentSession(): Promise<void> {
   const token = cookieStore.get(CT_SESSION_COOKIE)?.value;
 
   if (token) {
+    const tokenHash = sha256(token);
+
     await neonQuery(
       `
         UPDATE ct_user_sessions
-        SET is_active = false, revoked_at = now()
-        WHERE session_token = $1
+        SET revoked_at = now()
+        WHERE session_token_hash = $1
+          AND revoked_at IS NULL
       `,
-      [token],
+      [tokenHash],
     );
   }
 
-  cookieStore.delete(CT_SESSION_COOKIE);
+  cookieStore.set(CT_SESSION_COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
 }
 
 export async function logLoginAttempt(input: {
@@ -192,8 +195,7 @@ export async function logLoginAttempt(input: {
 }): Promise<void> {
   const headerStore = await headers();
   const userAgent = headerStore.get("user-agent");
-  const forwardedFor = headerStore.get("x-forwarded-for");
-  const ipAddress = forwardedFor?.split(",")[0]?.trim() || headerStore.get("x-real-ip");
+  const ipAddress = getClientIpFromHeaders(headerStore);
 
   await neonQuery(
     `
