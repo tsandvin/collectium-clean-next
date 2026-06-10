@@ -52,6 +52,8 @@
 
 "use client";
 
+import MariaDbNeonApplicationRuntimeOverview from "./MariaDbNeonApplicationRuntimeOverview";
+
 import MariaDbNeonLayoutGuide from "./MariaDbNeonLayoutGuide";
 
 import NeonRelationDbTree from "../../../../components/system/NeonRelationDbTree";
@@ -75,7 +77,7 @@ type TabKey =
   | "pages"
   | "diagnose"
   | "events"
-  | "transfer" | "json" | "chatgpt";
+  | "applications" | "transfer" | "applications" | "json" | "chatgpt";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "dashboard", label: "Dashboard" },
@@ -888,6 +890,10 @@ export default function MariaDbNeonControlPage() {
         <MariaDbNeonTransferMatrix />
       ) : null}
 
+        {activeTab === "applications" ? (
+          <MariaDbNeonApplicationRuntimeOverview />
+        ) : null}
+
       
 
       {activeTab === "json" ? (
@@ -909,6 +915,7 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
 
 
 
