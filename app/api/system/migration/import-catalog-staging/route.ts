@@ -90,21 +90,40 @@ function getNeonUrl(): string {
   return url;
 }
 
-function getMariaDbConfig() {
-  const url = process.env.MARIADB_URL || process.env.MYSQL_URL;
+function getMariaDbUrl(): string | null {
+  return process.env.MARIADB_URL || process.env.MYSQL_URL || null;
+}
 
-  if (url) {
-    return url;
-  }
+function getMariaDbConnectionOptions(): ConnectionOptions {
+  const host =
+    process.env.MARIADB_HOST ||
+    process.env.MYSQL_HOST ||
+    process.env.CT_DB_HOST;
 
-  const host = process.env.MARIADB_HOST || process.env.MYSQL_HOST;
-  const port = Number(process.env.MARIADB_PORT || process.env.MYSQL_PORT || 3306);
-  const database = process.env.MARIADB_DATABASE || process.env.MYSQL_DATABASE;
-  const user = process.env.MARIADB_USER || process.env.MYSQL_USER;
-  const password = process.env.MARIADB_PASSWORD || process.env.MYSQL_PASSWORD;
+  const port = Number(
+    process.env.MARIADB_PORT ||
+    process.env.MYSQL_PORT ||
+    process.env.CT_DB_PORT ||
+    3306
+  );
+
+  const database =
+    process.env.MARIADB_DATABASE ||
+    process.env.MYSQL_DATABASE ||
+    process.env.CT_DB_NAME;
+
+  const user =
+    process.env.MARIADB_USER ||
+    process.env.MYSQL_USER ||
+    process.env.CT_DB_USER;
+
+  const password =
+    process.env.MARIADB_PASSWORD ||
+    process.env.MYSQL_PASSWORD ||
+    process.env.CT_DB_PASSWORD;
 
   if (!host || !database || !user || !password) {
-    throw new Error("Missing MariaDB env vars. Expected MARIADB_HOST, MARIADB_DATABASE, MARIADB_USER, MARIADB_PASSWORD or MARIADB_URL.");
+    throw new Error("Missing MariaDB env vars. Expected MARIADB_*, MYSQL_* or CT_DB_*.");
   }
 
   return {
@@ -224,11 +243,11 @@ async function fetchMariaDbRows(sourceTable: string, fieldMap: FieldMapRow[], li
   const fields = Array.from(new Set(fieldMap.map((field) => field.source_field)));
   const selectFields = fields.map((field) => `\`${field}\``).join(", ");
 
-    const mariaConfig = getMariaDbConfig();
-  const conn =
-    typeof mariaConfig === "string"
-      ? await mysql.createConnection(mariaConfig)
-      : await mysql.createConnection(mariaConfig as ConnectionOptions);
+    const mariaDbUrl = getMariaDbUrl();
+
+  const conn = mariaDbUrl
+    ? await mysql.createConnection(mariaDbUrl)
+    : await mysql.createConnection(getMariaDbConnectionOptions());
 
   try {
     const [rows] = await conn.query(
@@ -567,5 +586,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
