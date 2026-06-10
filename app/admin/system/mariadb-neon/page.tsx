@@ -91,7 +91,9 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "diagnose", label: "Diagnose" },
   { key: "events", label: "Hendelseslogg" },
   { key: "json", label: "JSON" },
-  { key: "chatgpt", label: "Svar til ChatGPT" },
+  { key: "chatgpt", label: "Overføringsmatrise
+            Overføringsmatrise
+            Svar til ChatGPT" },
 ];
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -470,6 +472,11 @@ export default function MariaDbNeonControlPage() {
         <div>
           <p className={styles.eyebrow}>Collectium System Control</p>
           <h1>MariaDB - Neon Postgres Control</h1>
+          <div className="mariadbNeonLayoutGuideHost">
+            <MariaDbNeonLayoutGuide />
+          </div>
+          <div className="mariadbNeonLayoutGuideHost">
+</div>
           <p>
             Kontrollside for database, API, brytere, template, skin, layout og
             sidekrav før Neon kan bli sann hoveddatabase.
@@ -891,7 +898,9 @@ export default function MariaDbNeonControlPage() {
 
       {activeTab === "chatgpt" ? (
         <section className={styles.panel}>
-          <h2>Svar til ChatGPT</h2>
+          <h2>Overføringsmatrise
+            Overføringsmatrise
+            Svar til ChatGPT</h2>
           <p className={styles.panelLead}>
             Kopier denne statusen inn i neste chat hvis vi skal fortsette kontrollen.
           </p>
@@ -902,6 +911,8 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
+
 
 
 
