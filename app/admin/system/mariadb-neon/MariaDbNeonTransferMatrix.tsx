@@ -12,8 +12,8 @@ type TransferRow = {
   neon_exists: boolean;
   mariadb_rows: number | null;
   neon_rows: number | null;
-  status: "OK" | "VARSEL" | "MANGLER";
-  status_color: "green" | "yellow" | "red";
+  status: "OK" | "VARSEL" | "MANGLER" | "INFO";
+  status_color: "green" | "yellow" | "red" | "blue";
   deviation_no: string;
   next_action_no: string;
 };
@@ -26,6 +26,7 @@ type TransferMatrixResponse = {
     ok: number;
     varsel: number;
     mangler: number;
+    info: number;
   };
   database_summary: {
     mariadb_table_or_view_count: number;
@@ -37,6 +38,7 @@ type TransferMatrixResponse = {
 function statusStyle(color: TransferRow["status_color"]) {
   if (color === "green") return { color: "#166534", background: "#dcfce7", border: "1px solid #86efac" };
   if (color === "yellow") return { color: "#854d0e", background: "#fef9c3", border: "1px solid #fde68a" };
+  if (color === "blue") return { color: "#1e3a8a", background: "#dbeafe", border: "1px solid #93c5fd" };
   return { color: "#991b1b", background: "#fee2e2", border: "1px solid #fecaca" };
 }
 
@@ -95,7 +97,7 @@ export default function MariaDbNeonTransferMatrix() {
       <h2>Overføringsmatrise</h2>
       <p>
         Kilder: {data.summary.total}. OK: {data.summary.ok}. Varsel: {data.summary.varsel}. Mangler:{" "}
-        {data.summary.mangler}.
+        {data.summary.mangler}. Info: {data.summary.info}.
       </p>
       <p style={{ opacity: 0.7 }}>
         MariaDB tabeller/views: {data.database_summary.mariadb_table_or_view_count}. Neon tabeller/views:{" "}
@@ -157,3 +159,4 @@ export default function MariaDbNeonTransferMatrix() {
     </section>
   );
 }
+

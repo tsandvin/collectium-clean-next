@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type TransferStatus = "OK" | "VARSEL" | "MANGLER";
+type TransferStatus = "OK" | "VARSEL" | "MANGLER" | "INFO";
 
 type TransferRow = {
   line_no: number;
@@ -18,7 +18,7 @@ type TransferRow = {
   mariadb_rows: number | null;
   neon_rows: number | null;
   status: TransferStatus;
-  status_color: "green" | "yellow" | "red";
+  status_color: "green" | "yellow" | "red" | "blue";
   deviation_no: string;
   next_action_no: string;
 };
@@ -200,10 +200,10 @@ function resolveStatus(input: {
 
   if (!mariadbTable || mariadbTable === "NO_MARIADB_SOURCE") {
     return {
-      status: "MANGLER",
-      status_color: "red",
-      deviation_no: "MariaDB-kilde mangler eller er definert som Neon-first.",
-      next_action_no: "Definer kilde, importmodell eller Neon-first struktur."
+      status: "INFO",
+      status_color: "blue",
+      deviation_no: "Kilden finnes ikke i MariaDB og er definert som Neon-first.",
+      next_action_no: "Opprett Neon kilde-/filter-/objektstruktur når denne objektgruppen skal bygges."
     };
   }
 
@@ -328,9 +328,10 @@ export async function GET() {
         if (row.status === "OK") acc.ok += 1;
         if (row.status === "VARSEL") acc.varsel += 1;
         if (row.status === "MANGLER") acc.mangler += 1;
+        if (row.status === "INFO") acc.info += 1;
         return acc;
       },
-      { total: 0, ok: 0, varsel: 0, mangler: 0 }
+      { total: 0, ok: 0, varsel: 0, mangler: 0, info: 0 }
     );
 
     return NextResponse.json({
@@ -355,3 +356,4 @@ export async function GET() {
     await neonPool.end();
   }
 }
+
