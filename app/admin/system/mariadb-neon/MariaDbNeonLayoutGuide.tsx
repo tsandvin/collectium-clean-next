@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./MariaDbNeonLayoutGuide.module.css";
 
 type ScreenMode = "mobile" | "tablet" | "desktop" | "wide" | "tv";
@@ -38,7 +38,7 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
     title: "Desktop",
     range: "1101-1899px",
     shortText:
-      "Desktop er normal Collectium-visning. Global AppShell har venstre sidemeny, toppmeny, hero/overskrift, faner og ett hovedinnholdsområde.",
+      "Desktop er normal Collectium-visning. Innholdet bruker desktop cap 1101-1899px og skal ikke strekkes uendelig selv om skjermen er større.",
     rules: [
       "01 Sidemeny: fast venstre meny, ca. 220-260px.",
       "02 Toppmeny: søk, bruker, snarveier og status ligger globalt.",
@@ -52,7 +52,7 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
     title: "Bredskjerm",
     range: "1900px+",
     shortText:
-      "Bredskjerm er workspace-modus. Siden kan deles i sideveis arbeidsbaner slik at kontroll, matrise, relasjoner og detaljer kan vises samtidig.",
+      "Bredskjerm er workspace-modus. Skjermen deles i sideveis arbeidsflater på ca. 1000px slik at flere skjermområder kan vises samtidig.",
     rules: [
       "01 Sidemeny: kan være smalere, men fortsatt fast.",
       "02 Toppmeny: global, men må ikke bruke unødig høyde.",
@@ -66,7 +66,7 @@ const screenText: Record<ScreenMode, { title: string; range: string; shortText: 
     title: "TV / presentasjon",
     range: "2900px+",
     shortText:
-      "TV er presentasjonsmodus, ikke vanlig workspace. Den skal vise færre aktive felt, større typografi og tydelig status på avstand.",
+      "TV er presentasjonsmodus. TV skal ikke bare vise mer bredde, men færre felt, større typografi og tydeligere status på avstand.",
     rules: [
       "01 Sidemeny: minimal eller skjult.",
       "02 Toppmeny: forenklet, bare status og hovedvalg.",
@@ -153,6 +153,33 @@ const fieldRegister = [
 export default function MariaDbNeonLayoutGuide() {
   const [isOpen, setIsOpen] = useState(false);
   const [screenMode, setScreenMode] = useState<ScreenMode>("desktop");
+  const [viewportWidth, setViewportWidth] = useState<number>(0);
+
+  useEffect(() => {
+    function updateViewportWidth() {
+      setViewportWidth(window.innerWidth);
+    }
+
+    updateViewportWidth();
+    window.addEventListener("resize", updateViewportWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateViewportWidth);
+    };
+  }, []);
+
+  const actualViewportLabel = useMemo(() => {
+    if (viewportWidth < 720) return "Mobil";
+    if (viewportWidth < 1101) return "Tablet";
+    if (viewportWidth < 1900) return "Desktop standard";
+    if (viewportWidth < 2900) return "Bredskjerm mulig";
+    return "TV / presentasjon mulig";
+  }, [viewportWidth]);
+
+  const laneEstimate = useMemo(() => {
+    if (viewportWidth < 1900) return 1;
+    return Math.max(1, Math.floor(viewportWidth / 1000));
+  }, [viewportWidth]);
 
   return (
     <>
@@ -223,6 +250,71 @@ export default function MariaDbNeonLayoutGuide() {
 
                 <p className={styles.calculatorNote}>
                   {screenCalculator[screenMode].standardRule}
+                </p>
+              </div>
+
+                            <div className={styles.actualScreenSizeBox}>
+                <div className={styles.actualScreenHeader}>
+                  <div>
+                    <strong>Aktuell skjermstørrelse</strong>
+                    <span>Dette feltet viser hva nettleseren faktisk ser akkurat nå.</span>
+                  </div>
+                  <em>{viewportWidth > 0 ? `${viewportWidth}px` : "Måles ..."}</em>
+                </div>
+
+                <div className={styles.screenRuleGrid}>
+                  <article>
+                    <span>Faktisk visning</span>
+                    <strong>{actualViewportLabel}</strong>
+                    <small>Basert på aktiv nettleserbredde.</small>
+                  </article>
+
+                  <article>
+                    <span>Desktop cap</span>
+                    <strong>1101–1899px</strong>
+                    <small>Normal desktop skal ikke strekke innholdet uendelig.</small>
+                  </article>
+
+                  <article>
+                    <span>Valgt funksjon</span>
+                    <strong>{screenText[screenMode].title}</strong>
+                    <small>{screenText[screenMode].range}</small>
+                  </article>
+
+                  <article>
+                    <span>Estimert lanes</span>
+                    <strong>{screenMode === "wide" || screenMode === "tv" ? `${laneEstimate} x ca. 1000px` : "1 normal arbeidsflate"}</strong>
+                    <small>Bredskjerm deler skjermen i arbeidsområder.</small>
+                  </article>
+                </div>
+
+                <div className={styles.contentWidthRule}>
+                  <strong>Regel for feltbredde</strong>
+                  <p>
+                    Når skjermen er større enn desktop-standard, skal ikke innholdsfeltet bare bli bredere.
+                    Desktop-innholdet holdes innen normal lesbar bredde. Bredskjerm og TV er egne skjermfunksjoner
+                    som organiserer innholdet annerledes.
+                  </p>
+                </div>
+
+                <div className={styles.lanePreview}>
+                  <div className={styles.laneBox}>
+                    <strong>Lane 1</strong>
+                    <span>Sidemeny + toppmeny + kontroll/filter</span>
+                  </div>
+                  <div className={styles.laneBox}>
+                    <strong>Lane 2</strong>
+                    <span>Tabside, søkeresultat, objektpresentasjon eller relasjonsvisning</span>
+                  </div>
+                  <div className={styles.laneBoxMuted}>
+                    <strong>Lane 3</strong>
+                    <span>Ekstra relasjoner/logg ved svært bred skjerm</span>
+                  </div>
+                </div>
+
+                <p className={styles.wideExample}>
+                  Eksempel: På en 2400px skjerm / 27&quot; med Bredskjerm aktivert kan Collectium vise to arbeidsflater:
+                  én for global kontroll og én for tabside, søkeresultat, objektpresentasjon eller relasjonspresentasjon.
                 </p>
               </div>
 
@@ -371,5 +463,6 @@ export default function MariaDbNeonLayoutGuide() {
     </>
   );
 }
+
 
 
