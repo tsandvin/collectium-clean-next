@@ -15,16 +15,6 @@ type TableMapRow = {
 };
 
 
-function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
-  const repaired: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(row)) {
-    repaired[key] = repairMojibakeText(value);
-  }
-
-  return repaired as T;
-}
-
 
 function repairMojibakeText(value: unknown): unknown {
   if (typeof value !== "string") return value;
@@ -77,16 +67,6 @@ type FieldMapRow = {
   is_market_field: boolean;
 };
 
-
-function repairMojibakeObject<T extends Record<string, unknown>>(row: T): T {
-  const repaired: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(row)) {
-    repaired[key] = repairMojibakeText(value);
-  }
-
-  return repaired as T;
-}
 
 type ImportMode = "preview" | "import";
 
@@ -651,6 +631,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 
 
 
