@@ -9,7 +9,7 @@
  * Berørte tabeller / views: Ingen
  * Dataretning: Static UI icons only
  * Logging: Ingen runtime logging
- * Versjon: UI85-REACT-TEMPLATE-V18
+ * Versjon: UI85-REACT-TEMPLATE-V19
  */
 
 export function HeartIcon() {

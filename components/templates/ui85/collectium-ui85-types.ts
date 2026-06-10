@@ -9,7 +9,7 @@
  * Berørte tabeller / views: Ingen
  * Dataretning: Type definitions only
  * Logging: Ingen runtime logging
- * Versjon: UI85-REACT-TEMPLATE-V18
+ * Versjon: UI85-REACT-TEMPLATE-V19
  */
 
 import type { ReactNode } from "react";

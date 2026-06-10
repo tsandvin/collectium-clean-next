@@ -35,6 +35,9 @@
   --ct-ui-soft: #6e7d73;
   --ct-ui-accent: #0d6b5b;
   --ct-ui-accent-2: #b78c41;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(13, 107, 91, 0.13), transparent 31%),
+    linear-gradient(135deg, #f8f1e5 0%, #fff8eb 50%, #f2e5ce 100%);
 }
 
 .previewModule[data-skin="samler"] {
@@ -48,6 +51,9 @@
   --ct-ui-soft: #7b8a81;
   --ct-ui-accent: #28704e;
   --ct-ui-accent-2: #6a9c78;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(43, 112, 76, 0.10), transparent 31%),
+    linear-gradient(135deg, #f7fbf7 0%, #ffffff 48%, #edf5ef 100%);
 }
 
 .previewModule[data-skin="museum"] {
@@ -61,6 +67,9 @@
   --ct-ui-soft: #9c8f7d;
   --ct-ui-accent: #d3aa60;
   --ct-ui-accent-2: #8e6f47;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(211, 170, 96, 0.14), transparent 32%),
+    linear-gradient(135deg, #16120f 0%, #221b16 50%, #2d251d 100%);
 }
 
 .moduleHeader,

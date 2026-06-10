@@ -1,0 +1,107 @@
+.themeBar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid var(--ct-ui-border-soft);
+  border-radius: var(--ct-ui-radius);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ct-ui-panel) 88%, transparent), color-mix(in srgb, var(--ct-ui-panel-2) 72%, transparent));
+}
+
+.themeBar span {
+  display: block;
+  color: var(--ct-ui-soft);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.themeBar b {
+  display: block;
+  margin-top: 5px;
+  color: var(--ct-ui-text);
+  font-size: 18px;
+}
+
+.themeButtons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(118px, 1fr));
+  gap: 8px;
+  min-width: min(620px, 62vw);
+}
+
+.themeButton {
+  position: relative;
+  min-height: 54px;
+  padding: 9px 12px;
+  border: 1px solid var(--ct-ui-border-soft);
+  border-radius: var(--ct-ui-radius);
+  color: var(--ct-ui-text);
+  background: color-mix(in srgb, var(--ct-ui-panel) 70%, transparent);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.themeButton::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 5px;
+  height: 2px;
+  opacity: 0;
+  transform: scaleX(.62);
+  transform-origin: center;
+  background: linear-gradient(90deg, transparent, var(--ct-ui-accent), var(--ct-ui-accent-2), transparent);
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.themeButton:hover::after,
+.themeButton.active::after {
+  opacity: .82;
+  transform: scaleX(1);
+}
+
+.themeButton:hover {
+  transform: translateY(-1px);
+  border-color: var(--ct-ui-border);
+}
+
+.themeButton.active {
+  border-color: var(--ct-ui-border);
+  background: color-mix(in srgb, var(--ct-ui-accent) 16%, var(--ct-ui-panel));
+}
+
+.themeButton b {
+  margin: 0;
+  font-size: 13px;
+}
+
+.themeButton small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ct-ui-muted);
+  font-size: 10px;
+}
+
+@media (max-width: 960px) {
+  .themeBar {
+    flex-direction: column;
+  }
+
+  .themeButtons {
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .themeButtons {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,7 +2,7 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Collectium UI85 Object Preview React Component v18
+ * Collectium UI85 Object Preview React Component v19
  *
  * Definering / formål:
  * React template content for UI 8.5. Shows object presentation, collector
@@ -33,11 +33,11 @@
  * log_action: ui85.object.preview
  *
  * Versjon:
- * UI85-REACT-TEMPLATE-V18 / CHANGE-UI85-2026-06-11-0018
+ * UI85-REACT-TEMPLATE-V19 / CHANGE-UI85-2026-06-11-0019
  */
 
 import { HeartIcon, PlusIcon, ShareIcon, StarIcon } from "./CollectiumUi85Icons";
-import type { CollectiumUi85Action } from "./collectium-ui85-types";
+import type { CollectiumUi85Action, CollectiumUi85Skin } from "./collectium-ui85-types";
 import styles from "./CollectiumUi85ObjectPreview.module.css";
 
 const actions: CollectiumUi85Action[] = [
@@ -54,12 +54,12 @@ function IconFor({ icon }: { icon: CollectiumUi85Action["icon"] }) {
   return <ShareIcon />;
 }
 
-export function CollectiumUi85ObjectPreview() {
+export function CollectiumUi85ObjectPreview({ activeSkin }: { activeSkin?: CollectiumUi85Skin }) {
   return (
     <div className={styles.wrap}>
-      <p className={styles.eyebrow}>Collectium UI 8.5 / React innholdsmodul</p>
+      <p className={styles.eyebrow}>Collectium UI 8.5 / aktiv skin: {activeSkin ?? "finans"}</p>
       <h1>Objektpresentasjon inne i eksisterende Collectium-skall</h1>
-      <p className={styles.lead}>Denne versjonen lager ikke egen sidebar eller topbar. Eksisterende AppShell eier skall, meny og global responsivitet. UI85 leverer bare innhold, rammer, kort og handlingsfelt.</p>
+      <p className={styles.lead}>Tema-knappen over bytter mellom Collectium, Samler, Museum og Finans. Dette er lokal React-state for previewmodulen, ikke global produksjons-designmotor.</p>
 
       <section className={styles.hero} aria-label="Objektpresentasjon preview">
         <div className={styles.imagePanel}>
@@ -91,9 +91,9 @@ export function CollectiumUi85ObjectPreview() {
       </section>
 
       <section className={styles.grid} aria-label="Template standardfelt">
-        <article className={styles.card}><h3>Ingen dobbel sidebar</h3><p>UI85-modulen bruker eksisterende global sidebar og lager ikke egen sidemeny inne i innholdet.</p></article>
-        <article className={styles.card}><h3>Ingen dobbel topbar</h3><p>Topbar beholdes fra global AppShell. Modulen viser kun en lokal modulheader inne i content frame.</p></article>
-        <article className={styles.card}><h3>Riktig innholdsmodul</h3><p>Dette er riktig Next.js/React-retning for preview inne i eksisterende frontend.</p></article>
+        <article className={styles.card}><h3>Fire skins</h3><p>Collectium, Samler, Museum og Finans styres av tokenverdier i UI85-modulen.</p></article>
+        <article className={styles.card}><h3>Ingen dobbel sidebar</h3><p>Eksisterende global sidebar beholdes. Previewen lager ikke egen sidemeny.</p></article>
+        <article className={styles.card}><h3>Ingen dobbel topbar</h3><p>Eksisterende topbar beholdes. Tema-knapp ligger inne i modulen.</p></article>
         <article className={styles.card}><h3>Senere API-kobling</h3><p>Produksjonsdata skal kobles via API/backend og object_id + object_group + source_key.</p></article>
       </section>
     </div>

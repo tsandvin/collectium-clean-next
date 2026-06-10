@@ -2,7 +2,7 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Collectium UI85 React Template Content Shell v18
+ * Collectium UI85 React Template Content Shell v19
  *
  * Definering / formål:
  * Controlled UI85 content-only template wrapper. It does not create its own
@@ -16,6 +16,7 @@
  * Berørte DB-brytere / feature_keys:
  * - template.ui85.preview.view
  * - template.skin.finans.view
+ * - template.ui85.skin.switch.preview
  *
  * Berørte API-ruter:
  * - Ingen. Static preview.
@@ -31,7 +32,7 @@
  * log_action: ui85.react.template.content
  *
  * Versjon:
- * UI85-REACT-TEMPLATE-V18 / CHANGE-UI85-2026-06-11-0018
+ * UI85-REACT-TEMPLATE-V19 / CHANGE-UI85-2026-06-11-0019
  */
 
 import type { CollectiumUi85TemplateProps } from "./collectium-ui85-types";

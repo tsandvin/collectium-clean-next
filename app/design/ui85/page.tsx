@@ -2,12 +2,12 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Collectium UI85 React Template Page v18
+ * Collectium UI85 React Template Page v19
  *
  * Definering / formål:
  * Next.js sandbox route for Collectium UI 8.5 React template as content-only
- * module inside the existing Collectium AppShell. The route does not create
- * its own sidebar, topbar or global shell.
+ * module inside existing Collectium AppShell. Page uses a client theme controller
+ * for four approved skins.
  *
  * Bruksområde:
  * - /design/ui85
@@ -17,6 +17,7 @@
  *
  * Berørte DB-brytere / feature_keys:
  * - template.ui85.preview.view
+ * - template.ui85.skin.switch.preview
  *
  * Berørte API-ruter:
  * - Ingen. Static React template preview.
@@ -29,19 +30,14 @@
  *
  * Logging:
  * log_category: template
- * log_action: ui85.react.template.preview
+ * log_action: ui85.react.template.theme.preview
  *
  * Versjon:
- * UI85-REACT-TEMPLATE-V18 / CHANGE-UI85-2026-06-11-0018
+ * UI85-REACT-TEMPLATE-V19 / CHANGE-UI85-2026-06-11-0019
  */
 
-import { CollectiumUi85Template } from "../../../components/templates/ui85/CollectiumUi85Template";
-import { CollectiumUi85ObjectPreview } from "../../../components/templates/ui85/CollectiumUi85ObjectPreview";
+import { CollectiumUi85ThemeClient } from "../../../components/templates/ui85/CollectiumUi85ThemeClient";
 
 export default function CollectiumUi85DesignPage() {
-  return (
-    <CollectiumUi85Template skin="finans">
-      <CollectiumUi85ObjectPreview />
-    </CollectiumUi85Template>
-  );
+  return <CollectiumUi85ThemeClient />;
 }
