@@ -1,20 +1,4 @@
-﻿.toggleButton {
-  position: static;
-  z-index: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(10, 87, 73, 0.36);
-  border-radius: 999px;
-  background: #0a5749;
-  color: #fffaf0;
-  padding: 9px 15px;
-  font-size: 12px;
-  font-weight: 850;
-  box-shadow: 0 10px 24px rgba(10, 87, 73, 0.16);
-  cursor: pointer;
-  white-space: nowrap;
-}
+﻿
 
 .overlay {
   position: fixed;
@@ -378,3 +362,87 @@
   }
 }
 
+
+
+/* COLLECTIUM LAYOUT GUIDE BUTTON PLACEMENT FIX */
+.layoutGuideHost {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.toggleButton {
+  position: static;
+  z-index: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(10, 87, 73, 0.42);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 999px;
+  background: #0a5749;
+  color: #fffaf0;
+  padding: 9px 15px;
+  font-size: 12px;
+  font-weight: 850;
+  box-shadow: 0 10px 24px rgba(10, 87, 73, 0.16);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.screenModeSwitches {
+  margin-top: 18px;
+  border: 1px solid rgba(10, 87, 73, 0.24);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.screenModeSwitches h3 {
+  margin: 0 0 4px;
+}
+
+.screenModeSwitches p {
+  margin: 0;
+  line-height: 1.45;
+  opacity: 0.76;
+}
+
+.screenButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.screenButtons button {
+  border: 1px solid rgba(10, 87, 73, 0.28);
+  border-bottom: 2px solid rgba(10, 87, 73, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.86);
+  color: #052f2a;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.screenButtons button.activeScreen,
+.activeScreen {
+  background: #0a5749 !important;
+  color: #fffaf0 !important;
+  border-color: #0a5749 !important;
+}
+
+.screenExplanation {
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-bottom: 2px solid #3168b0;
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
+}

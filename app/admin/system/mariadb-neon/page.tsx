@@ -308,7 +308,7 @@ export default function MariaDbNeonControlPage() {
     "Source data migration allowed: false",
     "",
     "Neste steg: source-relation-overview og table mapping etter at platform/template-token-kontroll vises OK.",
-  ].join("\n");
+  ].join("");
 
   function normalizeInventoryName(value: unknown) {
     return asString(value, "").trim().toLowerCase();
@@ -902,6 +902,10 @@ export default function MariaDbNeonControlPage() {
 </main>
   );
 }
+
+
+
+
 
 
 

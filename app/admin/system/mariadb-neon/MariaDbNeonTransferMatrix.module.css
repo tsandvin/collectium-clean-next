@@ -1,13 +1,25 @@
 ﻿.transferMatrixSection {
-  background: var(--ct-card-bg, #f6f0e5);
-  border: 1px solid rgba(148, 163, 184, 0.36);
-  border-radius: 18px;
+  margin: 24px 0;
   padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 72% 54%, rgba(10, 87, 73, 0.08), transparent 34%),
+    rgba(255, 250, 240, 0.78);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
   overflow: hidden;
+  scroll-margin-top: 120px;
 }
 
 .transferMatrixHeader {
   margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.transferMatrixHeader h2 {
+  margin: 0 0 8px;
 }
 
 .transferMatrixTableWrap {
@@ -29,8 +41,8 @@
   text-align: left;
   padding: 10px 14px;
   font-size: 12px;
-  font-weight: 800;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.32);
+  font-weight: 850;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.34);
 }
 
 .transferMatrixRow td,
@@ -38,11 +50,6 @@
   vertical-align: top;
   padding: 16px 14px 14px;
   border-bottom: 2px solid #d8ccb8;
-}
-
-.transferMatrixRow:last-child td,
-.transferMatrixRow:last-child .fieldCell {
-  border-bottom-width: 2px;
 }
 
 .statusOK .fieldCell,
@@ -90,7 +97,7 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 850;
   margin-bottom: 8px;
   border: 1px solid transparent;
   white-space: nowrap;

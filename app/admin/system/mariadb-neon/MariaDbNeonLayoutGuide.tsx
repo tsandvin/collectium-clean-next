@@ -124,6 +124,7 @@ function getStatusClass(status: GuideItem["status"]) {
 
 export default function MariaDbNeonLayoutGuide() {
   const [isOpen, setIsOpen] = useState(false);
+  const [screenMode, setScreenMode] = useState<"mobile" | "tablet" | "desktop" | "wide" | "tv">("desktop");
 
   return (
     <>
@@ -197,6 +198,42 @@ export default function MariaDbNeonLayoutGuide() {
               </main>
             </div>
 
+                        <section className={styles.screenModeSwitches}>
+              <div>
+                <h3>Skjermvisning</h3>
+                <p>Bytt forklaringsvisning for å se hvordan innholdsfelt, faner og arbeidsflate skal oppføre seg.</p>
+              </div>
+
+              <div className={styles.screenButtons}>
+                <button type="button" className={screenMode === "mobile" ? styles.activeScreen : ""} onClick={() => setScreenMode("mobile")}>Mobil</button>
+                <button type="button" className={screenMode === "tablet" ? styles.activeScreen : ""} onClick={() => setScreenMode("tablet")}>Tablet</button>
+                <button type="button" className={screenMode === "desktop" ? styles.activeScreen : ""} onClick={() => setScreenMode("desktop")}>Desktop</button>
+                <button type="button" className={screenMode === "wide" ? styles.activeScreen : ""} onClick={() => setScreenMode("wide")}>Bredskjerm</button>
+                <button type="button" className={screenMode === "tv" ? styles.activeScreen : ""} onClick={() => setScreenMode("tv")}>TV</button>
+              </div>
+
+              <article className={styles.screenExplanation}>
+                {screenMode === "mobile" ? (
+                  <p><strong>Mobil:</strong> toppbar er hovedmeny, filter åpnes som overlay, innholdsfelt går i én kolonne, faner vises som chips.</p>
+                ) : null}
+
+                {screenMode === "tablet" ? (
+                  <p><strong>Tablet:</strong> filter og sidevalg løftes over innhold. Indrefelt bruker 1–2 kolonner uten horisontal body-scroll.</p>
+                ) : null}
+
+                {screenMode === "desktop" ? (
+                  <p><strong>Desktop:</strong> sidemeny ca. 240px, toppmeny fast over innhold, én hovedarbeidsflate og tydelige panelrammer.</p>
+                ) : null}
+
+                {screenMode === "wide" ? (
+                  <p><strong>Bredskjerm:</strong> innhold deles i sideveis arbeidsbaner. Faner, filter, tabeller, relasjoner og detaljpaneler kan ligge ved siden av hverandre.</p>
+                ) : null}
+
+                {screenMode === "tv" ? (
+                  <p><strong>TV/presentasjon:</strong> større typografi, færre aktive arbeidsbaner og mer presentasjonsrettet visning. Dette er ikke det samme som bredskjerm-workspace.</p>
+                ) : null}
+              </article>
+            </section>
             <section className={styles.viewportRules}>
               <h3>Skjermstørrelse-brytere og layoutregler</h3>
 
@@ -269,3 +306,5 @@ export default function MariaDbNeonLayoutGuide() {
     </>
   );
 }
+
+

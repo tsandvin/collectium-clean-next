@@ -123,7 +123,7 @@ export default function MariaDbNeonTransferMatrix() {
       </p>
 
       <div style={{ overflowX: "auto" }}>
-        <div className={styles.transferMatrixTableWrap}>`r`n        <table className={styles.transferMatrixTable} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <div className={styles.transferMatrixTableWrap}>        <table className={styles.transferMatrixTable} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr>
               <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #ddd" }}>#</th>
@@ -172,11 +172,13 @@ export default function MariaDbNeonTransferMatrix() {
               </tr>
             ))}
           </tbody>
-        </table>`r`n      </div>
+        </table>      </div>
       </div>
     </section>
   );
 }
+
+
 
 
 
