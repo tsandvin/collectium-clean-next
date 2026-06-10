@@ -1,4 +1,19 @@
-﻿
+﻿.toggleButton {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(10, 87, 73, 0.42);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 999px;
+  background: #0a5749;
+  color: #fffaf0;
+  padding: 9px 15px;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+  white-space: nowrap;
+}
 
 .overlay {
   position: fixed;
@@ -19,9 +34,7 @@
   overflow: auto;
   border: 1px solid rgba(217, 198, 161, 0.82);
   border-radius: 26px;
-  background:
-    radial-gradient(circle at top left, rgba(227, 204, 154, 0.34), transparent 34%),
-    linear-gradient(135deg, #fff9ec 0%, #f5eddc 48%, #fffaf2 100%);
+  background: linear-gradient(135deg, #fff9ec 0%, #f5eddc 48%, #fffaf2 100%);
   color: #052f2a;
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
   padding: 28px;
@@ -80,19 +93,48 @@
 .topbar,
 .tabs,
 .innerPanel,
-.widePanel {
-  border: 2px solid rgba(10, 87, 73, 0.42);
-  background: rgba(255, 250, 240, 0.82);
-  box-shadow: inset 0 -2px 0 rgba(10, 87, 73, 0.28);
+.widePanel,
+.screenModeSwitches,
+.viewportRules,
+.guideCard,
+.footer {
+  border: 1px solid rgba(10, 87, 73, 0.24);
+  border-bottom: 2px solid #0a5749;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 14px;
 }
 
 .sideMenu {
-  min-height: 410px;
-  border-radius: 18px;
-  padding: 18px;
+  min-height: 360px;
+}
+
+.screen {
   display: grid;
-  align-content: start;
-  gap: 8px;
+  gap: 12px;
+}
+
+.topbar,
+.tabs {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.innerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.innerPanel,
+.widePanel {
+  min-height: 140px;
+}
+
+.widePanel {
+  grid-column: 1 / -1;
 }
 
 .sideMenu strong,
@@ -125,80 +167,54 @@
   opacity: 0.68;
 }
 
-.screen {
-  display: grid;
-  gap: 12px;
-}
-
-.topbar,
-.tabs {
-  min-height: 64px;
-  border-radius: 18px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.tabs {
-  border-color: rgba(49, 104, 176, 0.42);
-  box-shadow: inset 0 -2px 0 rgba(49, 104, 176, 0.28);
-}
-
-.tabs strong {
-  background: #3168b0;
-}
-
-.innerGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.innerPanel,
-.widePanel {
-  min-height: 150px;
-  border-radius: 18px;
-  padding: 16px;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.innerPanel:nth-child(2) {
-  border-color: rgba(198, 75, 70, 0.42);
-  box-shadow: inset 0 -2px 0 rgba(198, 75, 70, 0.32);
-}
-
-.innerPanel:nth-child(2) strong {
-  background: #c64b46;
-}
-
-.widePanel {
-  grid-column: 1 / -1;
-  border-color: rgba(210, 154, 23, 0.48);
-  box-shadow: inset 0 -2px 0 rgba(210, 154, 23, 0.35);
-}
-
-.widePanel strong {
-  background: #9a6500;
-}
-
-.viewportRules,
-.guideList,
-.footer {
+.screenModeSwitches,
+.viewportRules {
   margin-top: 18px;
 }
 
-.viewportRules {
-  border: 1px solid rgba(148, 163, 184, 0.34);
-  border-radius: 20px;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.54);
+.screenModeSwitches h3,
+.viewportRules h3 {
+  margin: 0 0 8px;
 }
 
-.viewportRules h3 {
-  margin: 0 0 12px;
+.screenModeSwitches p,
+.viewportRules p {
+  margin: 0;
+  line-height: 1.45;
+  opacity: 0.76;
+}
+
+.screenButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.screenButtons button {
+  border: 1px solid rgba(10, 87, 73, 0.28);
+  border-bottom: 2px solid rgba(10, 87, 73, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.86);
+  color: #052f2a;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.activeScreen {
+  background: #0a5749 !important;
+  color: #fffaf0 !important;
+  border-color: #0a5749 !important;
+}
+
+.screenExplanation {
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-bottom: 2px solid #3168b0;
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .viewportGrid {
@@ -236,14 +252,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(220px, 1fr));
   gap: 12px;
-}
-
-.guideCard {
-  border: 1px solid rgba(148, 163, 184, 0.34);
-  border-bottom: 2px solid #0a5749;
-  border-radius: 18px;
-  padding: 14px;
-  background: rgba(255, 255, 255, 0.62);
+  margin-top: 18px;
 }
 
 .guideCardTop {
@@ -315,10 +324,7 @@
 .footer {
   display: flex;
   gap: 8px;
-  border: 1px solid rgba(10, 87, 73, 0.24);
-  border-radius: 16px;
-  padding: 14px;
-  background: rgba(10, 87, 73, 0.08);
+  margin-top: 18px;
 }
 
 @media (max-width: 1100px) {
@@ -355,94 +361,4 @@
   .footer {
     flex-direction: column;
   }
-}
-
-  .footer {
-    flex-direction: column;
-  }
-}
-
-
-
-/* COLLECTIUM LAYOUT GUIDE BUTTON PLACEMENT FIX */
-.layoutGuideHost {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(148, 163, 184, 0.28);
-}
-
-.toggleButton {
-  position: static;
-  z-index: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(10, 87, 73, 0.42);
-  border-bottom: 2px solid #0a5749;
-  border-radius: 999px;
-  background: #0a5749;
-  color: #fffaf0;
-  padding: 9px 15px;
-  font-size: 12px;
-  font-weight: 850;
-  box-shadow: 0 10px 24px rgba(10, 87, 73, 0.16);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.screenModeSwitches {
-  margin-top: 18px;
-  border: 1px solid rgba(10, 87, 73, 0.24);
-  border-bottom: 2px solid #0a5749;
-  border-radius: 18px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.screenModeSwitches h3 {
-  margin: 0 0 4px;
-}
-
-.screenModeSwitches p {
-  margin: 0;
-  line-height: 1.45;
-  opacity: 0.76;
-}
-
-.screenButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 14px 0;
-}
-
-.screenButtons button {
-  border: 1px solid rgba(10, 87, 73, 0.28);
-  border-bottom: 2px solid rgba(10, 87, 73, 0.42);
-  border-radius: 999px;
-  background: rgba(255, 250, 240, 0.86);
-  color: #052f2a;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 850;
-  cursor: pointer;
-}
-
-.screenButtons button.activeScreen,
-.activeScreen {
-  background: #0a5749 !important;
-  color: #fffaf0 !important;
-  border-color: #0a5749 !important;
-}
-
-.screenExplanation {
-  border: 1px solid rgba(148, 163, 184, 0.32);
-  border-bottom: 2px solid #3168b0;
-  border-radius: 14px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.72);
 }
