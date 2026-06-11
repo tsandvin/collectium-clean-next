@@ -39,9 +39,8 @@
  * UI85-FRONT-SHELL-REPAIR-V1 / CHANGE-UI85-2026-06-11-FRONT-0004
  */
 
-import { CollectiumUi85FrontContent } from "@/components/templates/ui85/CollectiumUi85FrontContent";
+import { CollectiumUi85FrontContent } from "./components/templates/ui85/CollectiumUi85FrontContent";
 
 export default function CollectiumFrontPage() {
   return <CollectiumUi85FrontContent />;
 }
-
