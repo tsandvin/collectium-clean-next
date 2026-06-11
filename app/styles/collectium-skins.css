@@ -2733,3 +2733,365 @@ body[data-skin="museum"],
 
 /* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES END */
 
+/* COLLECTIUM GLOBAL SKIN SURFACE SYSTEM START
+   Globalt skin- og rammelag for hele Collectium.
+   Kilde: godkjent designkode oversatt fra data-theme til data-skin.
+   Ingen demo, preview, canvas eller lokal sidedesign.
+*/
+
+/* BASE TOKENS / RAMMEGEOMETRI */
+:root {
+  --ct-font-base: 14px;
+  --w-display: 700;
+  --w-body: 400;
+  --w-ui: 500;
+
+  --ct-radius: 16px;
+  --ct-radius-card: 12px;
+  --ct-radius-lg: var(--ct-radius-card);
+  --ct-radius-sm: 8px;
+  --ct-radius-pill: 999px;
+
+  --ct-border-width: 1px;
+  --ct-border-width-strong: 1.5px;
+
+  --ct-ramme-inset: 7px;
+  --ct-ramme-opacity: 0.4;
+
+  --ct-pad-top: 16px;
+  --ct-pad-right: 16px;
+  --ct-pad-bottom: 16px;
+  --ct-pad-bottom-sig: 28px;
+  --ct-pad-left: 16px;
+
+  --ct-sig-safe-right: 72px;
+  --ct-sig-safe-bottom: 18px;
+  --ct-sig-font-size: 10px;
+  --ct-sig-font-family: "Cormorant Garamond", Georgia, serif;
+
+  --ct-hover-lift: -3px;
+  --ct-hover-time: 200ms;
+
+  --ct-muted: var(--ct-text-muted);
+  --ct-panel-border: var(--ct-border);
+  --ct-card-border: var(--ct-border);
+  --ct-card-shadow: var(--ct-shadow-card);
+  --ct-line: var(--ct-ramme-inner);
+  --ct-status-ok: var(--ct-success);
+  --ct-status-pending: var(--ct-warning);
+  --ct-status-rejected: var(--ct-danger);
+  --ct-status-down: var(--ct-danger);
+}
+
+/* COLLECTIUM */
+:root,
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"],
+html[data-theme="collectium"] {
+  --ct-app-bg: linear-gradient(135deg, #f8f1e6, #fffaf2 58%, #f3e2c8);
+  --ct-app-sidebar-bg: #efe2c9;
+  --ct-app-topbar-bg: rgba(255, 250, 242, 0.92);
+
+  --ct-text: #143327;
+  --ct-heading: #0f2e24;
+  --ct-text-soft: #3a4a3e;
+  --ct-text-muted: #8a7b5a;
+
+  --ct-panel-bg: rgba(255, 250, 242, 0.82);
+  --ct-panel-solid: #fff8ed;
+  --ct-card-bg: rgba(255, 250, 242, 0.96);
+  --ct-card-bg-soft: rgba(255, 250, 242, 0.72);
+
+  --ct-border: rgba(161, 122, 58, 0.24);
+  --ct-border-strong: rgba(161, 122, 58, 0.42);
+  --ct-ramme-inner: rgba(20, 51, 39, 0.18);
+
+  --ct-accent: #145c38;
+  --ct-accent-dark: #0f2e24;
+  --ct-accent-soft: #d6a641;
+  --ct-button-bg: rgba(255, 250, 242, 0.88);
+  --ct-signature: #a17a3a;
+  --ct-watermark: rgba(161, 122, 58, 0.13);
+
+  --ct-success: #147d4f;
+  --ct-warning: #9a6a13;
+  --ct-danger: #a84034;
+
+  --ct-shadow-card: 0 1px 0 rgba(255,255,255,0.5) inset, 0 12px 30px rgba(0,0,0,0.06);
+  --ct-shadow-hover: 0 1px 0 rgba(255,255,255,0.6) inset, 0 18px 40px rgba(0,0,0,0.1);
+
+  --ct-font-display: "Playfair Display", Georgia, serif;
+  --ct-font-body: "Cormorant Garamond", Georgia, serif;
+  --ct-font-ui: "Inter", system-ui, sans-serif;
+  --ct-font-mono: "IBM Plex Mono", "SF Mono", monospace;
+}
+
+/* SAMLER */
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"],
+html[data-skin="samler-enkel"],
+body[data-skin="samler-enkel"],
+[data-skin="samler-enkel"],
+html[data-theme="samler"] {
+  --ct-app-bg: linear-gradient(135deg, #f8fbff, #ffffff 58%, #eef5fc);
+  --ct-app-sidebar-bg: #e8f1fb;
+  --ct-app-topbar-bg: rgba(255,255,255,0.94);
+
+  --ct-text: #0b2a4a;
+  --ct-heading: #0b2a4a;
+  --ct-text-soft: #3a4b62;
+  --ct-text-muted: #7a8aa0;
+
+  --ct-panel-bg: rgba(255,255,255,0.84);
+  --ct-panel-solid: #ffffff;
+  --ct-card-bg: rgba(255,255,255,0.98);
+  --ct-card-bg-soft: rgba(255,255,255,0.72);
+
+  --ct-border: rgba(30, 90, 154, 0.14);
+  --ct-border-strong: rgba(30, 90, 154, 0.30);
+  --ct-ramme-inner: #dfeefb;
+
+  --ct-accent: #1e5a9a;
+  --ct-accent-dark: #0b2a4a;
+  --ct-accent-soft: #9fc6ea;
+  --ct-button-bg: rgba(255,255,255,0.96);
+  --ct-signature: #9fb6cf;
+  --ct-watermark: rgba(30, 90, 154, 0.10);
+
+  --ct-success: #3d6a58;
+  --ct-warning: #7a5e2a;
+  --ct-danger: #9c3a1f;
+
+  --ct-shadow-card: 0 1px 2px rgba(11,42,74,0.05), 0 8px 24px rgba(11,42,74,0.06);
+  --ct-shadow-hover: 0 2px 4px rgba(11,42,74,0.07), 0 16px 36px rgba(11,42,74,0.12);
+
+  --ct-font-display: "Fraunces", Georgia, serif;
+  --ct-font-body: "Inter", system-ui, sans-serif;
+  --ct-font-ui: "Inter", system-ui, sans-serif;
+  --ct-font-mono: "IBM Plex Mono", monospace;
+}
+
+/* MUSEUM */
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"],
+html[data-theme="museum"] {
+  --ct-app-bg: radial-gradient(ellipse at 30% 0%, rgba(185,154,85,0.06), transparent 50%), linear-gradient(180deg, #1a1a1c, #0d0d0e);
+  --ct-app-sidebar-bg: #15130f;
+  --ct-app-topbar-bg: rgba(19,18,16,0.94);
+
+  --ct-text: #e8e3d6;
+  --ct-heading: #f3ecd9;
+  --ct-text-soft: #c5bea9;
+  --ct-text-muted: #7a7568;
+
+  --ct-panel-bg: rgba(24,24,24,0.88);
+  --ct-panel-solid: #181818;
+  --ct-card-bg: linear-gradient(180deg, #222226 0%, #1a1a1c 100%);
+  --ct-card-bg-soft: rgba(36,36,36,0.6);
+
+  --ct-border: rgba(185,154,85,0.22);
+  --ct-border-strong: rgba(185,154,85,0.44);
+  --ct-ramme-inner: rgba(185,154,85,0.22);
+
+  --ct-accent: #b99a55;
+  --ct-accent-dark: #a17a3a;
+  --ct-accent-soft: #d6c082;
+  --ct-button-bg: rgba(255,255,255,0.06);
+  --ct-signature: #a17a3a;
+  --ct-watermark: rgba(185,154,85,0.14);
+
+  --ct-success: #8aaf7a;
+  --ct-warning: #d6c082;
+  --ct-danger: #c97a5f;
+
+  --ct-shadow-card: 0 0 0 1px rgba(185,154,85,0.06), 0 16px 40px rgba(0,0,0,0.5);
+  --ct-shadow-hover: 0 0 0 1px rgba(185,154,85,0.14), 0 24px 60px rgba(0,0,0,0.65);
+
+  --ct-font-display: "Cinzel", "Cormorant Garamond", Georgia, serif;
+  --ct-font-body: "Source Serif 4", "Cormorant Garamond", Georgia, serif;
+  --ct-font-ui: "Cinzel", "Inter", system-ui, sans-serif;
+  --ct-font-mono: "IBM Plex Mono", monospace;
+
+  --ct-sig-font-family: "Cinzel", serif;
+  --ct-sig-font-size: 8px;
+}
+
+/* FINANS */
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"],
+html[data-theme="finans"] {
+  --ct-app-bg: radial-gradient(ellipse at 80% 0%, rgba(39,167,119,0.05), transparent 50%), linear-gradient(180deg, #162028, #111a21);
+  --ct-app-sidebar-bg: #0d2028;
+  --ct-app-topbar-bg: rgba(13,29,36,0.94);
+
+  --ct-text: #dde6ed;
+  --ct-heading: #eaf2f7;
+  --ct-text-soft: #a8b8c5;
+  --ct-text-muted: #6b7d8c;
+
+  --ct-panel-bg: rgba(28,40,50,0.88);
+  --ct-panel-solid: #1c2832;
+  --ct-card-bg: #1c2832;
+  --ct-card-bg-soft: rgba(28,40,50,0.7);
+
+  --ct-border: rgba(160,185,200,0.12);
+  --ct-border-strong: rgba(39,167,119,0.36);
+  --ct-ramme-inner: rgba(160,185,200,0.12);
+
+  --ct-accent: #27a777;
+  --ct-accent-dark: #1f8a5f;
+  --ct-accent-soft: #b08a3e;
+  --ct-button-bg: rgba(255,255,255,0.06);
+  --ct-signature: #3a8a6a;
+  --ct-watermark: rgba(39,167,119,0.12);
+
+  --ct-success: #27a777;
+  --ct-warning: #b08a3e;
+  --ct-danger: #d04b4b;
+
+  --ct-shadow-card: 0 0 0 1px rgba(39,167,119,0.04), 0 14px 34px rgba(0,0,0,0.4);
+  --ct-shadow-hover: 0 0 0 1px rgba(39,167,119,0.12), 0 22px 50px rgba(0,0,0,0.55);
+
+  --ct-font-display: "IBM Plex Sans", system-ui, sans-serif;
+  --ct-font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --ct-font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --ct-font-mono: "IBM Plex Mono", monospace;
+
+  --ct-sig-font-family: "IBM Plex Mono", monospace;
+  --ct-sig-font-size: 8px;
+}
+
+/* GLOBAL SURFACE SYSTEM */
+.ct-surface {
+  position: relative;
+  background: var(--ct-card-bg);
+  border: var(--ct-border-width) solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  box-shadow: var(--ct-shadow-card);
+  padding: var(--ct-pad-top) var(--ct-pad-right) var(--ct-pad-bottom) var(--ct-pad-left);
+  color: var(--ct-text);
+  transition:
+    transform var(--ct-hover-time) ease,
+    box-shadow var(--ct-hover-time) ease,
+    border-color 160ms ease;
+}
+
+.ct-surface::after {
+  content: "";
+  position: absolute;
+  inset: var(--ct-ramme-inset);
+  border: 1px solid var(--ct-ramme-inner);
+  border-radius: calc(var(--ct-radius) - var(--ct-ramme-inset));
+  opacity: var(--ct-ramme-opacity);
+  pointer-events: none;
+}
+
+.ct-surface.ct-strong {
+  border-width: var(--ct-border-width-strong);
+  border-color: var(--ct-border-strong);
+}
+
+.ct-surface.ct-flat {
+  box-shadow: none;
+}
+
+.ct-surface.ct-soft {
+  background: var(--ct-card-bg-soft);
+}
+
+.ct-surface.ct-pad-sm {
+  padding: 12px;
+}
+
+.ct-surface.ct-pad-lg {
+  padding: 24px;
+}
+
+.ct-surface.ct-radius-sm {
+  border-radius: var(--ct-radius-card);
+}
+
+.ct-surface.ct-radius-sm::after {
+  border-radius: calc(var(--ct-radius-card) - var(--ct-ramme-inset));
+}
+
+.ct-surface.ct-hover:hover {
+  transform: translateY(var(--ct-hover-lift));
+  box-shadow: var(--ct-shadow-hover);
+  border-color: var(--ct-border-strong);
+}
+
+.ct-surface.ct-sig {
+  padding-bottom: var(--ct-pad-bottom-sig);
+}
+
+.ct-surface.ct-sig::before {
+  content: "Collectium";
+  position: absolute;
+  right: 16px;
+  bottom: 9px;
+  z-index: 2;
+  font-family: var(--ct-sig-font-family);
+  font-style: italic;
+  font-size: var(--ct-sig-font-size);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ct-signature);
+  pointer-events: none;
+}
+
+html[data-skin="samler"] .ct-surface.ct-sig::before,
+html[data-skin="samler-enkel"] .ct-surface.ct-sig::before,
+html[data-theme="samler"] .ct-surface.ct-sig::before {
+  font-style: normal;
+}
+
+html[data-skin="museum"] .ct-surface.ct-sig::before,
+html[data-skin="finans"] .ct-surface.ct-sig::before,
+html[data-theme="museum"] .ct-surface.ct-sig::before,
+html[data-theme="finans"] .ct-surface.ct-sig::before {
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.ct-foot {
+  padding-right: var(--ct-sig-safe-right);
+}
+
+.ct-accent { color: var(--ct-accent); }
+.ct-muted { color: var(--ct-text-muted); }
+.ct-heading {
+  color: var(--ct-heading);
+  font-family: var(--ct-font-display);
+  font-weight: var(--w-display);
+}
+.ct-divider {
+  height: 1px;
+  background: var(--ct-ramme-inner);
+  border: 0;
+}
+.ct-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-button-bg);
+  color: var(--ct-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-surface { transition: none; }
+  .ct-surface.ct-hover:hover { transform: none; }
+}
+
+/* COLLECTIUM GLOBAL SKIN SURFACE SYSTEM END */
+
