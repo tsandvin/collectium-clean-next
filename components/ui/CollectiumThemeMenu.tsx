@@ -38,6 +38,7 @@ const SKINS: Array<{ key: SkinKey; label: string }> = [
 ];
 
 const STORAGE_KEY = "collectium-active-skin";
+const LEGACY_STORAGE_KEY = "ct-ui85-preview-skin";
 
 function normalizeSkin(value: string | null | undefined): SkinKey {
   if (value === "collectium" || value === "samler" || value === "museum" || value === "finans") {
@@ -59,9 +60,12 @@ function applySkin(skin: SkinKey) {
 
   try {
     window.localStorage.setItem(STORAGE_KEY, skin);
+    window.localStorage.setItem(LEGACY_STORAGE_KEY, skin);
   } catch {
     // data-skin still applies for this page.
   }
+
+  window.dispatchEvent(new CustomEvent("collectium:skin-change", { detail: { skin } }));
 }
 
 export function CollectiumThemeMenu() {
@@ -73,7 +77,10 @@ export function CollectiumThemeMenu() {
     let storedSkin = "";
 
     try {
-      storedSkin = window.localStorage.getItem(STORAGE_KEY) ?? "";
+      storedSkin =
+        window.localStorage.getItem(STORAGE_KEY) ??
+        window.localStorage.getItem(LEGACY_STORAGE_KEY) ??
+        "";
     } catch {
       storedSkin = "";
     }

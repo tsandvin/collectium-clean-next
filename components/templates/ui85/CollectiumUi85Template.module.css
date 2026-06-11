@@ -1,160 +1,195 @@
 .previewModule {
-  --ct-ui-bg: #071018;
-  --ct-ui-panel: #122835;
-  --ct-ui-panel-2: #173744;
-  --ct-ui-border: rgba(226, 199, 107, 0.46);
-  --ct-ui-border-soft: rgba(122, 180, 190, 0.32);
-  --ct-ui-text: #f8fbf4;
-  --ct-ui-muted: rgba(232, 242, 236, 0.72);
-  --ct-ui-soft: rgba(232, 242, 236, 0.54);
-  --ct-ui-accent: #e4bf4f;
-  --ct-ui-accent-2: #34c3aa;
-  --ct-ui-shadow: 0 24px 60px rgba(0, 0, 0, 0.20);
-  --ct-ui-radius: 6px;
+  --ct-ui-serif: Georgia, "Times New Roman", serif;
+  --ct-ui-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-ui-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --ct-ui-heading-weight: 700;
+  --ct-ui-heading-transform: none;
+  --ct-ui-lead-style: italic;
+  --ct-ui-radius: 18px;
+  --ct-ui-card-radius: 12px;
+
+  --ct-ui-bg: #fff9f2;
+  --ct-ui-bg-2: #f4eadb;
+  --ct-ui-card-bg: rgba(255, 251, 244, .92);
+  --ct-ui-panel-bg: rgba(255, 246, 232, .82);
+  --ct-ui-panel-2: #f4eadb;
+  --ct-ui-card-border: #e8d8be;
+  --ct-ui-panel-border: #e5d1ad;
+  --ct-ui-border-soft: #d7c9b4;
+  --ct-ui-toolbar-bg: rgba(255, 249, 242, .88);
+  --ct-ui-toolbar-border: #dec79f;
+  --ct-ui-toolbar-shadow: 0 18px 44px rgba(87, 65, 31, .14);
+  --ct-ui-text: #0b332c;
+  --ct-ui-heading: #062f29;
+  --ct-ui-soft: #5e5d50;
+  --ct-ui-muted: #9a7c46;
+  --ct-ui-accent: #176b40;
+  --ct-ui-accent-2: #d5a53a;
+  --ct-ui-active-bg: #176b40;
+  --ct-ui-active-text: #fff9f2;
+  --ct-ui-active-border: #176b40;
+  --ct-ui-signature: #aa7f37;
+  --ct-ui-line: #d9cfbf;
+  --ct-ui-status-ok: #136a3a;
+  --ct-ui-card-shadow: 0 18px 44px rgba(87, 65, 31, .12);
+  --ct-ui-note-bg: #f6e8c2;
+  --ct-ui-note-border: #d8bd78;
+  --ct-ui-note-stripe: rgba(188, 158, 91, .11);
+  --ct-ui-note-number: #aeb1a4;
+  --ct-ui-note-glow: rgba(221, 177, 63, .32);
+  --ct-ui-portrait-top: #26341f;
+  --ct-ui-portrait-bottom: #071a16;
+  --ct-ui-portrait-glow: rgba(221, 177, 63, .38);
+  --ct-ui-icon-bg: #e6f0e8;
 
   width: 100%;
   min-height: calc(100vh - 150px);
-  color: var(--ct-ui-text);
-  background:
-    radial-gradient(circle at 16% 12%, rgba(52, 195, 170, 0.18), transparent 30%),
-    linear-gradient(135deg, #081018 0%, #0b1720 48%, #102735 100%);
-  border: 1px solid var(--ct-ui-border-soft);
-  box-shadow: var(--ct-ui-shadow);
-  padding: 22px;
   box-sizing: border-box;
-}
-
-.previewModule[data-skin="collectium"] {
-  --ct-ui-bg: #f7efe2;
-  --ct-ui-panel: #fff9ed;
-  --ct-ui-panel-2: #f4e7cf;
-  --ct-ui-border: rgba(24, 91, 77, 0.34);
-  --ct-ui-border-soft: rgba(184, 144, 73, 0.35);
-  --ct-ui-text: #07372f;
-  --ct-ui-muted: #526b63;
-  --ct-ui-soft: #6e7d73;
-  --ct-ui-accent: #0d6b5b;
-  --ct-ui-accent-2: #b78c41;
+  padding: clamp(24px, 4vw, 56px);
+  border: 1px solid color-mix(in srgb, var(--ct-ui-card-border) 62%, transparent);
+  border-radius: var(--ct-ui-radius);
   background:
-    radial-gradient(circle at 16% 12%, rgba(13, 107, 91, 0.13), transparent 31%),
-    linear-gradient(135deg, #f8f1e5 0%, #fff8eb 50%, #f2e5ce 100%);
+    radial-gradient(circle at 14% 0, color-mix(in srgb, var(--ct-ui-accent-2) 13%, transparent), transparent 360px),
+    linear-gradient(135deg, var(--ct-ui-bg), var(--ct-ui-bg-2));
+  color: var(--ct-ui-text);
+  font-family: var(--ct-ui-sans);
 }
 
 .previewModule[data-skin="samler"] {
-  --ct-ui-bg: #f5f8f5;
-  --ct-ui-panel: #ffffff;
-  --ct-ui-panel-2: #edf4ef;
-  --ct-ui-border: rgba(43, 112, 76, 0.32);
-  --ct-ui-border-soft: rgba(43, 112, 76, 0.22);
-  --ct-ui-text: #10231b;
-  --ct-ui-muted: #64756b;
-  --ct-ui-soft: #7b8a81;
-  --ct-ui-accent: #28704e;
-  --ct-ui-accent-2: #6a9c78;
-  background:
-    radial-gradient(circle at 16% 12%, rgba(43, 112, 76, 0.10), transparent 31%),
-    linear-gradient(135deg, #f7fbf7 0%, #ffffff 48%, #edf5ef 100%);
+  --ct-ui-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-ui-heading-weight: 800;
+  --ct-ui-lead-style: normal;
+  --ct-ui-radius: 18px;
+  --ct-ui-card-radius: 12px;
+  --ct-ui-bg: #f6f9fc;
+  --ct-ui-bg-2: #edf4fb;
+  --ct-ui-card-bg: rgba(255, 255, 255, .94);
+  --ct-ui-panel-bg: #f2f7fb;
+  --ct-ui-panel-2: #e8f1f9;
+  --ct-ui-card-border: #cbddec;
+  --ct-ui-panel-border: #c8dced;
+  --ct-ui-border-soft: #c6d9e9;
+  --ct-ui-toolbar-bg: rgba(250, 253, 255, .92);
+  --ct-ui-toolbar-border: #b9d0e4;
+  --ct-ui-toolbar-shadow: 0 18px 40px rgba(25, 79, 125, .12);
+  --ct-ui-text: #052b4b;
+  --ct-ui-heading: #002a4d;
+  --ct-ui-soft: #2f4d68;
+  --ct-ui-muted: #6f8297;
+  --ct-ui-accent: #1d63a2;
+  --ct-ui-accent-2: #8fb7d9;
+  --ct-ui-active-bg: #1d63a2;
+  --ct-ui-active-text: #ffffff;
+  --ct-ui-active-border: #1d63a2;
+  --ct-ui-signature: #4f83b4;
+  --ct-ui-line: #d3e2f0;
+  --ct-ui-status-ok: #2a7655;
+  --ct-ui-card-shadow: 0 18px 40px rgba(25, 79, 125, .10);
+  --ct-ui-note-bg: #eaf4fc;
+  --ct-ui-note-border: #b7cfe4;
+  --ct-ui-note-stripe: rgba(37, 102, 166, .08);
+  --ct-ui-note-number: #9eb2c6;
+  --ct-ui-note-glow: rgba(34, 87, 132, .24);
+  --ct-ui-portrait-top: #294763;
+  --ct-ui-portrait-bottom: #061d34;
+  --ct-ui-portrait-glow: rgba(135, 181, 219, .34);
+  --ct-ui-icon-bg: #e5f1fb;
 }
 
 .previewModule[data-skin="museum"] {
-  --ct-ui-bg: #1b1714;
-  --ct-ui-panel: #29231e;
-  --ct-ui-panel-2: #332b24;
-  --ct-ui-border: rgba(212, 178, 112, 0.36);
-  --ct-ui-border-soft: rgba(212, 178, 112, 0.24);
-  --ct-ui-text: #f4ead9;
-  --ct-ui-muted: #c7b69d;
-  --ct-ui-soft: #9c8f7d;
-  --ct-ui-accent: #d3aa60;
+  --ct-ui-heading-transform: uppercase;
+  --ct-ui-radius: 16px;
+  --ct-ui-card-radius: 10px;
+  --ct-ui-bg: #11100f;
+  --ct-ui-bg-2: #1e1a16;
+  --ct-ui-card-bg: rgba(28, 28, 30, .96);
+  --ct-ui-panel-bg: #292621;
+  --ct-ui-panel-2: #26221d;
+  --ct-ui-card-border: #453821;
+  --ct-ui-panel-border: #5a4930;
+  --ct-ui-border-soft: #5b4a2e;
+  --ct-ui-toolbar-bg: rgba(18, 16, 13, .90);
+  --ct-ui-toolbar-border: #6e5730;
+  --ct-ui-toolbar-shadow: 0 20px 48px rgba(0, 0, 0, .30);
+  --ct-ui-text: #f4ead8;
+  --ct-ui-heading: #fff3dc;
+  --ct-ui-soft: #e3cba6;
+  --ct-ui-muted: #a99872;
+  --ct-ui-accent: #c9aa62;
   --ct-ui-accent-2: #8e6f47;
-  background:
-    radial-gradient(circle at 16% 12%, rgba(211, 170, 96, 0.14), transparent 32%),
-    linear-gradient(135deg, #16120f 0%, #221b16 50%, #2d251d 100%);
+  --ct-ui-active-bg: #c9aa62;
+  --ct-ui-active-text: #16120f;
+  --ct-ui-active-border: #c9aa62;
+  --ct-ui-signature: #b18a48;
+  --ct-ui-line: #4e422e;
+  --ct-ui-status-ok: #8fb67f;
+  --ct-ui-card-shadow: 0 22px 58px rgba(0, 0, 0, .36);
+  --ct-ui-note-bg: #423925;
+  --ct-ui-note-border: #5d4b2d;
+  --ct-ui-note-stripe: rgba(208, 171, 94, .08);
+  --ct-ui-note-number: #6e5b31;
+  --ct-ui-note-glow: rgba(201, 170, 98, .26);
+  --ct-ui-portrait-top: #9b7b3e;
+  --ct-ui-portrait-bottom: #42321d;
+  --ct-ui-portrait-glow: rgba(201, 170, 98, .30);
+  --ct-ui-icon-bg: #201b15;
 }
 
-.moduleHeader,
-.contentFrame {
-  position: relative;
-  border: 1px solid var(--ct-ui-border-soft);
-  background: color-mix(in srgb, var(--ct-ui-panel) 88%, transparent);
-  box-sizing: border-box;
-}
-
-.moduleHeader::after,
-.contentFrame::after {
-  content: "________________ Collectium";
-  position: absolute;
-  right: 18px;
-  bottom: 10px;
-  font-size: 10px;
-  line-height: 1;
-  color: var(--ct-ui-accent);
-  opacity: 0.86;
-  pointer-events: none;
-  font-style: italic;
+.previewModule[data-skin="finans"] {
+  --ct-ui-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-ui-heading-weight: 800;
+  --ct-ui-heading-transform: none;
+  --ct-ui-lead-style: normal;
+  --ct-ui-radius: 16px;
+  --ct-ui-card-radius: 8px;
+  --ct-ui-bg: #101820;
+  --ct-ui-bg-2: #111f28;
+  --ct-ui-card-bg: #1a2a36;
+  --ct-ui-panel-bg: #222d2d;
+  --ct-ui-panel-2: #20323b;
+  --ct-ui-card-border: #2e4655;
+  --ct-ui-panel-border: #3a4f50;
+  --ct-ui-border-soft: #284752;
+  --ct-ui-toolbar-bg: rgba(18, 31, 40, .92);
+  --ct-ui-toolbar-border: #1e665f;
+  --ct-ui-toolbar-shadow: 0 20px 50px rgba(0, 0, 0, .30);
+  --ct-ui-text: #eff8ff;
+  --ct-ui-heading: #f4fbff;
+  --ct-ui-soft: #b8d0dd;
+  --ct-ui-muted: #7f9baa;
+  --ct-ui-accent: #2dad82;
+  --ct-ui-accent-2: #bf9340;
+  --ct-ui-active-bg: #2dad82;
+  --ct-ui-active-text: #05131a;
+  --ct-ui-active-border: #2dad82;
+  --ct-ui-signature: #2dad82;
+  --ct-ui-line: #304a58;
+  --ct-ui-status-ok: #2dad82;
+  --ct-ui-card-shadow: 0 20px 50px rgba(0, 0, 0, .30);
+  --ct-ui-note-bg: #3c3b31;
+  --ct-ui-note-border: #4b5540;
+  --ct-ui-note-stripe: rgba(191, 147, 64, .07);
+  --ct-ui-note-number: #2dad82;
+  --ct-ui-note-glow: rgba(191, 147, 64, .26);
+  --ct-ui-portrait-top: #2dad82;
+  --ct-ui-portrait-bottom: #06362d;
+  --ct-ui-portrait-glow: rgba(191, 147, 64, .38);
+  --ct-ui-icon-bg: #123c35;
 }
 
 .moduleHeader {
-  min-height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 14px 18px;
-  margin-bottom: 16px;
-  border-radius: var(--ct-ui-radius);
-}
-
-.moduleHeader span {
-  display: block;
-  color: var(--ct-ui-muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-
-.moduleHeader b {
-  display: block;
-  margin-top: 4px;
-  font-size: 15px;
-}
-
-.headerMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.headerMeta span {
-  border: 1px solid var(--ct-ui-border-soft);
-  border-radius: var(--ct-ui-radius);
-  padding: 8px 10px;
-  color: var(--ct-ui-muted);
-  background: rgba(255,255,255,0.03);
+  display: none;
 }
 
 .contentFrame {
-  border-radius: var(--ct-ui-radius);
-  padding: 20px;
-  min-height: 560px;
+  width: min(100%, 1240px);
+  min-height: 760px;
+  margin: 0 auto;
 }
 
 @media (max-width: 760px) {
   .previewModule {
-    padding: 12px;
-  }
-
-  .moduleHeader {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .headerMeta {
-    justify-content: flex-start;
-  }
-
-  .contentFrame {
-    padding: 12px;
+    padding: 18px;
+    border-radius: 0;
   }
 }

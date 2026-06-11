@@ -2,38 +2,32 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Collectium UI85 Object Preview React Component v19
+ * Collectium UI85 Standing Object Card
  *
- * Definering / formål:
- * React template content for UI 8.5. Shows object presentation, collector
- * actions, finance small-field accent, clean icons and text underline hover.
+ * Definering / formal:
+ * Laast staende objektkort for UI85. Fire skins bytter kun tokens/farger,
+ * mens markup, rekkefolge og safe-zone er identisk.
  *
- * Bruksområde:
+ * Bruksomrade:
  * - /design/ui85
  * - components/templates/ui85
  *
- * Berørte DB-brytere / feature_keys:
+ * Berorte DB-brytere / feature_keys:
  * - template.ui85.preview.view
- * - collection.wishlist.view
- * - collection.favorite.view
- * - collection.item.add.preview
- * - object.share.preview
+ * - object.card.standing.view
  *
- * Berørte API-ruter:
- * - Ingen i preview. Production action buttons must connect to API/backend.
- *
- * Berørte tabeller / views:
- * - Ingen i preview.
+ * Berorte API-ruter:
+ * - Ingen i preview. Produksjonsdata kobles senere via API/backend.
  *
  * Dataretning:
- * Static preview. Production object data must use object_id + object_group + source_key.
+ * Static preview -> React -> UI.
  *
  * Logging:
  * log_category: template
- * log_action: ui85.object.preview
+ * log_action: ui85.object_card.standing
  *
  * Versjon:
- * UI85-REACT-TEMPLATE-V19 / CHANGE-UI85-2026-06-11-0019
+ * UI85-DESIGN-STANDARD-V20
  */
 
 import { HeartIcon, PlusIcon, ShareIcon, StarIcon } from "./CollectiumUi85Icons";
@@ -41,10 +35,24 @@ import type { CollectiumUi85Action, CollectiumUi85Skin } from "./collectium-ui85
 import styles from "./CollectiumUi85ObjectPreview.module.css";
 
 const actions: CollectiumUi85Action[] = [
-  { label: "Hjerte", meta: "Ønskeliste", count: "0", icon: "heart" },
-  { label: "Stjerne", meta: "Favoritt", count: "0", icon: "star" },
-  { label: "Legg i samling", meta: "Min samling", icon: "plus" },
-  { label: "Del objekt", meta: "Tidslenke", icon: "share" },
+  { label: "Hjerte", meta: "0", count: "0", icon: "heart" },
+  { label: "Stjerne", meta: "0", count: "0", icon: "star" },
+  { label: "Auksjon", meta: "3", count: "3", icon: "share" },
+  { label: "Nettbutikk", meta: "1", count: "1", icon: "plus" },
+];
+
+const facts = [
+  { label: "Valorutgave", value: "100 kroner" },
+  { label: "Utgave", value: "1. utgave" },
+  { label: "Variant", value: "Standardutgave" },
+  { label: "Sjeldenhet", value: "Sjelden" },
+];
+
+const history = [
+  { label: "Regent / konge", value: "Oscar II" },
+  { label: "Motiv / person", value: "Riksvapen" },
+  { label: "Periode", value: "1872-1905" },
+  { label: "Signatur", value: "Winge / Getz" },
 ];
 
 function IconFor({ icon }: { icon: CollectiumUi85Action["icon"] }) {
@@ -54,48 +62,95 @@ function IconFor({ icon }: { icon: CollectiumUi85Action["icon"] }) {
   return <ShareIcon />;
 }
 
-export function CollectiumUi85ObjectPreview({ activeSkin }: { activeSkin?: CollectiumUi85Skin }) {
+export function CollectiumUi85ObjectPreview({
+  activeSkin,
+  activeLabel,
+}: {
+  activeSkin: CollectiumUi85Skin;
+  activeLabel: string;
+}) {
   return (
-    <div className={styles.wrap}>
-      <p className={styles.eyebrow}>Collectium UI 8.5 / aktiv skin: {activeSkin ?? "finans"}</p>
-      <h1>Objektpresentasjon inne i eksisterende Collectium-skall</h1>
-      <p className={styles.lead}>Tema-knappen over bytter mellom Collectium, Samler, Museum og Finans. Dette er lokal React-state for previewmodulen, ikke global produksjons-designmotor.</p>
+    <section className={styles.preview} aria-label="UI85 staende objektkort">
+      <div className={styles.intro}>
+        <p className={styles.eyebrow}>Collectium - UI 8.5 - visningskort</p>
+        <h1>Objektkort - last layout, fire skinn</h1>
+        <p>
+          Samme markup i alle fire skins. Skin bytter kun tokens, mens staende
+          objektkort, safe-zone og hjornesignatur beholdes.
+        </p>
+      </div>
 
-      <section className={styles.hero} aria-label="Objektpresentasjon preview">
-        <div className={styles.imagePanel}>
-          <div className={styles.note}>1 kr<span>1917 / Litra A</span></div>
+      <div className={styles.sectionTitle}>
+        <span>B</span>
+        <strong>Staende</strong>
+        <i>maks 380px - vertikal</i>
+      </div>
+
+      <article className={styles.card} data-skin={activeSkin} aria-label={`Objektkort ${activeLabel}`}>
+        <div className={styles.banknote} aria-label="Objektbilde">
+          <strong>100</strong>
+          <div className={styles.portrait} />
+          <div className={styles.banknoteLine} />
+          <span>Norges Bank - Oscar II - 1877</span>
+          <em>A 045 921</em>
         </div>
 
-        <div className={styles.identity}>
-          <p className={styles.objectMeta}>NSNR 23a · Norske sedler · banknote · object_id 1459</p>
-          <h2>1 krone · 1917-serien · 1917 · Litra A · Seddelpapir</h2>
-          <div className={styles.factGrid}>
-            <div><span>Valør</span><b>1 krone</b></div>
-            <div><span>Årstall</span><b>1917</b></div>
-            <div><span>Valørutgave / serie</span><b>1917-serien</b></div>
-            <div><span>Regent</span><b>Haakon VII</b></div>
-            <div><span>Signatur</span><b>Winge / Getz</b></div>
-            <div><span>Marked</span><b>Ikke vurdert</b></div>
+        <h2>100 kroner 1877</h2>
+
+        <dl className={styles.factGrid}>
+          {facts.map((fact) => (
+            <div key={fact.label}>
+              <dt>{fact.label}</dt>
+              <dd>{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <p className={styles.meta}>Seddel - Norske sedler - Oscar II - NS 1459</p>
+
+        <div className={styles.detailRow}>
+          <section className={styles.historyPanel} aria-label="Historic dynamisk felt">
+            <div className={styles.historyHeader}>
+              <span className={styles.bookIcon} aria-hidden="true">H</span>
+              <strong>Historic</strong>
+              <small>dynamisk felt</small>
+            </div>
+
+            <dl>
+              {history.map((item) => (
+                <div key={item.label}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <div className={styles.actionPanel} aria-label="Objekthandlinger">
+            {actions.map((action) => (
+              <button className={styles.action} key={action.label} type="button">
+                <span className={styles.actionIcon}>
+                  <IconFor icon={action.icon} />
+                </span>
+                <b>{action.label}</b>
+                <em>{action.count}</em>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className={styles.actionPanel} aria-label="Objekthandlinger preview">
-          {actions.map((action) => (
-            <button className={styles.action} key={action.label} type="button">
-              <span className={styles.actionIcon}><IconFor icon={action.icon} /></span>
-              <span><b>{action.label}</b><small>{action.meta}</small></span>
-              {action.count ? <em>{action.count}</em> : null}
-            </button>
-          ))}
-        </div>
-      </section>
+        <section className={styles.priceBox} aria-label="Estimert pris">
+          <span>Estimert pris</span>
+          <strong>15 000 kr</strong>
+          <small>Vurdert</small>
+        </section>
 
-      <section className={styles.grid} aria-label="Template standardfelt">
-        <article className={styles.card}><h3>Fire skins</h3><p>Collectium, Samler, Museum og Finans styres av tokenverdier i UI85-modulen.</p></article>
-        <article className={styles.card}><h3>Ingen dobbel sidebar</h3><p>Eksisterende global sidebar beholdes. Previewen lager ikke egen sidemeny.</p></article>
-        <article className={styles.card}><h3>Ingen dobbel topbar</h3><p>Eksisterende topbar beholdes. Tema-knapp ligger inne i modulen.</p></article>
-        <article className={styles.card}><h3>Senere API-kobling</h3><p>Produksjonsdata skal kobles via API/backend og object_id + object_group + source_key.</p></article>
-      </section>
-    </div>
+        <div className={styles.cardActions} aria-label="Kortkommandoer">
+          <a href="/katalog">Apne objekt</a>
+          <a href="/katalog/kontroll">Se relasjon</a>
+          <a href="/min-side">Legg i samling</a>
+        </div>
+      </article>
+    </section>
   );
 }
