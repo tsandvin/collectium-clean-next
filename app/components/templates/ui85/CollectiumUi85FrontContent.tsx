@@ -5,9 +5,8 @@
  * Collectium UI85 Front Content
  *
  * Definering / formal:
- * Ren React-front for Collectium. Komponenten er faktisk frontsiden, ikke demo,
- * preview eller canvas. Den viser produksjonsrettet inngang til katalog,
- * samling, marked, historikk og systemflater.
+ * Ren React-front for Collectium. Komponenten er produksjonsrettet
+ * frontinnhold, ikke demo, preview eller canvas.
  *
  * Bruksomrade:
  * - /
@@ -35,41 +34,33 @@
  * log_action: ui85.front.view
  *
  * Versjon:
- * UI85-FRONT-CONTENT-V1 / CHANGE-UI85-2026-06-11-FRONT-0002
+ * UI85-FRONT-CONTENT-V2 / CHANGE-UI85-2026-06-11-FRONT-0005
  */
 
 import styles from "./CollectiumUi85FrontContent.module.css";
 
 const frontCards = [
   {
-    eyebrow: "Katalog",
+    label: "Katalog",
     title: "Objekter, kilder og relasjoner",
-    body: "Utforsk samlerobjekter med kilde, objektgruppe, historikk, relasjoner og marked i samme arbeidsflate.",
+    body: "Utforsk objekter med kilde, objektgruppe, historikk, relasjoner, marked og samlerstatus i samme arbeidsflate.",
     href: "/katalog",
     action: "Ã…pne katalog",
   },
   {
-    eyebrow: "Min side",
+    label: "Min side",
     title: "Samling, prosesser og aktivitet",
-    body: "Se samling, medlemskap, varsler, meldinger, kjÃ¸p, salg og pÃ¥gÃ¥ende prosesser samlet i Ã©n flate.",
+    body: "Se samling, medlemskap, varsler, meldinger, kjÃ¸p, salg og pÃ¥gÃ¥ende prosesser samlet pÃ¥ ett sted.",
     href: "/min-side",
     action: "GÃ¥ til Min side",
   },
   {
-    eyebrow: "Marked",
+    label: "Marked",
     title: "Historie og finansiell innsikt",
-    body: "Koble objekter mot perioder, markedsdata, verdiutvikling, auksjon, nettbutikk og personlig samlingsanalyse.",
+    body: "Koble objekter mot perioder, verdiutvikling, auksjon, nettbutikk og personlig samlingsanalyse.",
     href: "/katalog",
     action: "Se markedsflate",
   },
-];
-
-const statusItems = [
-  "Next.js React-front",
-  "Global Collectium layout",
-  "Katalog og relasjoner",
-  "Samling og medlemskap",
-  "Marked og historikk",
 ];
 
 export function CollectiumUi85FrontContent() {
@@ -80,8 +71,8 @@ export function CollectiumUi85FrontContent() {
           <p className={styles.eyebrow}>Collectium app</p>
           <h1>Applikasjonen for katalog, samling og markedsinnsikt.</h1>
           <p className={styles.lead}>
-            Collectium samler katalog, relasjoner, historikk, brukerfunksjoner
-            og markedsdata i en kontrollert React-front.
+            Collectium samler katalog, relasjoner, historikk,
+            brukerfunksjoner og markedsdata i en kontrollert React-front.
           </p>
 
           <div className={styles.actions} aria-label="Hovedhandlinger">
@@ -96,21 +87,12 @@ export function CollectiumUi85FrontContent() {
             </a>
           </div>
         </div>
-
-        <aside className={styles.statusPanel} aria-label="Systemflate">
-          <p className={styles.panelLabel}>Collectium arbeidsflate</p>
-          <ul>
-            {statusItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </aside>
       </section>
 
       <section className={styles.cardGrid} aria-label="HovedomrÃ¥der">
         {frontCards.map((card) => (
           <article className={styles.card} key={card.title}>
-            <p className={styles.cardEyebrow}>{card.eyebrow}</p>
+            <p className={styles.cardEyebrow}>{card.label}</p>
             <h2>{card.title}</h2>
             <p>{card.body}</p>
             <a href={card.href}>{card.action}</a>
@@ -118,13 +100,13 @@ export function CollectiumUi85FrontContent() {
         ))}
       </section>
 
-      <section className={styles.domainPanel} aria-label="Domenemodell">
-        <p className={styles.cardEyebrow}>LÃ¥st domenemodell</p>
-        <h2>collectium.no og app.collectium.no har ulike roller.</h2>
+      <section className={styles.domainPanel} aria-label="Collectium arbeidsflate">
+        <p className={styles.cardEyebrow}>Collectium arbeidsflate</p>
+        <h2>Ã‰n front for katalog, samling, relasjoner og marked.</h2>
         <p>
           app.collectium.no er arbeidsflaten for innlogging, katalog, samling,
-          markedsinnsikt og kontrollerte systemflater. Den offentlige nettsiden
-          kan ligge separat pÃ¥ collectium.no.
+          markedsinnsikt og kontrollerte systemflater. Fronten viser React-UI,
+          mens data, tilgang og handlinger skal kontrolleres av API og database.
         </p>
       </section>
     </main>
