@@ -2,42 +2,48 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * App root page
+ * Collectium Front Page
  *
- * Definering / formål:
- * Root-route for app.collectium.no. Viser samme app-gateway som /startside.
+ * Definering / formal:
+ * Produksjonsrettet React-front for app.collectium.no. Dette er ikke demo,
+ * preview eller canvas. Fronten bruker UI85-template og rent frontinnhold.
  *
- * Bruksområde:
- * Produksjonsinngang for app.collectium.no.
- *
- * Berørte sider / routes:
+ * Bruksomrade:
  * - /
  *
- * Berørte DB-brytere / feature_keys:
+ * Berorte sider / routes:
+ * - /
+ *
+ * Berorte DB-brytere / feature_keys:
  * - landing.view
+ * - catalog.view
+ * - collection.view
+ * - market.index.view
  *
- * Berørte API-ruter:
- * - Ingen i denne statiske gateway-versjonen.
+ * Berorte API-ruter:
+ * - Ingen direkte i denne filen.
  *
- * Berørte tabeller / views:
+ * Berorte tabeller / views:
  * - Ingen direkte.
  *
  * Dataretning:
- * MariaDB -> API/backend -> Next.js -> React -> UI
+ * MariaDB/Neon -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
- * log_category: app
- * log_action: root.view
+ * log_category: front
+ * log_action: view
  *
  * Versjon:
- * CT-FILE-ROOT-0001 / CHANGE-DOMAIN-LOCK-0001
- *
- * Endringsregel:
- * Siden skal bare rendres som innhold inne i global AppShell.
+ * UI85-CLEAN-FRONT-V1 / CHANGE-UI85-2026-06-11-FRONT-0003
  */
 
-import CollectiumAppStartside from "@/components/startside/CollectiumAppStartside";
+import { CollectiumUi85Template } from "./components/templates/ui85/CollectiumUi85Template";
+import { CollectiumUi85FrontContent } from "./components/templates/ui85/CollectiumUi85FrontContent";
 
-export default function HomePage() {
-  return <CollectiumAppStartside />;
+export default function CollectiumFrontPage() {
+  return (
+    <CollectiumUi85Template skin="finans">
+      <CollectiumUi85FrontContent />
+    </CollectiumUi85Template>
+  );
 }
