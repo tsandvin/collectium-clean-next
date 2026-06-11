@@ -2378,6 +2378,7 @@ html[data-ct-skin] .ct-topbar {
 
 /* COLLECTIUM SKIN COLORS ONLY V2 END */
 
+@media not all {
 /* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES START
    Formål:
    - Justerer kun globale skin-tokens for UI 8.5.
@@ -2450,6 +2451,9 @@ body[data-skin="collectium"],
 html[data-skin="enkel"],
 body[data-skin="enkel"],
 [data-skin="enkel"],
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"],
 html[data-skin="samler-enkel"],
 body[data-skin="samler-enkel"],
 [data-skin="samler-enkel"],
@@ -2575,58 +2579,36 @@ body[data-skin="museum"],
    Bruker brede selectors for å treffe CSS modules uten å endre TSX.
 ------------------------------------------------------------ */
 
-[class*="ui85"],
-[class*="Ui85"],
-[class*="objectPreview"],
-[class*="ObjectPreview"] {
+[data-ui85-preview="true"] {
   scrollbar-color: var(--ct-border-strong) transparent;
 }
 
-[class*="frame"],
-[class*="Frame"],
-[class*="panel"],
-[class*="Panel"],
-[class*="card"],
-[class*="Card"] {
+[data-ui85-preview="true"] :where([class*="frame"], [class*="Frame"], [class*="panel"], [class*="Panel"], [class*="card"], [class*="Card"]) {
   border-color: var(--ct-ui85-frame-line);
 }
 
-[class*="ObjectPreview"] [class*="card"],
-[class*="objectPreview"] [class*="card"],
-[class*="ObjectPreview"] [class*="panel"],
-[class*="objectPreview"] [class*="panel"] {
+[data-ui85-preview="true"] :where([class*="card"], [class*="panel"]) {
   background: var(--ct-card-bg);
   border-color: var(--ct-ui85-frame-line);
   box-shadow: var(--ct-ui85-frame-shadow-soft);
 }
 
-[class*="ObjectPreview"] [class*="shell"],
-[class*="objectPreview"] [class*="shell"],
-[class*="ObjectPreview"] [class*="wrap"],
-[class*="objectPreview"] [class*="wrap"] {
+[data-ui85-preview="true"] :where([class*="shell"], [class*="wrap"]) {
   background: var(--ct-panel-bg);
   border-color: var(--ct-ui85-frame-line);
 }
 
-[class*="ObjectPreview"] [class*="price"],
-[class*="objectPreview"] [class*="price"],
-[class*="ObjectPreview"] [class*="market"],
-[class*="objectPreview"] [class*="market"] {
+[data-ui85-preview="true"] :where([class*="price"], [class*="market"]) {
   background: color-mix(in srgb, var(--ct-panel-solid) 88%, var(--ct-accent-soft) 12%);
   border-color: var(--ct-ui85-frame-line-strong);
 }
 
-[class*="ObjectPreview"] button,
-[class*="objectPreview"] button,
-[class*="Ui85"] button,
-[class*="ui85"] button {
+[data-ui85-preview="true"] button {
   border-color: var(--ct-ui85-frame-line);
 }
 
-[class*="ObjectPreview"] button:hover,
-[class*="objectPreview"] button:hover,
-[class*="Ui85"] button:hover,
-[class*="ui85"] button:hover {
+[data-ui85-preview="true"] button:hover,
+[data-ui85-preview="true"] a:hover {
   border-color: var(--ct-border-strong);
 }
 
@@ -2683,6 +2665,358 @@ body[data-skin="museum"],
 [data-skin="museum"] [class*="market"] {
   background: rgba(43, 38, 28, 0.94);
   border-color: rgba(202, 166, 78, 0.66);
+}
+
+/* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES END */
+}
+
+/* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES START
+   Formål:
+   - Harmoniserer UI 8.5-paletter mot fire opplastede skin-referanser.
+   - Endrer kun globale tokens, farger, rammer, skygger og visuell dybde.
+   - Endrer ikke markup, layout, data-view, API, DB eller komponentstruktur.
+*/
+
+/* ------------------------------------------------------------
+   FELLES UI85 DYBDE / RAMME / SIGNATUR
+------------------------------------------------------------ */
+
+:root {
+  --ct-ui85-radius-xl: 18px;
+  --ct-ui85-radius-lg: 14px;
+  --ct-ui85-radius-md: 12px;
+
+  --ct-ui85-frame-line: color-mix(in srgb, var(--ct-panel-border) 82%, transparent);
+  --ct-ui85-frame-line-strong: color-mix(in srgb, var(--ct-border-strong) 76%, transparent);
+
+  --ct-ui85-frame-shadow: 0 24px 54px rgba(16, 24, 40, 0.12);
+  --ct-ui85-frame-shadow-soft: 0 14px 34px rgba(16, 24, 40, 0.08);
+  --ct-ui85-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+
+  --ct-ui85-surface-gradient:
+    radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--ct-accent-soft) 24%, transparent), transparent 32%),
+    linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid) 92%, white 8%), var(--ct-panel-bg));
+
+  --ct-ui85-card-gradient:
+    linear-gradient(145deg, color-mix(in srgb, var(--ct-card-bg) 95%, white 5%), color-mix(in srgb, var(--ct-panel-solid) 92%, var(--ct-app-bg) 8%));
+}
+
+/* ------------------------------------------------------------
+   COLLECTIUM
+   Referanse: varm premium, ivory, mørk grønn, dempet gull.
+------------------------------------------------------------ */
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"],
+.ct-skin-collectium {
+  --ct-app-bg: #fbf5eb;
+  --ct-app-sidebar-bg: #ece0c8;
+  --ct-app-topbar-bg: rgba(255, 250, 241, 0.92);
+
+  --ct-panel-bg: rgba(255, 249, 242, 0.88);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #fffaf4;
+
+  --ct-panel-border: #d8c49c;
+  --ct-border-strong: #b99755;
+  --ct-line: rgba(126, 106, 68, 0.23);
+
+  --ct-text: #0b3e34;
+  --ct-text-soft: #405345;
+  --ct-text-muted: #8d7a57;
+
+  --ct-accent: #0f6d45;
+  --ct-accent-dark: #0b3b2f;
+  --ct-accent-soft: #d7ad41;
+
+  --ct-signature: #a97d36;
+  --ct-watermark: rgba(163, 57, 31, 0.13);
+
+  --ct-status-ok: #116b3c;
+  --ct-status-pending: #ac8034;
+  --ct-status-rejected: #a33b25;
+
+  --ct-ui85-frame-line: rgba(218, 195, 154, 0.86);
+  --ct-ui85-frame-line-strong: rgba(185, 151, 85, 0.86);
+  --ct-ui85-frame-shadow: 0 24px 54px rgba(91, 67, 30, 0.15);
+  --ct-ui85-frame-shadow-soft: 0 14px 36px rgba(91, 67, 30, 0.10);
+
+  --ct-ui85-surface-gradient:
+    radial-gradient(circle at 10% 0%, rgba(215, 173, 65, 0.23), transparent 32%),
+    radial-gradient(circle at 92% 88%, rgba(11, 62, 52, 0.07), transparent 34%),
+    linear-gradient(135deg, #fffaf1 0%, #f7eddd 100%);
+
+  --ct-ui85-card-gradient:
+    linear-gradient(145deg, #fffbf5 0%, #fbf4e9 58%, #f5ead8 100%);
+}
+
+/* ------------------------------------------------------------
+   SAMLER / ENKEL
+   Referanse: ren, isblå/hvit, marineblå, lite dekor.
+------------------------------------------------------------ */
+
+html[data-skin="enkel"],
+body[data-skin="enkel"],
+[data-skin="enkel"],
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"],
+html[data-skin="samler-enkel"],
+body[data-skin="samler-enkel"],
+[data-skin="samler-enkel"],
+.ct-skin-enkel,
+.ct-skin-samler-enkel {
+  --ct-app-bg: #f8fbff;
+  --ct-app-sidebar-bg: #e3edf6;
+  --ct-app-topbar-bg: rgba(255, 255, 255, 0.94);
+
+  --ct-panel-bg: rgba(249, 252, 255, 0.90);
+  --ct-panel-solid: #ffffff;
+  --ct-card-bg: #fbfdff;
+
+  --ct-panel-border: #d8e4ef;
+  --ct-border-strong: #b8cce0;
+  --ct-line: rgba(45, 66, 97, 0.14);
+
+  --ct-text: #0b3158;
+  --ct-text-soft: #40536d;
+  --ct-text-muted: #7d8da3;
+
+  --ct-accent: #2363a3;
+  --ct-accent-dark: #0e3155;
+  --ct-accent-soft: #9fcbb6;
+
+  --ct-signature: #2363a3;
+  --ct-watermark: rgba(35, 99, 163, 0.12);
+
+  --ct-status-ok: #3f735c;
+  --ct-status-pending: #86672a;
+  --ct-status-rejected: #a43a25;
+
+  --ct-ui85-frame-line: rgba(211, 226, 239, 0.95);
+  --ct-ui85-frame-line-strong: rgba(184, 204, 224, 0.88);
+  --ct-ui85-frame-shadow: 0 22px 48px rgba(45, 66, 97, 0.10);
+  --ct-ui85-frame-shadow-soft: 0 12px 28px rgba(45, 66, 97, 0.07);
+
+  --ct-ui85-surface-gradient:
+    radial-gradient(circle at 14% 2%, rgba(184, 204, 224, 0.30), transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #f1f7fc 100%);
+
+  --ct-ui85-card-gradient:
+    linear-gradient(145deg, #ffffff 0%, #fbfdff 54%, #f1f7fc 100%);
+}
+
+/* ------------------------------------------------------------
+   FINANS
+   Referanse: mørk petroleum, grønn/turkis, mer teknisk og kald.
+------------------------------------------------------------ */
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"],
+.ct-skin-finans {
+  --ct-app-bg: #0c171c;
+  --ct-app-sidebar-bg: #08252c;
+  --ct-app-topbar-bg: rgba(13, 29, 36, 0.94);
+
+  --ct-panel-bg: rgba(24, 42, 52, 0.92);
+  --ct-panel-solid: #1c2832;
+  --ct-card-bg: #1b2a34;
+
+  --ct-panel-border: #304553;
+  --ct-border-strong: #216152;
+  --ct-line: rgba(164, 184, 195, 0.15);
+
+  --ct-text: #edf4f8;
+  --ct-text-soft: #a8bbc7;
+  --ct-text-muted: #718996;
+
+  --ct-accent: #2aac80;
+  --ct-accent-dark: #1d8a63;
+  --ct-accent-soft: #b8943d;
+
+  --ct-signature: #2aac80;
+  --ct-watermark: rgba(42, 172, 128, 0.14);
+
+  --ct-status-ok: #2aac80;
+  --ct-status-pending: #bd953f;
+  --ct-status-rejected: #d34e51;
+
+  --ct-ui85-frame-line: rgba(48, 69, 83, 0.92);
+  --ct-ui85-frame-line-strong: rgba(42, 172, 128, 0.52);
+  --ct-ui85-frame-shadow: 0 26px 58px rgba(0, 0, 0, 0.48);
+  --ct-ui85-frame-shadow-soft: 0 16px 36px rgba(0, 0, 0, 0.32);
+
+  --ct-ui85-surface-gradient:
+    radial-gradient(circle at 12% 4%, rgba(42, 172, 128, 0.16), transparent 34%),
+    radial-gradient(circle at 86% 90%, rgba(184, 148, 61, 0.08), transparent 36%),
+    linear-gradient(135deg, #1c2832 0%, #13232b 100%);
+
+  --ct-ui85-card-gradient:
+    linear-gradient(145deg, #1d2c36 0%, #192832 58%, #142229 100%);
+}
+
+/* ------------------------------------------------------------
+   MUSEUM
+   Referanse: varm mørk grafitt, antikk gull, kremtekst.
+------------------------------------------------------------ */
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"],
+.ct-skin-museum {
+  --ct-app-bg: #171717;
+  --ct-app-sidebar-bg: #15130f;
+  --ct-app-topbar-bg: rgba(19, 18, 16, 0.94);
+
+  --ct-panel-bg: rgba(31, 30, 29, 0.94);
+  --ct-panel-solid: #1f1e1e;
+  --ct-card-bg: #202020;
+
+  --ct-panel-border: #4e4433;
+  --ct-border-strong: #8a7043;
+  --ct-line: rgba(195, 184, 135, 0.18);
+
+  --ct-text: #f2ead7;
+  --ct-text-soft: #c6b88d;
+  --ct-text-muted: #918572;
+
+  --ct-accent: #c0a052;
+  --ct-accent-dark: #aa7b37;
+  --ct-accent-soft: #d9c780;
+
+  --ct-signature: #aa7b37;
+  --ct-watermark: rgba(192, 160, 82, 0.16);
+
+  --ct-status-ok: #8fb57e;
+  --ct-status-pending: #d9c780;
+  --ct-status-rejected: #c9785d;
+
+  --ct-ui85-frame-line: rgba(78, 68, 51, 0.96);
+  --ct-ui85-frame-line-strong: rgba(170, 123, 55, 0.78);
+  --ct-ui85-frame-shadow: 0 28px 62px rgba(0, 0, 0, 0.60);
+  --ct-ui85-frame-shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.42);
+
+  --ct-ui85-surface-gradient:
+    radial-gradient(circle at 20% 0%, rgba(160, 123, 80, 0.14), transparent 34%),
+    radial-gradient(circle at 88% 88%, rgba(195, 184, 135, 0.07), transparent 36%),
+    linear-gradient(135deg, #222120 0%, #171717 100%);
+
+  --ct-ui85-card-gradient:
+    linear-gradient(145deg, #242322 0%, #1f1e1e 58%, #191919 100%);
+}
+
+/* ------------------------------------------------------------
+   UI85 OVERFLATER
+   Brede selectors brukes for å treffe CSS-modules uten TSX-endring.
+------------------------------------------------------------ */
+
+[data-ui85-preview="true"] {
+  scrollbar-color: var(--ct-border-strong) transparent;
+}
+
+[data-ui85-preview="true"] :where([class*="frame"], [class*="Frame"], [class*="panel"], [class*="Panel"], [class*="card"], [class*="Card"]) {
+  border-color: var(--ct-ui85-frame-line);
+}
+
+[data-ui85-preview="true"] :where([class*="card"], [class*="panel"]) {
+  background: var(--ct-ui85-card-gradient);
+  border-color: var(--ct-ui85-frame-line);
+  box-shadow: var(--ct-ui85-frame-shadow-soft);
+}
+
+[data-ui85-preview="true"] :where([class*="shell"], [class*="wrap"], [class*="hero"]) {
+  background: var(--ct-ui85-surface-gradient);
+  border-color: var(--ct-ui85-frame-line);
+  box-shadow: var(--ct-ui85-frame-shadow);
+}
+
+[data-ui85-preview="true"] :where([class*="price"], [class*="market"]) {
+  background:
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--ct-panel-solid) 94%, var(--ct-accent-soft) 6%),
+      color-mix(in srgb, var(--ct-panel-solid) 84%, var(--ct-app-bg) 16%)
+    );
+  border-color: var(--ct-ui85-frame-line-strong);
+  box-shadow: var(--ct-ui85-inner-glow);
+}
+
+[data-ui85-preview="true"] button {
+  border-color: var(--ct-ui85-frame-line);
+}
+
+[data-ui85-preview="true"] button:hover,
+[data-ui85-preview="true"] a:hover {
+  border-color: var(--ct-border-strong);
+}
+
+/* ------------------------------------------------------------
+   TOPBAR / SKIN-MENY
+------------------------------------------------------------ */
+
+[class*="ThemeMenu"],
+[class*="themeMenu"],
+[class*="skinMenu"],
+[class*="SkinMenu"] {
+  background: var(--ct-app-topbar-bg);
+  border-color: var(--ct-ui85-frame-line-strong);
+  box-shadow: var(--ct-ui85-frame-shadow-soft);
+  backdrop-filter: blur(14px);
+}
+
+[class*="ThemeMenu"] button,
+[class*="themeMenu"] button,
+[class*="skinMenu"] button,
+[class*="SkinMenu"] button {
+  color: var(--ct-text-soft);
+}
+
+[class*="ThemeMenu"] button[aria-pressed="true"],
+[class*="themeMenu"] button[aria-pressed="true"],
+[class*="skinMenu"] button[aria-pressed="true"],
+[class*="SkinMenu"] button[aria-pressed="true"] {
+  color: var(--ct-panel-solid);
+  background: var(--ct-accent);
+  border-color: var(--ct-accent);
+}
+
+/* ------------------------------------------------------------
+   BILDETONING PER SKIN
+------------------------------------------------------------ */
+
+[data-skin="collectium"] [data-ui85-preview="true"] img {
+  filter: sepia(0.10) saturate(0.92) contrast(0.98) brightness(1.02);
+}
+
+[data-skin="samler"] [data-ui85-preview="true"] img,
+[data-skin="samler-enkel"] [data-ui85-preview="true"] img,
+[data-skin="enkel"] [data-ui85-preview="true"] img {
+  filter: saturate(0.88) contrast(0.98) brightness(1.02);
+}
+
+[data-skin="finans"] [data-ui85-preview="true"] img {
+  filter: saturate(0.88) contrast(0.94) brightness(0.72) hue-rotate(8deg);
+}
+
+[data-skin="museum"] [data-ui85-preview="true"] img {
+  filter: sepia(0.34) saturate(0.78) contrast(0.92) brightness(0.70);
+}
+
+/* ------------------------------------------------------------
+   MØRKE SKINS: PRIS / MARKED / DELIKAT KONTRAST
+------------------------------------------------------------ */
+
+[data-skin="finans"] [data-ui85-preview="true"] :where([class*="price"], [class*="market"]) {
+  background:
+    linear-gradient(145deg, rgba(35, 49, 52, 0.96), rgba(28, 40, 50, 0.96));
+  border-color: rgba(184, 148, 61, 0.56);
+}
+
+[data-skin="museum"] [data-ui85-preview="true"] :where([class*="price"], [class*="market"]) {
+  background:
+    linear-gradient(145deg, rgba(43, 38, 30, 0.96), rgba(31, 30, 29, 0.96));
+  border-color: rgba(170, 123, 55, 0.66);
 }
 
 /* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES END */
