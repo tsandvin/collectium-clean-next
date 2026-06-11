@@ -40,7 +40,12 @@ import styles from "./CollectiumUi85Template.module.css";
 
 export function CollectiumUi85Template({ skin = "finans", children }: CollectiumUi85TemplateProps) {
   return (
-    <section className={styles.previewModule} data-skin={skin} aria-label="Collectium UI85 content preview">
+    <section
+      className={styles.previewModule}
+      data-skin={skin}
+      data-ui85-preview="true"
+      aria-label="Collectium UI85 content preview"
+    >
       <header className={styles.moduleHeader}>
         <div>
           <span>Design / UI85</span>

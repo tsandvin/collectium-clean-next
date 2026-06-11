@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * COLLECTIUM FILE HEADER
@@ -7,8 +7,8 @@
  * Collectium UI85 Theme Client
  *
  * Definering / formal:
- * Aktiv React-kontroll for UI85 designstandard. Komponenten bytter kun skin-
- * tokens og holder staende objektkort som laast struktur for alle fire skins.
+ * Aktiv React-kontroll for UI85 designstandard. Skin bytter kun tokens/farger,
+ * mens layout-knappene bytter mellom godkjente visningskortstrukturer.
  *
  * Bruksomrade:
  * - /design/ui85
@@ -16,24 +16,25 @@
  *
  * Berorte DB-brytere / feature_keys:
  * - template.ui85.skin.switch.preview
+ * - template.ui85.layout.switch.preview
  *
  * Berorte API-ruter:
  * - Ingen.
  *
  * Dataretning:
- * Local React state -> data-skin paa html/body -> CSS tokens.
+ * Local React state -> data-skin/data-layout -> CSS tokens.
  *
  * Logging:
  * Ingen runtime logging i preview.
  *
  * Versjon:
- * UI85-DESIGN-STANDARD-V20
+ * UI85-DESIGN-STANDARD-V21
  */
 
 import { useMemo, useState } from "react";
 import { CollectiumUi85ObjectPreview } from "./CollectiumUi85ObjectPreview";
 import { CollectiumUi85Template } from "./CollectiumUi85Template";
-import type { CollectiumUi85Skin } from "./collectium-ui85-types";
+import type { CollectiumUi85Layout, CollectiumUi85Skin } from "./collectium-ui85-types";
 import styles from "./CollectiumUi85ThemeClient.module.css";
 
 const skinOptions: { key: CollectiumUi85Skin; label: string; description: string }[] = [
@@ -43,7 +44,13 @@ const skinOptions: { key: CollectiumUi85Skin; label: string; description: string
   { key: "finans", label: "Finans", description: "Marked og analyse" },
 ];
 
-const layoutOptions = ["Alle", "Horisontal", "Staende", "Liste", "Museum"];
+const layoutOptions: { key: CollectiumUi85Layout; label: string }[] = [
+  { key: "all", label: "Alle" },
+  { key: "horizontal", label: "Horisontal" },
+  { key: "standing", label: "Staende" },
+  { key: "list", label: "Liste" },
+  { key: "museum", label: "Museum" },
+];
 
 function SkinDot({ skin }: { skin: CollectiumUi85Skin }) {
   return <span className={styles.skinDot} data-skin-dot={skin} aria-hidden="true" />;
@@ -65,6 +72,7 @@ function applyGlobalSkin(skin: CollectiumUi85Skin) {
 
 export function CollectiumUi85ThemeClient() {
   const [skin, setSkin] = useState<CollectiumUi85Skin>("collectium");
+  const [layout, setLayout] = useState<CollectiumUi85Layout>("horizontal");
 
   const activeLabel = useMemo(() => {
     return skinOptions.find((option) => option.key === skin)?.label ?? "Collectium";
@@ -106,19 +114,19 @@ export function CollectiumUi85ThemeClient() {
         <div className={styles.layoutButtons} role="group" aria-label="Velg layout">
           {layoutOptions.map((option) => (
             <button
-              aria-pressed={option === "Staende"}
-              className={option === "Staende" ? `${styles.layoutButton} ${styles.active}` : styles.layoutButton}
-              key={option}
+              aria-pressed={layout === option.key}
+              className={layout === option.key ? `${styles.layoutButton} ${styles.active}` : styles.layoutButton}
+              key={option.key}
+              onClick={() => setLayout(option.key)}
               type="button"
             >
-              {option}
+              {option.label}
             </button>
           ))}
         </div>
       </section>
 
-      <CollectiumUi85ObjectPreview activeSkin={skin} activeLabel={activeLabel} />
+      <CollectiumUi85ObjectPreview activeSkin={skin} activeLabel={activeLabel} activeLayout={layout} />
     </CollectiumUi85Template>
   );
 }
-

@@ -15,6 +15,7 @@
 import type { ReactNode } from "react";
 
 export type CollectiumUi85Skin = "collectium" | "samler" | "museum" | "finans";
+export type CollectiumUi85Layout = "all" | "horizontal" | "standing" | "list" | "museum";
 
 export type CollectiumUi85TemplateProps = {
   skin?: CollectiumUi85Skin;
