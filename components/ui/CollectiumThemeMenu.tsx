@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * COLLECTIUM FILE HEADER
@@ -7,13 +7,15 @@
  * Collectium Theme Menu
  *
  * Definering / formÃ¥l:
- * Aktiv Tema-bryter for global topbar. Setter kun data-skin pÃ¥ html/body.
+ * Aktiv Tema-bryter for global topbar. Setter data-theme, data-skin og
+ * data-ct-skin pÃ¥ html og body slik at Ã©n Next.js/React-standard styrer design.
  *
  * BruksomrÃ¥de:
  * Global AppShell / Topbar.
  *
  * BerÃ¸rte DB-brytere / feature_keys:
  * template.theme.select
+ * local.template.theme_ui85
  *
  * BerÃ¸rte API-ruter:
  * Ingen.
@@ -22,7 +24,7 @@
  * Ingen.
  *
  * Versjon:
- * CT-THEME-SWITCH-0002 / CHANGE-2026-06-11-THEME-ACTIVE-V2
+ * CT-THEME-SWITCH-0003 / CHANGE-2026-06-12-SINGLE-DESIGN-STANDARD
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -39,6 +41,7 @@ const SKINS: Array<{ key: SkinKey; label: string }> = [
 
 const STORAGE_KEY = "collectium-active-skin";
 const LEGACY_STORAGE_KEY = "ct-ui85-preview-skin";
+const V2_STORAGE_KEY = "ct-active-skin-v2";
 
 function normalizeSkin(value: string | null | undefined): SkinKey {
   if (value === "collectium" || value === "samler" || value === "museum" || value === "finans") {
@@ -53,16 +56,31 @@ function normalizeSkin(value: string | null | undefined): SkinKey {
 }
 
 function applySkin(skin: SkinKey) {
-  document.documentElement.dataset.skin = skin;
-  document.body.dataset.skin = skin;
-  document.documentElement.setAttribute("data-ct-skin", skin);
-  document.body.setAttribute("data-ct-skin", skin);
+  const html = document.documentElement;
+  const body = document.body;
+
+  html.dataset.theme = skin;
+  html.dataset.skin = skin;
+  html.dataset.ctSkin = skin;
+
+  body.dataset.theme = skin;
+  body.dataset.skin = skin;
+  body.dataset.ctSkin = skin;
+
+  html.setAttribute("data-theme", skin);
+  html.setAttribute("data-skin", skin);
+  html.setAttribute("data-ct-skin", skin);
+
+  body.setAttribute("data-theme", skin);
+  body.setAttribute("data-skin", skin);
+  body.setAttribute("data-ct-skin", skin);
 
   try {
     window.localStorage.setItem(STORAGE_KEY, skin);
     window.localStorage.setItem(LEGACY_STORAGE_KEY, skin);
+    window.localStorage.setItem(V2_STORAGE_KEY, skin);
   } catch {
-    // data-skin still applies for this page.
+    // data attributes still apply for this page.
   }
 
   window.dispatchEvent(new CustomEvent("collectium:skin-change", { detail: { skin } }));
@@ -79,6 +97,7 @@ export function CollectiumThemeMenu() {
     try {
       storedSkin =
         window.localStorage.getItem(STORAGE_KEY) ??
+        window.localStorage.getItem(V2_STORAGE_KEY) ??
         window.localStorage.getItem(LEGACY_STORAGE_KEY) ??
         "";
     } catch {
@@ -87,6 +106,7 @@ export function CollectiumThemeMenu() {
 
     const selectedSkin = normalizeSkin(
       storedSkin ||
+        document.documentElement.getAttribute("data-theme") ||
         document.documentElement.dataset.skin ||
         document.body.dataset.skin ||
         document.documentElement.getAttribute("data-ct-skin") ||
