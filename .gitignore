@@ -67,3 +67,7 @@ app/admin/system/mariadb-neon/MariaDbNeonLayoutGuide.module.css.backup-*
 # Collectium generated local folders
 docs/backups/
 docs/sandbox-reports/
+
+# Local/generated backup archives
+docs/backup-archives/
+*.backup-*
