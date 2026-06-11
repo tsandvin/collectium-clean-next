@@ -1,0 +1,58 @@
+﻿/*
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium themes.css
+ *
+ * Definering / formÃ¥l:
+ * Hovedimport for alle Collectium-tema. Denne filen importeres globalt i app/layout.tsx.
+ * globals.css skal ikke eie farger/design.
+ *
+ * Versjon:
+ * CT-THEMES-IMPORT-0001 / CHANGE-2026-06-12-THEME-STANDARD
+ */
+
+@import "./collectium.css";
+@import "./samler.css";
+@import "./museum.css";
+@import "./finans.css";
+
+:root {
+  --ct-bg: #ffffff;
+  --ct-sidebar-bg: #ffffff;
+  --ct-topbar-bg: #ffffff;
+
+  --ct-panel-bg: #ffffff;
+  --ct-panel-solid: #ffffff;
+  --ct-card-bg: #ffffff;
+
+  --ct-border: #d8d8d8;
+  --ct-border-strong: #999999;
+  --ct-line: #eeeeee;
+
+  --ct-text: #111111;
+  --ct-text-soft: #444444;
+  --ct-text-muted: #777777;
+
+  --ct-accent: #111111;
+  --ct-accent-dark: #000000;
+  --ct-accent-soft: #eeeeee;
+
+  --ct-signature: #777777;
+  --ct-watermark: transparent;
+
+  --ct-status-ok: #067647;
+  --ct-status-pending: #a15c07;
+  --ct-status-rejected: #b42318;
+
+  --ct-shadow: none;
+
+  --ct-radius-sm: 4px;
+  --ct-radius-md: 8px;
+  --ct-radius-lg: 12px;
+
+  --ct-font-head: Georgia, serif;
+  --ct-font-body: Arial, Helvetica, sans-serif;
+  --ct-font-ui: Arial, Helvetica, sans-serif;
+  --ct-font-mono: Consolas, monospace;
+}

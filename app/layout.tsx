@@ -5,12 +5,11 @@
  * Root layout
  *
  * Definering / formÃ¥l:
- * Global Next.js layout for nÃ¸ytral Collectium-standard. Layout importerer kun
- * app/globals.css. Alle gamle skin-importer og data-skin/data-theme-attributter
- * er fjernet for Ã¥ rydde designkonflikt.
+ * Global Next.js layout med ThemeProvider og delt tema-CSS.
+ * globals.css eier layoutstruktur. app/styles/themes.css eier farger/design.
  *
  * BruksomrÃ¥de:
- * Brukes av alle routes i app/.
+ * Alle routes i app/.
  *
  * BerÃ¸rte sider / routes:
  * - alle
@@ -18,26 +17,23 @@
  * BerÃ¸rte DB-brytere / feature_keys:
  * - template.view
  * - navigation.view
+ * - local.template.theme_provider
  *
  * BerÃ¸rte API-ruter:
- * - Ingen
+ * - senere /api/user/preferences/theme
  *
  * BerÃ¸rte tabeller / views:
- * - Ingen
- *
- * Dataretning:
- * Next.js layout -> CollectiumAppShell -> sideinnhold.
- *
- * Logging:
- * log_category: template
- * log_action: render
+ * - senere ct_ui_skins
+ * - senere ct_user_preferences.preferred_skin
  *
  * Versjon:
- * CT-CLEAN-LAYOUT-NEUTRAL-0001 / CHANGE-2026-06-12-DISABLE-SKINS
+ * CT-LAYOUT-THEMEPROVIDER-0001 / CHANGE-2026-06-12-THEME-STANDARD
  */
 
 import type { Metadata } from "next";
 import "./globals.css";
+import "./styles/themes.css";
+import { ThemeProvider } from "./providers/theme-provider";
 import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
 
 export const metadata: Metadata = {
@@ -45,11 +41,19 @@ export const metadata: Metadata = {
   description: "Samlerplattform for katalog, historie og marked.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="no">
+    <html lang="no" data-theme="collectium">
       <body>
-        <CollectiumAppShell>{children}</CollectiumAppShell>
+        <ThemeProvider>
+          <CollectiumAppShell>
+            {children}
+          </CollectiumAppShell>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -2,42 +2,19 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Global CSS - neutral Next.js standard
+ * Global CSS - layout only
  *
  * Definering / formÃ¥l:
- * NÃ¸ytral global CSS uten skins, tema, gradienter, vannmerker, stempler,
- * gamle farger, skygger eller dekor. Denne filen skal kun gi lesbar layout.
- *
- * BruksomrÃ¥de:
- * Importeres kun i app/layout.tsx.
- *
- * BerÃ¸rte sider / routes:
- * - alle routes
- *
- * BerÃ¸rte DB-brytere / feature_keys:
- * - template.view
- * - navigation.view
- *
- * Dataretning:
- * Next.js -> React -> HTML/CSS.
+ * NÃ¸ytral layout/shell-CSS. Skal ikke eie skin/farger/design.
+ * Alle farger, typografi, skygger og radius leses fra app/styles/themes.css.
  *
  * Versjon:
- * CT-GLOBAL-NEUTRAL-0001 / CHANGE-2026-06-12-DISABLE-SKINS
+ * CT-GLOBAL-LAYOUT-ONLY-0001 / CHANGE-2026-06-12-THEME-STANDARD
  */
 
 :root {
   --ct-sidebar-width: 260px;
   --ct-topbar-height: 64px;
-  --ct-bg: #ffffff;
-  --ct-surface: #ffffff;
-  --ct-surface-muted: #f7f7f7;
-  --ct-border: #d8d8d8;
-  --ct-text: #111111;
-  --ct-text-soft: #444444;
-  --ct-text-muted: #777777;
-  --ct-focus: #111111;
-  --ct-radius: 0px;
-  --ct-font: Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -55,7 +32,7 @@ body {
   min-height: 100vh;
   background: var(--ct-bg);
   color: var(--ct-text);
-  font-family: var(--ct-font);
+  font-family: var(--ct-font-ui);
   font-size: 14px;
 }
 
@@ -85,7 +62,7 @@ button {
   min-height: 100vh;
   padding: 20px 16px;
   border-right: 1px solid var(--ct-border);
-  background: var(--ct-surface);
+  background: var(--ct-sidebar-bg);
 }
 
 .ct-brand {
@@ -99,10 +76,11 @@ button {
   width: 34px;
   height: 34px;
   border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
   display: grid;
   place-items: center;
-  background: var(--ct-surface);
-  color: var(--ct-text);
+  background: var(--ct-accent);
+  color: var(--ct-panel-solid);
   font-weight: 700;
 }
 
@@ -132,7 +110,7 @@ button {
 }
 
 .ct-sidebar-link:hover {
-  text-decoration: underline;
+  color: var(--ct-accent);
 }
 
 .ct-sidebar-icon {
@@ -140,7 +118,7 @@ button {
   height: 24px;
   display: grid;
   place-items: center;
-  color: var(--ct-text);
+  color: var(--ct-accent);
 }
 
 .ct-sidebar-link strong,
@@ -169,7 +147,7 @@ button {
   gap: 16px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--ct-border);
-  background: var(--ct-surface);
+  background: var(--ct-topbar-bg);
 }
 
 .ct-search {
@@ -180,7 +158,8 @@ button {
   align-items: center;
   padding: 0 12px;
   border: 1px solid var(--ct-border);
-  background: var(--ct-surface);
+  border-radius: var(--ct-radius-lg);
+  background: var(--ct-panel-solid);
   color: var(--ct-text-muted);
 }
 
@@ -200,12 +179,14 @@ button {
 }
 
 .ct-topbar-actions a:hover {
-  text-decoration: underline;
+  color: var(--ct-accent);
 }
 
 .ct-topbar-cta {
   border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
   padding: 0 12px !important;
+  background: var(--ct-panel-solid);
 }
 
 .ct-page-frame {
@@ -226,10 +207,34 @@ button {
 
 .ct-page-header,
 .ct-panel,
-.ct-card {
+.ct-card,
+.collectium-card {
+  position: relative;
   border: 1px solid var(--ct-border);
-  background: var(--ct-surface);
+  border-radius: var(--ct-radius-lg);
+  background: var(--ct-panel-bg);
+  color: var(--ct-text);
+  box-shadow: var(--ct-shadow);
   padding: 24px;
+}
+
+.collectium-card {
+  background: var(--ct-card-bg);
+  padding-bottom: 28px;
+}
+
+.collectium-card::after {
+  content: "Collectium anno 2022";
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  color: var(--ct-signature);
+  font-family: var(--ct-font-head);
+  font-size: 8px;
+  line-height: 1;
+  opacity: 0.5;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .ct-page-header {
@@ -238,7 +243,7 @@ button {
 
 .ct-eyebrow {
   margin: 0 0 10px;
-  color: var(--ct-text-muted);
+  color: var(--ct-accent);
   font-weight: 700;
   text-transform: uppercase;
   font-size: 12px;
@@ -249,8 +254,7 @@ h1,
 h2 {
   margin: 0;
   color: var(--ct-text);
-  font-family: var(--ct-font);
-  letter-spacing: normal;
+  font-family: var(--ct-font-head);
 }
 
 h1 {
@@ -298,52 +302,20 @@ p {
   align-items: center;
   padding: 0 12px;
   border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
   color: var(--ct-text);
-  background: var(--ct-surface);
+  background: var(--ct-panel-solid);
   font-weight: 600;
 }
 
 .ct-button:hover {
-  background: var(--ct-surface-muted);
+  border-color: var(--ct-border-strong);
 }
 
 .ct-button--primary {
-  background: var(--ct-text);
-  color: #ffffff;
-  border-color: var(--ct-text);
-}
-
-.ct-section-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: flex-start;
-}
-
-.ct-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  border: 1px solid var(--ct-border);
-  padding: 0 10px;
-  color: var(--ct-text);
-  font-weight: 700;
-  font-size: 12px;
-}
-
-.ct-filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.ct-filter-row span {
-  border: 1px solid var(--ct-border);
-  padding: 8px 12px;
-  background: var(--ct-surface);
-  color: var(--ct-text-soft);
-  font-weight: 600;
+  background: var(--ct-accent);
+  color: var(--ct-panel-solid);
+  border-color: var(--ct-accent);
 }
 
 @media (max-width: 980px) {
@@ -362,14 +334,6 @@ p {
 
   .ct-topbar {
     padding: 12px 16px;
-  }
-
-  .ct-search {
-    max-width: none;
-  }
-
-  .ct-topbar-actions {
-    gap: 8px;
   }
 
   .ct-page-frame {
