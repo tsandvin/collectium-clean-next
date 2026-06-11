@@ -5,11 +5,10 @@
  * Global CSS - layout only
  *
  * Definering / formÃ¥l:
- * NÃ¸ytral layout/shell-CSS. Skal ikke eie skin/farger/design.
- * Alle farger, typografi, skygger og radius leses fra app/styles/themes.css.
+ * Layout/shell-CSS. Farger, typografi, skygger og radius leses fra app/styles/*.css.
  *
  * Versjon:
- * CT-GLOBAL-LAYOUT-ONLY-0001 / CHANGE-2026-06-12-THEME-STANDARD
+ * CT-GLOBAL-LAYOUT-ONLY-0002 / CHANGE-2026-06-12-TEMPLATE-TOKENS
  */
 
 :root {
@@ -23,14 +22,14 @@
 
 html {
   min-height: 100%;
-  background: var(--ct-bg);
+  background: var(--ct-app-bg);
   color: var(--ct-text);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--ct-bg);
+  background: var(--ct-app-bg);
   color: var(--ct-text);
   font-family: var(--ct-font-ui);
   font-size: 14px;
@@ -54,15 +53,15 @@ button {
   min-height: 100vh;
   display: grid;
   grid-template-columns: var(--ct-sidebar-width) minmax(0, 1fr);
-  background: var(--ct-bg);
+  background: var(--ct-app-bg);
   color: var(--ct-text);
 }
 
 .ct-sidebar {
   min-height: 100vh;
   padding: 20px 16px;
-  border-right: 1px solid var(--ct-border);
-  background: var(--ct-sidebar-bg);
+  border-right: 1px solid var(--ct-panel-border);
+  background: var(--ct-app-sidebar-bg);
 }
 
 .ct-brand {
@@ -75,7 +74,7 @@ button {
 .ct-brand-mark {
   width: 34px;
   height: 34px;
-  border: 1px solid var(--ct-border);
+  border: 1px solid var(--ct-panel-border);
   border-radius: var(--ct-radius-md);
   display: grid;
   place-items: center;
@@ -136,7 +135,7 @@ button {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: var(--ct-bg);
+  background: var(--ct-app-bg);
 }
 
 .ct-topbar {
@@ -146,8 +145,8 @@ button {
   justify-content: space-between;
   gap: 16px;
   padding: 12px 24px;
-  border-bottom: 1px solid var(--ct-border);
-  background: var(--ct-topbar-bg);
+  border-bottom: 1px solid var(--ct-panel-border);
+  background: var(--ct-app-topbar-bg);
 }
 
 .ct-search {
@@ -157,7 +156,7 @@ button {
   display: flex;
   align-items: center;
   padding: 0 12px;
-  border: 1px solid var(--ct-border);
+  border: 1px solid var(--ct-panel-border);
   border-radius: var(--ct-radius-lg);
   background: var(--ct-panel-solid);
   color: var(--ct-text-muted);
@@ -183,7 +182,7 @@ button {
 }
 
 .ct-topbar-cta {
-  border: 1px solid var(--ct-border);
+  border: 1px solid var(--ct-panel-border);
   border-radius: var(--ct-radius-lg);
   padding: 0 12px !important;
   background: var(--ct-panel-solid);
@@ -192,7 +191,7 @@ button {
 .ct-page-frame {
   flex: 1;
   padding: 24px;
-  background: var(--ct-bg);
+  background: var(--ct-app-bg);
 }
 
 .ct-page-inner {
@@ -210,7 +209,7 @@ button {
 .ct-card,
 .collectium-card {
   position: relative;
-  border: 1px solid var(--ct-border);
+  border: 1px solid var(--ct-panel-border);
   border-radius: var(--ct-radius-lg);
   background: var(--ct-panel-bg);
   color: var(--ct-text);
@@ -301,7 +300,7 @@ p {
   display: inline-flex;
   align-items: center;
   padding: 0 12px;
-  border: 1px solid var(--ct-border);
+  border: 1px solid var(--ct-panel-border);
   border-radius: var(--ct-radius-md);
   color: var(--ct-text);
   background: var(--ct-panel-solid);

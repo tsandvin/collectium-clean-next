@@ -5,15 +5,15 @@
  */
 
 html[data-theme="museum"] {
-  --ct-bg: #111111;
-  --ct-sidebar-bg: #141312;
-  --ct-topbar-bg: rgba(18, 18, 17, 0.94);
+  --ct-app-bg: #111111;
+  --ct-app-sidebar-bg: #141312;
+  --ct-app-topbar-bg: rgba(18, 18, 17, 0.94);
 
   --ct-panel-bg: rgba(31, 31, 32, 0.88);
   --ct-panel-solid: #1b1b1d;
   --ct-card-bg: #1c1c1f;
 
-  --ct-border: #4a3c26;
+  --ct-panel-border: #4a3c26;
   --ct-border-strong: #6d5830;
   --ct-line: #463723;
 

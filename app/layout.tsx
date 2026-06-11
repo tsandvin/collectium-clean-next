@@ -5,29 +5,11 @@
  * Root layout
  *
  * Definering / formÃ¥l:
- * Global Next.js layout med ThemeProvider og delt tema-CSS.
- * globals.css eier layoutstruktur. app/styles/themes.css eier farger/design.
- *
- * BruksomrÃ¥de:
- * Alle routes i app/.
- *
- * BerÃ¸rte sider / routes:
- * - alle
- *
- * BerÃ¸rte DB-brytere / feature_keys:
- * - template.view
- * - navigation.view
- * - local.template.theme_provider
- *
- * BerÃ¸rte API-ruter:
- * - senere /api/user/preferences/theme
- *
- * BerÃ¸rte tabeller / views:
- * - senere ct_ui_skins
- * - senere ct_user_preferences.preferred_skin
+ * Global Next.js layout med ThemeProvider og direkte tema-CSS-importer.
+ * Direkte import brukes fordi Next.js/Turbopack kan feile pÃ¥ @import i CSS.
  *
  * Versjon:
- * CT-LAYOUT-THEMEPROVIDER-0001 / CHANGE-2026-06-12-THEME-STANDARD
+ * CT-LAYOUT-THEMEPROVIDER-0002 / CHANGE-2026-06-12-DIRECT-CSS-IMPORTS
  */
 
 import type { Metadata } from "next";
@@ -62,4 +44,3 @@ export default function RootLayout({
     </html>
   );
 }
-

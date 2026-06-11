@@ -5,15 +5,15 @@
  */
 
 html[data-theme="finans"] {
-  --ct-bg: #0d1b20;
-  --ct-sidebar-bg: #0f2026;
-  --ct-topbar-bg: rgba(13, 30, 36, 0.94);
+  --ct-app-bg: #0d1b20;
+  --ct-app-sidebar-bg: #0f2026;
+  --ct-app-topbar-bg: rgba(13, 30, 36, 0.94);
 
   --ct-panel-bg: rgba(25, 42, 50, 0.9);
   --ct-panel-solid: #1d3039;
   --ct-card-bg: #1a2d36;
 
-  --ct-border: #29424d;
+  --ct-panel-border: #29424d;
   --ct-border-strong: #236b57;
   --ct-line: #2b414b;
 

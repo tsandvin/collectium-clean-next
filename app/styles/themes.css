@@ -5,24 +5,27 @@
  * Collectium themes.css
  *
  * Definering / formÃ¥l:
- * Hovedimport for alle Collectium-tema. Denne filen importeres globalt i app/layout.tsx.
- * globals.css skal ikke eie farger/design.
+ * Base tokenfil for Collectium ThemeProvider-standard.
+ * Denne filen skal IKKE bruke @import, fordi Next.js/Turbopack kan feile.
+ * Temafilene importeres direkte i app/layout.tsx.
+ *
+ * BerÃ¸rte tokens:
+ * De 20 template-tokenene som kontrolleres av /admin/system/mariadb-neon.
  *
  * Versjon:
- * CT-THEMES-IMPORT-0001 / CHANGE-2026-06-12-THEME-STANDARD
+ * CT-THEMES-BASE-0002 / CHANGE-2026-06-12-TOKEN-CONTROL
  */
 
-
 :root {
-  --ct-bg: #ffffff;
-  --ct-sidebar-bg: #ffffff;
-  --ct-topbar-bg: #ffffff;
+  --ct-app-bg: #ffffff;
+  --ct-app-sidebar-bg: #ffffff;
+  --ct-app-topbar-bg: #ffffff;
 
   --ct-panel-bg: #ffffff;
   --ct-panel-solid: #ffffff;
   --ct-card-bg: #ffffff;
 
-  --ct-border: #d8d8d8;
+  --ct-panel-border: #d8d8d8;
   --ct-border-strong: #999999;
   --ct-line: #eeeeee;
 

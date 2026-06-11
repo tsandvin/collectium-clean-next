@@ -5,15 +5,15 @@
  */
 
 html[data-theme="samler"] {
-  --ct-bg: #f4f8fc;
-  --ct-sidebar-bg: #edf5fb;
-  --ct-topbar-bg: rgba(248, 251, 255, 0.92);
+  --ct-app-bg: #f4f8fc;
+  --ct-app-sidebar-bg: #edf5fb;
+  --ct-app-topbar-bg: rgba(248, 251, 255, 0.92);
 
   --ct-panel-bg: rgba(255, 255, 255, 0.88);
   --ct-panel-solid: #ffffff;
   --ct-card-bg: #f1f7fc;
 
-  --ct-border: #d8e5f1;
+  --ct-panel-border: #d8e5f1;
   --ct-border-strong: #bdd2e7;
   --ct-line: #d9e7f3;
 

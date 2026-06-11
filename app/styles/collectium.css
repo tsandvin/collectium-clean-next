@@ -5,15 +5,15 @@
  */
 
 html[data-theme="collectium"] {
-  --ct-bg: #f7efe2;
-  --ct-sidebar-bg: #efe1c9;
-  --ct-topbar-bg: rgba(255, 248, 235, 0.92);
+  --ct-app-bg: #f7efe2;
+  --ct-app-sidebar-bg: #efe1c9;
+  --ct-app-topbar-bg: rgba(255, 248, 235, 0.92);
 
   --ct-panel-bg: rgba(255, 249, 237, 0.86);
   --ct-panel-solid: #fff9ed;
   --ct-card-bg: #fbf2e4;
 
-  --ct-border: #e1cfaa;
+  --ct-panel-border: #e1cfaa;
   --ct-border-strong: #c49a59;
   --ct-line: #e8d9be;
 
