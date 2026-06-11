@@ -12,10 +12,6 @@
  * CT-THEMES-IMPORT-0001 / CHANGE-2026-06-12-THEME-STANDARD
  */
 
-@import "./collectium.css";
-@import "./samler.css";
-@import "./museum.css";
-@import "./finans.css";
 
 :root {
   --ct-bg: #ffffff;

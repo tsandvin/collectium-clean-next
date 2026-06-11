@@ -33,6 +33,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./styles/themes.css";
+import "./styles/collectium.css";
+import "./styles/samler.css";
+import "./styles/museum.css";
+import "./styles/finans.css";
 import { ThemeProvider } from "./providers/theme-provider";
 import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
 
@@ -58,3 +62,4 @@ export default function RootLayout({
     </html>
   );
 }
+
