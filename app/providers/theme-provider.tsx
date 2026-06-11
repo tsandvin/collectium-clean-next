@@ -59,7 +59,6 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 const STORAGE_KEY = "ct-active-skin-v2";
-const LEGACY_STORAGE_KEY = "ct-active-skin-v1";
 
 function isCollectiumTheme(value: string | null): value is CollectiumTheme {
   return (
@@ -70,18 +69,6 @@ function isCollectiumTheme(value: string | null): value is CollectiumTheme {
   );
 }
 
-function normalizeTheme(value: string | null): CollectiumTheme | null {
-  if (isCollectiumTheme(value)) {
-    return value;
-  }
-
-  if (value === "enkel" || value === "samler-enkel") {
-    return "samler";
-  }
-
-  return null;
-}
-
 export function ThemeProvider({
   children,
 }: {
@@ -89,40 +76,21 @@ export function ThemeProvider({
 }) {
   const [theme, setThemeState] = useState<CollectiumTheme>("collectium");
 
-  function applyTheme(nextTheme: CollectiumTheme) {
+  function setTheme(nextTheme: CollectiumTheme) {
     setThemeState(nextTheme);
-
     document.documentElement.dataset.theme = nextTheme;
     document.documentElement.dataset.skin = nextTheme;
-
-    try {
-      localStorage.setItem(STORAGE_KEY, nextTheme);
-    } catch {
-      // Theme still applies in DOM.
-    }
+    localStorage.setItem(STORAGE_KEY, nextTheme);
   }
 
   useEffect(() => {
-    let saved: string | null = null;
-
-    try {
-      saved =
-        localStorage.getItem(STORAGE_KEY) ??
-        localStorage.getItem(LEGACY_STORAGE_KEY);
-    } catch {
-      saved = null;
-    }
-
-    applyTheme(normalizeTheme(saved) ?? "collectium");
+    const saved = localStorage.getItem(STORAGE_KEY);
+    setTheme(isCollectiumTheme(saved) ? saved : "collectium");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        setTheme: applyTheme,
-      }}
-    >
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
