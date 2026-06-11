@@ -1875,3 +1875,320 @@ body[data-skin],
 
 /* COLLECTIUM SKIN COLORS ONLY V1 END */
 
+/* COLLECTIUM SKIN COLORS ONLY V2 START
+   Kilde: UI 8.5 referansebilder for Collectium, Samler, Museum og Finans.
+   Dette er kun farge-/tokenlag.
+   Ingen shell, sidebar, topbar, ramme, React-template, preview eller canvas.
+
+   Viktig korreksjon:
+   - Collectium skal ikke gi gul helsidebakgrunn.
+   - Collectium skal vaere varm krem/hvit/beige med gronn tekst og kontrollert gullaksent.
+*/
+
+:root,
+html,
+body {
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+
+  --ct-shadow: 0 18px 46px rgba(60, 42, 20, .08);
+  --ct-hover-shadow: 0 16px 34px rgba(60, 42, 20, .10);
+  --ct-card-shadow: 0 14px 34px rgba(60, 42, 20, .08);
+
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,.10) 48%, rgba(80,54,18,.035));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.18) 42%, rgba(80,54,18,.045));
+
+  --ct-app-bg: #fbf7ef;
+  --ct-app-sidebar-bg: #ece5d9;
+  --ct-app-topbar-bg: rgba(251, 247, 239, .88);
+  --ct-panel-bg: rgba(255, 251, 243, .88);
+  --ct-panel-solid: #fffaf1;
+  --ct-card-bg: #f6eddd;
+  --ct-panel-border: #dfcfb4;
+  --ct-border-strong: #c7ab73;
+  --ct-line: #d9cbb8;
+
+  --ct-text: #0b3a2f;
+  --ct-text-soft: #375243;
+  --ct-text-muted: #8b7656;
+  --ct-muted: #8b7656;
+
+  --ct-accent: #146b3f;
+  --ct-accent-dark: #07372b;
+  --ct-accent-soft: #d7b24a;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+
+  --ct-status-ok: #146b3f;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 11%, var(--ct-panel-solid));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: #fffdf7;
+  --ct-button-border: var(--ct-accent);
+}
+
+/* ------------------------------------------------------------
+   Collectium: varm krem/arkiv. IKKE gul helside.
+------------------------------------------------------------ */
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"] {
+  --ct-app-bg: #fbf7ef;
+  --ct-app-sidebar-bg: #e9e1d4;
+  --ct-app-topbar-bg: rgba(251, 247, 239, .90);
+  --ct-panel-bg: rgba(255, 251, 243, .90);
+  --ct-panel-solid: #fffaf1;
+  --ct-card-bg: #f5ecd9;
+  --ct-panel-border: #dfcfb4;
+  --ct-border-strong: #c7ab73;
+  --ct-line: #d8cab8;
+
+  --ct-text: #0b3a2f;
+  --ct-text-soft: #385241;
+  --ct-text-muted: #8c7654;
+  --ct-muted: #8c7654;
+
+  --ct-accent: #146b3f;
+  --ct-accent-dark: #07372b;
+  --ct-accent-soft: #d7b24a;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+
+  --ct-status-ok: #146b3f;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+
+  --ct-shadow: 0 18px 46px rgba(60, 42, 20, .08);
+  --ct-card-shadow: 0 14px 34px rgba(60, 42, 20, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.18) 48%, rgba(80,54,18,.030));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.24) 42%, rgba(80,54,18,.040));
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+}
+
+/* ------------------------------------------------------------
+   Samler / Enkel: lys blaa-hvit samlerflate.
+------------------------------------------------------------ */
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"],
+html[data-skin="enkel"],
+body[data-skin="enkel"],
+[data-skin="enkel"] {
+  --ct-app-bg: #f7fbff;
+  --ct-app-sidebar-bg: #edf5fb;
+  --ct-app-topbar-bg: rgba(247, 251, 255, .92);
+  --ct-panel-bg: rgba(251, 253, 255, .92);
+  --ct-panel-solid: #ffffff;
+  --ct-card-bg: #f5f9fd;
+  --ct-panel-border: #d7e5f1;
+  --ct-border-strong: #b8cee0;
+  --ct-line: #dbe8f3;
+
+  --ct-text: #082f55;
+  --ct-text-soft: #3f5873;
+  --ct-text-muted: #7d8da3;
+  --ct-muted: #7d8da3;
+
+  --ct-accent: #2567a9;
+  --ct-accent-dark: #0d345b;
+  --ct-accent-soft: #a8d0b8;
+  --ct-signature: #2567a9;
+  --ct-watermark: #2567a9;
+
+  --ct-status-ok: #3a765e;
+  --ct-status-pending: #856827;
+  --ct-status-rejected: #a43a22;
+
+  --ct-shadow: 0 18px 46px rgba(18, 64, 104, .08);
+  --ct-card-shadow: 0 14px 34px rgba(18, 64, 104, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.72), rgba(246,251,255,.22) 48%, rgba(5,44,74,.026));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.86), rgba(246,251,255,.30) 42%, rgba(5,44,74,.036));
+
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+
+  --ct-radius-lg: 12px;
+  --ct-radius-md: 10px;
+  --ct-radius-sm: 999px;
+  --ct-title-transform: none;
+}
+
+/* ------------------------------------------------------------
+   Museum: mork historisk/gull.
+------------------------------------------------------------ */
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"] {
+  --ct-app-bg: #12110f;
+  --ct-app-sidebar-bg: #17130f;
+  --ct-app-topbar-bg: rgba(23, 19, 15, .90);
+  --ct-panel-bg: rgba(31, 29, 28, .92);
+  --ct-panel-solid: #1d1c1d;
+  --ct-card-bg: #242322;
+  --ct-panel-border: #4b3e2b;
+  --ct-border-strong: #6d5a38;
+  --ct-line: #44392a;
+
+  --ct-text: #f4ead8;
+  --ct-text-soft: #b8aa8c;
+  --ct-text-muted: #8d8069;
+  --ct-muted: #8d8069;
+
+  --ct-accent: #c9aa62;
+  --ct-accent-dark: #a88340;
+  --ct-accent-soft: #d9c485;
+  --ct-signature: #b18a48;
+  --ct-watermark: #b18a48;
+
+  --ct-status-ok: #8fb67f;
+  --ct-status-pending: #d9c485;
+  --ct-status-rejected: #c9765f;
+
+  --ct-shadow: 0 20px 56px rgba(0,0,0,.30);
+  --ct-card-shadow: 0 18px 46px rgba(0,0,0,.26);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.028), rgba(0,0,0,.045) 48%, rgba(0,0,0,.135));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.038), rgba(0,0,0,.030) 42%, rgba(0,0,0,.110));
+
+  --ct-radius-lg: 8px;
+  --ct-radius-md: 6px;
+  --ct-radius-sm: 999px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+}
+
+/* ------------------------------------------------------------
+   Finans: mork dataflate, gronn aksent.
+------------------------------------------------------------ */
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .92);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #213542;
+  --ct-panel-border: #314e5d;
+  --ct-border-strong: #206b5f;
+  --ct-line: #304b59;
+
+  --ct-text: #eff8ff;
+  --ct-text-soft: #b7d0dd;
+  --ct-text-muted: #7e98a9;
+  --ct-muted: #7e98a9;
+
+  --ct-accent: #2dad82;
+  --ct-accent-dark: #1d8b6a;
+  --ct-accent-soft: #bf9340;
+  --ct-signature: #2dad82;
+  --ct-watermark: #2dad82;
+
+  --ct-status-ok: #2dad82;
+  --ct-status-pending: #bf9340;
+  --ct-status-rejected: #d34c4f;
+
+  --ct-shadow: 0 20px 56px rgba(0,0,0,.30);
+  --ct-card-shadow: 0 16px 42px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.028), rgba(0,0,0,.055) 48%, rgba(0,0,0,.120));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.040) 42%, rgba(0,0,0,.095));
+
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+
+  --ct-radius-lg: 8px;
+  --ct-radius-md: 7px;
+  --ct-radius-sm: 999px;
+  --ct-title-transform: none;
+
+  --ct-finans-small-accent: #d8b45b;
+  --ct-finans-small-accent-soft: rgba(216, 180, 91, .16);
+}
+
+/* Token bridge til eksisterende skall/komponenter.
+   Dette er fortsatt bare variabler, ikke ny layout. */
+html[data-skin],
+body[data-skin],
+[data-skin] {
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 12%, var(--ct-panel-solid));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 90%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+/* Sterk beskyttelse mot gul helsidevask i Collectium. */
+html[data-skin="collectium"],
+body[data-skin="collectium"] {
+  background-color: var(--ct-app-bg) !important;
+}
+
+/* Finans skal ha nok kontrast, uten aa endre struktur. */
+html[data-skin="finans"] h1,
+html[data-skin="finans"] h2,
+html[data-skin="finans"] h3,
+html[data-skin="finans"] h4,
+html[data-skin="finans"] h5,
+html[data-skin="finans"] h6 {
+  color: var(--ct-text);
+}
+
+/* COLLECTIUM SKIN COLORS ONLY V2 END */
+
