@@ -117,7 +117,7 @@ export function CollectiumUi85ThemeClient() {
         </div>
       </section>
 
-      <CollectiumUi85ObjectPreview activeSkin={skin} />
+      <CollectiumUi85ObjectPreview activeSkin={skin} activeLabel={activeLabel} />
     </CollectiumUi85Template>
   );
 }

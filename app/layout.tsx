@@ -1,4 +1,3 @@
-﻿import { CollectiumSkinProvider } from "./components/layout/CollectiumSkinProvider";
 /**
  * COLLECTIUM FILE HEADER
  *
@@ -49,9 +48,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="no" data-template="collectium" data-skin="signature-light">
+    <html lang="no" data-template="collectium" data-skin="collectium" data-ct-skin="collectium">
       <body>
-        <CollectiumAppShell><CollectiumSkinProvider>{children}</CollectiumSkinProvider></CollectiumAppShell>
+        <CollectiumAppShell>{children}</CollectiumAppShell>
       </body>
     </html>
   );

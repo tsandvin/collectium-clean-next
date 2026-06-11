@@ -2190,5 +2190,191 @@ html[data-skin="finans"] h6 {
   color: var(--ct-text);
 }
 
+/* ------------------------------------------------------------
+   COLLECTIUM UI85 CANONICAL STANDARD V20
+   Active final bridge. Older token blocks above are kept as archive context,
+   but this block is last and therefore owns the runtime skin variables.
+------------------------------------------------------------ */
+
+html[data-skin="collectium"],
+html[data-ct-skin="collectium"],
+body[data-skin="collectium"],
+body[data-ct-skin="collectium"] {
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .88);
+  --ct-panel-bg: rgba(255, 249, 242, .88);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+
+html[data-skin="samler"],
+html[data-ct-skin="samler"],
+body[data-skin="samler"],
+body[data-ct-skin="samler"] {
+  --ct-app-bg: #f6f9fc;
+  --ct-app-sidebar-bg: #e7f0f8;
+  --ct-app-topbar-bg: rgba(250, 253, 255, .92);
+  --ct-panel-bg: rgba(250, 253, 255, .92);
+  --ct-panel-solid: #fbfdff;
+  --ct-card-bg: #eaf3fb;
+  --ct-panel-border: #c6d8e8;
+  --ct-border-strong: #7fa0bf;
+  --ct-line: #c9dceb;
+  --ct-text: #082943;
+  --ct-text-soft: #213f5c;
+  --ct-text-muted: #5f7288;
+  --ct-muted: #5f7288;
+  --ct-accent: #1d63a2;
+  --ct-accent-dark: #062d4f;
+  --ct-accent-soft: #8fb5d3;
+  --ct-signature: #4f83b4;
+  --ct-watermark: #4f83b4;
+  --ct-status-ok: #2d6b56;
+  --ct-status-pending: #7b6128;
+  --ct-status-rejected: #9e3421;
+  --ct-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+
+html[data-skin="museum"],
+html[data-ct-skin="museum"],
+body[data-skin="museum"],
+body[data-ct-skin="museum"] {
+  --ct-app-bg: #12110f;
+  --ct-app-sidebar-bg: #17130f;
+  --ct-app-topbar-bg: rgba(23, 19, 15, .92);
+  --ct-panel-bg: rgba(31, 29, 28, .94);
+  --ct-panel-solid: #1d1c1d;
+  --ct-card-bg: #242322;
+  --ct-panel-border: #4b3e2b;
+  --ct-border-strong: #6d5a38;
+  --ct-line: #44392a;
+  --ct-text: #f4ead8;
+  --ct-text-soft: #b8aa8c;
+  --ct-text-muted: #8d8069;
+  --ct-muted: #8d8069;
+  --ct-accent: #c9aa62;
+  --ct-accent-dark: #a88340;
+  --ct-accent-soft: #d9c485;
+  --ct-signature: #b18a48;
+  --ct-watermark: #b18a48;
+  --ct-status-ok: #8fb67f;
+  --ct-status-pending: #d9c485;
+  --ct-status-rejected: #c9765f;
+  --ct-font-family: Georgia, "Times New Roman", serif;
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  color-scheme: dark;
+}
+
+html[data-skin="finans"],
+html[data-ct-skin="finans"],
+body[data-skin="finans"],
+body[data-ct-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .92);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #213542;
+  --ct-panel-border: #314e5d;
+  --ct-border-strong: #206b5f;
+  --ct-line: #304b59;
+  --ct-text: #eff8ff;
+  --ct-text-soft: #b7d0dd;
+  --ct-text-muted: #7e98a9;
+  --ct-muted: #7e98a9;
+  --ct-accent: #2dad82;
+  --ct-accent-dark: #1d8b6a;
+  --ct-accent-soft: #bf9340;
+  --ct-signature: #2dad82;
+  --ct-watermark: #2dad82;
+  --ct-status-ok: #2dad82;
+  --ct-status-pending: #bf9340;
+  --ct-status-rejected: #d34c4f;
+  --ct-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+
+html[data-skin],
+html[data-ct-skin],
+body[data-skin],
+body[data-ct-skin] {
+  --ct-bg: var(--ct-app-bg);
+  --ct-bg-2: color-mix(in srgb, var(--ct-app-bg) 82%, var(--ct-panel-border));
+  --ct-panel: var(--ct-panel-bg);
+  --ct-panel-soft: var(--ct-card-bg);
+  --ct-border: var(--ct-panel-border);
+  --ct-soft: var(--ct-text-soft);
+  --ct-accent-2: var(--ct-accent-soft);
+  --ct-accent-contrast: var(--ct-panel-solid);
+  --ct-radius: 8px;
+  --ct-font: var(--ct-font-family);
+  --ct-serif: var(--ct-font-serif);
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 12%, var(--ct-panel-solid));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: var(--ct-accent-contrast);
+  --ct-button-border: var(--ct-accent);
+}
+
+html[data-skin] body,
+html[data-ct-skin] body {
+  background:
+    radial-gradient(circle at 20% 0, color-mix(in srgb, var(--ct-accent-soft) 12%, transparent), transparent 34rem),
+    linear-gradient(135deg, var(--ct-app-bg), color-mix(in srgb, var(--ct-app-bg) 86%, var(--ct-panel-border)));
+  color: var(--ct-text);
+  font-family: var(--ct-font-family);
+}
+
+html[data-skin] .ct-sidebar,
+html[data-ct-skin] .ct-sidebar {
+  border-right-color: var(--ct-panel-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-app-sidebar-bg) 94%, var(--ct-panel-solid)), var(--ct-app-sidebar-bg));
+}
+
+html[data-skin] .ct-topbar,
+html[data-ct-skin] .ct-topbar {
+  border-bottom-color: var(--ct-panel-border);
+  background: var(--ct-app-topbar-bg);
+  color: var(--ct-text);
+}
+
 /* COLLECTIUM SKIN COLORS ONLY V2 END */
 

@@ -199,6 +199,12 @@ const SEARCH_DIRS = [
   "src",
 ];
 
+const INACTIVE_STANDARD_PATHS = [
+  `${path.sep}app${path.sep}components${path.sep}templates${path.sep}ui85${path.sep}`,
+  `${path.sep}app${path.sep}components${path.sep}ui${path.sep}`,
+  `${path.sep}app${path.sep}components${path.sep}layout${path.sep}CollectiumSkinProvider.tsx`,
+];
+
 async function pathExists(dirPath: string) {
   try {
     await readdir(dirPath);
@@ -239,7 +245,11 @@ async function walkFiles(rootDir: string): Promise<string[]> {
       }
 
       if (FILE_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
-        output.push(fullPath);
+        const normalizedPath = fullPath.split(/[\\/]+/).join(path.sep);
+
+        if (!INACTIVE_STANDARD_PATHS.some((inactivePath) => normalizedPath.includes(inactivePath))) {
+          output.push(fullPath);
+        }
       }
     }
   }
@@ -275,11 +285,10 @@ function findUsageNear(source: string, token: string, nearWords: string[]) {
 
 export async function GET() {
   try {
-    const projectRoot = process.cwd();
     const files: string[] = [];
 
     for (const dir of SEARCH_DIRS) {
-      const fullDir = path.join(projectRoot, dir);
+      const fullDir = path.join(/* turbopackIgnore: true */ process.cwd(), dir);
       if (await pathExists(fullDir)) {
         files.push(...(await walkFiles(fullDir)));
       }

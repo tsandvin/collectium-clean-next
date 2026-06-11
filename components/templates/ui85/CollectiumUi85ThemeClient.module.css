@@ -1,107 +1,125 @@
-.themeBar {
+.toolbar {
+  position: sticky;
+  top: 86px;
+  z-index: 4;
+  width: fit-content;
+  max-width: min(100%, 980px);
+  margin: 0 auto 34px;
   display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding: 14px;
-  border: 1px solid var(--ct-ui-border-soft);
-  border-radius: var(--ct-ui-radius);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--ct-ui-panel) 88%, transparent), color-mix(in srgb, var(--ct-ui-panel-2) 72%, transparent));
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 6px 12px;
+  border: 1px solid var(--ct-ui-toolbar-border);
+  border-radius: 999px;
+  background: var(--ct-ui-toolbar-bg);
+  color: var(--ct-ui-text);
+  box-shadow: var(--ct-ui-toolbar-shadow);
+  backdrop-filter: blur(18px);
 }
 
-.themeBar span {
-  display: block;
-  color: var(--ct-ui-soft);
+.groupLabel {
+  color: var(--ct-ui-muted);
   font-size: 10px;
-  letter-spacing: .16em;
+  font-weight: 900;
+  letter-spacing: .22em;
   text-transform: uppercase;
 }
 
-.themeBar b {
-  display: block;
-  margin-top: 5px;
-  color: var(--ct-ui-text);
-  font-size: 18px;
+.skinButtons,
+.layoutButtons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.themeButtons {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(118px, 1fr));
-  gap: 8px;
-  min-width: min(620px, 62vw);
-}
-
-.themeButton {
-  position: relative;
-  min-height: 54px;
-  padding: 9px 12px;
-  border: 1px solid var(--ct-ui-border-soft);
-  border-radius: var(--ct-ui-radius);
-  color: var(--ct-ui-text);
-  background: color-mix(in srgb, var(--ct-ui-panel) 70%, transparent);
-  cursor: pointer;
-  text-align: left;
+.skinButton,
+.layoutButton {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ct-ui-soft);
   font: inherit;
-  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.themeButton::after {
-  content: "";
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 5px;
-  height: 2px;
-  opacity: 0;
-  transform: scaleX(.62);
-  transform-origin: center;
-  background: linear-gradient(90deg, transparent, var(--ct-ui-accent), var(--ct-ui-accent-2), transparent);
-  transition: opacity .16s ease, transform .16s ease;
+.skinButton {
+  padding: 0 12px 0 9px;
 }
 
-.themeButton:hover::after,
-.themeButton.active::after {
-  opacity: .82;
-  transform: scaleX(1);
+.layoutButton {
+  padding: 0 13px;
 }
 
-.themeButton:hover {
-  transform: translateY(-1px);
-  border-color: var(--ct-ui-border);
+.skinButton:hover,
+.layoutButton:hover {
+  color: var(--ct-ui-text);
+  border-color: var(--ct-ui-border-soft);
 }
 
-.themeButton.active {
-  border-color: var(--ct-ui-border);
-  background: color-mix(in srgb, var(--ct-ui-accent) 16%, var(--ct-ui-panel));
+.active {
+  color: var(--ct-ui-active-text);
+  border-color: var(--ct-ui-active-border);
+  background: var(--ct-ui-active-bg);
 }
 
-.themeButton b {
-  margin: 0;
-  font-size: 13px;
+.skinDot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid color-mix(in srgb, currentColor 54%, transparent);
+  border-radius: 999px;
+  background: currentColor;
 }
 
-.themeButton small {
-  display: block;
-  margin-top: 3px;
-  color: var(--ct-ui-muted);
-  font-size: 10px;
+.skinDot[data-skin-dot="collectium"] {
+  color: #d9a936;
 }
 
-@media (max-width: 960px) {
-  .themeBar {
-    flex-direction: column;
+.skinDot[data-skin-dot="samler"] {
+  color: #1e65a0;
+}
+
+.skinDot[data-skin-dot="museum"] {
+  color: #c7a052;
+}
+
+.skinDot[data-skin-dot="finans"] {
+  color: #25ad82;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 4px;
+  background: var(--ct-ui-border-soft);
+}
+
+@media (max-width: 980px) {
+  .toolbar {
+    position: relative;
+    top: auto;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    border-radius: var(--ct-ui-radius);
   }
 
-  .themeButtons {
-    min-width: 0;
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  .divider {
+    display: none;
   }
 }
 
-@media (max-width: 520px) {
-  .themeButtons {
-    grid-template-columns: 1fr;
+@media (max-width: 640px) {
+  .skinButtons,
+  .layoutButtons {
+    width: 100%;
+    flex-wrap: wrap;
   }
 }
