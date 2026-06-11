@@ -1,3 +1,4 @@
+import { CollectiumThemeMenu } from "../ui/CollectiumThemeMenu";
 /**
  * COLLECTIUM FILE HEADER
  *
@@ -42,6 +43,7 @@ export function CollectiumTopbar() {
       <nav className="ct-topbar-actions" aria-label="Toppmeny">
         <Link href="/katalog">Katalog</Link>
         <Link href="/min-side">Min side</Link>
+          <CollectiumThemeMenu />
         <Link className="ct-topbar-cta" href="/startside">Start</Link>
       </nav>
     </header>
