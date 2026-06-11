@@ -1,35 +1,30 @@
 ﻿.front {
   width: min(100%, 1380px);
   margin: 0 auto;
-  padding: clamp(32px, 4vw, 72px);
+  padding: clamp(28px, 4vw, 68px);
   color: var(--ct-text, #f2fbff);
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
-  gap: 28px;
-  align-items: stretch;
-  min-height: 520px;
+  min-height: clamp(440px, 52vw, 640px);
+  display: flex;
+  align-items: center;
   border: 1px solid var(--ct-panel-border, #385867);
   background:
     radial-gradient(circle at 12% 6%, color-mix(in srgb, var(--ct-accent, #32b893) 15%, transparent), transparent 340px),
     linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-bg, #1c2c38) 94%, #ffffff 6%), var(--ct-card-bg, #263f4d));
   border-radius: var(--ct-radius-lg, 6px);
-  padding: clamp(34px, 5vw, 74px);
+  padding: clamp(34px, 6vw, 86px);
   box-shadow: var(--ct-card-shadow, 0 16px 40px rgba(0, 0, 0, .24));
+  overflow: hidden;
 }
 
 .heroText {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  max-width: 850px;
+  max-width: min(920px, 100%);
 }
 
 .eyebrow,
-.cardEyebrow,
-.panelLabel {
+.cardEyebrow {
   margin: 0 0 16px;
   color: var(--ct-accent-soft, #d8b45b);
   font-size: 12px;
@@ -39,11 +34,12 @@
 }
 
 .hero h1 {
+  max-width: 920px;
   margin: 0;
   color: var(--ct-text, #f2fbff);
   font-family: var(--ct-font-serif, Georgia, "Times New Roman", serif);
-  font-size: clamp(48px, 7vw, 96px);
-  line-height: .92;
+  font-size: clamp(44px, 6.4vw, 90px);
+  line-height: .94;
   letter-spacing: -.055em;
 }
 
@@ -51,7 +47,7 @@
   max-width: 760px;
   margin: 30px 0 0;
   color: var(--ct-text-soft, #c5dce6);
-  font-size: clamp(17px, 1.6vw, 22px);
+  font-size: clamp(17px, 1.45vw, 21px);
   line-height: 1.65;
 }
 
@@ -86,33 +82,6 @@
 .card a {
   background: color-mix(in srgb, var(--ct-panel-solid, #1c2c38) 84%, white 8%);
   color: var(--ct-text, #f2fbff);
-}
-
-.statusPanel {
-  align-self: stretch;
-  border: 1px solid var(--ct-panel-border, #385867);
-  border-radius: var(--ct-radius-lg, 6px);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.05)),
-    color-mix(in srgb, var(--ct-panel-solid, #1c2c38) 82%, var(--ct-card-bg, #263f4d));
-  padding: 28px;
-}
-
-.statusPanel ul {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.statusPanel li {
-  border: 1px solid var(--ct-panel-border, #385867);
-  border-radius: var(--ct-radius-md, 6px);
-  padding: 14px 16px;
-  color: var(--ct-text-soft, #c5dce6);
-  background: color-mix(in srgb, var(--ct-card-bg, #263f4d) 76%, transparent);
-  font-weight: 700;
 }
 
 .cardGrid {
@@ -164,7 +133,6 @@
   }
 
   .hero {
-    grid-template-columns: 1fr;
     min-height: auto;
     padding: 30px;
   }

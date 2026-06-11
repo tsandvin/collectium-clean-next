@@ -716,3 +716,1479 @@ html[data-skin="finans"] [class*="sidebar"] [class*="stamp"],
 
 /* COLLECTIUM FOUR SKINS - SHELL AND FIELD EXTENSION END */
 
+/* COLLECTIUM HTML SKIN TOKENS V1 START
+   Kilde:
+   - UI 8.5 HTML: finans radius, gul aksent og rene ikoner.
+   Formaal:
+   - Definerer 4 globale skins fra HTML-kilden.
+   - Topbar Tema-knapp setter html/body data-skin.
+   - Ingen ny sidebar/topbar opprettes her.
+*/
+
+:root,
+html,
+body {
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+  --ct-shadow: 0 20px 60px rgba(23, 22, 20, .10);
+  --ct-hover-shadow: none;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.030), rgba(0,0,0,.035) 48%, rgba(0,0,0,.070));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.025) 42%, rgba(0,0,0,.055));
+
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"] {
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.12), rgba(72,45,12,.035) 45%, rgba(72,45,12,.075));
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+}
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"] {
+  --ct-app-bg: #f4f8fc;
+  --ct-app-sidebar-bg: #e6eff8;
+  --ct-app-topbar-bg: rgba(250,253,255,.88);
+  --ct-panel-bg: rgba(250,253,255,.88);
+  --ct-panel-solid: #fbfdff;
+  --ct-card-bg: #e7f0f8;
+  --ct-panel-border: #c6d8e8;
+  --ct-border-strong: #7fa0bf;
+  --ct-line: #c9dceb;
+  --ct-text: #082943;
+  --ct-text-soft: #213f5c;
+  --ct-text-muted: #5f7288;
+  --ct-muted: #5f7288;
+  --ct-accent: #0c4f86;
+  --ct-accent-dark: #062d4f;
+  --ct-accent-soft: #8fb5d3;
+  --ct-signature: #0c4f86;
+  --ct-watermark: #0c4f86;
+  --ct-status-ok: #2d6b56;
+  --ct-status-pending: #7b6128;
+  --ct-status-rejected: #9e3421;
+  --ct-card-shadow: 0 12px 30px rgba(8, 41, 67, .09);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.16), rgba(5,44,74,.026) 44%, rgba(5,44,74,.060));
+  --ct-font-serif: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-sans: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-serif-weight: 400;
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-title-transform: none;
+}
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"] {
+  --ct-app-bg: #12100d;
+  --ct-app-sidebar-bg: #0c0b09;
+  --ct-app-topbar-bg: rgba(18, 16, 13, .88);
+  --ct-panel-bg: rgba(35, 30, 24, .92);
+  --ct-panel-solid: #231e18;
+  --ct-card-bg: #2f291f;
+  --ct-panel-border: #5a4a32;
+  --ct-border-strong: #8b7241;
+  --ct-line: #66543a;
+  --ct-text: #f6ead5;
+  --ct-text-soft: #d7c59d;
+  --ct-text-muted: #a79877;
+  --ct-muted: #a79877;
+  --ct-accent: #c7a25a;
+  --ct-accent-dark: #a77f44;
+  --ct-accent-soft: #e0cb8a;
+  --ct-signature: #b88b45;
+  --ct-watermark: #c7a25a;
+  --ct-status-ok: #96b887;
+  --ct-status-pending: #e0cb8a;
+  --ct-status-rejected: #d18469;
+  --ct-card-shadow: 0 18px 46px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.050) 45%, rgba(0,0,0,.145));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.035) 45%, rgba(0,0,0,.115));
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+}
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .90);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #263f4d;
+  --ct-panel-border: #385867;
+  --ct-border-strong: #31917f;
+  --ct-line: #456573;
+  --ct-text: #f2fbff;
+  --ct-text-soft: #c5dce6;
+  --ct-text-muted: #99b2bf;
+  --ct-muted: #99b2bf;
+  --ct-accent: #32b893;
+  --ct-accent-dark: #1e8a72;
+  --ct-accent-soft: #c09a46;
+  --ct-signature: #32b893;
+  --ct-watermark: #32b893;
+  --ct-status-ok: #32b893;
+  --ct-status-pending: #c09a46;
+  --ct-status-rejected: #e06266;
+  --ct-card-shadow: 0 16px 40px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.060) 46%, rgba(0,0,0,.125));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.045) 46%, rgba(0,0,0,.100));
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+  --ct-radius-lg: 6px;
+  --ct-radius-md: 6px;
+  --ct-radius-sm: 6px;
+  --ct-finans-small-accent: #d8b45b;
+  --ct-finans-small-accent-soft: rgba(216, 180, 91, .16);
+}
+
+html[data-skin],
+body[data-skin] {
+  background:
+    radial-gradient(circle at 22% 0, color-mix(in srgb, var(--ct-accent-soft) 11%, transparent), transparent 34rem),
+    linear-gradient(135deg, var(--ct-app-bg), color-mix(in srgb, var(--ct-app-bg) 82%, var(--ct-panel-border)));
+  color: var(--ct-text);
+  transition: background .25s ease, color .25s ease;
+}
+
+/* Shell token bridge */
+html[data-skin],
+body[data-skin],
+[data-skin] {
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+/* Ren ikonregel fra HTML-kilden */
+html[data-skin] .sidebar-nav-icon,
+html[data-skin] .icon,
+html[data-skin] .action-icon,
+html[data-skin] .status-icon,
+html[data-skin] .nav-icon,
+html[data-skin] .menu-icon,
+html[data-skin] .chip-icon {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: currentColor;
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+html[data-skin="finans"] .skin-btn,
+html[data-skin="finans"] .action,
+html[data-skin="finans"] .pill,
+html[data-skin="finans"] button,
+html[data-skin="finans"] .tab,
+html[data-skin="finans"] .segment,
+html[data-skin="finans"] .switch,
+html[data-skin="finans"] .toggle {
+  border-radius: 6px !important;
+}
+
+html[data-skin="finans"] .fact b,
+html[data-skin="finans"] .token code,
+html[data-skin="finans"] .price,
+html[data-skin="finans"] .trend,
+html[data-skin="finans"] .mini-value,
+html[data-skin="finans"] .kpi-value {
+  color: var(--ct-finans-small-accent) !important;
+}
+
+/* COLLECTIUM HTML SKIN TOKENS V1 END */
+
+/* COLLECTIUM HTML SKIN TOKENS V1 START
+   Kilde:
+   - UI 8.5 HTML: finans radius, gul aksent og rene ikoner.
+   Formaal:
+   - Definerer 4 globale skins fra HTML-kilden.
+   - Topbar Tema-knapp setter html/body data-skin.
+   - Ingen ny sidebar/topbar opprettes her.
+*/
+
+:root,
+html,
+body {
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+  --ct-shadow: 0 20px 60px rgba(23, 22, 20, .10);
+  --ct-hover-shadow: none;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.030), rgba(0,0,0,.035) 48%, rgba(0,0,0,.070));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.025) 42%, rgba(0,0,0,.055));
+
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"] {
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.12), rgba(72,45,12,.035) 45%, rgba(72,45,12,.075));
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+}
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"] {
+  --ct-app-bg: #f4f8fc;
+  --ct-app-sidebar-bg: #e6eff8;
+  --ct-app-topbar-bg: rgba(250,253,255,.88);
+  --ct-panel-bg: rgba(250,253,255,.88);
+  --ct-panel-solid: #fbfdff;
+  --ct-card-bg: #e7f0f8;
+  --ct-panel-border: #c6d8e8;
+  --ct-border-strong: #7fa0bf;
+  --ct-line: #c9dceb;
+  --ct-text: #082943;
+  --ct-text-soft: #213f5c;
+  --ct-text-muted: #5f7288;
+  --ct-muted: #5f7288;
+  --ct-accent: #0c4f86;
+  --ct-accent-dark: #062d4f;
+  --ct-accent-soft: #8fb5d3;
+  --ct-signature: #0c4f86;
+  --ct-watermark: #0c4f86;
+  --ct-status-ok: #2d6b56;
+  --ct-status-pending: #7b6128;
+  --ct-status-rejected: #9e3421;
+  --ct-card-shadow: 0 12px 30px rgba(8, 41, 67, .09);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.16), rgba(5,44,74,.026) 44%, rgba(5,44,74,.060));
+  --ct-font-serif: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-sans: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-serif-weight: 400;
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-title-transform: none;
+}
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"] {
+  --ct-app-bg: #12100d;
+  --ct-app-sidebar-bg: #0c0b09;
+  --ct-app-topbar-bg: rgba(18, 16, 13, .88);
+  --ct-panel-bg: rgba(35, 30, 24, .92);
+  --ct-panel-solid: #231e18;
+  --ct-card-bg: #2f291f;
+  --ct-panel-border: #5a4a32;
+  --ct-border-strong: #8b7241;
+  --ct-line: #66543a;
+  --ct-text: #f6ead5;
+  --ct-text-soft: #d7c59d;
+  --ct-text-muted: #a79877;
+  --ct-muted: #a79877;
+  --ct-accent: #c7a25a;
+  --ct-accent-dark: #a77f44;
+  --ct-accent-soft: #e0cb8a;
+  --ct-signature: #b88b45;
+  --ct-watermark: #c7a25a;
+  --ct-status-ok: #96b887;
+  --ct-status-pending: #e0cb8a;
+  --ct-status-rejected: #d18469;
+  --ct-card-shadow: 0 18px 46px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.050) 45%, rgba(0,0,0,.145));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.035) 45%, rgba(0,0,0,.115));
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+}
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .90);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #263f4d;
+  --ct-panel-border: #385867;
+  --ct-border-strong: #31917f;
+  --ct-line: #456573;
+  --ct-text: #f2fbff;
+  --ct-text-soft: #c5dce6;
+  --ct-text-muted: #99b2bf;
+  --ct-muted: #99b2bf;
+  --ct-accent: #32b893;
+  --ct-accent-dark: #1e8a72;
+  --ct-accent-soft: #c09a46;
+  --ct-signature: #32b893;
+  --ct-watermark: #32b893;
+  --ct-status-ok: #32b893;
+  --ct-status-pending: #c09a46;
+  --ct-status-rejected: #e06266;
+  --ct-card-shadow: 0 16px 40px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.060) 46%, rgba(0,0,0,.125));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.045) 46%, rgba(0,0,0,.100));
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+  --ct-radius-lg: 6px;
+  --ct-radius-md: 6px;
+  --ct-radius-sm: 6px;
+  --ct-finans-small-accent: #d8b45b;
+  --ct-finans-small-accent-soft: rgba(216, 180, 91, .16);
+}
+
+html[data-skin],
+body[data-skin] {
+  background:
+    radial-gradient(circle at 22% 0, color-mix(in srgb, var(--ct-accent-soft) 11%, transparent), transparent 34rem),
+    linear-gradient(135deg, var(--ct-app-bg), color-mix(in srgb, var(--ct-app-bg) 82%, var(--ct-panel-border)));
+  color: var(--ct-text);
+  transition: background .25s ease, color .25s ease;
+}
+
+/* Shell token bridge */
+html[data-skin],
+body[data-skin],
+[data-skin] {
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+/* Ren ikonregel fra HTML-kilden */
+html[data-skin] .sidebar-nav-icon,
+html[data-skin] .icon,
+html[data-skin] .action-icon,
+html[data-skin] .status-icon,
+html[data-skin] .nav-icon,
+html[data-skin] .menu-icon,
+html[data-skin] .chip-icon {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: currentColor;
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+html[data-skin="finans"] .skin-btn,
+html[data-skin="finans"] .action,
+html[data-skin="finans"] .pill,
+html[data-skin="finans"] button,
+html[data-skin="finans"] .tab,
+html[data-skin="finans"] .segment,
+html[data-skin="finans"] .switch,
+html[data-skin="finans"] .toggle {
+  border-radius: 6px !important;
+}
+
+html[data-skin="finans"] .fact b,
+html[data-skin="finans"] .token code,
+html[data-skin="finans"] .price,
+html[data-skin="finans"] .trend,
+html[data-skin="finans"] .mini-value,
+html[data-skin="finans"] .kpi-value {
+  color: var(--ct-finans-small-accent) !important;
+}
+
+/* COLLECTIUM HTML SKIN TOKENS V1 END */
+
+/* COLLECTIUM HTML SKIN TOKENS V1 START
+   Kilde:
+   - UI 8.5 HTML: finans radius, gul aksent og rene ikoner.
+   Formaal:
+   - Definerer 4 globale skins fra HTML-kilden.
+   - Topbar Tema-knapp setter html/body data-skin.
+   - Ingen ny sidebar/topbar opprettes her.
+*/
+
+:root,
+html,
+body {
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+  --ct-shadow: 0 20px 60px rgba(23, 22, 20, .10);
+  --ct-hover-shadow: none;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.030), rgba(0,0,0,.035) 48%, rgba(0,0,0,.070));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.025) 42%, rgba(0,0,0,.055));
+
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"] {
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.12), rgba(72,45,12,.035) 45%, rgba(72,45,12,.075));
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+}
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"] {
+  --ct-app-bg: #f4f8fc;
+  --ct-app-sidebar-bg: #e6eff8;
+  --ct-app-topbar-bg: rgba(250,253,255,.88);
+  --ct-panel-bg: rgba(250,253,255,.88);
+  --ct-panel-solid: #fbfdff;
+  --ct-card-bg: #e7f0f8;
+  --ct-panel-border: #c6d8e8;
+  --ct-border-strong: #7fa0bf;
+  --ct-line: #c9dceb;
+  --ct-text: #082943;
+  --ct-text-soft: #213f5c;
+  --ct-text-muted: #5f7288;
+  --ct-muted: #5f7288;
+  --ct-accent: #0c4f86;
+  --ct-accent-dark: #062d4f;
+  --ct-accent-soft: #8fb5d3;
+  --ct-signature: #0c4f86;
+  --ct-watermark: #0c4f86;
+  --ct-status-ok: #2d6b56;
+  --ct-status-pending: #7b6128;
+  --ct-status-rejected: #9e3421;
+  --ct-card-shadow: 0 12px 30px rgba(8, 41, 67, .09);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.16), rgba(5,44,74,.026) 44%, rgba(5,44,74,.060));
+  --ct-font-serif: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-sans: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-serif-weight: 400;
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-title-transform: none;
+}
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"] {
+  --ct-app-bg: #12100d;
+  --ct-app-sidebar-bg: #0c0b09;
+  --ct-app-topbar-bg: rgba(18, 16, 13, .88);
+  --ct-panel-bg: rgba(35, 30, 24, .92);
+  --ct-panel-solid: #231e18;
+  --ct-card-bg: #2f291f;
+  --ct-panel-border: #5a4a32;
+  --ct-border-strong: #8b7241;
+  --ct-line: #66543a;
+  --ct-text: #f6ead5;
+  --ct-text-soft: #d7c59d;
+  --ct-text-muted: #a79877;
+  --ct-muted: #a79877;
+  --ct-accent: #c7a25a;
+  --ct-accent-dark: #a77f44;
+  --ct-accent-soft: #e0cb8a;
+  --ct-signature: #b88b45;
+  --ct-watermark: #c7a25a;
+  --ct-status-ok: #96b887;
+  --ct-status-pending: #e0cb8a;
+  --ct-status-rejected: #d18469;
+  --ct-card-shadow: 0 18px 46px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.050) 45%, rgba(0,0,0,.145));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.035) 45%, rgba(0,0,0,.115));
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+}
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .90);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #263f4d;
+  --ct-panel-border: #385867;
+  --ct-border-strong: #31917f;
+  --ct-line: #456573;
+  --ct-text: #f2fbff;
+  --ct-text-soft: #c5dce6;
+  --ct-text-muted: #99b2bf;
+  --ct-muted: #99b2bf;
+  --ct-accent: #32b893;
+  --ct-accent-dark: #1e8a72;
+  --ct-accent-soft: #c09a46;
+  --ct-signature: #32b893;
+  --ct-watermark: #32b893;
+  --ct-status-ok: #32b893;
+  --ct-status-pending: #c09a46;
+  --ct-status-rejected: #e06266;
+  --ct-card-shadow: 0 16px 40px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.060) 46%, rgba(0,0,0,.125));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.045) 46%, rgba(0,0,0,.100));
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+  --ct-radius-lg: 6px;
+  --ct-radius-md: 6px;
+  --ct-radius-sm: 6px;
+  --ct-finans-small-accent: #d8b45b;
+  --ct-finans-small-accent-soft: rgba(216, 180, 91, .16);
+}
+
+html[data-skin],
+body[data-skin] {
+  background:
+    radial-gradient(circle at 22% 0, color-mix(in srgb, var(--ct-accent-soft) 11%, transparent), transparent 34rem),
+    linear-gradient(135deg, var(--ct-app-bg), color-mix(in srgb, var(--ct-app-bg) 82%, var(--ct-panel-border)));
+  color: var(--ct-text);
+  transition: background .25s ease, color .25s ease;
+}
+
+/* Shell token bridge */
+html[data-skin],
+body[data-skin],
+[data-skin] {
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+/* Ren ikonregel fra HTML-kilden */
+html[data-skin] .sidebar-nav-icon,
+html[data-skin] .icon,
+html[data-skin] .action-icon,
+html[data-skin] .status-icon,
+html[data-skin] .nav-icon,
+html[data-skin] .menu-icon,
+html[data-skin] .chip-icon {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: currentColor;
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+html[data-skin="finans"] .skin-btn,
+html[data-skin="finans"] .action,
+html[data-skin="finans"] .pill,
+html[data-skin="finans"] button,
+html[data-skin="finans"] .tab,
+html[data-skin="finans"] .segment,
+html[data-skin="finans"] .switch,
+html[data-skin="finans"] .toggle {
+  border-radius: 6px !important;
+}
+
+html[data-skin="finans"] .fact b,
+html[data-skin="finans"] .token code,
+html[data-skin="finans"] .price,
+html[data-skin="finans"] .trend,
+html[data-skin="finans"] .mini-value,
+html[data-skin="finans"] .kpi-value {
+  color: var(--ct-finans-small-accent) !important;
+}
+
+/* COLLECTIUM HTML SKIN TOKENS V1 END */
+
+/* COLLECTIUM SKIN COLORS ONLY V1 START
+   Kilde: UI 8.5 HTML skin-tokens.
+   Dette er kun farge-/tokenlag.
+   Ingen shell, sidebar, topbar, ramme, React-template, preview eller canvas.
+*/
+
+:root,
+html,
+body {
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+
+  --ct-shadow: 0 20px 60px rgba(23, 22, 20, .10);
+  --ct-hover-shadow: none;
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.030), rgba(0,0,0,.035) 48%, rgba(0,0,0,.070));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.025) 42%, rgba(0,0,0,.055));
+
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+
+  /* Bro til eksisterende Collectium CSS-navn */
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"] {
+  --ct-app-bg: #fff9f2;
+  --ct-app-sidebar-bg: #ece4d8;
+  --ct-app-topbar-bg: rgba(255, 249, 242, .78);
+  --ct-panel-bg: rgba(255, 249, 242, .78);
+  --ct-panel-solid: #fff9f2;
+  --ct-card-bg: #f3eadb;
+  --ct-panel-border: #e8d8be;
+  --ct-border-strong: #bcaa85;
+  --ct-line: #d8d1c4;
+
+  --ct-text: #0b332c;
+  --ct-text-soft: #314b40;
+  --ct-text-muted: #8f7a59;
+  --ct-muted: #8f7a59;
+
+  --ct-accent: #176b40;
+  --ct-accent-dark: #0a342d;
+  --ct-accent-soft: #ddb13f;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+
+  --ct-status-ok: #136a3a;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+
+  --ct-card-shadow: 0 14px 36px rgba(73, 43, 8, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.12), rgba(72,45,12,.035) 45%, rgba(72,45,12,.075));
+
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+}
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"] {
+  --ct-app-bg: #f4f8fc;
+  --ct-app-sidebar-bg: #e6eff8;
+  --ct-app-topbar-bg: rgba(250,253,255,.88);
+  --ct-panel-bg: rgba(250,253,255,.88);
+  --ct-panel-solid: #fbfdff;
+  --ct-card-bg: #e7f0f8;
+  --ct-panel-border: #c6d8e8;
+  --ct-border-strong: #7fa0bf;
+  --ct-line: #c9dceb;
+
+  --ct-text: #082943;
+  --ct-text-soft: #213f5c;
+  --ct-text-muted: #5f7288;
+  --ct-muted: #5f7288;
+
+  --ct-accent: #0c4f86;
+  --ct-accent-dark: #062d4f;
+  --ct-accent-soft: #8fb5d3;
+  --ct-signature: #0c4f86;
+  --ct-watermark: #0c4f86;
+
+  --ct-status-ok: #2d6b56;
+  --ct-status-pending: #7b6128;
+  --ct-status-rejected: #9e3421;
+
+  --ct-card-shadow: 0 12px 30px rgba(8, 41, 67, .09);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.16), rgba(5,44,74,.026) 44%, rgba(5,44,74,.060));
+
+  --ct-font-serif: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-sans: Comfortaa, Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-serif-weight: 400;
+
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-title-transform: none;
+}
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"] {
+  --ct-app-bg: #12100d;
+  --ct-app-sidebar-bg: #0c0b09;
+  --ct-app-topbar-bg: rgba(18, 16, 13, .88);
+  --ct-panel-bg: rgba(35, 30, 24, .92);
+  --ct-panel-solid: #231e18;
+  --ct-card-bg: #2f291f;
+  --ct-panel-border: #5a4a32;
+  --ct-border-strong: #8b7241;
+  --ct-line: #66543a;
+
+  --ct-text: #f6ead5;
+  --ct-text-soft: #d7c59d;
+  --ct-text-muted: #a79877;
+  --ct-muted: #a79877;
+
+  --ct-accent: #c7a25a;
+  --ct-accent-dark: #a77f44;
+  --ct-accent-soft: #e0cb8a;
+  --ct-signature: #b88b45;
+  --ct-watermark: #c7a25a;
+
+  --ct-status-ok: #96b887;
+  --ct-status-pending: #e0cb8a;
+  --ct-status-rejected: #d18469;
+
+  --ct-card-shadow: 0 18px 46px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.050) 45%, rgba(0,0,0,.145));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.035) 45%, rgba(0,0,0,.115));
+
+  --ct-radius-lg: 2px;
+  --ct-radius-md: 2px;
+  --ct-radius-sm: 2px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+}
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .90);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #263f4d;
+  --ct-panel-border: #385867;
+  --ct-border-strong: #31917f;
+  --ct-line: #456573;
+
+  --ct-text: #f2fbff;
+  --ct-text-soft: #c5dce6;
+  --ct-text-muted: #99b2bf;
+  --ct-muted: #99b2bf;
+
+  --ct-accent: #32b893;
+  --ct-accent-dark: #1e8a72;
+  --ct-accent-soft: #c09a46;
+  --ct-signature: #32b893;
+  --ct-watermark: #32b893;
+
+  --ct-status-ok: #32b893;
+  --ct-status-pending: #c09a46;
+  --ct-status-rejected: #e06266;
+
+  --ct-card-shadow: 0 16px 40px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.060) 46%, rgba(0,0,0,.125));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.045) 46%, rgba(0,0,0,.100));
+
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+
+  --ct-radius-lg: 6px;
+  --ct-radius-md: 6px;
+  --ct-radius-sm: 6px;
+  --ct-title-transform: uppercase;
+
+  --ct-finans-small-accent: #d8b45b;
+  --ct-finans-small-accent-soft: rgba(216, 180, 91, .16);
+}
+
+html[data-skin],
+body[data-skin],
+[data-skin] {
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 16%, var(--ct-card-bg));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 86%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+/* COLLECTIUM SKIN COLORS ONLY V1 END */
+
+/* COLLECTIUM SKIN COLORS ONLY V2 START
+   Kilde: UI 8.5 referansebilder for Collectium, Samler, Museum og Finans.
+   Dette er kun farge-/tokenlag.
+   Ingen shell, sidebar, topbar, ramme, React-template, preview eller canvas.
+
+   Viktig korreksjon:
+   - Collectium skal ikke gi gul helsidebakgrunn.
+   - Collectium skal vaere varm krem/hvit/beige med gronn tekst og kontrollert gullaksent.
+*/
+
+:root,
+html,
+body {
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+
+  --ct-shadow: 0 18px 46px rgba(60, 42, 20, .08);
+  --ct-hover-shadow: 0 16px 34px rgba(60, 42, 20, .10);
+  --ct-card-shadow: 0 14px 34px rgba(60, 42, 20, .08);
+
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,.10) 48%, rgba(80,54,18,.035));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.18) 42%, rgba(80,54,18,.045));
+
+  --ct-app-bg: #fbf7ef;
+  --ct-app-sidebar-bg: #ece5d9;
+  --ct-app-topbar-bg: rgba(251, 247, 239, .88);
+  --ct-panel-bg: rgba(255, 251, 243, .88);
+  --ct-panel-solid: #fffaf1;
+  --ct-card-bg: #f6eddd;
+  --ct-panel-border: #dfcfb4;
+  --ct-border-strong: #c7ab73;
+  --ct-line: #d9cbb8;
+
+  --ct-text: #0b3a2f;
+  --ct-text-soft: #375243;
+  --ct-text-muted: #8b7656;
+  --ct-muted: #8b7656;
+
+  --ct-accent: #146b3f;
+  --ct-accent-dark: #07372b;
+  --ct-accent-soft: #d7b24a;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+
+  --ct-status-ok: #146b3f;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 11%, var(--ct-panel-solid));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: #fffdf7;
+  --ct-button-border: var(--ct-accent);
+}
+
+/* ------------------------------------------------------------
+   Collectium: varm krem/arkiv. IKKE gul helside.
+------------------------------------------------------------ */
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"] {
+  --ct-app-bg: #fbf7ef;
+  --ct-app-sidebar-bg: #e9e1d4;
+  --ct-app-topbar-bg: rgba(251, 247, 239, .90);
+  --ct-panel-bg: rgba(255, 251, 243, .90);
+  --ct-panel-solid: #fffaf1;
+  --ct-card-bg: #f5ecd9;
+  --ct-panel-border: #dfcfb4;
+  --ct-border-strong: #c7ab73;
+  --ct-line: #d8cab8;
+
+  --ct-text: #0b3a2f;
+  --ct-text-soft: #385241;
+  --ct-text-muted: #8c7654;
+  --ct-muted: #8c7654;
+
+  --ct-accent: #146b3f;
+  --ct-accent-dark: #07372b;
+  --ct-accent-soft: #d7b24a;
+  --ct-signature: #aa7f37;
+  --ct-watermark: #a43a22;
+
+  --ct-status-ok: #146b3f;
+  --ct-status-pending: #ad823a;
+  --ct-status-rejected: #a33a22;
+
+  --ct-shadow: 0 18px 46px rgba(60, 42, 20, .08);
+  --ct-card-shadow: 0 14px 34px rgba(60, 42, 20, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.18) 48%, rgba(80,54,18,.030));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.24) 42%, rgba(80,54,18,.040));
+
+  --ct-radius-lg: 18px;
+  --ct-radius-md: 12px;
+  --ct-radius-sm: 999px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: none;
+}
+
+/* ------------------------------------------------------------
+   Samler / Enkel: lys blaa-hvit samlerflate.
+------------------------------------------------------------ */
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"],
+html[data-skin="enkel"],
+body[data-skin="enkel"],
+[data-skin="enkel"] {
+  --ct-app-bg: #f7fbff;
+  --ct-app-sidebar-bg: #edf5fb;
+  --ct-app-topbar-bg: rgba(247, 251, 255, .92);
+  --ct-panel-bg: rgba(251, 253, 255, .92);
+  --ct-panel-solid: #ffffff;
+  --ct-card-bg: #f5f9fd;
+  --ct-panel-border: #d7e5f1;
+  --ct-border-strong: #b8cee0;
+  --ct-line: #dbe8f3;
+
+  --ct-text: #082f55;
+  --ct-text-soft: #3f5873;
+  --ct-text-muted: #7d8da3;
+  --ct-muted: #7d8da3;
+
+  --ct-accent: #2567a9;
+  --ct-accent-dark: #0d345b;
+  --ct-accent-soft: #a8d0b8;
+  --ct-signature: #2567a9;
+  --ct-watermark: #2567a9;
+
+  --ct-status-ok: #3a765e;
+  --ct-status-pending: #856827;
+  --ct-status-rejected: #a43a22;
+
+  --ct-shadow: 0 18px 46px rgba(18, 64, 104, .08);
+  --ct-card-shadow: 0 14px 34px rgba(18, 64, 104, .08);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.72), rgba(246,251,255,.22) 48%, rgba(5,44,74,.026));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.86), rgba(246,251,255,.30) 42%, rgba(5,44,74,.036));
+
+  --ct-font-serif: Georgia, "Times New Roman", serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+
+  --ct-radius-lg: 12px;
+  --ct-radius-md: 10px;
+  --ct-radius-sm: 999px;
+  --ct-title-transform: none;
+}
+
+/* ------------------------------------------------------------
+   Museum: mork historisk/gull.
+------------------------------------------------------------ */
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"] {
+  --ct-app-bg: #12110f;
+  --ct-app-sidebar-bg: #17130f;
+  --ct-app-topbar-bg: rgba(23, 19, 15, .90);
+  --ct-panel-bg: rgba(31, 29, 28, .92);
+  --ct-panel-solid: #1d1c1d;
+  --ct-card-bg: #242322;
+  --ct-panel-border: #4b3e2b;
+  --ct-border-strong: #6d5a38;
+  --ct-line: #44392a;
+
+  --ct-text: #f4ead8;
+  --ct-text-soft: #b8aa8c;
+  --ct-text-muted: #8d8069;
+  --ct-muted: #8d8069;
+
+  --ct-accent: #c9aa62;
+  --ct-accent-dark: #a88340;
+  --ct-accent-soft: #d9c485;
+  --ct-signature: #b18a48;
+  --ct-watermark: #b18a48;
+
+  --ct-status-ok: #8fb67f;
+  --ct-status-pending: #d9c485;
+  --ct-status-rejected: #c9765f;
+
+  --ct-shadow: 0 20px 56px rgba(0,0,0,.30);
+  --ct-card-shadow: 0 18px 46px rgba(0,0,0,.26);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.028), rgba(0,0,0,.045) 48%, rgba(0,0,0,.135));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.038), rgba(0,0,0,.030) 42%, rgba(0,0,0,.110));
+
+  --ct-radius-lg: 8px;
+  --ct-radius-md: 6px;
+  --ct-radius-sm: 999px;
+  --ct-serif-weight: 700;
+  --ct-title-transform: uppercase;
+}
+
+/* ------------------------------------------------------------
+   Finans: mork dataflate, gronn aksent.
+------------------------------------------------------------ */
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"] {
+  --ct-app-bg: #101820;
+  --ct-app-sidebar-bg: #0b1118;
+  --ct-app-topbar-bg: rgba(18, 27, 36, .92);
+  --ct-panel-bg: rgba(28, 44, 56, .92);
+  --ct-panel-solid: #1c2c38;
+  --ct-card-bg: #213542;
+  --ct-panel-border: #314e5d;
+  --ct-border-strong: #206b5f;
+  --ct-line: #304b59;
+
+  --ct-text: #eff8ff;
+  --ct-text-soft: #b7d0dd;
+  --ct-text-muted: #7e98a9;
+  --ct-muted: #7e98a9;
+
+  --ct-accent: #2dad82;
+  --ct-accent-dark: #1d8b6a;
+  --ct-accent-soft: #bf9340;
+  --ct-signature: #2dad82;
+  --ct-watermark: #2dad82;
+
+  --ct-status-ok: #2dad82;
+  --ct-status-pending: #bf9340;
+  --ct-status-rejected: #d34c4f;
+
+  --ct-shadow: 0 20px 56px rgba(0,0,0,.30);
+  --ct-card-shadow: 0 16px 42px rgba(0,0,0,.24);
+  --ct-field-gradient: linear-gradient(180deg, rgba(255,255,255,.028), rgba(0,0,0,.055) 48%, rgba(0,0,0,.120));
+  --ct-field-gradient-hover: linear-gradient(180deg, rgba(255,255,255,.040), rgba(0,0,0,.040) 42%, rgba(0,0,0,.095));
+
+  --ct-font-serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-serif-weight: 700;
+
+  --ct-radius-lg: 8px;
+  --ct-radius-md: 7px;
+  --ct-radius-sm: 999px;
+  --ct-title-transform: none;
+
+  --ct-finans-small-accent: #d8b45b;
+  --ct-finans-small-accent-soft: rgba(216, 180, 91, .16);
+}
+
+/* Token bridge til eksisterende skall/komponenter.
+   Dette er fortsatt bare variabler, ikke ny layout. */
+html[data-skin],
+body[data-skin],
+[data-skin] {
+  --ct-page-bg: var(--ct-app-bg);
+  --ct-shell-sidebar-bg: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-bg-2: var(--ct-app-sidebar-bg);
+  --ct-shell-sidebar-text: var(--ct-text);
+  --ct-shell-sidebar-muted: var(--ct-text-muted);
+  --ct-shell-sidebar-border: var(--ct-panel-border);
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent) 12%, var(--ct-panel-solid));
+  --ct-shell-sidebar-active-text: var(--ct-text);
+
+  --ct-shell-topbar-bg: var(--ct-app-topbar-bg);
+  --ct-shell-topbar-text: var(--ct-text);
+  --ct-shell-topbar-border: var(--ct-panel-border);
+
+  --ct-field-bg: var(--ct-panel-solid);
+  --ct-field-bg-soft: var(--ct-card-bg);
+  --ct-field-text: var(--ct-text);
+  --ct-field-muted: var(--ct-text-muted);
+  --ct-field-border: var(--ct-panel-border);
+  --ct-field-focus: var(--ct-accent);
+
+  --ct-button-bg: var(--ct-accent);
+  --ct-button-text: color-mix(in srgb, var(--ct-panel-solid) 90%, #fff);
+  --ct-button-border: var(--ct-accent);
+}
+
+/* Sterk beskyttelse mot gul helsidevask i Collectium. */
+html[data-skin="collectium"],
+body[data-skin="collectium"] {
+  background-color: var(--ct-app-bg) !important;
+}
+
+/* Finans skal ha nok kontrast, uten aa endre struktur. */
+html[data-skin="finans"] h1,
+html[data-skin="finans"] h2,
+html[data-skin="finans"] h3,
+html[data-skin="finans"] h4,
+html[data-skin="finans"] h5,
+html[data-skin="finans"] h6 {
+  color: var(--ct-text);
+}
+
+/* COLLECTIUM SKIN COLORS ONLY V2 END */
+
