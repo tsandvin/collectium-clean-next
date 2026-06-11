@@ -1,12 +1,14 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * Collectium UI85 Front Content
  *
  * Definering / formal:
- * Ren React-front for Collectium. Komponenten er produksjonsrettet
- * frontinnhold, ikke demo, preview eller canvas.
+ * Produksjonsrettet frontinnhold for app.collectium.no.
+ * Forsiden viser nå UI 8.5 v36-standard som faktisk arbeidsflate:
+ * kompakt objektkort, objektpresentasjon-link, fire skinn og låst kortstruktur.
+ * Dette erstatter gammel landing/hero som hovedinnhold.
  *
  * Bruksomrade:
  * - /
@@ -19,6 +21,9 @@
  * - catalog.view
  * - collection.view
  * - market.index.view
+ * - local.template.theme_ui85
+ * - catalog.card.compact_view
+ * - catalog.object_presentation.link
  *
  * Berorte API-ruter:
  * - Ingen direkte i denne komponenten.
@@ -34,81 +39,57 @@
  * log_action: ui85.front.view
  *
  * Versjon:
- * UI85-FRONT-CONTENT-V2 / CHANGE-UI85-2026-06-11-FRONT-0005
+ * UI85-FRONT-CONTENT-V3 / CHANGE-UI85-2026-06-12-FRONT-V36-STANDARD
  */
 
+import { CollectiumUi85ObjectPreview } from "./CollectiumUi85ObjectPreview";
 import styles from "./CollectiumUi85FrontContent.module.css";
 
-const frontCards = [
-  {
-    label: "Katalog",
-    title: "Objekter, kilder og relasjoner",
-    body: "Utforsk objekter med kilde, objektgruppe, historikk, relasjoner, marked og samlerstatus i samme arbeidsflate.",
-    href: "/katalog",
-    action: "Ã…pne katalog",
-  },
-  {
-    label: "Min side",
-    title: "Samling, prosesser og aktivitet",
-    body: "Se samling, medlemskap, varsler, meldinger, kjÃ¸p, salg og pÃ¥gÃ¥ende prosesser samlet pÃ¥ ett sted.",
-    href: "/min-side",
-    action: "GÃ¥ til Min side",
-  },
-  {
-    label: "Marked",
-    title: "Historie og finansiell innsikt",
-    body: "Koble objekter mot perioder, verdiutvikling, auksjon, nettbutikk og personlig samlingsanalyse.",
-    href: "/katalog",
-    action: "Se markedsflate",
-  },
+const standardPoints = [
+  "Én global skin-standard: Collectium, Samler, Museum og Finans.",
+  "Objektkortet bruker samme struktur på tvers av skinn; bare tokens byttes.",
+  "Visning-lenke peker mot objektpresentasjon og skal ikke være løs demoknapp.",
+  "Hjerte, stjerne, auksjon, nettbutikk og pris ligger samlet i statusfelt.",
 ];
 
 export function CollectiumUi85FrontContent() {
   return (
-    <main className={styles.front} aria-label="Collectium front">
-      <section className={styles.hero}>
-        <div className={styles.heroText}>
-          <p className={styles.eyebrow}>Collectium app</p>
-          <h1>Applikasjonen for katalog, samling og markedsinnsikt.</h1>
+    <main className={styles.front} aria-label="Collectium UI 8.5 v36 front">
+      <section className={styles.standardHero}>
+        <div>
+          <p className={styles.eyebrow}>Collectium UI 8.5 v36</p>
+          <h1>Kompakt visningskort med objektpresentasjon-link.</h1>
           <p className={styles.lead}>
-            Collectium samler katalog, relasjoner, historikk,
-            brukerfunksjoner og markedsdata i en kontrollert React-front.
+            Dette er ny aktiv standard for app.collectium.no. Forsiden viser nå
+            kortsystemet som skal brukes videre i katalog, samling, relasjoner,
+            auksjon, nettbutikk og markedsflater.
           </p>
+        </div>
 
-          <div className={styles.actions} aria-label="Hovedhandlinger">
-            <a className={styles.primary} href="/katalog">
-              Ã…pne katalog
-            </a>
-            <a className={styles.secondary} href="/login">
-              Logg inn
-            </a>
-            <a className={styles.secondary} href="/min-side">
-              Min side
-            </a>
-          </div>
+        <div className={styles.standardStatus} aria-label="UI 8.5 v36 status">
+          <strong>Aktiv standard</strong>
+          <span>html[data-theme]</span>
+          <em>Collectium · Samler · Museum · Finans</em>
         </div>
       </section>
 
-      <section className={styles.cardGrid} aria-label="HovedomrÃ¥der">
-        {frontCards.map((card) => (
-          <article className={styles.card} key={card.title}>
-            <p className={styles.cardEyebrow}>{card.label}</p>
-            <h2>{card.title}</h2>
-            <p>{card.body}</p>
-            <a href={card.href}>{card.action}</a>
-          </article>
-        ))}
+      <section className={styles.standardPanel} aria-label="Låste UI-regler">
+        <p className={styles.cardEyebrow}>Låst metode</p>
+        <h2>Samme komponent. Fire skinn. Én tokenmodell.</h2>
+        <div className={styles.pointGrid}>
+          {standardPoints.map((point) => (
+            <div className={styles.point} key={point}>
+              {point}
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className={styles.domainPanel} aria-label="Collectium arbeidsflate">
-        <p className={styles.cardEyebrow}>Collectium arbeidsflate</p>
-        <h2>Ã‰n front for katalog, samling, relasjoner og marked.</h2>
-        <p>
-          app.collectium.no er arbeidsflaten for innlogging, katalog, samling,
-          markedsinnsikt og kontrollerte systemflater. Fronten viser React-UI,
-          mens data, tilgang og handlinger skal kontrolleres av API og database.
-        </p>
-      </section>
+      <CollectiumUi85ObjectPreview
+        activeSkin="collectium"
+        activeLabel="Collectium"
+        activeLayout="horizontal"
+      />
     </main>
   );
 }
