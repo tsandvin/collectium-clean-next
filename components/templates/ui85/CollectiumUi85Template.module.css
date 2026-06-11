@@ -1,0 +1,160 @@
+.previewModule {
+  --ct-ui-bg: #071018;
+  --ct-ui-panel: #122835;
+  --ct-ui-panel-2: #173744;
+  --ct-ui-border: rgba(226, 199, 107, 0.46);
+  --ct-ui-border-soft: rgba(122, 180, 190, 0.32);
+  --ct-ui-text: #f8fbf4;
+  --ct-ui-muted: rgba(232, 242, 236, 0.72);
+  --ct-ui-soft: rgba(232, 242, 236, 0.54);
+  --ct-ui-accent: #e4bf4f;
+  --ct-ui-accent-2: #34c3aa;
+  --ct-ui-shadow: 0 24px 60px rgba(0, 0, 0, 0.20);
+  --ct-ui-radius: 6px;
+
+  width: 100%;
+  min-height: calc(100vh - 150px);
+  color: var(--ct-ui-text);
+  background:
+    radial-gradient(circle at 16% 12%, rgba(52, 195, 170, 0.18), transparent 30%),
+    linear-gradient(135deg, #081018 0%, #0b1720 48%, #102735 100%);
+  border: 1px solid var(--ct-ui-border-soft);
+  box-shadow: var(--ct-ui-shadow);
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.previewModule[data-skin="collectium"] {
+  --ct-ui-bg: #f7efe2;
+  --ct-ui-panel: #fff9ed;
+  --ct-ui-panel-2: #f4e7cf;
+  --ct-ui-border: rgba(24, 91, 77, 0.34);
+  --ct-ui-border-soft: rgba(184, 144, 73, 0.35);
+  --ct-ui-text: #07372f;
+  --ct-ui-muted: #526b63;
+  --ct-ui-soft: #6e7d73;
+  --ct-ui-accent: #0d6b5b;
+  --ct-ui-accent-2: #b78c41;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(13, 107, 91, 0.13), transparent 31%),
+    linear-gradient(135deg, #f8f1e5 0%, #fff8eb 50%, #f2e5ce 100%);
+}
+
+.previewModule[data-skin="samler"] {
+  --ct-ui-bg: #f5f8f5;
+  --ct-ui-panel: #ffffff;
+  --ct-ui-panel-2: #edf4ef;
+  --ct-ui-border: rgba(43, 112, 76, 0.32);
+  --ct-ui-border-soft: rgba(43, 112, 76, 0.22);
+  --ct-ui-text: #10231b;
+  --ct-ui-muted: #64756b;
+  --ct-ui-soft: #7b8a81;
+  --ct-ui-accent: #28704e;
+  --ct-ui-accent-2: #6a9c78;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(43, 112, 76, 0.10), transparent 31%),
+    linear-gradient(135deg, #f7fbf7 0%, #ffffff 48%, #edf5ef 100%);
+}
+
+.previewModule[data-skin="museum"] {
+  --ct-ui-bg: #1b1714;
+  --ct-ui-panel: #29231e;
+  --ct-ui-panel-2: #332b24;
+  --ct-ui-border: rgba(212, 178, 112, 0.36);
+  --ct-ui-border-soft: rgba(212, 178, 112, 0.24);
+  --ct-ui-text: #f4ead9;
+  --ct-ui-muted: #c7b69d;
+  --ct-ui-soft: #9c8f7d;
+  --ct-ui-accent: #d3aa60;
+  --ct-ui-accent-2: #8e6f47;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(211, 170, 96, 0.14), transparent 32%),
+    linear-gradient(135deg, #16120f 0%, #221b16 50%, #2d251d 100%);
+}
+
+.moduleHeader,
+.contentFrame {
+  position: relative;
+  border: 1px solid var(--ct-ui-border-soft);
+  background: color-mix(in srgb, var(--ct-ui-panel) 88%, transparent);
+  box-sizing: border-box;
+}
+
+.moduleHeader::after,
+.contentFrame::after {
+  content: "________________ Collectium";
+  position: absolute;
+  right: 18px;
+  bottom: 10px;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--ct-ui-accent);
+  opacity: 0.86;
+  pointer-events: none;
+  font-style: italic;
+}
+
+.moduleHeader {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-radius: var(--ct-ui-radius);
+}
+
+.moduleHeader span {
+  display: block;
+  color: var(--ct-ui-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.moduleHeader b {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+}
+
+.headerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.headerMeta span {
+  border: 1px solid var(--ct-ui-border-soft);
+  border-radius: var(--ct-ui-radius);
+  padding: 8px 10px;
+  color: var(--ct-ui-muted);
+  background: rgba(255,255,255,0.03);
+}
+
+.contentFrame {
+  border-radius: var(--ct-ui-radius);
+  padding: 20px;
+  min-height: 560px;
+}
+
+@media (max-width: 760px) {
+  .previewModule {
+    padding: 12px;
+  }
+
+  .moduleHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .headerMeta {
+    justify-content: flex-start;
+  }
+
+  .contentFrame {
+    padding: 12px;
+  }
+}

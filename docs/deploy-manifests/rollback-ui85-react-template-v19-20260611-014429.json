@@ -1,0 +1,58 @@
+﻿{
+    "name":  "Collectium UI85 React Template v19 theme button",
+    "createdAt":  "2026-06-11T01:44:29",
+    "projectRoot":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next",
+    "branchName":  "sandbox/ui85-react-template-v19-theme-button",
+    "files":  [
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\app\\design\\ui85\\page.tsx",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_app_design_ui85_page.tsx"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85ThemeClient.tsx",
+                      "hadExisting":  false,
+                      "backupPath":  null
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85ThemeClient.module.css",
+                      "hadExisting":  false,
+                      "backupPath":  null
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85Template.tsx",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_components_templates_ui85_CollectiumUi85Template.tsx"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85Template.module.css",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_components_templates_ui85_CollectiumUi85Template.module.css"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85ObjectPreview.tsx",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_components_templates_ui85_CollectiumUi85ObjectPreview.tsx"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85ObjectPreview.module.css",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_components_templates_ui85_CollectiumUi85ObjectPreview.module.css"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\CollectiumUi85Icons.tsx",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_components_templates_ui85_CollectiumUi85Icons.tsx"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\components\\templates\\ui85\\collectium-ui85-types.ts",
+                      "hadExisting":  true,
+                      "backupPath":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\backups\\ui85-react-template-v19\\20260611-014429\\Users_Bruker_Pictures_Collectium clean rebuild_collectium-clean-next_components_templates_ui85_collectium-ui85-types.ts"
+                  },
+                  {
+                      "destination":  "C:\\Users\\Bruker\\Pictures\\Collectium clean rebuild\\collectium-clean-next\\docs\\templates\\README-collectium-ui85-react-template-v19.md",
+                      "hadExisting":  false,
+                      "backupPath":  null
+                  }
+              ]
+}
