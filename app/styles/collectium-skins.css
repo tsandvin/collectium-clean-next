@@ -2378,3 +2378,312 @@ html[data-ct-skin] .ct-topbar {
 
 /* COLLECTIUM SKIN COLORS ONLY V2 END */
 
+/* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES START
+   Formål:
+   - Justerer kun globale skin-tokens for UI 8.5.
+   - Endrer farger, rammer, kontrast, signatur og kortfølelse.
+   - Endrer ikke markup, layout, data-view, API eller komponentstruktur.
+*/
+
+/* ------------------------------------------------------------
+   FELLES UI85 RAMME-/SIGNATURTOKENS
+------------------------------------------------------------ */
+
+:root {
+  --ct-ui85-radius-xl: 18px;
+  --ct-ui85-radius-lg: 14px;
+  --ct-ui85-radius-md: 12px;
+
+  --ct-ui85-frame-line: color-mix(in srgb, var(--ct-panel-border) 82%, transparent);
+  --ct-ui85-frame-line-strong: color-mix(in srgb, var(--ct-border-strong) 78%, transparent);
+  --ct-ui85-frame-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
+  --ct-ui85-frame-shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.07);
+  --ct-ui85-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.36);
+  --ct-ui85-dark-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+}
+
+/* ------------------------------------------------------------
+   COLLECTIUM — varm premium / ivory / grønn / gull
+------------------------------------------------------------ */
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"],
+.ct-skin-collectium {
+  --ct-app-bg: #f6efe3;
+  --ct-app-sidebar-bg: #efe2c9;
+  --ct-app-topbar-bg: rgba(255, 248, 235, 0.88);
+
+  --ct-panel-bg: rgba(255, 250, 240, 0.78);
+  --ct-panel-solid: #fff7e8;
+  --ct-card-bg: #fffaf1;
+
+  --ct-panel-border: #dfc998;
+  --ct-border-strong: #c49a46;
+  --ct-line: rgba(120, 93, 45, 0.24);
+
+  --ct-text: #062f29;
+  --ct-text-soft: #4d6258;
+  --ct-text-muted: #8b7651;
+
+  --ct-accent: #0c6f48;
+  --ct-accent-dark: #064d35;
+  --ct-accent-soft: #d5a640;
+
+  --ct-signature: #b58b38;
+  --ct-watermark: rgba(181, 139, 56, 0.14);
+
+  --ct-status-ok: #0b7a4b;
+  --ct-status-pending: #b88924;
+  --ct-status-rejected: #9b3730;
+
+  --ct-ui85-frame-line: rgba(210, 178, 112, 0.72);
+  --ct-ui85-frame-line-strong: rgba(180, 139, 56, 0.88);
+  --ct-ui85-frame-shadow: 0 20px 44px rgba(77, 59, 25, 0.15);
+  --ct-ui85-frame-shadow-soft: 0 12px 32px rgba(77, 59, 25, 0.10);
+}
+
+/* ------------------------------------------------------------
+   ENKEL / SAMLER — ren blå/hvit, mindre dekor
+------------------------------------------------------------ */
+
+html[data-skin="enkel"],
+body[data-skin="enkel"],
+[data-skin="enkel"],
+html[data-skin="samler-enkel"],
+body[data-skin="samler-enkel"],
+[data-skin="samler-enkel"],
+.ct-skin-enkel,
+.ct-skin-samler-enkel {
+  --ct-app-bg: #f6f9fd;
+  --ct-app-sidebar-bg: #e8f1fb;
+  --ct-app-topbar-bg: rgba(255, 255, 255, 0.92);
+
+  --ct-panel-bg: rgba(255, 255, 255, 0.84);
+  --ct-panel-solid: #ffffff;
+  --ct-card-bg: #fbfdff;
+
+  --ct-panel-border: #c8dcef;
+  --ct-border-strong: #2b68ad;
+  --ct-line: rgba(43, 104, 173, 0.18);
+
+  --ct-text: #052d57;
+  --ct-text-soft: #34536f;
+  --ct-text-muted: #738aa3;
+
+  --ct-accent: #1f66ad;
+  --ct-accent-dark: #164f8b;
+  --ct-accent-soft: #d8e9fb;
+
+  --ct-signature: #8eb7df;
+  --ct-watermark: rgba(31, 102, 173, 0.10);
+
+  --ct-status-ok: #147a57;
+  --ct-status-pending: #c08a22;
+  --ct-status-rejected: #b8443f;
+
+  --ct-ui85-frame-line: rgba(190, 216, 239, 0.86);
+  --ct-ui85-frame-line-strong: rgba(43, 104, 173, 0.52);
+  --ct-ui85-frame-shadow: 0 16px 38px rgba(35, 78, 120, 0.10);
+  --ct-ui85-frame-shadow-soft: 0 8px 24px rgba(35, 78, 120, 0.07);
+}
+
+/* ------------------------------------------------------------
+   FINANS — mørk blågrønn / teknisk / tydelig forskjellig
+------------------------------------------------------------ */
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"],
+.ct-skin-finans {
+  --ct-app-bg: #071318;
+  --ct-app-sidebar-bg: #0b2027;
+  --ct-app-topbar-bg: rgba(10, 29, 35, 0.90);
+
+  --ct-panel-bg: rgba(20, 37, 46, 0.88);
+  --ct-panel-solid: #172833;
+  --ct-card-bg: #182b35;
+
+  --ct-panel-border: rgba(54, 91, 101, 0.76);
+  --ct-border-strong: #1fb789;
+  --ct-line: rgba(143, 184, 198, 0.15);
+
+  --ct-text: #f4f8fb;
+  --ct-text-soft: #bfd4e0;
+  --ct-text-muted: #7895a5;
+
+  --ct-accent: #25c08b;
+  --ct-accent-dark: #11966b;
+  --ct-accent-soft: #2e6f5f;
+
+  --ct-signature: #24c28d;
+  --ct-watermark: rgba(37, 192, 139, 0.12);
+
+  --ct-status-ok: #27c98d;
+  --ct-status-pending: #d7aa46;
+  --ct-status-rejected: #ef6f64;
+
+  --ct-ui85-frame-line: rgba(78, 119, 130, 0.60);
+  --ct-ui85-frame-line-strong: rgba(37, 192, 139, 0.66);
+  --ct-ui85-frame-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
+  --ct-ui85-frame-shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+/* ------------------------------------------------------------
+   MUSEUM — mørk historisk / grafitt / antikk gull
+------------------------------------------------------------ */
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"],
+.ct-skin-museum {
+  --ct-app-bg: #101010;
+  --ct-app-sidebar-bg: #17130d;
+  --ct-app-topbar-bg: rgba(18, 17, 14, 0.92);
+
+  --ct-panel-bg: rgba(30, 29, 28, 0.90);
+  --ct-panel-solid: #1d1c1b;
+  --ct-card-bg: #202020;
+
+  --ct-panel-border: rgba(111, 88, 45, 0.78);
+  --ct-border-strong: #c5a653;
+  --ct-line: rgba(197, 166, 83, 0.20);
+
+  --ct-text: #fff2d5;
+  --ct-text-soft: #d9c7a0;
+  --ct-text-muted: #9d8e70;
+
+  --ct-accent: #caa64e;
+  --ct-accent-dark: #9d7930;
+  --ct-accent-soft: #4b3d22;
+
+  --ct-signature: #caa64e;
+  --ct-watermark: rgba(202, 166, 78, 0.15);
+
+  --ct-status-ok: #8ccf7a;
+  --ct-status-pending: #d4ad53;
+  --ct-status-rejected: #c96a58;
+
+  --ct-ui85-frame-line: rgba(133, 108, 55, 0.72);
+  --ct-ui85-frame-line-strong: rgba(202, 166, 78, 0.82);
+  --ct-ui85-frame-shadow: 0 24px 54px rgba(0, 0, 0, 0.56);
+  --ct-ui85-frame-shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.36);
+}
+
+/* ------------------------------------------------------------
+   UI85 RAMMER / KORT / FELT
+   Bruker brede selectors for å treffe CSS modules uten å endre TSX.
+------------------------------------------------------------ */
+
+[class*="ui85"],
+[class*="Ui85"],
+[class*="objectPreview"],
+[class*="ObjectPreview"] {
+  scrollbar-color: var(--ct-border-strong) transparent;
+}
+
+[class*="frame"],
+[class*="Frame"],
+[class*="panel"],
+[class*="Panel"],
+[class*="card"],
+[class*="Card"] {
+  border-color: var(--ct-ui85-frame-line);
+}
+
+[class*="ObjectPreview"] [class*="card"],
+[class*="objectPreview"] [class*="card"],
+[class*="ObjectPreview"] [class*="panel"],
+[class*="objectPreview"] [class*="panel"] {
+  background: var(--ct-card-bg);
+  border-color: var(--ct-ui85-frame-line);
+  box-shadow: var(--ct-ui85-frame-shadow-soft);
+}
+
+[class*="ObjectPreview"] [class*="shell"],
+[class*="objectPreview"] [class*="shell"],
+[class*="ObjectPreview"] [class*="wrap"],
+[class*="objectPreview"] [class*="wrap"] {
+  background: var(--ct-panel-bg);
+  border-color: var(--ct-ui85-frame-line);
+}
+
+[class*="ObjectPreview"] [class*="price"],
+[class*="objectPreview"] [class*="price"],
+[class*="ObjectPreview"] [class*="market"],
+[class*="objectPreview"] [class*="market"] {
+  background: color-mix(in srgb, var(--ct-panel-solid) 88%, var(--ct-accent-soft) 12%);
+  border-color: var(--ct-ui85-frame-line-strong);
+}
+
+[class*="ObjectPreview"] button,
+[class*="objectPreview"] button,
+[class*="Ui85"] button,
+[class*="ui85"] button {
+  border-color: var(--ct-ui85-frame-line);
+}
+
+[class*="ObjectPreview"] button:hover,
+[class*="objectPreview"] button:hover,
+[class*="Ui85"] button:hover,
+[class*="ui85"] button:hover {
+  border-color: var(--ct-border-strong);
+}
+
+/* ------------------------------------------------------------
+   TOPBAR / SKIN MENU
+------------------------------------------------------------ */
+
+[class*="ThemeMenu"],
+[class*="themeMenu"],
+[class*="skinMenu"],
+[class*="SkinMenu"] {
+  background: var(--ct-app-topbar-bg);
+  border-color: var(--ct-ui85-frame-line-strong);
+  box-shadow: var(--ct-ui85-frame-shadow-soft);
+}
+
+[class*="ThemeMenu"] button,
+[class*="themeMenu"] button,
+[class*="skinMenu"] button,
+[class*="SkinMenu"] button {
+  color: var(--ct-text-soft);
+}
+
+[class*="ThemeMenu"] button[aria-pressed="true"],
+[class*="themeMenu"] button[aria-pressed="true"],
+[class*="skinMenu"] button[aria-pressed="true"],
+[class*="SkinMenu"] button[aria-pressed="true"] {
+  color: var(--ct-panel-solid);
+  background: var(--ct-accent);
+  border-color: var(--ct-accent);
+}
+
+/* ------------------------------------------------------------
+   MØRKE SKINS: ekstra kontrast
+------------------------------------------------------------ */
+
+[data-skin="finans"] [class*="ObjectPreview"] img,
+[data-skin="finans"] [class*="objectPreview"] img {
+  filter: saturate(0.92) contrast(0.96) brightness(0.72) hue-rotate(10deg);
+}
+
+[data-skin="museum"] [class*="ObjectPreview"] img,
+[data-skin="museum"] [class*="objectPreview"] img {
+  filter: sepia(0.36) saturate(0.78) contrast(0.92) brightness(0.68);
+}
+
+[data-skin="finans"] [class*="price"],
+[data-skin="finans"] [class*="market"] {
+  background: rgba(35, 47, 46, 0.92);
+  border-color: rgba(185, 159, 83, 0.58);
+}
+
+[data-skin="museum"] [class*="price"],
+[data-skin="museum"] [class*="market"] {
+  background: rgba(43, 38, 28, 0.94);
+  border-color: rgba(202, 166, 78, 0.66);
+}
+
+/* COLLECTIUM UI85 SKIN COLOR AND FRAME OVERRIDES END */
+
