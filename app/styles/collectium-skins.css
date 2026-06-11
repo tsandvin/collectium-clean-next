@@ -1,22 +1,22 @@
-/*
+﻿/*
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * Collectium Four Skins UI 8.5 tokens
  *
- * Definering / formål:
+ * Definering / formÃ¥l:
  * Global skin-tokenfil for fire Collectium-designretninger: Collectium, Samler, Museum og Finans.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Importeres globalt i app/layout.tsx eller globals.css. Skal ikke brukes som lokal side-CSS.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - Alle Next.js sider via global layout
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - Ren lokal template-/designkontroll. Ingen systemhandling.
  *
- * Berørte API-ruter:
+ * BerÃ¸rte API-ruter:
  * - Ingen
  *
  * Dataretning:
@@ -330,3 +330,389 @@ body {
     overflow-x: auto;
   }
 }
+
+/* COLLECTIUM FOUR SKINS - SHELL AND FIELD EXTENSION START
+   Formaal:
+   - Aktiv skin skal ogsaa endre sidemeny, toppmeny, sokefelt,
+     inputfelt, kort, paneler, knapper og sma datafelt.
+   - Dette er global tokenstyring. Det skal ikke endre datastruktur,
+     API, DB, kataloglogikk eller komponentrekkefolge.
+*/
+
+/* ------------------------------
+   1. Felles shell-token fallback
+------------------------------ */
+
+:root,
+html[data-skin],
+body[data-skin],
+[data-skin],
+[data-ct-skin] {
+  --ct-shell-sidebar-bg: var(--ct-panel-bg, var(--ct-card-bg, #f4efe4));
+  --ct-shell-sidebar-bg-2: var(--ct-card-bg, #f8f3ea);
+  --ct-shell-sidebar-text: var(--ct-text, #123c34);
+  --ct-shell-sidebar-muted: var(--ct-muted, #6f7f78);
+  --ct-shell-sidebar-border: var(--ct-border, rgba(15, 54, 48, 0.18));
+  --ct-shell-sidebar-active-bg: color-mix(in srgb, var(--ct-accent, #0f7a63) 12%, transparent);
+  --ct-shell-sidebar-active-text: var(--ct-accent, #0f7a63);
+
+  --ct-shell-topbar-bg: color-mix(in srgb, var(--ct-page-bg, #f7f2e8) 88%, var(--ct-card-bg, #ffffff) 12%);
+  --ct-shell-topbar-text: var(--ct-text, #123c34);
+  --ct-shell-topbar-border: var(--ct-border, rgba(15, 54, 48, 0.18));
+
+  --ct-field-bg: color-mix(in srgb, var(--ct-card-bg, #ffffff) 88%, var(--ct-page-bg, #f7f2e8) 12%);
+  --ct-field-bg-soft: color-mix(in srgb, var(--ct-card-bg, #ffffff) 76%, var(--ct-page-bg, #f7f2e8) 24%);
+  --ct-field-text: var(--ct-text, #123c34);
+  --ct-field-muted: var(--ct-muted, #6f7f78);
+  --ct-field-border: var(--ct-border, rgba(15, 54, 48, 0.20));
+  --ct-field-focus: var(--ct-accent, #0f7a63);
+
+  --ct-button-bg: var(--ct-accent, #0f7a63);
+  --ct-button-text: var(--ct-on-accent, #ffffff);
+  --ct-button-border: color-mix(in srgb, var(--ct-accent, #0f7a63) 68%, #000 10%);
+}
+
+/* ------------------------------
+   2. Skin-spesifikke shell-token
+------------------------------ */
+
+html[data-skin="collectium"],
+body[data-skin="collectium"],
+[data-skin="collectium"],
+[data-ct-skin="collectium"] {
+  --ct-shell-sidebar-bg: linear-gradient(180deg, #f7efe0 0%, #eee3cf 100%);
+  --ct-shell-sidebar-bg-2: #fbf4e7;
+  --ct-shell-sidebar-text: #123f35;
+  --ct-shell-sidebar-muted: #60766d;
+  --ct-shell-sidebar-border: rgba(162, 126, 54, 0.28);
+  --ct-shell-sidebar-active-bg: rgba(181, 138, 46, 0.16);
+  --ct-shell-sidebar-active-text: #0f5c4e;
+
+  --ct-shell-topbar-bg: #ebe7dc;
+  --ct-shell-topbar-text: #123f35;
+  --ct-shell-topbar-border: rgba(20, 65, 55, 0.22);
+
+  --ct-field-bg: #f8f4ea;
+  --ct-field-bg-soft: #efe8d9;
+  --ct-field-text: #123f35;
+  --ct-field-muted: #65766f;
+  --ct-field-border: rgba(20, 65, 55, 0.34);
+  --ct-field-focus: #0f6b5b;
+}
+
+html[data-skin="samler"],
+body[data-skin="samler"],
+[data-skin="samler"],
+[data-ct-skin="samler"] {
+  --ct-shell-sidebar-bg: linear-gradient(180deg, #eef5f1 0%, #e2ece7 100%);
+  --ct-shell-sidebar-bg-2: #f7fbf8;
+  --ct-shell-sidebar-text: #163c34;
+  --ct-shell-sidebar-muted: #587168;
+  --ct-shell-sidebar-border: rgba(49, 112, 92, 0.24);
+  --ct-shell-sidebar-active-bg: rgba(58, 128, 99, 0.15);
+  --ct-shell-sidebar-active-text: #1a6b50;
+
+  --ct-shell-topbar-bg: #edf5f1;
+  --ct-shell-topbar-text: #163c34;
+  --ct-shell-topbar-border: rgba(49, 112, 92, 0.24);
+
+  --ct-field-bg: #f8fcfa;
+  --ct-field-bg-soft: #edf5f1;
+  --ct-field-text: #163c34;
+  --ct-field-muted: #60766e;
+  --ct-field-border: rgba(49, 112, 92, 0.28);
+  --ct-field-focus: #2b765c;
+}
+
+html[data-skin="museum"],
+body[data-skin="museum"],
+[data-skin="museum"],
+[data-ct-skin="museum"] {
+  --ct-shell-sidebar-bg: linear-gradient(180deg, #f4ead8 0%, #e6d5bd 100%);
+  --ct-shell-sidebar-bg-2: #fbf3e5;
+  --ct-shell-sidebar-text: #3b2c1e;
+  --ct-shell-sidebar-muted: #7a6652;
+  --ct-shell-sidebar-border: rgba(126, 89, 42, 0.32);
+  --ct-shell-sidebar-active-bg: rgba(126, 89, 42, 0.16);
+  --ct-shell-sidebar-active-text: #6e451f;
+
+  --ct-shell-topbar-bg: #e8dcc8;
+  --ct-shell-topbar-text: #3b2c1e;
+  --ct-shell-topbar-border: rgba(126, 89, 42, 0.28);
+
+  --ct-field-bg: #fbf4e8;
+  --ct-field-bg-soft: #efe2cd;
+  --ct-field-text: #3b2c1e;
+  --ct-field-muted: #7a6652;
+  --ct-field-border: rgba(126, 89, 42, 0.30);
+  --ct-field-focus: #8a5a27;
+}
+
+html[data-skin="finans"],
+body[data-skin="finans"],
+[data-skin="finans"],
+[data-ct-skin="finans"] {
+  --ct-shell-sidebar-bg: linear-gradient(180deg, #071823 0%, #0b2433 100%);
+  --ct-shell-sidebar-bg-2: #0e2d3e;
+  --ct-shell-sidebar-text: #e7f6f3;
+  --ct-shell-sidebar-muted: #9fb8bd;
+  --ct-shell-sidebar-border: rgba(86, 214, 209, 0.28);
+  --ct-shell-sidebar-active-bg: rgba(65, 210, 200, 0.16);
+  --ct-shell-sidebar-active-text: #75e4dc;
+
+  --ct-shell-topbar-bg: #0b1d28;
+  --ct-shell-topbar-text: #e7f6f3;
+  --ct-shell-topbar-border: rgba(86, 214, 209, 0.26);
+
+  --ct-field-bg: #102b3b;
+  --ct-field-bg-soft: #0c2331;
+  --ct-field-text: #ecfbf8;
+  --ct-field-muted: #a8c1c7;
+  --ct-field-border: rgba(98, 221, 215, 0.34);
+  --ct-field-focus: #76eee5;
+
+  --ct-button-bg: #48d6cc;
+  --ct-button-text: #062027;
+  --ct-button-border: rgba(118, 238, 229, 0.62);
+}
+
+/* ------------------------------
+   3. Global shell selectors
+   Dekker flere mulige klassenavn uten aa endre komponentstruktur.
+------------------------------ */
+
+aside,
+nav,
+.ct-sidebar,
+.collectium-sidebar,
+.sidebar,
+.sideBar,
+.app-sidebar,
+[class*="sidebar"],
+[class*="Sidebar"],
+[class*="side-menu"],
+[class*="SideMenu"] {
+  background: var(--ct-shell-sidebar-bg) !important;
+  color: var(--ct-shell-sidebar-text) !important;
+  border-color: var(--ct-shell-sidebar-border) !important;
+}
+
+aside *,
+.ct-sidebar *,
+.collectium-sidebar *,
+.sidebar *,
+.app-sidebar *,
+[class*="sidebar"] *,
+[class*="Sidebar"] * {
+  border-color: var(--ct-shell-sidebar-border);
+}
+
+aside a,
+nav a,
+.ct-sidebar a,
+.collectium-sidebar a,
+.sidebar a,
+.app-sidebar a,
+[class*="sidebar"] a,
+[class*="Sidebar"] a,
+[class*="side-menu"] a,
+[class*="SideMenu"] a {
+  color: var(--ct-shell-sidebar-text) !important;
+}
+
+aside a[aria-current="page"],
+nav a[aria-current="page"],
+.ct-sidebar a[aria-current="page"],
+.collectium-sidebar a[aria-current="page"],
+.sidebar a[aria-current="page"],
+.app-sidebar a[aria-current="page"],
+[class*="sidebar"] a[aria-current="page"],
+[class*="Sidebar"] a[aria-current="page"],
+[class*="active"],
+[class*="Active"] {
+  background: var(--ct-shell-sidebar-active-bg) !important;
+  color: var(--ct-shell-sidebar-active-text) !important;
+}
+
+header,
+.ct-topbar,
+.collectium-topbar,
+.topbar,
+.app-topbar,
+[class*="topbar"],
+[class*="Topbar"],
+[class*="top-bar"],
+[class*="TopBar"] {
+  background: var(--ct-shell-topbar-bg) !important;
+  color: var(--ct-shell-topbar-text) !important;
+  border-color: var(--ct-shell-topbar-border) !important;
+}
+
+header a,
+.ct-topbar a,
+.collectium-topbar a,
+.topbar a,
+.app-topbar a,
+[class*="topbar"] a,
+[class*="Topbar"] a {
+  color: var(--ct-shell-topbar-text) !important;
+}
+
+/* ------------------------------
+   4. Felt, sok, input og kontroller
+------------------------------ */
+
+input,
+select,
+textarea,
+button,
+[role="button"],
+.ct-field,
+.ct-input,
+.collectium-field,
+.collectium-input,
+.search,
+.searchBox,
+.search-box,
+[class*="search"],
+[class*="Search"],
+[class*="field"],
+[class*="Field"],
+[class*="input"],
+[class*="Input"],
+[class*="control"],
+[class*="Control"] {
+  border-color: var(--ct-field-border) !important;
+}
+
+input,
+select,
+textarea,
+.ct-field,
+.ct-input,
+.collectium-field,
+.collectium-input,
+.search,
+.searchBox,
+.search-box,
+[class*="search"],
+[class*="Search"],
+[class*="field"],
+[class*="Field"],
+[class*="input"],
+[class*="Input"] {
+  background: var(--ct-field-bg) !important;
+  color: var(--ct-field-text) !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+[class*="search"]::placeholder,
+[class*="Search"]::placeholder {
+  color: var(--ct-field-muted) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ct-field-focus) 70%, transparent) !important;
+  outline-offset: 2px;
+  border-color: var(--ct-field-focus) !important;
+}
+
+/* Primarknapper */
+button,
+.button,
+.ct-button,
+.collectium-button,
+[class*="button"],
+[class*="Button"] {
+  border-color: var(--ct-button-border) !important;
+}
+
+button:not([data-variant="ghost"]):not([data-variant="secondary"]),
+.ct-button--primary,
+.collectium-button--primary,
+[class*="primary"],
+[class*="Primary"] {
+  background: var(--ct-button-bg);
+  color: var(--ct-button-text);
+}
+
+/* ------------------------------
+   5. Kort, paneler og sma datafelt
+------------------------------ */
+
+.card,
+.panel,
+.box,
+.tile,
+.ct-card,
+.ct-panel,
+.collectium-card,
+.collectium-panel,
+[class*="card"],
+[class*="Card"],
+[class*="panel"],
+[class*="Panel"],
+[class*="box"],
+[class*="Box"],
+[class*="tile"],
+[class*="Tile"] {
+  background: var(--ct-card-bg, var(--ct-field-bg-soft)) !important;
+  color: var(--ct-text, var(--ct-field-text)) !important;
+  border-color: var(--ct-border, var(--ct-field-border)) !important;
+}
+
+.badge,
+.chip,
+.tag,
+.pill,
+.meta,
+.ct-badge,
+.ct-chip,
+.ct-tag,
+.ct-meta,
+[class*="badge"],
+[class*="Badge"],
+[class*="chip"],
+[class*="Chip"],
+[class*="tag"],
+[class*="Tag"],
+[class*="pill"],
+[class*="Pill"],
+[class*="meta"],
+[class*="Meta"] {
+  background: var(--ct-field-bg-soft) !important;
+  color: var(--ct-field-text) !important;
+  border-color: var(--ct-field-border) !important;
+}
+
+/* ------------------------------
+   6. Stempel/logo-effekter i sidemeny
+------------------------------ */
+
+aside [class*="stamp"],
+aside [class*="Stamp"],
+.sidebar [class*="stamp"],
+.sidebar [class*="Stamp"],
+[class*="sidebar"] [class*="stamp"],
+[class*="Sidebar"] [class*="Stamp"] {
+  opacity: var(--ct-stamp-opacity, 0.16);
+  color: var(--ct-shell-sidebar-muted) !important;
+  border-color: var(--ct-shell-sidebar-border) !important;
+}
+
+html[data-skin="finans"] aside [class*="stamp"],
+html[data-skin="finans"] .sidebar [class*="stamp"],
+html[data-skin="finans"] [class*="sidebar"] [class*="stamp"],
+[data-skin="finans"] aside [class*="stamp"],
+[data-skin="finans"] .sidebar [class*="stamp"],
+[data-skin="finans"] [class*="sidebar"] [class*="stamp"] {
+  --ct-stamp-opacity: 0.08;
+}
+
+/* COLLECTIUM FOUR SKINS - SHELL AND FIELD EXTENSION END */
+

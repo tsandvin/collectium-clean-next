@@ -1,43 +1,47 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Collectium UI85 React Template Page v19
+ * Collectium UI85 React Template Page
  *
- * Definering / formål:
- * Next.js sandbox route for Collectium UI 8.5 React template as content-only
- * module inside existing Collectium AppShell. Page uses a client theme controller
- * for four approved skins.
+ * Definering / formal:
+ * Next.js sandbox route for Collectium UI 8.5 React template. The page mounts a
+ * controlled template component and does not change the global production shell.
  *
- * Bruksområde:
+ * Bruksomrade:
  * - /design/ui85
  *
- * Berørte sider / routes:
+ * Berorte sider / routes:
  * - app/design/ui85/page.tsx
  *
- * Berørte DB-brytere / feature_keys:
+ * Berorte DB-brytere / feature_keys:
  * - template.ui85.preview.view
- * - template.ui85.skin.switch.preview
  *
- * Berørte API-ruter:
+ * Berorte API-ruter:
  * - Ingen. Static React template preview.
  *
- * Berørte tabeller / views:
+ * Berorte tabeller / views:
  * - Ingen.
  *
  * Dataretning:
- * Static preview → React UI only. Production data must come from API/backend.
+ * Static preview -> React UI only. Production data must come from API/backend.
  *
  * Logging:
  * log_category: template
- * log_action: ui85.react.template.theme.preview
+ * log_action: ui85.react.template.preview
  *
  * Versjon:
- * UI85-REACT-TEMPLATE-V19 / CHANGE-UI85-2026-06-11-0019
+ * UI85-REACT-TEMPLATE-V17 / CHANGE-UI85-2026-06-11-0017
  */
 
-import { CollectiumUi85ThemeClient } from "../../../components/templates/ui85/CollectiumUi85ThemeClient";
+import { CollectiumUi85Template } from "../../components/templates/ui85/CollectiumUi85Template";
+import { CollectiumUi85ObjectPreview } from "../../components/templates/ui85/CollectiumUi85ObjectPreview";
 
 export default function CollectiumUi85DesignPage() {
-  return <CollectiumUi85ThemeClient />;
+  return (
+    <CollectiumUi85Template skin="finans">
+      <CollectiumUi85ObjectPreview />
+    </CollectiumUi85Template>
+  );
 }
+

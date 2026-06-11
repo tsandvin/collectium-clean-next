@@ -1,29 +1,30 @@
+﻿import { CollectiumSkinProvider } from "./components/layout/CollectiumSkinProvider";
 /**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * Root layout
  *
- * Definering / formål:
+ * Definering / formÃ¥l:
  * Global Next.js layout for ren Collectium-start. Eier html/body og pakker alle sider i CollectiumAppShell.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Brukes av alle routes i app/.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - /
  * - /startside
  * - /katalog
  * - /min-side
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - template.view
  * - navigation.view
  *
- * Berørte API-ruter:
+ * BerÃ¸rte API-ruter:
  * - Ingen i v1 clean template
  *
- * Berørte tabeller / views:
+ * BerÃ¸rte tabeller / views:
  * - Ingen i v1 clean template
  *
  * Dataretning:
@@ -38,6 +39,7 @@
  */
 import type { Metadata } from 'next';
 import './globals.css';
+import "./styles/collectium-skins.css";
 import { CollectiumAppShell } from '@/components/layout/CollectiumAppShell';
 
 export const metadata: Metadata = {
@@ -49,8 +51,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="no" data-template="collectium" data-skin="signature-light">
       <body>
-        <CollectiumAppShell>{children}</CollectiumAppShell>
+        <CollectiumAppShell><CollectiumSkinProvider>{children}</CollectiumSkinProvider></CollectiumAppShell>
       </body>
     </html>
   );
 }
+
