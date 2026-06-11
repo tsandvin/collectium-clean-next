@@ -5,23 +5,19 @@
  * Root layout
  *
  * Definering / formÃ¥l:
- * Global Next.js layout for ren Collectium UI85-standard. Layout eier kun html/body
- * og pakker alle sider i CollectiumAppShell. Designverdier kommer fra
- * app/styles/collectium-skins.css via data-theme/data-skin/data-ct-skin.
+ * Global Next.js layout for nÃ¸ytral Collectium-standard. Layout importerer kun
+ * app/globals.css. Alle gamle skin-importer og data-skin/data-theme-attributter
+ * er fjernet for Ã¥ rydde designkonflikt.
  *
  * BruksomrÃ¥de:
  * Brukes av alle routes i app/.
  *
  * BerÃ¸rte sider / routes:
- * - /
- * - /startside
- * - /katalog
- * - /min-side
+ * - alle
  *
  * BerÃ¸rte DB-brytere / feature_keys:
  * - template.view
  * - navigation.view
- * - local.template.theme_ui85
  *
  * BerÃ¸rte API-ruter:
  * - Ingen
@@ -30,19 +26,18 @@
  * - Ingen
  *
  * Dataretning:
- * collectium-skins.css -> globals.css shell -> React -> UI
+ * Next.js layout -> CollectiumAppShell -> sideinnhold.
  *
  * Logging:
  * log_category: template
  * log_action: render
  *
  * Versjon:
- * CT-CLEAN-LAYOUT-UI85-0002 / CHANGE-2026-06-12-SINGLE-DESIGN-STANDARD
+ * CT-CLEAN-LAYOUT-NEUTRAL-0001 / CHANGE-2026-06-12-DISABLE-SKINS
  */
 
 import type { Metadata } from "next";
 import "./globals.css";
-import "./styles/collectium-skins.css";
 import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
 
 export const metadata: Metadata = {
@@ -52,14 +47,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="no"
-      data-template="collectium"
-      data-theme="collectium"
-      data-skin="collectium"
-      data-ct-skin="collectium"
-    >
-      <body data-theme="collectium" data-skin="collectium" data-ct-skin="collectium">
+    <html lang="no">
+      <body>
         <CollectiumAppShell>{children}</CollectiumAppShell>
       </body>
     </html>

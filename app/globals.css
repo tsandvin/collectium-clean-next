@@ -2,16 +2,14 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Global CSS - UI85 clean shell
+ * Global CSS - neutral Next.js standard
  *
  * Definering / formÃ¥l:
- * Eneste globale shell/layout-CSS for Next.js-appen. Denne filen eier ikke
- * farger, tema, typografi eller skin-uttrykk direkte. Alle designverdier leses
- * fra app/styles/collectium-skins.css via html[data-theme], html[data-skin]
- * og html[data-ct-skin].
+ * NÃ¸ytral global CSS uten skins, tema, gradienter, vannmerker, stempler,
+ * gamle farger, skygger eller dekor. Denne filen skal kun gi lesbar layout.
  *
  * BruksomrÃ¥de:
- * Importeres kun i app/layout.tsx fÃ¸r collectium-skins.css.
+ * Importeres kun i app/layout.tsx.
  *
  * BerÃ¸rte sider / routes:
  * - alle routes
@@ -19,28 +17,27 @@
  * BerÃ¸rte DB-brytere / feature_keys:
  * - template.view
  * - navigation.view
- * - local.template.theme_ui85
- *
- * BerÃ¸rte API-ruter:
- * - Ingen
- *
- * BerÃ¸rte tabeller / views:
- * - Ingen
  *
  * Dataretning:
- * collectium-skins.css tokens -> globals.css shell -> React components -> UI.
- *
- * Logging:
- * log_category: template
- * log_action: render_style
+ * Next.js -> React -> HTML/CSS.
  *
  * Versjon:
- * CT-GLOBAL-UI85-CLEAN-0002 / CHANGE-2026-06-12-SINGLE-DESIGN-STANDARD
+ * CT-GLOBAL-NEUTRAL-0001 / CHANGE-2026-06-12-DISABLE-SKINS
  */
 
 :root {
-  --ct-sidebar-width: 282px;
-  --ct-topbar-height: 72px;
+  --ct-sidebar-width: 260px;
+  --ct-topbar-height: 64px;
+  --ct-bg: #ffffff;
+  --ct-surface: #ffffff;
+  --ct-surface-muted: #f7f7f7;
+  --ct-border: #d8d8d8;
+  --ct-text: #111111;
+  --ct-text-soft: #444444;
+  --ct-text-muted: #777777;
+  --ct-focus: #111111;
+  --ct-radius: 0px;
+  --ct-font: Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -49,17 +46,17 @@
 
 html {
   min-height: 100%;
-  background: var(--ct-app-bg);
+  background: var(--ct-bg);
   color: var(--ct-text);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--ct-app-bg);
+  background: var(--ct-bg);
   color: var(--ct-text);
-  font-family: var(--ct-font-ui, var(--ct-font-body, Inter, ui-sans-serif, system-ui, sans-serif));
-  font-size: var(--ct-font-base, 14px);
+  font-family: var(--ct-font);
+  font-size: 14px;
 }
 
 a {
@@ -80,146 +77,33 @@ button {
   min-height: 100vh;
   display: grid;
   grid-template-columns: var(--ct-sidebar-width) minmax(0, 1fr);
-  background: var(--ct-app-bg);
+  background: var(--ct-bg);
   color: var(--ct-text);
 }
 
 .ct-sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-  padding: 24px 20px;
-  border-right: var(--ct-border-width, 1px) solid var(--ct-border);
-  background: var(--ct-app-sidebar-bg);
-  isolation: isolate;
-}
-
-.ct-sidebar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--ct-accent-soft) 16%, transparent), transparent 170px),
-    linear-gradient(180deg, color-mix(in srgb, var(--ct-panel-bg) 18%, transparent), transparent 62%);
-  opacity: .72;
-}
-
-.ct-sidebar-decor,
-.ct-brand,
-.ct-sidebar-nav {
-  position: relative;
-  z-index: 1;
-}
-
-.ct-sidebar-anno,
-.ct-sidebar-stamp,
-.ct-stamp,
-.ct-watermark {
-  color: var(--ct-watermark);
-  pointer-events: none;
-  user-select: none;
-}
-
-.ct-sidebar-anno {
-  position: absolute;
-  left: -18px;
-  bottom: 108px;
-  transform: rotate(-90deg);
-  transform-origin: left bottom;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-family: var(--ct-font-display, Georgia, serif);
-  line-height: .78;
-  opacity: .75;
-}
-
-.ct-sidebar-anno span {
-  font-size: 1.9rem;
-  letter-spacing: .28em;
-}
-
-.ct-sidebar-anno strong {
-  font-size: 5.5rem;
-  letter-spacing: -.04em;
-}
-
-.ct-sidebar-stamp,
-.ct-stamp {
-  position: absolute;
-  width: 118px;
-  height: 118px;
-  border: var(--ct-border-width-strong, 1.5px) solid currentColor;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  transform: rotate(-10deg);
-  opacity: .6;
-}
-
-.ct-sidebar-stamp::after,
-.ct-stamp::after {
-  content: "";
-  position: absolute;
-  inset: 14px;
-  border: 1px dashed currentColor;
-  border-radius: inherit;
-  opacity: .65;
-}
-
-.ct-sidebar-stamp span,
-.ct-stamp span {
-  position: absolute;
-  top: 24px;
-  font-size: .48rem;
-  letter-spacing: .12em;
-  font-weight: 800;
-}
-
-.ct-sidebar-stamp b,
-.ct-stamp b {
-  width: 38px;
-  height: 38px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-family: var(--ct-font-display, Georgia, serif);
-}
-
-.ct-sidebar-stamp--one {
-  right: 12px;
-  top: 160px;
-}
-
-.ct-sidebar-stamp--two {
-  left: -8px;
-  bottom: 170px;
-  transform: rotate(12deg);
+  min-height: 100vh;
+  padding: 20px 16px;
+  border-right: 1px solid var(--ct-border);
+  background: var(--ct-surface);
 }
 
 .ct-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 28px;
 }
 
 .ct-brand-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--ct-radius-pill, 999px);
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ct-border);
   display: grid;
   place-items: center;
-  background: var(--ct-accent);
-  color: var(--ct-panel-solid);
-  font-family: var(--ct-font-display, Georgia, serif);
-  font-weight: 800;
-  font-size: 1.3rem;
-  box-shadow: var(--ct-shadow-soft, none);
+  background: var(--ct-surface);
+  color: var(--ct-text);
+  font-weight: 700;
 }
 
 .ct-brand strong,
@@ -227,44 +111,36 @@ button {
   display: block;
 }
 
-.ct-brand strong {
-  color: var(--ct-heading, var(--ct-text));
-  font-family: var(--ct-font-ui, Inter, system-ui, sans-serif);
-}
-
 .ct-brand small {
-  color: var(--ct-text-soft);
-  font-size: .76rem;
+  color: var(--ct-text-muted);
+  font-size: 12px;
   margin-top: 2px;
 }
 
 .ct-sidebar-nav {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .ct-sidebar-link {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
-  padding: 8px 4px;
-  border-radius: var(--ct-radius-sm, 8px);
+  gap: 8px;
+  padding: 8px 0;
   color: var(--ct-text);
 }
 
 .ct-sidebar-link:hover {
-  color: var(--ct-accent);
+  text-decoration: underline;
 }
 
 .ct-sidebar-icon {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
-  font-size: 1.45rem;
-  color: var(--ct-accent);
-  background: transparent;
+  color: var(--ct-text);
 }
 
 .ct-sidebar-link strong,
@@ -274,7 +150,7 @@ button {
 
 .ct-sidebar-link small {
   color: var(--ct-text-muted);
-  font-size: .75rem;
+  font-size: 12px;
   margin-top: 2px;
 }
 
@@ -282,204 +158,120 @@ button {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  background: var(--ct-bg);
 }
 
 .ct-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   min-height: var(--ct-topbar-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 14px 28px;
-  border-bottom: var(--ct-border-width, 1px) solid var(--ct-border);
-  background: var(--ct-app-topbar-bg);
-  backdrop-filter: blur(16px);
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--ct-border);
+  background: var(--ct-surface);
 }
 
 .ct-search {
   flex: 1;
-  max-width: 680px;
-  border: var(--ct-border-width, 1px) solid var(--ct-border);
-  border-radius: var(--ct-radius-pill, 999px);
-  min-height: 42px;
+  max-width: 720px;
+  min-height: 38px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 12px;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface);
   color: var(--ct-text-muted);
-  background: var(--ct-field-bg, var(--ct-panel-bg));
 }
 
 .ct-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .ct-topbar-actions a {
-  min-height: 38px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
-  padding: 0 12px;
-  border: var(--ct-border-width, 1px) solid transparent;
-  border-radius: var(--ct-radius-pill, 999px);
-  color: var(--ct-text-soft);
-  font-weight: 700;
-  font-size: .9rem;
+  padding: 0 8px;
+  color: var(--ct-text);
+  font-weight: 600;
 }
 
 .ct-topbar-actions a:hover {
-  border-color: var(--ct-border);
-  color: var(--ct-text);
-  background: var(--ct-button-bg, var(--ct-panel-bg));
+  text-decoration: underline;
 }
 
 .ct-topbar-cta {
-  background: var(--ct-accent) !important;
-  color: var(--ct-panel-solid) !important;
-  border-color: var(--ct-accent) !important;
+  border: 1px solid var(--ct-border);
+  padding: 0 12px !important;
 }
 
 .ct-page-frame {
-  position: relative;
   flex: 1;
-  padding: 30px;
-  isolation: isolate;
-  overflow: hidden;
-  background: var(--ct-app-bg);
-}
-
-.ct-page-frame::before {
-  content: "";
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  width: min(900px, 62vw);
-  height: min(720px, 64vh);
-  background:
-    radial-gradient(ellipse at 100% 100%, var(--ct-watermark), transparent 72%);
-  filter: blur(10px);
-  opacity: .62;
-  z-index: -3;
-  pointer-events: none;
+  padding: 24px;
+  background: var(--ct-bg);
 }
 
 .ct-page-inner {
-  position: relative;
-  z-index: 2;
   max-width: 1440px;
   margin: 0 auto;
 }
 
-.ct-content-decor {
-  position: fixed;
-  inset: var(--ct-topbar-height) 0 0 var(--ct-sidebar-width);
-  z-index: -2;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.ct-watermark {
-  position: absolute;
-  right: clamp(24px, 5vw, 80px);
-  bottom: clamp(24px, 4vw, 64px);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-family: var(--ct-font-display, Georgia, serif);
-  line-height: .78;
-}
-
-.ct-watermark span {
-  font-size: clamp(2.2rem, 5vw, 6rem);
-  letter-spacing: .3em;
-}
-
-.ct-watermark strong {
-  font-size: clamp(7rem, 18vw, 18rem);
-  letter-spacing: -.05em;
-}
-
-.ct-stamp {
-  right: 22vw;
-  bottom: 24vh;
-  width: 150px;
-  height: 150px;
-}
-
-.ct-stamp--two {
-  right: 8vw;
-  top: 18vh;
-  transform: rotate(14deg);
-}
-
 .ct-stack {
   display: grid;
-  gap: 22px;
+  gap: 20px;
 }
 
 .ct-page-header,
 .ct-panel,
 .ct-card {
-  position: relative;
-  border: var(--ct-border-width, 1px) solid var(--ct-border);
-  border-radius: var(--ct-radius-card, var(--ct-radius-md, 12px));
-  background: var(--ct-panel-bg);
-  box-shadow: var(--ct-shadow-card, var(--ct-shadow, none));
-  padding: 28px;
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface);
+  padding: 24px;
 }
 
 .ct-page-header {
-  min-height: 270px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  min-height: 180px;
 }
 
 .ct-eyebrow {
   margin: 0 0 10px;
-  color: var(--ct-accent-soft);
-  font-weight: 800;
-  letter-spacing: .1em;
+  color: var(--ct-text-muted);
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: .74rem;
+  font-size: 12px;
+  letter-spacing: .08em;
 }
 
 h1,
 h2 {
   margin: 0;
-  font-family: var(--ct-font-display, Georgia, serif);
-  letter-spacing: -.035em;
-  color: var(--ct-heading, var(--ct-text));
+  color: var(--ct-text);
+  font-family: var(--ct-font);
+  letter-spacing: normal;
 }
 
 h1 {
   max-width: 920px;
-  font-size: clamp(2.5rem, 5vw, 5.7rem);
-  line-height: .98;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1.05;
 }
 
 h2 {
-  font-size: clamp(1.4rem, 2.1vw, 2.3rem);
-  line-height: 1.05;
+  font-size: clamp(1.4rem, 2vw, 2.2rem);
+  line-height: 1.15;
 }
 
 p {
   color: var(--ct-text-soft);
-  line-height: 1.65;
-}
-
-.ct-page-header p:not(.ct-eyebrow) {
-  max-width: 760px;
-  font-size: 1.08rem;
+  line-height: 1.55;
 }
 
 .ct-grid {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .ct-grid--three {
@@ -491,30 +283,7 @@ p {
 }
 
 .ct-card {
-  min-height: 190px;
-  transition: transform 160ms ease, border-color 160ms ease;
-}
-
-.ct-card-link:hover .ct-card {
-  transform: translateY(-2px);
-  border-color: var(--ct-border-strong);
-}
-
-.ct-signature-box::after,
-.ct-card::after,
-.ct-panel::after,
-.ct-page-header::after {
-  content: "Collectium anno 2022";
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  color: var(--ct-signature);
-  font-family: var(--ct-sig-font-family, var(--ct-font-display, Georgia, serif));
-  font-size: var(--ct-sig-font-size, 8px);
-  line-height: 1;
-  opacity: var(--ct-signature-opacity, .5);
-  pointer-events: none;
-  white-space: nowrap;
+  min-height: 160px;
 }
 
 .ct-actions {
@@ -524,21 +293,24 @@ p {
 }
 
 .ct-button {
-  min-height: 40px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
-  padding: 0 14px;
-  border: var(--ct-border-width, 1px) solid var(--ct-border);
-  border-radius: var(--ct-radius-pill, 999px);
-  font-weight: 800;
-  color: var(--ct-accent);
-  background: var(--ct-button-bg, var(--ct-panel-bg));
+  padding: 0 12px;
+  border: 1px solid var(--ct-border);
+  color: var(--ct-text);
+  background: var(--ct-surface);
+  font-weight: 600;
+}
+
+.ct-button:hover {
+  background: var(--ct-surface-muted);
 }
 
 .ct-button--primary {
-  background: var(--ct-accent);
-  color: var(--ct-panel-solid);
-  border-color: var(--ct-accent);
+  background: var(--ct-text);
+  color: #ffffff;
+  border-color: var(--ct-text);
 }
 
 .ct-section-head {
@@ -552,12 +324,11 @@ p {
   display: inline-flex;
   align-items: center;
   min-height: 30px;
-  border-radius: var(--ct-radius-pill, 999px);
-  border: var(--ct-border-width, 1px) solid var(--ct-border);
+  border: 1px solid var(--ct-border);
   padding: 0 10px;
-  color: var(--ct-accent);
-  font-weight: 800;
-  font-size: .78rem;
+  color: var(--ct-text);
+  font-weight: 700;
+  font-size: 12px;
 }
 
 .ct-filter-row {
@@ -568,18 +339,17 @@ p {
 }
 
 .ct-filter-row span {
-  border: var(--ct-border-width, 1px) solid var(--ct-border);
-  border-radius: var(--ct-radius-pill, 999px);
+  border: 1px solid var(--ct-border);
   padding: 8px 12px;
-  background: var(--ct-field-bg, var(--ct-panel-bg));
+  background: var(--ct-surface);
   color: var(--ct-text-soft);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (max-width: 980px) {
   :root {
     --ct-sidebar-width: 0px;
-    --ct-topbar-height: 68px;
+    --ct-topbar-height: 64px;
   }
 
   .ct-app-shell {
@@ -588,10 +358,6 @@ p {
 
   .ct-sidebar {
     display: none;
-  }
-
-  .ct-content-decor {
-    inset-left: 0;
   }
 
   .ct-topbar {
@@ -603,16 +369,11 @@ p {
   }
 
   .ct-topbar-actions {
-    gap: 6px;
-  }
-
-  .ct-topbar-actions a {
-    padding: 0 9px;
-    font-size: .82rem;
+    gap: 8px;
   }
 
   .ct-page-frame {
-    padding: 18px;
+    padding: 16px;
   }
 
   .ct-grid--three {

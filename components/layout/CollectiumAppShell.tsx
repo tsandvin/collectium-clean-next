@@ -1,40 +1,42 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * CollectiumAppShell
  *
- * Definering / formål:
- * Eneste globale shell for Collectium clean rebuild. Eier sidebar, topbar, bakgrunn og page frame.
+ * Definering / formÃ¥l:
+ * Eneste globale shell for Collectium clean rebuild. Eier kun sidebar, topbar
+ * og page frame. Alle gamle dekorlag, vannmerker og ANNO-stempler er fjernet.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Brukes kun i app/layout.tsx.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - alle routes
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - template.view
  * - navigation.view
  *
- * Berørte API-ruter:
- * - Ingen i v1 clean template
+ * BerÃ¸rte API-ruter:
+ * - Ingen
  *
- * Berørte tabeller / views:
- * - Ingen i v1 clean template
+ * BerÃ¸rte tabeller / views:
+ * - Ingen
  *
  * Dataretning:
- * MariaDB -> API/backend -> Next.js -> React -> UI
+ * MariaDB/Neon -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
  * log_category: template
  * log_action: render_shell
  *
  * Versjon:
- * CT-CLEAN-0001
+ * CT-SHELL-NEUTRAL-0001 / CHANGE-2026-06-12-REMOVE-DECOR
  */
-import { CollectiumSidebar } from './CollectiumSidebar';
-import { CollectiumTopbar } from './CollectiumTopbar';
+
+import { CollectiumSidebar } from "./CollectiumSidebar";
+import { CollectiumTopbar } from "./CollectiumTopbar";
 
 export function CollectiumAppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -42,14 +44,9 @@ export function CollectiumAppShell({ children }: Readonly<{ children: React.Reac
       <CollectiumSidebar />
       <div className="ct-workspace">
         <CollectiumTopbar />
-        <div className="ct-page-frame">
-          <div className="ct-content-decor" aria-hidden="true">
-            <div className="ct-watermark"><span>ANNO</span><strong>2022</strong></div>
-            <div className="ct-stamp ct-stamp--one"><span>COLLECTIUM · ANNO 2022</span><b>C</b></div>
-            <div className="ct-stamp ct-stamp--two"><span>COLLECTIUM · ANNO 2022</span><b>C</b></div>
-          </div>
+        <main className="ct-page-frame">
           <div className="ct-page-inner">{children}</div>
-        </div>
+        </main>
       </div>
     </div>
   );

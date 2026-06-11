@@ -1,64 +1,68 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * CollectiumSidebar
  *
- * Definering / formål:
- * Eneste globale sidemeny i clean rebuild. Ingen side skal importere eller lage egen sidebar.
+ * Definering / formÃ¥l:
+ * Eneste globale sidemeny i clean rebuild. NÃ¸ytral versjon uten skin, dekor,
+ * ANNO, watermark eller stempler.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Brukes kun av CollectiumAppShell.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - alle routes
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - navigation.view
  *
- * Berørte API-ruter:
- * - Ingen i v1 clean template
+ * BerÃ¸rte API-ruter:
+ * - Ingen
  *
- * Berørte tabeller / views:
+ * BerÃ¸rte tabeller / views:
  * - ct_v_app_menu senere
  *
  * Dataretning:
- * MariaDB -> API/backend -> Next.js -> React -> UI
+ * MariaDB/Neon -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
  * log_category: navigation
  * log_action: render_sidebar
  *
  * Versjon:
- * CT-CLEAN-0001
+ * CT-SIDEBAR-NEUTRAL-0001 / CHANGE-2026-06-12-REMOVE-DECOR
  */
-import Link from 'next/link';
+
+import Link from "next/link";
 
 const menu = [
-  { href: '/startside', label: 'Startside', sub: 'Oversikt', icon: '⌂' },
-  { href: '/katalog', label: 'Katalog', sub: 'Objekter', icon: '□' },
-  { href: '/min-side', label: 'Min side', sub: 'Samling', icon: '◇' }
+  { href: "/startside", label: "Startside", sub: "Oversikt", icon: "âŒ‚" },
+  { href: "/katalog", label: "Katalog", sub: "Objekter", icon: "â–¡" },
+  { href: "/min-side", label: "Min side", sub: "Samling", icon: "â—‡" },
 ];
 
 export function CollectiumSidebar() {
   return (
     <aside className="ct-sidebar" aria-label="Global sidemeny">
-      <div className="ct-sidebar-decor" aria-hidden="true">
-        <div className="ct-sidebar-anno"><span>ANNO</span><strong>2022</strong></div>
-        <div className="ct-sidebar-stamp ct-sidebar-stamp--one"><span>COLLECTIUM · ANNO 2022</span><b>C</b></div>
-        <div className="ct-sidebar-stamp ct-sidebar-stamp--two"><span>COLLECTIUM · ANNO 2022</span><b>C</b></div>
-      </div>
-
       <Link className="ct-brand" href="/startside" aria-label="Collectium startside">
         <span className="ct-brand-mark">C</span>
-        <span><strong>Collectium</strong><small>Samler · Historie · Finans</small></span>
+        <span>
+          <strong>Collectium</strong>
+          <small>Samler Â· Historie Â· Finans</small>
+        </span>
       </Link>
 
       <nav className="ct-sidebar-nav" aria-label="Hovedmeny">
         {menu.map((item) => (
           <Link key={item.href} href={item.href} className="ct-sidebar-link">
-            <span className="ct-sidebar-icon" aria-hidden="true">{item.icon}</span>
-            <span><strong>{item.label}</strong><small>{item.sub}</small></span>
+            <span className="ct-sidebar-icon" aria-hidden="true">
+              {item.icon}
+            </span>
+            <span>
+              <strong>{item.label}</strong>
+              <small>{item.sub}</small>
+            </span>
           </Link>
         ))}
       </nav>
