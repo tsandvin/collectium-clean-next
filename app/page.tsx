@@ -1,47 +1,51 @@
-﻿/**
- * COLLECTIUM FILE HEADER
- *
- * Overskrift:
- * Collectium Front Page
- *
- * Definering / formal:
- * Produksjonsrettet React-front for app.collectium.no. Siden bruker eksisterende
- * global AppShell fra app/layout.tsx og legger bare rent frontinnhold inn i
- * innholdsomraadet. Ingen preview, canvas, demo, intern sidemeny, intern topbar
- * eller sandbox-header.
- *
- * Bruksomrade:
- * - /
- *
- * Berorte sider / routes:
- * - /
- *
- * Berorte DB-brytere / feature_keys:
- * - landing.view
- * - catalog.view
- * - collection.view
- * - market.index.view
- *
- * Berorte API-ruter:
- * - Ingen direkte i denne filen.
- *
- * Berorte tabeller / views:
- * - Ingen direkte.
- *
- * Dataretning:
- * MariaDB/Neon -> API/backend -> Next.js -> React -> UI
- *
- * Logging:
- * log_category: front
- * log_action: view
- *
- * Versjon:
- * UI85-FRONT-SHELL-REPAIR-V1 / CHANGE-UI85-2026-06-11-FRONT-0004
- */
+﻿import Link from "next/link";
 
-import { CollectiumUi85FrontContent } from "@/components/templates/ui85/CollectiumUi85FrontContent";
+const cards = [
+  {
+    title: "Katalog",
+    body: "SÃ¸k og arbeid med objekter, kilder, relasjoner og historiske data.",
+    href: "/katalog",
+  },
+  {
+    title: "Min side",
+    body: "Se samling, prosesser, varsler, meldinger og brukerstatus.",
+    href: "/min-side",
+  },
+  {
+    title: "Systemkontroll",
+    body: "Kontroller MariaDB, Neon, API-status og plattformkrav.",
+    href: "/admin/system/mariadb-neon",
+  },
+];
 
-export default function CollectiumFrontPage() {
-  return <CollectiumUi85FrontContent />;
+export default function HomePage() {
+  return (
+    <div className="ct-page">
+      <section className="ct-page-header">
+        <p className="ct-eyebrow">Collectium</p>
+        <h1>Katalog, samling og marked i Ã©n arbeidsflate.</h1>
+        <p className="ct-lead">
+          Collectium er en kontrollert Next.js-front for katalogdata,
+          samlinger, relasjoner, prosesser og markedsinnsikt.
+        </p>
+        <div className="ct-actions">
+          <Link className="ct-button ct-button-primary" href="/katalog">
+            Ã…pne katalog
+          </Link>
+          <Link className="ct-button" href="/min-side">
+            Min side
+          </Link>
+        </div>
+      </section>
+
+      <section className="ct-grid ct-grid-3" aria-label="HovedomrÃ¥der">
+        {cards.map((card) => (
+          <Link className="ct-card" href={card.href} key={card.title}>
+            <h2>{card.title}</h2>
+            <p>{card.body}</p>
+          </Link>
+        ))}
+      </section>
+    </div>
+  );
 }
-

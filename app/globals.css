@@ -1,19 +1,37 @@
-﻿/*
- * COLLECTIUM FILE HEADER
- *
- * Overskrift:
- * Global CSS - layout only
- *
- * Definering / formÃ¥l:
- * Layout/shell-CSS. Farger, typografi, skygger og radius leses fra app/styles/*.css.
- *
- * Versjon:
- * CT-GLOBAL-LAYOUT-ONLY-0002 / CHANGE-2026-06-12-TEMPLATE-TOKENS
- */
+﻿:root {
+  --ct-sidebar-width: 272px;
+  --ct-topbar-height: 68px;
 
-:root {
-  --ct-sidebar-width: 260px;
-  --ct-topbar-height: 64px;
+  --ct-bg: #f4f6f8;
+  --ct-surface: #ffffff;
+  --ct-surface-soft: #f8fafc;
+  --ct-surface-strong: #eef2f6;
+
+  --ct-border: #d7dee7;
+  --ct-border-strong: #9aa8b8;
+
+  --ct-text: #111827;
+  --ct-text-soft: #374151;
+  --ct-text-muted: #6b7280;
+
+  --ct-accent: #0f5f4a;
+  --ct-accent-dark: #0b3f34;
+  --ct-accent-soft: #e5f2ee;
+
+  --ct-danger: #b42318;
+  --ct-warning: #a15c07;
+  --ct-success: #067647;
+
+  --ct-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --ct-shadow-soft: 0 4px 14px rgba(15, 23, 42, 0.06);
+
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 10px;
+  --ct-radius-lg: 16px;
+
+  --ct-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-head: Georgia, "Times New Roman", serif;
+  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 * {
@@ -22,16 +40,16 @@
 
 html {
   min-height: 100%;
-  background: var(--ct-app-bg);
+  background: var(--ct-bg);
   color: var(--ct-text);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--ct-app-bg);
+  background: var(--ct-bg);
   color: var(--ct-text);
-  font-family: var(--ct-font-ui);
+  font-family: var(--ct-font-body);
   font-size: 14px;
 }
 
@@ -41,7 +59,9 @@ a {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
 }
 
@@ -49,80 +69,98 @@ button {
   cursor: pointer;
 }
 
-.ct-app-shell {
+.ct-shell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: var(--ct-sidebar-width) minmax(0, 1fr);
-  background: var(--ct-app-bg);
-  color: var(--ct-text);
+  background: var(--ct-bg);
 }
 
 .ct-sidebar {
   min-height: 100vh;
-  padding: 20px 16px;
-  border-right: 1px solid var(--ct-panel-border);
-  background: var(--ct-app-sidebar-bg);
+  padding: 22px 18px;
+  border-right: 1px solid var(--ct-border);
+  background: var(--ct-surface);
 }
 
 .ct-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 12px;
+  min-height: 44px;
+  margin-bottom: 30px;
 }
 
 .ct-brand-mark {
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--ct-panel-border);
-  border-radius: var(--ct-radius-md);
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
+  border-radius: 999px;
   background: var(--ct-accent);
-  color: var(--ct-panel-solid);
-  font-weight: 700;
+  color: white;
+  font-weight: 800;
+  box-shadow: var(--ct-shadow-soft);
 }
 
-.ct-brand strong,
-.ct-brand small {
+.ct-brand-text strong,
+.ct-brand-text small {
   display: block;
 }
 
-.ct-brand small {
+.ct-brand-text strong {
+  font-weight: 800;
+  color: var(--ct-text);
+  line-height: 1.1;
+}
+
+.ct-brand-text small {
   color: var(--ct-text-muted);
   font-size: 12px;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .ct-sidebar-nav {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .ct-sidebar-link {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
-  padding: 8px 0;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: var(--ct-radius-md);
   color: var(--ct-text);
 }
 
 .ct-sidebar-link:hover {
-  color: var(--ct-accent);
+  background: var(--ct-accent-soft);
+  color: var(--ct-accent-dark);
 }
 
 .ct-sidebar-icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-sm);
+  background: var(--ct-surface-soft);
   color: var(--ct-accent);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .ct-sidebar-link strong,
 .ct-sidebar-link small {
   display: block;
+}
+
+.ct-sidebar-link strong {
+  font-weight: 750;
 }
 
 .ct-sidebar-link small {
@@ -133,9 +171,9 @@ button {
 
 .ct-workspace {
   min-width: 0;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--ct-app-bg);
 }
 
 .ct-topbar {
@@ -143,65 +181,63 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--ct-panel-border);
-  background: var(--ct-app-topbar-bg);
+  gap: 18px;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--ct-border);
+  background: var(--ct-surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .ct-search {
   flex: 1;
-  max-width: 720px;
-  min-height: 38px;
+  max-width: 760px;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  border: 1px solid var(--ct-panel-border);
-  border-radius: var(--ct-radius-lg);
-  background: var(--ct-panel-solid);
+  padding: 0 14px;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-surface-soft);
   color: var(--ct-text-muted);
 }
 
 .ct-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ct-topbar-actions a {
-  min-height: 34px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
-  padding: 0 8px;
-  color: var(--ct-text);
-  font-weight: 600;
+  padding: 0 10px;
+  border-radius: var(--ct-radius-md);
+  color: var(--ct-text-soft);
+  font-weight: 700;
 }
 
 .ct-topbar-actions a:hover {
-  color: var(--ct-accent);
+  background: var(--ct-surface-strong);
+  color: var(--ct-text);
 }
 
-.ct-topbar-cta {
-  border: 1px solid var(--ct-panel-border);
-  border-radius: var(--ct-radius-lg);
-  padding: 0 12px !important;
-  background: var(--ct-panel-solid);
-}
-
-.ct-page-frame {
+.ct-main {
   flex: 1;
-  padding: 24px;
-  background: var(--ct-app-bg);
+  padding: 28px;
 }
 
-.ct-page-inner {
-  max-width: 1440px;
+.ct-main-inner {
+  width: min(100%, 1440px);
   margin: 0 auto;
 }
 
+.ct-page,
 .ct-stack {
   display: grid;
-  gap: 20px;
+  gap: 22px;
 }
 
 .ct-page-header,
@@ -209,112 +245,163 @@ button {
 .ct-card,
 .collectium-card {
   position: relative;
-  border: 1px solid var(--ct-panel-border);
+  border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-lg);
-  background: var(--ct-panel-bg);
+  background: var(--ct-surface);
   color: var(--ct-text);
-  box-shadow: var(--ct-shadow);
+  box-shadow: var(--ct-shadow-soft);
   padding: 24px;
 }
 
-.collectium-card {
-  background: var(--ct-card-bg);
-  padding-bottom: 28px;
-}
-
-.collectium-card::after {
-  content: "Collectium anno 2022";
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  color: var(--ct-signature);
-  font-family: var(--ct-font-head);
-  font-size: 8px;
-  line-height: 1;
-  opacity: 0.5;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
 .ct-page-header {
-  min-height: 180px;
+  min-height: 220px;
+  display: grid;
+  align-content: end;
 }
 
 .ct-eyebrow {
   margin: 0 0 10px;
   color: var(--ct-accent);
-  font-weight: 700;
-  text-transform: uppercase;
   font-size: 12px;
-  letter-spacing: .08em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 h1,
-h2 {
+h2,
+h3 {
   margin: 0;
   color: var(--ct-text);
-  font-family: var(--ct-font-head);
 }
 
 h1 {
   max-width: 920px;
-  font-size: clamp(2rem, 4vw, 4rem);
-  line-height: 1.05;
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 h2 {
-  font-size: clamp(1.4rem, 2vw, 2.2rem);
-  line-height: 1.15;
+  font-size: clamp(24px, 2.8vw, 42px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+h3 {
+  font-size: 18px;
 }
 
 p {
   color: var(--ct-text-soft);
-  line-height: 1.55;
+  line-height: 1.6;
+}
+
+.ct-lead {
+  max-width: 760px;
+  font-size: 18px;
 }
 
 .ct-grid {
   display: grid;
-  gap: 16px;
+  gap: 18px;
 }
 
-.ct-grid--three {
+.ct-grid-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.ct-card-link {
-  display: block;
-}
-
-.ct-card {
-  min-height: 160px;
-}
-
-.ct-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
+.ct-card h2,
+.ct-panel h2 {
+  margin-bottom: 10px;
 }
 
 .ct-button {
   min-height: 38px;
   display: inline-flex;
   align-items: center;
-  padding: 0 12px;
-  border: 1px solid var(--ct-panel-border);
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
   color: var(--ct-text);
-  background: var(--ct-panel-solid);
-  font-weight: 600;
+  font-weight: 750;
 }
 
 .ct-button:hover {
   border-color: var(--ct-border-strong);
+  background: var(--ct-surface-soft);
 }
 
-.ct-button--primary {
+.ct-button-primary {
   background: var(--ct-accent);
-  color: var(--ct-panel-solid);
   border-color: var(--ct-accent);
+  color: white !important;
+}
+
+.ct-button-primary:hover {
+  background: var(--ct-accent-dark);
+  border-color: var(--ct-accent-dark);
+}
+
+.ct-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.ct-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ct-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-surface-soft);
+  color: var(--ct-text-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ct-muted {
+  color: var(--ct-text-muted);
+}
+
+.ct-ok {
+  color: var(--ct-success);
+}
+
+.ct-warning {
+  color: var(--ct-warning);
+}
+
+.ct-danger {
+  color: var(--ct-danger);
+}
+
+.collectium-card {
+  background: var(--ct-surface);
+  padding-bottom: 28px;
+}
+
+.collectium-card::after {
+  content: "Collectium";
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  color: var(--ct-text-muted);
+  font-size: 8px;
+  opacity: 0.55;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 @media (max-width: 980px) {
@@ -323,7 +410,7 @@ p {
     --ct-topbar-height: 64px;
   }
 
-  .ct-app-shell {
+  .ct-shell {
     display: block;
   }
 
@@ -335,11 +422,15 @@ p {
     padding: 12px 16px;
   }
 
-  .ct-page-frame {
+  .ct-main {
     padding: 16px;
   }
 
-  .ct-grid--three {
+  .ct-grid-3 {
     grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: clamp(32px, 12vw, 52px);
   }
 }
