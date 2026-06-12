@@ -1,0 +1,200 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 fixed sidebar frame
+ *
+ * Definering / formÃ¥l:
+ * GjÃ¸r sidemenyen til et fast sidefelt fra topp til bunn, uten flytende/avsluttet ramme.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt sist i app/layout.tsx.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI/layout-styling.
+ *
+ * Dataretning:
+ * DB/API -> Next.js -> React -> UI
+ */
+
+/* ----------------------------------------------------------------------
+   Locked dimensions
+   ---------------------------------------------------------------------- */
+
+:root {
+  --ct-fixed-sidebar-width: 300px;
+  --ct-fixed-sidebar-pad-x: 18px;
+}
+
+/* ----------------------------------------------------------------------
+   Sidebar must be a fixed full-height side rail
+   ---------------------------------------------------------------------- */
+
+.ct-sidebar-enhanced,
+.ct-sidebar-visible-v3 {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: var(--ct-fixed-sidebar-width) !important;
+  max-width: var(--ct-fixed-sidebar-width) !important;
+  min-width: var(--ct-fixed-sidebar-width) !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  z-index: 1000 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Make the sidefield look like one continuous column, not a floating card */
+.ct-sidebar-enhanced {
+  padding-top: 22px !important;
+  padding-bottom: 22px !important;
+  border-right: 1px solid var(--ct-sidebar-border, rgba(198, 163, 90, 0.42)) !important;
+  box-shadow:
+    inset -1px 0 0 rgba(255,255,255,.12),
+    18px 0 48px rgba(64, 48, 20, 0.06) !important;
+}
+
+/* ----------------------------------------------------------------------
+   Push the content area out from under fixed sidebar
+   ---------------------------------------------------------------------- */
+
+/* Most likely layout: sidebar followed by the page/content wrapper */
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced + *,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 + * {
+  margin-left: var(--ct-fixed-sidebar-width) !important;
+  width: calc(100vw - var(--ct-fixed-sidebar-width)) !important;
+  max-width: calc(100vw - var(--ct-fixed-sidebar-width)) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* If content is a later sibling */
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ main,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-main,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-page,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-content,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ main,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-main,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-page,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-content {
+  margin-left: var(--ct-fixed-sidebar-width) !important;
+  width: calc(100vw - var(--ct-fixed-sidebar-width)) !important;
+  max-width: calc(100vw - var(--ct-fixed-sidebar-width)) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Old global shells sometimes carry full-width/flex assumptions */
+body:has(.ct-sidebar-enhanced) .collectium-shell,
+body:has(.ct-sidebar-enhanced) .ct-shell,
+body:has(.ct-sidebar-enhanced) .app-shell,
+body:has(.ct-sidebar-visible-v3) .collectium-shell,
+body:has(.ct-sidebar-visible-v3) .ct-shell,
+body:has(.ct-sidebar-visible-v3) .app-shell {
+  min-width: 0 !important;
+}
+
+/* If the sidebar is inside an app-shell flex/grid wrapper, disable its flow gap */
+body:has(.ct-sidebar-enhanced) .app-shell:has(.ct-sidebar-enhanced),
+body:has(.ct-sidebar-enhanced) .collectium-shell:has(.ct-sidebar-enhanced),
+body:has(.ct-sidebar-visible-v3) .app-shell:has(.ct-sidebar-visible-v3),
+body:has(.ct-sidebar-visible-v3) .collectium-shell:has(.ct-sidebar-visible-v3) {
+  align-items: stretch !important;
+}
+
+/* Ensure topbar/content does not start behind the fixed sidefield */
+body:has(.ct-sidebar-enhanced) header,
+body:has(.ct-sidebar-enhanced) .topbar,
+body:has(.ct-sidebar-enhanced) .ct-topbar,
+body:has(.ct-sidebar-enhanced) .collectium-topbar,
+body:has(.ct-sidebar-visible-v3) header,
+body:has(.ct-sidebar-visible-v3) .topbar,
+body:has(.ct-sidebar-visible-v3) .ct-topbar,
+body:has(.ct-sidebar-visible-v3) .collectium-topbar {
+  max-width: calc(100vw - var(--ct-fixed-sidebar-width)) !important;
+}
+
+/* Avoid horizontal page drift */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+/* ----------------------------------------------------------------------
+   Sidebar internal clean-up
+   ---------------------------------------------------------------------- */
+
+.ct-sidebar-enhanced .ct-sidebar-logo-card {
+  margin-top: 0 !important;
+}
+
+.ct-sidebar-enhanced .ct-sidebar-progress {
+  margin-bottom: 26px !important;
+}
+
+/* Do not make internal cards appear like the whole sidebar floats */
+.ct-sidebar-enhanced .ct-sidebar-status,
+.ct-sidebar-enhanced .ct-sidebar-progress,
+.ct-sidebar-enhanced .ct-sidebar-logo-card {
+  position: relative;
+}
+
+/* ----------------------------------------------------------------------
+   Mobile: sidebar must stop being fixed and become top/mobile area
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  :root {
+    --ct-fixed-sidebar-width: 100%;
+  }
+
+  .ct-sidebar-enhanced,
+  .ct-sidebar-visible-v3 {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    z-index: 1 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--ct-sidebar-border, rgba(198, 163, 90, 0.42)) !important;
+  }
+
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced + *,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 + *,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ main,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-main,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-page,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ main,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-main,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-page {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:has(.ct-sidebar-enhanced) header,
+  body:has(.ct-sidebar-enhanced) .topbar,
+  body:has(.ct-sidebar-enhanced) .ct-topbar,
+  body:has(.ct-sidebar-enhanced) .collectium-topbar,
+  body:has(.ct-sidebar-visible-v3) header,
+  body:has(.ct-sidebar-visible-v3) .topbar,
+  body:has(.ct-sidebar-visible-v3) .ct-topbar,
+  body:has(.ct-sidebar-visible-v3) .collectium-topbar {
+    max-width: 100% !important;
+  }
+}

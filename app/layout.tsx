@@ -5,6 +5,7 @@ import "./styles/collectium-ui85-hard-polish.css";
 import "./styles/collectium-ui85-sidebar-theme-layout.css";
 import "./styles/collectium-ui85-sidebar-icons-clean.css";
 import "./styles/collectium-ui85-v36.css";
+import "./styles/collectium-ui85-fixed-sidebar-frame.css";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 
