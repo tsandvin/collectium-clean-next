@@ -1,6 +1,6 @@
 ﻿import Link from "next/link";
 
-type IconName = "home" | "catalog" | "collection";
+type IconName = "home" | "catalog" | "collection" | "market";
 
 const menu: Array<{
   href: string;
@@ -11,6 +11,7 @@ const menu: Array<{
   { href: "/startside", label: "Startside", sub: "Oversikt", icon: "home" },
   { href: "/katalog", label: "Katalog", sub: "Objekter", icon: "catalog" },
   { href: "/min-side", label: "Min side", sub: "Samling", icon: "collection" },
+  { href: "/admin/system/mariadb-neon", label: "System", sub: "Kontroll", icon: "market" },
 ];
 
 function MenuIcon({ name }: { name: IconName }) {
@@ -35,11 +36,23 @@ function MenuIcon({ name }: { name: IconName }) {
     );
   }
 
+  if (name === "collection") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 4.5 19.5 9 12 13.5 4.5 9 12 4.5Z" />
+        <path d="M4.5 13 12 17.5 19.5 13" />
+        <path d="M4.5 17 12 21.5 19.5 17" />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 4.5 19.5 9 12 13.5 4.5 9 12 4.5Z" />
-      <path d="M4.5 13 12 17.5 19.5 13" />
-      <path d="M4.5 17 12 21.5 19.5 17" />
+      <path d="M4.5 18.5h15" />
+      <path d="M6.5 16v-4" />
+      <path d="M11.5 16V8" />
+      <path d="M16.5 16v-6" />
+      <path d="M4.5 5.5h15" />
     </svg>
   );
 }
@@ -51,7 +64,7 @@ export function CollectiumSidebar() {
         <span className="ct-brand-mark">C</span>
         <span className="ct-brand-text">
           <strong>Collectium</strong>
-          <small>Museum Â· Historie Â· Samling</small>
+          <small>Katalog Â· Samling Â· Marked</small>
         </span>
       </Link>
 
@@ -69,7 +82,7 @@ export function CollectiumSidebar() {
         ))}
       </nav>
 
-      <div className="ct-sidebar-note">
+      <div className="ct-sidebar-footer">
         <span>Collectium</span>
         <strong>Anno 2022</strong>
       </div>

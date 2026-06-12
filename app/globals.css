@@ -1,7 +1,44 @@
 ﻿:root {
-  --ct-sidebar-width: 280px;
+  --ct-sidebar-width: 282px;
   --ct-topbar-height: 72px;
 
+  --ct-bg: #f7efe2;
+  --ct-bg-soft: #fbf5ea;
+  --ct-surface: #fff9ed;
+  --ct-surface-soft: #fbf2e4;
+  --ct-surface-strong: #efe1c9;
+
+  --ct-border: #e1cfaa;
+  --ct-border-strong: #c49a59;
+
+  --ct-text: #06372f;
+  --ct-text-soft: #415f54;
+  --ct-text-muted: #907d58;
+
+  --ct-accent: #0f6a45;
+  --ct-accent-dark: #06372f;
+  --ct-accent-soft: rgba(214, 173, 62, 0.18);
+
+  --ct-signature: #ad7f2e;
+  --ct-watermark: rgba(164, 59, 35, 0.1);
+
+  --ct-danger: #a43b23;
+  --ct-warning: #a97d36;
+  --ct-success: #14643c;
+
+  --ct-shadow: 0 18px 46px rgba(88, 54, 14, 0.13);
+  --ct-shadow-soft: 0 10px 26px rgba(88, 54, 14, 0.09);
+
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 10px;
+  --ct-radius-lg: 18px;
+
+  --ct-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-head: Georgia, "Times New Roman", serif;
+  --ct-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+html[data-theme="museum"] {
   --ct-bg: #11110f;
   --ct-bg-soft: #171612;
   --ct-surface: #1d1b16;
@@ -19,21 +56,15 @@
   --ct-accent-dark: #9e7c32;
   --ct-accent-soft: rgba(201, 169, 91, 0.13);
 
+  --ct-signature: #c9a95b;
+  --ct-watermark: rgba(201, 169, 91, 0.10);
+
   --ct-danger: #c9775d;
   --ct-warning: #d9bf6d;
   --ct-success: #8fbf82;
 
   --ct-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
   --ct-shadow-soft: 0 12px 34px rgba(0, 0, 0, 0.24);
-
-  --ct-radius-sm: 6px;
-  --ct-radius-md: 10px;
-  --ct-radius-lg: 18px;
-
-  --ct-font-body: Georgia, "Times New Roman", serif;
-  --ct-font-head: Georgia, "Times New Roman", serif;
-  --ct-font-ui: Arial, Helvetica, sans-serif;
-  --ct-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 * {
@@ -50,11 +81,11 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 80% 8%, rgba(201, 169, 91, 0.08), transparent 360px),
+    radial-gradient(circle at 82% 8%, var(--ct-watermark), transparent 360px),
     linear-gradient(180deg, var(--ct-bg-soft), var(--ct-bg));
   color: var(--ct-text);
   font-family: var(--ct-font-body);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 a {
@@ -87,7 +118,7 @@ button {
   padding: 24px 20px;
   border-right: 1px solid var(--ct-border);
   background:
-    linear-gradient(180deg, rgba(29, 27, 22, 0.98), rgba(17, 17, 15, 0.98));
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-surface) 96%, transparent), var(--ct-bg));
 }
 
 .ct-brand {
@@ -105,10 +136,10 @@ button {
   place-items: center;
   border-radius: 999px;
   background: var(--ct-accent);
-  color: #17130b;
+  color: var(--ct-surface);
   font-family: var(--ct-font-head);
   font-weight: 800;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset;
 }
 
 .ct-brand-text strong,
@@ -158,7 +189,7 @@ button {
   place-items: center;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-sm);
-  background: rgba(255,255,255,0.03);
+  background: color-mix(in srgb, var(--ct-surface) 70%, transparent);
   color: var(--ct-accent);
 }
 
@@ -189,7 +220,7 @@ button {
   margin-top: 2px;
 }
 
-.ct-sidebar-note {
+.ct-sidebar-footer {
   position: absolute;
   left: 20px;
   right: 20px;
@@ -199,18 +230,18 @@ button {
   color: var(--ct-text-muted);
 }
 
-.ct-sidebar-note span,
-.ct-sidebar-note strong {
+.ct-sidebar-footer span,
+.ct-sidebar-footer strong {
   display: block;
 }
 
-.ct-sidebar-note span {
+.ct-sidebar-footer span {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.ct-sidebar-note strong {
+.ct-sidebar-footer strong {
   margin-top: 4px;
   color: var(--ct-accent);
   font-size: 18px;
@@ -231,7 +262,7 @@ button {
   gap: 18px;
   padding: 14px 28px;
   border-bottom: 1px solid var(--ct-border);
-  background: rgba(20, 19, 16, 0.94);
+  background: color-mix(in srgb, var(--ct-surface) 92%, transparent);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -247,7 +278,7 @@ button {
   padding: 0 15px;
   border: 1px solid var(--ct-border);
   border-radius: 999px;
-  background: rgba(255,255,255,0.03);
+  background: color-mix(in srgb, var(--ct-surface-soft) 82%, transparent);
   color: var(--ct-text-muted);
   font-family: var(--ct-font-ui);
 }
@@ -258,20 +289,51 @@ button {
   gap: 10px;
 }
 
-.ct-topbar-actions a {
+.ct-topbar-actions a,
+.ct-theme-toggle,
+.ct-login-button {
   min-height: 38px;
   display: inline-flex;
   align-items: center;
+  gap: 7px;
   padding: 0 11px;
+  border: 1px solid transparent;
   border-radius: var(--ct-radius-md);
+  background: transparent;
   color: var(--ct-text-soft);
   font-family: var(--ct-font-ui);
   font-weight: 700;
+  line-height: 1;
 }
 
-.ct-topbar-actions a:hover {
+.ct-topbar-actions a:hover,
+.ct-theme-toggle:hover,
+.ct-login-button:hover {
+  border-color: var(--ct-border);
   background: var(--ct-accent-soft);
   color: var(--ct-text);
+}
+
+.ct-theme-toggle {
+  border-color: var(--ct-border);
+  background: color-mix(in srgb, var(--ct-surface-soft) 70%, transparent);
+}
+
+.ct-theme-toggle-icon {
+  width: 18px;
+  text-align: center;
+}
+
+.ct-login-button {
+  border-color: var(--ct-accent);
+  background: var(--ct-accent);
+  color: var(--ct-surface) !important;
+}
+
+.ct-login-button:hover {
+  background: var(--ct-accent-dark);
+  border-color: var(--ct-accent-dark);
+  color: var(--ct-surface) !important;
 }
 
 .ct-main {
@@ -299,7 +361,7 @@ button {
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-lg);
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(0,0,0,0.04)),
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 4%, transparent), transparent),
     var(--ct-surface);
   color: var(--ct-text);
   box-shadow: var(--ct-shadow-soft);
@@ -415,7 +477,7 @@ p {
   padding: 0 14px;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-md);
-  background: rgba(255,255,255,0.04);
+  background: color-mix(in srgb, var(--ct-surface-soft) 72%, transparent);
   color: var(--ct-text);
   font-family: var(--ct-font-ui);
   font-weight: 750;
@@ -429,12 +491,12 @@ p {
 .ct-button-primary {
   background: var(--ct-accent);
   border-color: var(--ct-accent);
-  color: #15120b !important;
+  color: var(--ct-surface) !important;
 }
 
 .ct-button-primary:hover {
-  background: #d8bc72;
-  border-color: #d8bc72;
+  background: var(--ct-accent-dark);
+  border-color: var(--ct-accent-dark);
 }
 
 .ct-actions {
@@ -442,51 +504,6 @@ p {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 22px;
-}
-
-.ct-section-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.ct-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid var(--ct-border);
-  border-radius: 999px;
-  background: var(--ct-surface-soft);
-  color: var(--ct-accent);
-  font-family: var(--ct-font-ui);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.ct-status-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 22px;
-}
-
-.ct-status-grid div {
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-radius-md);
-  background: rgba(255,255,255,0.03);
-  padding: 16px;
-}
-
-.ct-status-grid strong,
-.ct-status-grid span {
-  display: block;
-}
-
-.ct-status-grid span {
-  color: var(--ct-text-muted);
-  margin-top: 4px;
 }
 
 .collectium-card {
@@ -498,7 +515,7 @@ p {
   position: absolute;
   right: 8px;
   bottom: 8px;
-  color: var(--ct-accent);
+  color: var(--ct-signature);
   font-size: 8px;
   opacity: 0.55;
   pointer-events: none;
@@ -521,6 +538,12 @@ p {
 
   .ct-topbar {
     padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+
+  .ct-search {
+    order: 2;
+    min-width: 100%;
   }
 
   .ct-main {
@@ -533,8 +556,7 @@ p {
     padding: 28px;
   }
 
-  .ct-grid-3,
-  .ct-status-grid {
+  .ct-grid-3 {
     grid-template-columns: 1fr;
   }
 

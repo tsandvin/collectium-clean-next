@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import { CollectiumThemeToggle } from "./CollectiumThemeToggle";
 
 export function CollectiumTopbar() {
   return (
@@ -10,8 +11,9 @@ export function CollectiumTopbar() {
       <nav className="ct-topbar-actions" aria-label="Toppmeny">
         <Link href="/katalog">Katalog</Link>
         <Link href="/min-side">Min side</Link>
-        <Link className="ct-button ct-button-primary" href="/startside">
-          Start
+        <CollectiumThemeToggle />
+        <Link className="ct-login-button" href="/login">
+          Login
         </Link>
       </nav>
     </header>
