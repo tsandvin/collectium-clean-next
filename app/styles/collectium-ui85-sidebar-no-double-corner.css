@@ -1,0 +1,78 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 sidebar no double corner
+ *
+ * Definering / formÃ¥l:
+ * Fjerner den ekstra grÃ¸nne hjÃ¸rne-/inner-frame-markeringen pÃ¥ aktiv sidemenyrad.
+ * Beholder aktiv rad, ikon og tekst, men fjerner dobbel hjÃ¸rnesignatur.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt aller sist i app/layout.tsx.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI-styling.
+ */
+
+/* Fjern ekstra pseudo-hjÃ¸rne/inner-frame pÃ¥ aktiv sidemenyknapp */
+.ct-sidebar-enhanced a::before,
+.ct-sidebar-enhanced a::after,
+.ct-sidebar-visible-v3 a::before,
+.ct-sidebar-visible-v3 a::after,
+.ct-sidebar-link::before,
+.ct-sidebar-link::after,
+.ct-v3-link::before,
+.ct-v3-link::after,
+aside[class*="sidebar"] a::before,
+aside[class*="sidebar"] a::after,
+nav[class*="sidebar"] a::before,
+nav[class*="sidebar"] a::after {
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Aktiv rad skal markeres med ren venstrestrek, ikke dobbel avrundet hjÃ¸rneramme */
+.ct-sidebar-enhanced a[aria-current="page"],
+.ct-sidebar-enhanced a.is-active,
+.ct-sidebar-visible-v3 a[aria-current="page"],
+.ct-sidebar-visible-v3 a.is-active,
+.ct-sidebar-link[aria-current="page"],
+.ct-sidebar-link.is-active,
+.ct-v3-link[aria-current="page"],
+.ct-v3-link.is-active {
+  box-shadow: inset 4px 0 0 var(--ct-accent, #007a4d) !important;
+  border-left: 0 !important;
+}
+
+/* Fjern eventuelle smÃ¥ inner-border-hjÃ¸rner inne i ikonomrÃ¥det */
+.ct-sidebar-enhanced .ct-sidebar-icon::before,
+.ct-sidebar-enhanced .ct-sidebar-icon::after,
+.ct-sidebar-visible-v3 .ct-v3-icon::before,
+.ct-sidebar-visible-v3 .ct-v3-icon::after,
+.ct-sidebar-icon::before,
+.ct-sidebar-icon::after,
+.ct-v3-icon::before,
+.ct-v3-icon::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Ikoner skal stÃ¥ rent uten egen bakramme/hjÃ¸rnemerke */
+.ct-sidebar-icon,
+.ct-v3-icon {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Dersom aktiv knapp har egen outline som lager dobbelt hjÃ¸rne */
+.ct-sidebar-enhanced a,
+.ct-sidebar-visible-v3 a,
+.ct-sidebar-link,
+.ct-v3-link {
+  outline: 0 !important;
+}
