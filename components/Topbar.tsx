@@ -1,20 +1,22 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 
 const themes = [
-  { value: "neon-dark", label: "01 Neon Dark" },
-  { value: "corporate", label: "02 Corporate Clean" },
-  { value: "brutalist", label: "03 Tech Brutalist" },
-  { value: "editorial", label: "04 Editorial Luxury" },
+  { value: "collectium", label: "Collectium" },
+  { value: "samler", label: "Samler" },
+  { value: "museum", label: "Museum" },
+  { value: "finans", label: "Finans" },
 ];
 
 export default function Topbar() {
-  const [theme, setTheme] = useState("corporate");
+  const [theme, setTheme] = useState("collectium");
 
   useEffect(() => {
     const saved = window.localStorage.getItem("collectium-workspace-theme");
-    const nextTheme = saved || "corporate";
+    const allowed = ["collectium", "samler", "museum", "finans"];
+    const nextTheme = saved && allowed.includes(saved) ? saved : "collectium";
+
     setTheme(nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
   }, []);
@@ -30,7 +32,7 @@ export default function Topbar() {
       <input
         className="collectium-search"
         type="text"
-        placeholder="02 SÃ¸k / bruker..."
+        placeholder="02 SÃƒÂ¸k / bruker..."
       />
 
       <div className="collectium-topbar-actions">

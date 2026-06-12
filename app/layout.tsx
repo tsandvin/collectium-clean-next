@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="no" data-theme="corporate">
+    <html lang="no" data-theme="collectium">
       <body>
         <div className="collectium-shell">
           <Sidebar />
