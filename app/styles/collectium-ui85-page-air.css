@@ -1,0 +1,84 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 page air spacing
+ *
+ * Definering / formÃ¥l:
+ * Legger minimumsluft mellom hovedinnhold og ytre kant/sidefelt.
+ * Gjelder rammen markert som rÃ¸d i skjermkontroll.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt sist i app/layout.tsx.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI-spacing.
+ */
+
+:root {
+  --ct-page-air-min: 20px;
+  --ct-page-air-fluid: clamp(20px, 1.45vw, 28px);
+  --ct-page-air-mobile: 12px;
+}
+
+/* Main work area: 20px luft pÃ¥ desktop/bredskjerm/TV */
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced + *,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 + *,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ main,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-main,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-page,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-content,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ main,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-main,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-page,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-content {
+  padding: var(--ct-page-air-fluid) !important;
+  box-sizing: border-box !important;
+}
+
+/* Direct page/content containers also get internal safety spacing. */
+main,
+.collectium-main,
+.collectium-page,
+.collectium-content {
+  box-sizing: border-box !important;
+}
+
+/* Prevent the first hero/panel from touching top/left/right edges. */
+main > :first-child,
+.collectium-main > :first-child,
+.collectium-page > :first-child,
+.collectium-content > :first-child {
+  margin-top: 0;
+}
+
+/* Sections/panels inside the page keep a small breathing gap. */
+main section,
+.collectium-section,
+.collectium-panel,
+.ct-section,
+.ct-panel {
+  box-sizing: border-box;
+}
+
+/* If older layout already has huge padding, do not double it beyond reason. */
+@media (min-width: 1101px) {
+  main,
+  .collectium-main,
+  .collectium-page,
+  .collectium-content {
+    padding-left: max(var(--ct-page-air-min), env(safe-area-inset-left)) !important;
+    padding-right: max(var(--ct-page-air-min), env(safe-area-inset-right)) !important;
+  }
+}
+
+/* Mobile/tablet: smaller but never zero. */
+@media (max-width: 1100px) {
+  body:has(.ct-mobile-nav-root) main,
+  body:has(.ct-mobile-nav-root) .collectium-main,
+  body:has(.ct-mobile-nav-root) .collectium-page,
+  body:has(.ct-mobile-nav-root) .collectium-content {
+    padding: var(--ct-page-air-mobile) !important;
+    box-sizing: border-box !important;
+  }
+}
