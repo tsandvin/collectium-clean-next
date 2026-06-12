@@ -1,0 +1,92 @@
+﻿.collectium-section-label {
+  font-size: 0.75rem;
+  color: var(--ct-accent);
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.collectium-panel {
+  background-color: var(--ct-panel-solid);
+  border: 1px solid var(--ct-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.collectium-hero {
+  background-color: var(--ct-panel-solid);
+  padding: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--ct-border);
+}
+
+.collectium-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.collectium-tab {
+  padding: 12px 4px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+}
+
+.collectium-tab[data-active="true"] {
+  border-bottom-color: var(--ct-accent);
+  color: var(--ct-text);
+}
+
+.collectium-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.collectium-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.collectium-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 20px;
+}
+
+.collectium-grid-3-1 {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 20px;
+}
+
+.collectium-grid-1-3 {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 20px;
+}
+
+.collectium-lanes {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.collectium-lane {
+  flex: 0 0 360px;
+  background-color: var(--ct-panel-solid);
+  border: 1px solid var(--ct-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+@media (max-width: 900px) {
+  .collectium-grid-3-1,
+  .collectium-grid-1-3 {
+    grid-template-columns: 1fr;
+  }
+}

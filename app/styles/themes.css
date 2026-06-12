@@ -1,0 +1,74 @@
+﻿:root {
+  --ct-app-bg: #f4f6f9;
+  --ct-panel-solid: #ffffff;
+  --ct-border: #cbd5e1;
+  --ct-text: #1e293b;
+  --ct-text-muted: #64748b;
+  --ct-text-soft: #475569;
+  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-head: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-accent: #2563eb;
+  --ct-accent-soft: rgba(37, 99, 235, 0.1);
+  --ct-signature: #94a3b8;
+  --ct-density: 16px;
+}
+
+[data-theme="neon-dark"] {
+  --ct-app-bg: #0d1117;
+  --ct-panel-solid: #161b22;
+  --ct-border: #30363d;
+  --ct-text: #c9d1d9;
+  --ct-text-muted: #8b949e;
+  --ct-text-soft: #afb8c1;
+  --ct-font-body: "Fira Code", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --ct-font-head: "Fira Code", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --ct-accent: #00ffcc;
+  --ct-accent-soft: rgba(0, 255, 204, 0.15);
+  --ct-signature: #58a6ff;
+  --ct-density: 16px;
+}
+
+[data-theme="corporate"] {
+  --ct-app-bg: #f4f6f9;
+  --ct-panel-solid: #ffffff;
+  --ct-border: #cbd5e1;
+  --ct-text: #1e293b;
+  --ct-text-muted: #64748b;
+  --ct-text-soft: #475569;
+  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-head: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-accent: #2563eb;
+  --ct-accent-soft: rgba(37, 99, 235, 0.1);
+  --ct-signature: #94a3b8;
+  --ct-density: 16px;
+}
+
+[data-theme="brutalist"] {
+  --ct-app-bg: #fafafa;
+  --ct-panel-solid: #ffffff;
+  --ct-border: #000000;
+  --ct-text: #000000;
+  --ct-text-muted: #4b5563;
+  --ct-text-soft: #1f2937;
+  --ct-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --ct-font-head: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --ct-accent: #ff4500;
+  --ct-accent-soft: rgba(255, 69, 0, 0.15);
+  --ct-signature: #000000;
+  --ct-density: 16px;
+}
+
+[data-theme="editorial"] {
+  --ct-app-bg: #fcfbf7;
+  --ct-panel-solid: #f4f1ea;
+  --ct-border: #bdaf9c;
+  --ct-text: #2c2c2c;
+  --ct-text-muted: #6e6a5f;
+  --ct-text-soft: #4a4740;
+  --ct-font-body: "Playfair Display", Georgia, serif;
+  --ct-font-head: "Playfair Display", Georgia, serif;
+  --ct-accent: #8b5a2b;
+  --ct-accent-soft: rgba(139, 90, 43, 0.1);
+  --ct-signature: #bdaf9c;
+  --ct-density: 16px;
+}

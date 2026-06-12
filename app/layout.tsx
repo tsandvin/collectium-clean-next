@@ -1,10 +1,13 @@
 ﻿import type { Metadata } from "next";
 import "./globals.css";
-import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
+import "./styles/themes.css";
+import "./styles/collectium-ui85-v36.css";
+import Sidebar from "@/components/Sidebar";
+import Topbar from "@/components/Topbar";
 
 export const metadata: Metadata = {
   title: "Collectium",
-  description: "Samlerplattform for katalog, historie og marked.",
+  description: "Samlerplattform for katalog, samling, marked og systemkontroll.",
 };
 
 export default function RootLayout({
@@ -13,9 +16,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="no" data-theme="collectium">
+    <html lang="no" data-theme="corporate">
       <body>
-        <CollectiumAppShell>{children}</CollectiumAppShell>
+        <div className="collectium-shell">
+          <Sidebar />
+
+          <div className="collectium-workspace">
+            <Topbar />
+
+            <main className="collectium-app">
+              {children}
+            </main>
+          </div>
+        </div>
       </body>
     </html>
   );
