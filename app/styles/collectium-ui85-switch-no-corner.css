@@ -5,17 +5,15 @@
  * Collectium UI 8.5 switch/button no corner marker
  *
  * Definering / formÃ¥l:
- * Fjerner den ekstra grÃ¸nne hjÃ¸rne-/inner-frame-delen pÃ¥ aktive brytere/menyknapper.
- * Beholder ren aktiv markering uten dobbel hjÃ¸rnesignatur.
+ * Fjerner ekstra grÃ¸nt hjÃ¸rne / dobbel inner-frame pÃ¥ brytere, tabs og sidemenyvalg.
  *
  * BruksomrÃ¥de:
- * Importeres globalt aller sist i app/layout.tsx.
+ * Importeres globalt fra app/layout.tsx.
  *
  * BerÃ¸rte DB-brytere / feature_keys:
  * - Ingen. Ren global UI-styling.
  */
 
-/* Fjern ekstra pseudo-hjÃ¸rne/inner-frame pÃ¥ brytere, tabs og sidebar-knapper */
 .ct-sidebar-enhanced a::before,
 .ct-sidebar-enhanced a::after,
 .ct-sidebar-visible-v3 a::before,
@@ -45,7 +43,6 @@ a[class*="tab"]::after {
   box-shadow: none !important;
 }
 
-/* Aktiv bryter skal bruke ren venstre markÃ¸r eller ren fyllflate, ikke ekstra hjÃ¸rne */
 .ct-sidebar-enhanced a[aria-current="page"],
 .ct-sidebar-enhanced a.is-active,
 .ct-sidebar-visible-v3 a[aria-current="page"],
@@ -58,7 +55,6 @@ a[class*="tab"]::after {
   box-shadow: inset 4px 0 0 var(--ct-accent, #007a4d) !important;
 }
 
-/* Fjern liten egen boks/ramme rundt ikonet i aktiv bryter */
 .ct-sidebar-icon,
 .ct-v3-icon,
 .ct-switch-icon,
@@ -78,15 +74,4 @@ a[class*="tab"]::after {
 .ct-toggle-icon::after {
   content: none !important;
   display: none !important;
-}
-
-/* UnngÃ¥ dobbel outline pÃ¥ fokuserte knapper */
-.ct-sidebar-enhanced a,
-.ct-sidebar-visible-v3 a,
-.ct-sidebar-link,
-.ct-v3-link,
-.ct-folder-tab,
-.ct-switch,
-.ct-toggle {
-  outline-offset: 3px !important;
 }

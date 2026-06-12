@@ -1,13 +1,16 @@
 .ct-designvalg-page {
   display: grid;
-  gap: clamp(18px, 2vw, 28px);
-  padding: clamp(18px, 2vw, 30px);
+  gap: clamp(18px, 2vw, 30px);
+  padding: clamp(18px, 2vw, 34px);
   color: var(--ct-text, #003f34);
 }
 
 .ct-designvalg-hero,
 .ct-designvalg-section,
-.ct-mini-panel {
+.ct-mini-panel,
+.ct-switch-card,
+.ct-folder-panel,
+.ct-profile-card {
   position: relative;
   border: 1px solid var(--ct-panel-border, rgba(198, 163, 90, .42));
   border-radius: 18px;
@@ -16,7 +19,7 @@
 }
 
 .ct-designvalg-hero {
-  padding: clamp(24px, 3vw, 44px);
+  padding: clamp(24px, 3vw, 46px);
 }
 
 .ct-eyebrow {
@@ -30,20 +33,20 @@
 
 .ct-designvalg-hero h1 {
   margin: 0;
-  max-width: 760px;
+  max-width: 880px;
   font-family: Georgia, serif;
-  font-size: clamp(34px, 5vw, 62px);
+  font-size: clamp(34px, 5vw, 64px);
   line-height: .98;
 }
 
 .ct-designvalg-hero p {
-  max-width: 820px;
+  max-width: 860px;
   margin: 16px 0 0;
   line-height: 1.55;
 }
 
 .ct-designvalg-section {
-  padding: clamp(18px, 2vw, 28px);
+  padding: clamp(18px, 2vw, 30px);
 }
 
 .ct-section-head {
@@ -75,7 +78,8 @@
   color: var(--ct-text-muted, #716b59);
 }
 
-.ct-switch-grid {
+.ct-switch-grid,
+.ct-profile-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(190px, 1fr));
   gap: 16px;
@@ -85,8 +89,6 @@
   display: grid;
   gap: 10px;
   padding: 14px;
-  border: 1px solid rgba(198, 163, 90, .35);
-  border-radius: 16px;
   background: rgba(255,255,255,.34);
 }
 
@@ -126,7 +128,8 @@
 .ct-demo-icon {
   display: grid;
   place-items: center;
-  font-size: 22px;
+  font-size: 15px;
+  font-weight: 950;
   color: var(--ct-accent, #007a4d);
 }
 
@@ -161,6 +164,28 @@
   background: rgba(255,255,255,.35);
 }
 
+.variant-dot .ct-demo-switch.is-active .ct-demo-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--ct-accent, #007a4d);
+  color: transparent;
+  justify-self: center;
+}
+
+.variant-outline .ct-demo-switch.is-active {
+  border-color: var(--ct-accent, #007a4d);
+}
+
+.variant-lift .ct-demo-switch.is-active {
+  background: rgba(255,255,255,.64);
+  box-shadow: 0 16px 34px rgba(0, 122, 77, .18);
+}
+
+.variant-minimal .ct-demo-switch.is-active strong {
+  color: var(--ct-accent, #007a4d);
+}
+
 .ct-switch-card p {
   margin: 4px 0 0;
   color: var(--ct-text-muted, #716b59);
@@ -168,7 +193,17 @@
   line-height: 1.45;
 }
 
-.ct-folder-demo {
+.ct-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.ct-folder-example {
+  min-width: 0;
+}
+
+.ct-folder-row {
   display: flex;
   align-items: flex-end;
   gap: 0;
@@ -177,7 +212,7 @@
 }
 
 .ct-folder {
-  min-width: 150px;
+  min-width: 145px;
   min-height: 58px;
   padding: 10px 18px;
   border: 1px solid rgba(198, 163, 90, .48);
@@ -202,7 +237,6 @@
 
 .ct-folder-panel {
   padding: clamp(18px, 2vw, 28px);
-  border: 1px solid rgba(198, 163, 90, .48);
   border-radius: 18px;
   background: var(--ct-card-bg, #fff7e8);
 }
@@ -215,8 +249,128 @@
 
 .ct-folder-panel p {
   margin: 0;
-  max-width: 760px;
   line-height: 1.5;
+}
+
+.ct-profile-card {
+  padding: 18px;
+}
+
+.ct-profile-top {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.ct-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--ct-accent, #007a4d), #164b3d);
+  color: #fff7df;
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: 900;
+  box-shadow: 0 16px 28px rgba(0, 122, 77, .22);
+}
+
+.ct-profile-top strong,
+.ct-profile-top small {
+  display: block;
+}
+
+.ct-profile-top small {
+  color: var(--ct-text-muted, #716b59);
+}
+
+.ct-profile-top span {
+  font-size: 24px;
+  font-weight: 950;
+  color: var(--ct-accent, #007a4d);
+}
+
+.ct-progress {
+  height: 5px;
+  margin: 18px 0 12px;
+  border-radius: 999px;
+  background: rgba(198, 163, 90, .24);
+  overflow: hidden;
+}
+
+.ct-progress i {
+  display: block;
+  width: 74%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ct-accent, #007a4d), #c7a24e);
+}
+
+.ct-profile-card p {
+  margin: 0;
+  color: var(--ct-text-muted, #716b59);
+  line-height: 1.45;
+}
+
+.ct-line-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ct-line-demo {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr) 90px;
+  align-items: center;
+  gap: 14px;
+  min-height: 38px;
+}
+
+.ct-line-demo span {
+  font-weight: 900;
+}
+
+.ct-line-demo i {
+  display: block;
+  height: 1px;
+  background: rgba(198, 163, 90, .55);
+}
+
+.ct-line-demo em {
+  font-family: Georgia, serif;
+  font-size: 11px;
+  color: rgba(198, 163, 90, .9);
+}
+
+.line-2 i {
+  height: 2px;
+}
+
+.line-3 i {
+  background: repeating-linear-gradient(90deg, rgba(198, 163, 90, .65) 0 6px, transparent 6px 12px);
+}
+
+.line-4 i::after {
+  content: " Collectium";
+  float: right;
+  margin-top: -7px;
+  padding-left: 8px;
+  background: var(--ct-card-bg, #fff7e8);
+  font-family: Georgia, serif;
+  font-size: 10px;
+  color: rgba(198, 163, 90, .9);
+}
+
+.line-5 i {
+  height: 6px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--ct-accent, #007a4d), rgba(198, 163, 90, .7));
+}
+
+.line-6 i {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ct-accent, #007a4d), transparent);
 }
 
 .two {
@@ -239,14 +393,18 @@
 }
 
 .ct-bottom-demo,
-.ct-status-demo {
+.ct-status-demo,
+.ct-segment-demo,
+.ct-action-demo {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
 .ct-bottom-demo button,
-.ct-status-demo button {
+.ct-status-demo button,
+.ct-segment-demo button,
+.ct-action-demo button {
   min-height: 42px;
   padding: 9px 16px;
   border-radius: 999px;
@@ -257,19 +415,35 @@
 }
 
 .ct-bottom-demo button.is-active,
-.ct-status-demo button.is-active {
+.ct-status-demo button.is-active,
+.ct-segment-demo button.is-active,
+.ct-action-demo button.is-active {
   background: var(--ct-accent, #007a4d);
   color: #fff7df;
   border-color: var(--ct-accent, #007a4d);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .ct-switch-grid,
+  .ct-profile-grid {
+    grid-template-columns: repeat(2, minmax(190px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ct-switch-grid,
+  .ct-profile-grid,
+  .ct-folder-grid,
   .two {
     grid-template-columns: 1fr;
   }
 
   .ct-designvalg-page {
     padding: 14px;
+  }
+
+  .ct-line-demo {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
