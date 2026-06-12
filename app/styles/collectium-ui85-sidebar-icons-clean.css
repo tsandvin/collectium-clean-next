@@ -1,0 +1,90 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 sidebar icon clean-up
+ *
+ * Definering / formÃ¥l:
+ * Fjerner egne felt/bokser bak sidemenyikonene og gjÃ¸r ikonene stÃ¸rre.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt etter Ã¸vrig sidebar styling.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI-styling.
+ */
+
+/* Nye v3-klasser */
+.ct-v3-link {
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  gap: 14px !important;
+}
+
+.ct-v3-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ct-v3-icon svg {
+  width: 25px !important;
+  height: 25px !important;
+  stroke-width: 2.15 !important;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.12));
+}
+
+/* Hard-polish klasser */
+.ct-sidebar-link {
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  gap: 14px !important;
+}
+
+.ct-sidebar-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ct-sidebar-icon svg {
+  width: 25px !important;
+  height: 25px !important;
+  stroke-width: 2.15 !important;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.12));
+}
+
+/* Eldre/fallback sidebarmenyer: fjern smÃ¥ bakgrunnsfelt rundt SVG hvis de finnes */
+.ct-sidebar-enhanced a span:has(svg),
+.ct-sidebar-visible-v3 a span:has(svg),
+aside a span:has(svg),
+nav a span:has(svg) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* GjÃ¸r selve ikonene tydeligere i alle sidebarvarianter */
+.ct-sidebar-enhanced svg,
+.ct-sidebar-visible-v3 svg,
+aside[class*="sidebar"] svg,
+nav[class*="sidebar"] svg {
+  width: 25px !important;
+  height: 25px !important;
+  min-width: 25px !important;
+  min-height: 25px !important;
+}
+
+/* Behold aktiv markering pÃ¥ hele raden, ikke bak ikonet */
+.ct-sidebar-link.is-active .ct-sidebar-icon,
+.ct-sidebar-link[aria-current="page"] .ct-sidebar-icon,
+.ct-v3-link.is-active .ct-v3-icon,
+.ct-v3-link[aria-current="page"] .ct-v3-icon {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
