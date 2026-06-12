@@ -13,6 +13,7 @@ import "./styles/collectium-ui85-mobile-navigation-force.css";
 import "./styles/collectium-ui85-page-air.css";
 import "./styles/collectium-ui85-smooth-mobile-layout.css";
 import "./styles/collectium-ui85-sidebar-no-double-corner.css";
+import "./styles/collectium-ui85-switch-no-corner.css";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 
