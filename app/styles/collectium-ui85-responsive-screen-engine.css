@@ -1,0 +1,311 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 responsive screen engine
+ *
+ * Definering / formÃ¥l:
+ * Global responsiv skjermmotor for sidemeny, toppbar, desktop cap,
+ * bredskjerm-lanes og TV/presentasjonsmodus.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt fra app/layout.tsx og gjelder hele nettstedet.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI/layout-styling.
+ *
+ * Dataretning:
+ * Browser viewport -> CSS variables -> UI
+ */
+
+:root {
+  --ct-active-sidebar-width: 260px;
+  --ct-active-work-width: calc(100vw - var(--ct-active-sidebar-width));
+  --ct-active-lanes: 1;
+  --ct-lane-gap: 18px;
+  --ct-lane-desktop-cap: 1899px;
+  --ct-content-pad-x: clamp(14px, 1.35vw, 28px);
+  --ct-content-pad-y: clamp(14px, 1.20vw, 24px);
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --ct-active-sidebar-width: 0px;
+    --ct-active-lanes: 1;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1899px) {
+  :root {
+    --ct-active-sidebar-width: 260px;
+    --ct-active-lanes: 1;
+  }
+}
+
+@media (min-width: 1900px) and (max-width: 2899px) {
+  :root {
+    --ct-active-sidebar-width: 260px;
+    --ct-active-lanes: 2;
+  }
+}
+
+@media (min-width: 2900px) {
+  :root {
+    --ct-active-sidebar-width: 280px;
+    --ct-active-lanes: 3;
+  }
+}
+
+html,
+body {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.ct-sidebar-enhanced,
+.ct-sidebar-visible-v3 {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: var(--ct-active-sidebar-width) !important;
+  max-width: var(--ct-active-sidebar-width) !important;
+  min-width: var(--ct-active-sidebar-width) !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  z-index: 1000 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+}
+
+/* The first real content wrapper after sidebar must occupy the work area. */
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced + *,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 + *,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ main,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-main,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-page,
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-content,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ main,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-main,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-page,
+body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-content {
+  margin-left: var(--ct-active-sidebar-width) !important;
+  width: calc(100vw - var(--ct-active-sidebar-width)) !important;
+  max-width: calc(100vw - var(--ct-active-sidebar-width)) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body:has(.ct-sidebar-enhanced) header,
+body:has(.ct-sidebar-enhanced) .topbar,
+body:has(.ct-sidebar-enhanced) .ct-topbar,
+body:has(.ct-sidebar-enhanced) .collectium-topbar,
+body:has(.ct-sidebar-visible-v3) header,
+body:has(.ct-sidebar-visible-v3) .topbar,
+body:has(.ct-sidebar-visible-v3) .ct-topbar,
+body:has(.ct-sidebar-visible-v3) .collectium-topbar {
+  max-width: calc(100vw - var(--ct-active-sidebar-width)) !important;
+  box-sizing: border-box !important;
+}
+
+.collectium-page,
+.collectium-content,
+.collectium-main,
+main {
+  min-width: 0;
+}
+
+/* Desktop: one logical page lane, capped by the available work area. */
+html[data-ct-screen="desktop"] main,
+html[data-ct-screen="desktop"] .collectium-page,
+html[data-ct-screen="desktop"] .collectium-content {
+  max-width: min(var(--ct-active-work-width), var(--ct-lane-desktop-cap));
+}
+
+/* Wide/TV: use full work area, but inner lanes decide width. */
+html[data-ct-screen="widescreen"] main,
+html[data-ct-screen="widescreen"] .collectium-page,
+html[data-ct-screen="widescreen"] .collectium-content,
+html[data-ct-screen="tv"] main,
+html[data-ct-screen="tv"] .collectium-page,
+html[data-ct-screen="tv"] .collectium-content {
+  max-width: var(--ct-active-work-width);
+}
+
+.collectium-lanes,
+.ct-lanes,
+[data-ct-layout="lanes"] {
+  display: grid !important;
+  gap: var(--ct-lane-gap) !important;
+  align-items: start;
+  min-width: 0;
+}
+
+html[data-ct-screen="mobile"] .collectium-lanes,
+html[data-ct-screen="tablet"] .collectium-lanes,
+html[data-ct-screen="desktop"] .collectium-lanes,
+html[data-ct-screen="mobile"] .ct-lanes,
+html[data-ct-screen="tablet"] .ct-lanes,
+html[data-ct-screen="desktop"] .ct-lanes,
+html[data-ct-screen="mobile"] [data-ct-layout="lanes"],
+html[data-ct-screen="tablet"] [data-ct-layout="lanes"],
+html[data-ct-screen="desktop"] [data-ct-layout="lanes"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+html[data-ct-screen="widescreen"] .collectium-lanes,
+html[data-ct-screen="widescreen"] .ct-lanes,
+html[data-ct-screen="widescreen"] [data-ct-layout="lanes"] {
+  grid-template-columns: minmax(900px, 1fr) minmax(720px, 1fr) !important;
+}
+
+html[data-ct-screen="tv"] .collectium-lanes,
+html[data-ct-screen="tv"] .ct-lanes,
+html[data-ct-screen="tv"] [data-ct-layout="lanes"] {
+  grid-template-columns: minmax(900px, 1fr) minmax(900px, 1fr) minmax(720px, .9fr) !important;
+}
+
+.collectium-grid-4,
+.collectium-grid-3,
+.collectium-grid-2,
+.collectium-grid-3-1,
+.collectium-grid-1-3,
+.ct-grid-4,
+.ct-grid-3,
+.ct-grid-2,
+.ct-grid-3-1,
+.ct-grid-1-3 {
+  display: grid;
+  gap: var(--ct-lane-gap);
+  min-width: 0;
+}
+
+.collectium-grid-4,
+.ct-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.collectium-grid-3,
+.ct-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.collectium-grid-2,
+.ct-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.collectium-grid-3-1,
+.ct-grid-3-1 {
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
+}
+
+.collectium-grid-1-3,
+.ct-grid-1-3 {
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 3fr);
+}
+
+html[data-ct-screen="mobile"] .collectium-grid-4,
+html[data-ct-screen="mobile"] .collectium-grid-3,
+html[data-ct-screen="mobile"] .collectium-grid-2,
+html[data-ct-screen="mobile"] .collectium-grid-3-1,
+html[data-ct-screen="mobile"] .collectium-grid-1-3,
+html[data-ct-screen="tablet"] .collectium-grid-4,
+html[data-ct-screen="tablet"] .collectium-grid-3,
+html[data-ct-screen="tablet"] .collectium-grid-2,
+html[data-ct-screen="tablet"] .collectium-grid-3-1,
+html[data-ct-screen="tablet"] .collectium-grid-1-3,
+html[data-ct-screen="mobile"] .ct-grid-4,
+html[data-ct-screen="mobile"] .ct-grid-3,
+html[data-ct-screen="mobile"] .ct-grid-2,
+html[data-ct-screen="mobile"] .ct-grid-3-1,
+html[data-ct-screen="mobile"] .ct-grid-1-3,
+html[data-ct-screen="tablet"] .ct-grid-4,
+html[data-ct-screen="tablet"] .ct-grid-3,
+html[data-ct-screen="tablet"] .ct-grid-2,
+html[data-ct-screen="tablet"] .ct-grid-3-1,
+html[data-ct-screen="tablet"] .ct-grid-1-3 {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+html[data-ct-screen="desktop"] .collectium-grid-4,
+html[data-ct-screen="desktop"] .ct-grid-4 {
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+}
+
+html[data-ct-screen="desktop"] .collectium-grid-3,
+html[data-ct-screen="desktop"] .ct-grid-3 {
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+}
+
+html[data-ct-screen="desktop"] .collectium-grid-2,
+html[data-ct-screen="desktop"] .ct-grid-2 {
+  grid-template-columns: repeat(2, minmax(300px, 1fr));
+}
+
+.collectium-card,
+.collectium-panel,
+.ct-card,
+.ct-panel,
+[class*="card"],
+[class*="panel"] {
+  min-width: 0;
+}
+
+/* Screen label hooks for control/status pages. */
+html[data-ct-screen="mobile"] [data-ct-current-screen]::after { content: "Mobil"; }
+html[data-ct-screen="tablet"] [data-ct-current-screen]::after { content: "Tablet"; }
+html[data-ct-screen="desktop"] [data-ct-current-screen]::after { content: "Desktop standard"; }
+html[data-ct-screen="widescreen"] [data-ct-current-screen]::after { content: "Bredskjerm"; }
+html[data-ct-screen="tv"] [data-ct-current-screen]::after { content: "TV / presentasjon"; }
+
+@media (max-width: 1100px) {
+  .ct-sidebar-enhanced,
+  .ct-sidebar-visible-v3 {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    z-index: 1 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--ct-sidebar-border, rgba(198, 163, 90, 0.42)) !important;
+  }
+
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced + *,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 + *,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ main,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-main,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-page,
+  body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced ~ .collectium-content,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ main,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-main,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-page,
+  body:has(.ct-sidebar-visible-v3) .ct-sidebar-visible-v3 ~ .collectium-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:has(.ct-sidebar-enhanced) header,
+  body:has(.ct-sidebar-enhanced) .topbar,
+  body:has(.ct-sidebar-enhanced) .ct-topbar,
+  body:has(.ct-sidebar-enhanced) .collectium-topbar,
+  body:has(.ct-sidebar-visible-v3) header,
+  body:has(.ct-sidebar-visible-v3) .topbar,
+  body:has(.ct-sidebar-visible-v3) .ct-topbar,
+  body:has(.ct-sidebar-visible-v3) .collectium-topbar {
+    max-width: 100% !important;
+  }
+}
