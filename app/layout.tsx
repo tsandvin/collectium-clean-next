@@ -11,6 +11,7 @@ import "./styles/collectium-ui85-sidebar-750-breakpoint.css";
 import "./styles/collectium-ui85-mobile-navigation.css";
 import "./styles/collectium-ui85-mobile-navigation-force.css";
 import "./styles/collectium-ui85-page-air.css";
+import "./styles/collectium-ui85-smooth-mobile-layout.css";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 

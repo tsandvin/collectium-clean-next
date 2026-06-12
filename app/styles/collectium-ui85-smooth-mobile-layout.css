@@ -1,0 +1,253 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 smooth mobile layout override
+ *
+ * Definering / formÃ¥l:
+ * Myker opp mobil/tablet-responsivitet og fjerner kollisjon mellom
+ * desktop sidefelt-regler, mobil toppmeny og bunnbar.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt aller sist i app/layout.tsx.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI/layout-styling.
+ */
+
+/* ------------------------------------------------------------
+   Global: smoother width/spacing transitions
+   ------------------------------------------------------------ */
+
+:root {
+  --ct-mobile-shell-pad: clamp(12px, 3.2vw, 22px);
+  --ct-mobile-card-pad: clamp(16px, 4vw, 28px);
+  --ct-mobile-gap: clamp(14px, 3.8vw, 24px);
+  --ct-mobile-readable: 760px;
+}
+
+.collectium-workspace,
+.collectium-app,
+.collectium-shell,
+main,
+section,
+.ct-panel,
+.ct-card,
+.collectium-panel,
+.collectium-card {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------
+   Mobil/Fold: one clean app column
+   ------------------------------------------------------------ */
+
+@media (max-width: 749px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  body {
+    padding-top: 62px !important;
+    padding-bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .collectium-shell {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .collectium-workspace {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .collectium-app,
+  main.collectium-app {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: var(--ct-mobile-shell-pad) !important;
+    transform: none !important;
+  }
+
+  .collectium-app > *,
+  main.collectium-app > *,
+  .collectium-page,
+  .collectium-content,
+  .collectium-main {
+    width: 100% !important;
+    max-width: var(--ct-mobile-readable) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Remove hidden desktop lane/side offsets completely */
+  .ct-sidebar-enhanced,
+  .ct-sidebar-visible-v3,
+  .collectium-sidebar,
+  .ct-sidebar,
+  aside[class*="sidebar"],
+  nav[class*="sidebar"] {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Cards and hero should breathe, not look like squeezed desktop cards */
+  .collectium-app article,
+  .collectium-app section,
+  .collectium-app .ct-card,
+  .collectium-app .ct-panel,
+  .collectium-app .collectium-card,
+  .collectium-app .collectium-panel,
+  .collectium-app [class*="card"],
+  .collectium-app [class*="panel"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: var(--ct-mobile-card-pad);
+    padding-right: var(--ct-mobile-card-pad);
+  }
+
+  /* Topbar is fixed; content should start calmly below it */
+  .ct-mobile-topbar {
+    height: 62px !important;
+    backdrop-filter: blur(14px);
+  }
+
+  .ct-mobile-brand-text strong {
+    font-size: clamp(16px, 4.4vw, 20px) !important;
+  }
+
+  .ct-mobile-top-action {
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Bottom bar should not cover content too aggressively */
+  .ct-mobile-bottom-bar {
+    height: calc(74px + env(safe-area-inset-bottom)) !important;
+    background: color-mix(in srgb, var(--ct-panel-bg, #fff7e8) 92%, transparent) !important;
+    backdrop-filter: blur(16px);
+  }
+
+  .ct-mobile-bottom-bar a {
+    min-height: 50px !important;
+  }
+
+  /* Tabs: horizontal scroll inside tabs only, not whole page */
+  .collectium-app [role="tablist"],
+  .collectium-app .ct-folder-tabs,
+  .collectium-app .folder-tabs,
+  .collectium-app [class*="tab"],
+  .collectium-app [class*="Tabs"] {
+    max-width: 100% !important;
+  }
+
+  .collectium-app [role="tablist"],
+  .collectium-app .ct-folder-tabs,
+  .collectium-app .folder-tabs {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .collectium-app h1 {
+    font-size: clamp(24px, 7vw, 34px) !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .collectium-app h2 {
+    font-size: clamp(19px, 5.6vw, 27px) !important;
+    line-height: 1.16 !important;
+  }
+
+  .collectium-app p,
+  .collectium-app li {
+    font-size: clamp(14px, 3.7vw, 17px) !important;
+    line-height: 1.48 !important;
+  }
+
+  /* Grid sections must stack smoothly */
+  .collectium-grid-4,
+  .collectium-grid-3,
+  .collectium-grid-2,
+  .collectium-grid-3-1,
+  .collectium-grid-1-3,
+  .ct-grid-4,
+  .ct-grid-3,
+  .ct-grid-2,
+  .ct-grid-3-1,
+  .ct-grid-1-3,
+  [class*="grid"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: var(--ct-mobile-gap) !important;
+  }
+}
+
+/* ------------------------------------------------------------
+   Small tablet: keep side rail only when there is room
+   ------------------------------------------------------------ */
+
+@media (min-width: 750px) and (max-width: 1100px) {
+  :root {
+    --ct-active-sidebar-width: 220px !important;
+    --ct-fixed-sidebar-width: 220px !important;
+  }
+
+  .collectium-workspace {
+    width: calc(100vw - 220px) !important;
+    max-width: calc(100vw - 220px) !important;
+    margin-left: 220px !important;
+  }
+
+  .collectium-app,
+  main.collectium-app {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: clamp(16px, 2.4vw, 26px) !important;
+  }
+
+  .collectium-app > * {
+    max-width: 100% !important;
+  }
+}
+
+/* ------------------------------------------------------------
+   Reduced motion support
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .collectium-workspace,
+  .collectium-app,
+  .ct-mobile-topbar,
+  .ct-mobile-bottom-bar,
+  .ct-mobile-drawer {
+    transition:
+      width 180ms ease,
+      margin 180ms ease,
+      padding 180ms ease,
+      transform 180ms ease,
+      opacity 160ms ease;
+  }
+}
