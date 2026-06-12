@@ -28,7 +28,7 @@ import { useEffect } from "react";
 type ScreenMode = "mobile" | "tablet" | "desktop" | "widescreen" | "tv";
 
 function getMode(width: number): ScreenMode {
-  if (width < 720) return "mobile";
+  if (width < 750) return "mobile";
   if (width <= 1100) return "tablet";
   if (width <= 1899) return "desktop";
   if (width <= 2899) return "widescreen";
