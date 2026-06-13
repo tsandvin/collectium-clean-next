@@ -1,4 +1,4 @@
-﻿.transferMatrixSection {
+.transferMatrixSection {
   margin: 24px 0;
   padding: 24px;
   border: 1px solid rgba(148, 163, 184, 0.38);
@@ -22,6 +22,69 @@
   margin: 0 0 8px;
 }
 
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0a5749;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.summaryGrid article {
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.summaryGrid span,
+.summaryGrid small {
+  display: block;
+  color: rgba(15, 23, 42, 0.68);
+  font-size: 11px;
+}
+
+.summaryGrid strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.matrixSubTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 14px;
+}
+
+.matrixSubTabs button {
+  appearance: none;
+  border: 1px solid rgba(10, 87, 73, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #163b35;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+  padding: 8px 12px;
+}
+
+.matrixSubTabs button:hover,
+.activeMatrixSubTab {
+  background: #0a5749 !important;
+  color: #fff !important;
+  border-color: #0a5749 !important;
+}
+
 .transferMatrixTableWrap {
   width: 100%;
   overflow-x: auto;
@@ -32,9 +95,13 @@
 
 .transferMatrixTable {
   width: 100%;
-  min-width: 1120px;
+  min-width: 1180px;
   border-collapse: separate;
   border-spacing: 0;
+}
+
+.rulesTable {
+  min-width: 1680px;
 }
 
 .transferMatrixTable th {
@@ -43,9 +110,10 @@
   font-size: 12px;
   font-weight: 850;
   border-bottom: 1px solid rgba(148, 163, 184, 0.34);
+  white-space: nowrap;
 }
 
-.transferMatrixRow td,
+.transferMatrixTable td,
 .fieldCell {
   vertical-align: top;
   padding: 16px 14px 14px;
@@ -132,10 +200,42 @@
   display: block;
 }
 
+.transferMatrixTable code {
+  max-width: 320px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .transferMatrixTable small {
   margin-top: 4px;
-  opacity: 0.68;
+  opacity: 0.72;
   line-height: 1.35;
+}
+
+.matrixRuleBox {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-left: 4px solid #0a5749;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.matrixRuleBox strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.matrixRuleBox p {
+  margin: 0;
+  color: rgba(15, 23, 42, 0.72);
+  line-height: 1.45;
+}
+
+@media (max-width: 1100px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {
@@ -145,5 +245,15 @@
 
   .transferMatrixTable {
     min-width: 980px;
+  }
+
+  .rulesTable {
+    min-width: 1450px;
+  }
+}
+
+@media (max-width: 640px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
   }
 }
