@@ -1,0 +1,2069 @@
+# Collectium UI/UX 8.6 — Robotregler for visningskort, objektpresentasjon, relasjonsside, index og periodefilter
+
+## 1. Formål
+
+Denne filen er en robot-/AI-instruksjonsfil for Collectium UI/UX 8.6.
+
+Den skal brukes av:
+
+```text
+AI
+Codex
+Antigravity
+utvikler
+designsystem
+sandbox
+kontrollside
+automatiske kodeverktøy
+```
+
+Formålet er å sikre at Collectium bygges som én samlet relasjonsplattform, ikke som løse sider, løse kort eller tilfeldige React-komponenter.
+
+Denne filen definerer:
+
+```text
+hva UI/UX 8.6 skal vise
+hvordan visningskort skal oppføre seg
+hvordan objektpresentasjon skal fungere
+hvordan relasjonssider skal fungere
+hvordan index skal bruke periodefilter
+hvordan Filter Master binder sidene sammen
+hvordan tilgang, medlemskap og datapakker skal vises
+hvordan auksjon, nettbutikk, forhandler og samling skal kobles til objektet
+hva AI/robot aldri skal hardkode
+```
+
+Dette er ikke en vanlig `robots.txt` for søkemotorer.
+
+Dette er en intern Collectium robotregel for bygging, kontroll og videreutvikling av UI/UX 8.6.
+
+---
+
+## 2. Hovedskille mellom UI/UX 8.6 og DB Neon 8.6
+
+Collectium 8.6 skal deles i to standarder:
+
+```text
+UI/UX 8.6
+= hva brukeren ser, gjør, forstår og kan trykke på
+
+DB Neon 8.6
+= hvor data ligger, hvordan data hentes, hvilke API-ruter, feature_keys, access_rules, tabeller, views og logger som styrer sannheten
+```
+
+UI/UX 8.6 skal aldri eie sannheten.
+
+DB Neon 8.6 skal eie sannheten.
+
+UI/UX 8.6 skal bare vise data, handlinger, relasjoner, filterverdier, medlemskap og status som kommer fra API/server actions og DB Neon 8.6.
+
+Riktig dataflyt:
+
+```text
+DB Neon 8.6
+→ API / server action
+→ Next.js
+→ React-komponent
+→ UI/UX 8.6
+```
+
+Ikke:
+
+```text
+React
+→ hardkodede objekter
+→ hardkodede relasjoner
+→ hardkodede priser
+→ hardkodede filterverdier
+→ hardkodede tilgangsregler
+```
+
+---
+
+## 3. Absolutt hovedregel for robot/AI
+
+Robot skal aldri finne opp:
+
+```text
+object_id
+source_key
+object_group
+filterverdier
+relasjoner
+periodekoblinger
+markedsverdi
+trend
+tilgang
+medlemskap
+auksjonsstatus
+nettbutikkstatus
+forhandlerstatus
+samlerstatus
+fakturaflyt
+API-ruter
+feature_keys
+```
+
+Robot skal alltid bygge UI ut fra:
+
+```text
+API-respons
+DB Neon 8.6-kontrakt
+feature_key
+access_rule
+action_route
+read_view
+write_table
+log_action
+log_category
+```
+
+Dersom data mangler, skal UI vise en kontrollert fallback.
+
+Eksempler:
+
+```text
+Bilde mangler
+→ Bilde ikke registrert
+
+Verdi mangler
+→ Ikke vurdert / Mangler markedsverdi
+
+Tilgang mangler
+→ Krever høyere medlemskap
+
+Relasjon mangler
+→ Relasjon ikke registrert
+
+API mangler
+→ Funksjon ikke aktivert
+```
+
+---
+
+## 4. Grunnmodell for objekt, visningskort, objektpresentasjon, relasjonsside og index
+
+Alle objekter skal følge samme hovedmodell:
+
+```text
+Objekt
+→ visningskort
+→ objektpresentasjon
+→ relasjonsside
+→ index / periodeanalyse
+→ tilbake til filtrert katalog
+```
+
+Dette betyr:
+
+```text
+Visningskort
+= kort inngang til objektet
+
+Objektpresentasjon
+= full presentasjon av ett objekt
+
+Relasjonsside
+= kunnskapsside for én relasjonsnode
+
+Index
+= analyse-, marked- og periodeflate
+
+Periodefilter
+= tidsmotoren som binder alt sammen
+
+Filter Master
+= felles filterkontrakt for hele plattformen
+```
+
+Ingen del skal bygges som et isolert system.
+
+---
+
+## 5. Låst hovedregel for UI/UX 8.6
+
+```text
+Ingen katalog uten Filter Master.
+Ingen visningskort uten direkte lenke til objektpresentasjon.
+Ingen visningskort uten relasjonskobling.
+Ingen objektpresentasjon uten periode- og relasjonskobling.
+Ingen objektpresentasjon uten tilgangsstyrt visning basert på medlemsnivå.
+Ingen relasjonsside uten periodekontekst.
+Ingen index uten periodefilter.
+Ingen auksjon uten objektkobling.
+Ingen nettbutikk uten objektkobling.
+Ingen forhandlerside uten objekt-, prosess- og filterkobling.
+Ingen samling uten objekt-, periode- og filterkobling.
+Ingen knapp uten feature_key, action_route eller tydelig lokal UI-funksjon.
+```
+
+Alle brukere må være pålogget for å kunne gi bud.
+
+Budgivning krever medlemskap og tilgangsregel som åpner objektpresentasjon, relasjonsside og nødvendig periode-/objektinformasjon.
+
+---
+
+## 6. Objekt som hovedmodul
+
+Objekt er kjernen i Collectium.
+
+Et objekt kan vises i:
+
+```text
+katalog
+visningskort
+objektpresentasjon
+relasjonsside
+index
+min samling
+ønskeliste
+favoritter
+auksjon
+nettbutikk
+forhandlerflate
+admin
+```
+
+Alle objekter skal identifiseres med:
+
+```text
+object_id + object_group + source_key
+```
+
+Eksempel:
+
+```text
+source_key = norske_sedler
+object_group = banknote
+object_id = 1459
+```
+
+Robot skal aldri bruke bare `id` som objektidentitet.
+
+---
+
+## 7. Objektmodulens understruktur
+
+Objektmodulen skal bestå av:
+
+```text
+Master Filter
+Objektfilter
+Auksjonsfilter
+Nettbutikkfilter
+Periodefilter
+Visningskort
+Objektpresentasjon
+Relasjonspresentasjon
+Indexkobling
+Samlingstilknytning
+Forhandlerkobling
+Admin-/godkjenningsstatus
+```
+
+Hierarki:
+
+```text
+Objekt
+├─ Master Filter
+├─ Objektfilter
+├─ Auksjonsfilter
+├─ Nettbutikkfilter
+├─ Periodefilter
+├─ Visningskort
+├─ Objektpresentasjon
+├─ Relasjonspresentasjon
+├─ Index
+├─ Samling
+├─ Auksjon
+├─ Nettbutikk
+└─ Forhandler / admin
+```
+
+Alle deler skal bruke samme datagrunnlag.
+
+Robot skal ikke lage egne lokale filter, lokale relasjoner eller lokale objektkort som avviker fra denne modellen.
+
+---
+
+## 8. Master Filter
+
+Master Filter er øverste filterlag.
+
+Master Filter skal dekke:
+
+```text
+katalog
+objekter
+relasjoner
+index
+auksjon
+nettbutikk
+forhandler
+min samling
+ønskeliste
+favoritter
+transaksjoner
+marked
+admin
+```
+
+Master Filter kan filtrere på:
+
+```text
+source_key
+object_group
+land
+område
+kategori
+samletype
+segment
+tilgangsnivå
+markedskanal
+status
+```
+
+Master Filter skal ikke være en visuell detalj i én side.
+
+Master Filter er en plattformkontrakt.
+
+---
+
+## 9. Objektfilter
+
+Objektfilter inneholder objektets katalogiske og identitetsmessige felt.
+
+For sedler skal objektfilter minst støtte:
+
+```text
+Land / område
+Kilde
+Objekttype
+Produsent / utsteder
+Valør / objektbetegnelse
+Årstall
+Litra / nummer / detalj
+Valørutgave / serie
+Variant / type
+Signatur / personer
+Konge / regent / dynasti
+Historisk periode
+Historiske hendelser
+Materiale / papirtype
+Kvalitet
+Sjeldenhet
+Marked
+Auksjon
+Nettbutikk
+Samling
+Trend
+Verdi
+```
+
+Korrigert objektidentitet:
+
+```text
+Valør / objektbetegnelse
+→ Årstall
+→ Litra / nummer / detalj
+→ Valørutgave / serie
+→ Variant / type
+→ Signatur / personer
+→ Konge / regent / dynasti
+```
+
+Viktig:
+
+```text
+denomination_issue_raw_no
+= Valørutgave / serie
+```
+
+Det skal ikke vises bare som “Utgave”.
+
+---
+
+## 10. Auksjonsfilter
+
+Auksjonsfilter brukes der objektet kan være del av en auksjon.
+
+Det skal kunne brukes i:
+
+```text
+katalog
+objektpresentasjon
+relasjonsside
+index
+forhandler
+min side
+auksjon
+admin
+```
+
+Auksjonsfilter skal støtte:
+
+```text
+auksjonshus
+forhandler
+auksjonsnavn
+auksjonsnummer
+auksjonsdato
+objektstatus
+budstatus
+salgsstatus
+utropspris
+tilslag
+estimert verdi
+prisintervall
+betalingsstatus
+oppgjørsstatus
+```
+
+Auksjonsfilter skal ikke lage nytt objekt.
+
+Auksjon skal alltid kobles til eksisterende objekt via:
+
+```text
+object_id + object_group + source_key
+```
+
+---
+
+## 11. Nettbutikkfilter
+
+Nettbutikkfilter brukes der objektet kan være til salgs direkte.
+
+Det skal kunne brukes i:
+
+```text
+katalog
+objektpresentasjon
+relasjonsside
+index
+forhandler
+min side
+nettbutikk
+admin
+```
+
+Nettbutikkfilter skal støtte:
+
+```text
+forhandler
+butikk
+lagerstatus
+pris
+valuta
+land
+levering
+salgsstatus
+betalingsstatus
+fakturastatus
+```
+
+Nettbutikk skal ikke eie objektdata.
+
+Nettbutikk skal bare være en salgskanal for objektet.
+
+---
+
+## 12. Periodefilter
+
+Periodefilter er tidsmotoren i Collectium UI/UX 8.6.
+
+Periodefilter skal brukes i:
+
+```text
+/katalog
+/index
+/objekt/[sourceKey]/[objectGroup]/[objectId]
+/relasjon/[type]/[slug]
+/auksjon
+/nettbutikk
+/forhandler
+/min-side/samling
+/admin/catalog
+/admin/system/migration
+```
+
+Periodefilter skal ikke bare filtrere etter år.
+
+Periodefilter skal kunne koble flere tidslag:
+
+```text
+publiseringsår
+objektår
+utgaveperiode
+produksjonsperiode
+regentperiode
+dynasti / maktstruktur
+historisk periode
+historisk hendelse
+funnperiode
+marked/performance-periode
+auksjonsperiode
+samlingstransaksjonsperiode
+indexperiode
+```
+
+Periodefilter skal være selvstendig modul, men samtidig kunne brukes inne i andre sider.
+
+---
+
+## 13. Enkel periodefilter
+
+Enkel periodefilter er tilgjengelig for brukere under Sølv.
+
+Den kan inneholde:
+
+```text
+år fra
+år til
+periode
+århundre
+historisk hovedperiode
+regent / konge
+før / etter
+```
+
+Eksempler:
+
+```text
+1800–1899
+1900–1945
+Etter 1945
+Oscar II
+Haakon VII
+Norges Bank periode
+```
+
+Enkel periodefilter skal være lett å bruke og ikke overbelaste vanlige brukere.
+
+---
+
+## 14. Avansert periodefilter
+
+Avansert periodefilter krever Sølv eller høyere.
+
+Avansert periodefilter skal være både:
+
+```text
+et panel inne i andre sider
+en egen side
+```
+
+Egne sider:
+
+```text
+/filter/periode
+/filter/periode/avansert
+```
+
+Avansert periodefilter skal kunne kombinere:
+
+```text
+publiseringsår
+objektår
+utgaveperiode
+produksjonsperiode
+regentperiode
+dynasti / maktstruktur
+historisk periode
+historisk hendelse
+funnperiode
+marked/performance-periode
+auksjonsperiode
+samlingstransaksjonsperiode
+indexperiode
+```
+
+Avansert periodefilter skal kunne åpne:
+
+```text
+filtrert katalog
+relasjonsside
+indexanalyse
+objektliste
+markedsgraf
+periodegraf
+```
+
+---
+
+## 15. Visningskort
+
+Visningskort er objektets kompakte presentasjon.
+
+Visningskort skal kunne brukes i:
+
+```text
+katalog
+samling
+nettbutikk
+auksjon
+relasjonspresentasjon
+index
+søk
+favoritter
+ønskeliste
+forhandler
+admin
+```
+
+Visningskort skal alltid bruke samme datastruktur og samme grunnmarkup.
+
+Skin kan endre:
+
+```text
+farge
+kontrast
+typografi
+stemning
+visuell vekt
+```
+
+Skin skal ikke endre:
+
+```text
+datastruktur
+feltrekkefølge
+systemlogikk
+API-kontrakt
+relasjonslogikk
+filterlogikk
+tilgangslogikk
+```
+
+---
+
+## 16. Visningskort — primær identitet
+
+Hovedinformasjonen på visningskortet skal alltid vises øverst.
+
+Den skal bestå av:
+
+```text
+Overskrift
+Årstall
+Valør
+Utgave / serie
+Utgave
+Variant
+```
+
+Overskrift kan være en sammensatt hovedtittel.
+
+Eksempel:
+
+```text
+1 krone · 1917-serien · 1917 · Litra A · Seddel / Sikkerhetspapir
+```
+
+Katalognummer skal ligge svakere under hovedtittelen.
+
+Eksempel:
+
+```text
+NSNR 23a · Norske sedler
+```
+
+---
+
+## 17. Visningskort — felles innhold
+
+Alle visningskort skal kunne vise:
+
+```text
+Objektbilde / seddelflate
+Tittel
+Valør
+År
+Utgave / serie
+Utgave
+Variant
+Sjeldenhet
+Signatur
+Konge / regent
+Kilde
+object_group
+source_key
+katalognummer
+Hjerte
+Stjerne
+Auksjon
+Nettbutikk
+Estimert pris
+Vurdert-status
+Trend
+Trendperiode
+Åpne objekt
+Relasjoner
+Legg i samling
+Collectium signaturhjørne
+```
+
+Dersom verdi mangler:
+
+```text
+Ikke vurdert
+Mangler markedsverdi
+```
+
+Dersom bilde mangler:
+
+```text
+Bilde ikke registrert
+```
+
+---
+
+## 18. Visningskort — segmenttilpasning
+
+Visningskort skal støtte segmentene:
+
+```text
+Samler
+Historie
+Finans
+```
+
+### Samler
+
+Viser:
+
+```text
+hjerte
+stjerne
+legg i samling
+ønskeliste
+favoritt
+kvalitet
+sjeldenhet
+brukerstatus
+```
+
+### Historie
+
+Viser:
+
+```text
+år
+utgave
+regent / konge
+signatur
+historisk periode
+materiale
+relasjoner
+```
+
+### Finans
+
+Viser:
+
+```text
+estimert verdi
+trend
+trend %
+likviditet
+auksjonsstatus
+nettbutikkstatus
+prisobservasjoner
+```
+
+---
+
+## 19. Visningskort — handlinger
+
+Visningskort skal ha tre hovedhandlinger:
+
+```text
+Åpne objekt
+Relasjoner
+Legg i samling
+```
+
+### Åpne objekt
+
+Åpner full objektpresentasjon.
+
+URL:
+
+```text
+/objekt/[sourceKey]/[objectGroup]/[objectId]
+```
+
+Eksempel:
+
+```text
+/objekt/norske_sedler/banknote/1459
+```
+
+### Relasjoner
+
+Relasjoner skal ikke være en løs knapp.
+
+Relasjoner skal åpne en popup, meny eller liste med objektets faktiske relasjoner.
+
+Eksempel:
+
+```text
+År · 1877
+Regent · Oscar II
+Signatur · Winge / Getz
+Motiv · Riksvåpen
+Utgave · 1. utgave
+Kilde · Norske sedler
+Valør · 100 kroner
+Produsent · Norges Bank
+```
+
+Hver relasjon skal være klikkbar og åpne relasjonspresentasjon.
+
+### Legg i samling
+
+Skal kobles til brukerens samling og brukerstatus.
+
+Dette skal ikke være lokal frontend-state alene.
+
+---
+
+## 20. Objektpresentasjon
+
+Objektpresentasjon er hovedsiden for ett objekt.
+
+URL:
+
+```text
+/objekt/[sourceKey]/[objectGroup]/[objectId]
+```
+
+Objektpresentasjonen skal bygges rundt tre hovedsegmenter:
+
+```text
+Samler
+Historie
+Finans
+```
+
+Objektpresentasjonen skal være koblet til:
+
+```text
+Master Filter
+Objektfilter
+Auksjonsfilter
+Nettbutikkfilter
+Periodefilter
+Relasjonspresentasjoner
+Samling
+Katalog
+Index
+Forhandler
+Admin
+```
+
+Objektpresentasjon skal ikke være et større katalogkort.
+
+Objektpresentasjon skal forklare objektet som:
+
+```text
+katalogpost
+samlerobjekt
+historisk objekt
+finansielt objekt
+relasjonsnode
+markedsobjekt
+```
+
+---
+
+## 21. Objektpresentasjon — hero
+
+Objekt-hero skal vise:
+
+```text
+hovedbilde
+bildegalleri
+fallback: Bilde ikke registrert
+tittel
+katalognummer
+kilde
+object_group
+source_key
+object_id
+```
+
+---
+
+## 22. Objektpresentasjon — identitet
+
+Identitetsfelt:
+
+```text
+Valør / objektbetegnelse
+Årstall
+Litra / nummer / detalj
+Valørutgave / serie
+Variant / type
+Signatur / personer
+Konge / regent / dynasti
+```
+
+Disse feltene skal være relasjonsklare.
+
+Det betyr at kjente verdier skal kunne åpne relasjonspresentasjon.
+
+---
+
+## 23. Objektpresentasjon — Samler
+
+Samler-segmentet skal vise:
+
+```text
+hjerte
+stjerne
+i min samling
+egne lister
+kvalitet
+sjeldenhet
+kjøpspris hvis bruker eier objektet
+kjøpsdato
+kjøpt fra
+solgt til
+notater
+private bilder
+deling
+```
+
+Tilgang skal styres av medlemskap, rolle og eierskap.
+
+---
+
+## 24. Objektpresentasjon — Historie
+
+Historie-segmentet skal vise:
+
+```text
+produsent / utsteder
+utgave / serie
+utgaveperiode
+publiseringsår
+objektår
+regent / konge
+regentperiode
+dynasti / maktstruktur
+signatur / personer
+motiv
+materiale
+historisk periode
+historiske hendelser
+funn
+proveniens
+relasjoner
+```
+
+Historie-segmentet skal ha tydelige relasjonslenker.
+
+Eksempel:
+
+```text
+Regent: Haakon VII
+→ /relasjon/regent/haakon-vii
+
+År: 1917
+→ /relasjon/ar/1917
+
+Historisk periode: Første verdenskrig
+→ /relasjon/periode/forste-verdenskrig
+```
+
+---
+
+## 25. Objektpresentasjon — Finans
+
+Finans-segmentet skal vise:
+
+```text
+estimert verdi
+fallback: Ikke vurdert
+trend
+trend %
+trendperiode
+likviditet
+siste prisobservasjon
+auksjonsstatus
+nettbutikkstatus
+markedsgrunnlag
+indexkobling
+```
+
+Viktig regel:
+
+```text
+0 kr skal aldri vises som ekte markedsverdi.
+Hvis verdi mangler, skal det stå Ikke vurdert eller Mangler markedsverdi.
+```
+
+---
+
+## 26. Objektpresentasjon — Relasjon til andre objekttyper
+
+Objektpresentasjonen skal ha en egen fane:
+
+```text
+Relasjon til andre objekttyper
+```
+
+Denne fanen skal vise koblinger til:
+
+```text
+andre samleobjekter
+andre objektgrupper
+perioder
+personer
+motiver
+historiske hendelser
+funn
+proveniens
+markedskontekst
+relasjoner
+```
+
+Eksempel:
+
+```text
+Kong Olav V
+→ motiv på sedler
+→ regentperiode for mynter
+→ personrelasjon i medaljer
+→ historisk periode
+→ relaterte dokumenter
+→ relaterte samleobjekter
+```
+
+Fanen skal kunne åpne relasjonspresentasjoner og filtrert katalog.
+
+---
+
+## 27. Objektpresentasjon — periodeforhold
+
+Objektpresentasjonen skal vise hvordan objektet hører til tidsmessig:
+
+```text
+Objektår → relasjon til år
+Publiseringsår → relasjon til år
+Utgaveperiode → relasjon til periode
+Regentperiode → relasjon til konge/regent
+Historisk periode → relasjonspresentasjon
+Markedperiode → index/finans
+```
+
+Eksempel:
+
+```text
+1 krone 1917 Litra A
+
+År: 1917
+→ /relasjon/ar/1917
+
+Regent: Haakon VII
+→ /relasjon/regent/haakon-vii
+
+Historisk periode: Første verdenskrig
+→ /relasjon/periode/forste-verdenskrig
+
+Marked 12 mnd
+→ /index?object_group=banknote&trend_period=12m
+```
+
+---
+
+## 28. Relasjonspresentasjon
+
+Relasjonspresentasjon er hovedsiden for én relasjon.
+
+URL:
+
+```text
+/relasjon/[type]/[slug]
+```
+
+Eksempler:
+
+```text
+/relasjon/regent/oscar-ii
+/relasjon/regent/olav-v
+/relasjon/ar/1980
+/relasjon/person/winge-getz
+/relasjon/motiv/riksvaapen
+/relasjon/kilde/norske-sedler
+/relasjon/utgave/1-utgave-1877
+/relasjon/valor/100-kroner
+/relasjon/produsent/norges-bank
+/relasjon/periode/unionstid
+```
+
+Relasjonspresentasjonen skal være koblet direkte mot:
+
+```text
+objektpresentasjon
+katalog
+samling
+nettbutikk
+auksjon
+index
+periodefilter
+forhandler
+admin
+```
+
+---
+
+## 29. Relasjonspresentasjon — innhold
+
+Relasjonspresentasjonen skal vise:
+
+```text
+relasjonstype
+navn / label
+slug
+periode
+kort forklaring
+historisk kontekst
+finansiell kontekst der relevant
+bilder / portrett / heraldikk / signaturbilde der relevant
+relaterte objekter
+relaterte objektgrupper
+relaterte perioder
+relaterte hendelser
+relasjoner til andre relasjoner
+lenke til filtrert katalog
+lenke til indexanalyse
+lenke til samling
+lenke til nettbutikk
+lenke til auksjon
+```
+
+Relasjonssiden skal forklare hvorfor relasjonen betyr noe.
+
+Den skal ikke bare vise en liste med objekter.
+
+---
+
+## 30. Relasjonspresentasjon — Relasjon til andre samleobjekter
+
+Relasjonspresentasjonen skal ha en egen fane:
+
+```text
+Relasjon til andre samleobjekter
+```
+
+Denne fanen skal vise koblinger på tvers av:
+
+```text
+sedler
+mynter
+medaljer
+verdipapirer
+dokumenter
+kunst
+antikviteter
+historiske gjenstander
+andre samleobjekter
+```
+
+Eksempel:
+
+```text
+Kong Olav V
+→ sedler med motiv/person
+→ mynter fra regentperioden
+→ medaljer
+→ dokumenter
+→ historiske hendelser
+→ relaterte personer
+→ relaterte perioder
+```
+
+---
+
+## 31. Relasjonspresentasjon — periodeforhold
+
+Relasjonspresentasjonen skal alltid ha periodekontekst.
+
+Eksempel for regent:
+
+```text
+/relasjon/regent/oscar-ii
+
+Viser:
+Oscar II
+Regentperiode
+Union
+Historisk periode
+Objekter publisert i perioden
+Objekter med motiv/personkobling
+Sedler
+Mynter
+Hendelser
+Markedskontekst
+```
+
+Eksempel for år:
+
+```text
+/relasjon/ar/1980
+
+Viser:
+År 1980
+Historisk kontekst
+Finansiell kontekst
+Objekter publisert i 1980
+Auksjonsdata
+Markedsdata
+Indexkobling
+```
+
+Eksempel for periode:
+
+```text
+/relasjon/periode/unionstid
+
+Viser:
+periode
+regenter
+objekter
+historiske hendelser
+samfunnskontekst
+marked
+index
+```
+
+---
+
+## 32. Index
+
+Index er Collectiums analyse- og markedsmotor.
+
+Index skal ikke være en vanlig forside.
+
+Index skal analysere data på tvers av:
+
+```text
+katalog
+objekter
+relasjoner
+samling
+auksjon
+nettbutikk
+marked
+transaksjoner
+prisobservasjoner
+historiske hendelser
+finansdata
+periodefilter
+```
+
+Index skal svare på:
+
+```text
+Hvilke objekter utvikler seg best?
+Hvilke perioder har høyest aktivitet?
+Hvilke regenter eller historiske perioder har best verdiutvikling?
+Hvilke objektgrupper er mest likvide?
+Hvordan utvikler min samling seg mot markedet?
+Hvordan utvikler sedler, mynter og andre samletyper seg over tid?
+Hvilke objekter mangler verdi?
+Hvilke objekter mangler bilde?
+Hvilke objekter har høy aktivitet?
+```
+
+---
+
+## 33. Index — periodefilter
+
+Index skal alltid ha periodefilter.
+
+Index skal kunne filtrere på:
+
+```text
+år fra
+år til
+periode
+århundre
+regent
+dynasti
+historisk periode
+historisk hendelse
+source_key
+object_group
+land
+kilde
+valør
+materiale
+markedskanal
+trendperiode
+verdiområde
+datakvalitet
+```
+
+Index skal kunne åpne:
+
+```text
+filtrert katalog
+relasjonsside
+objektpresentasjon
+markedsgraf
+periodeanalyse
+samleranalyse
+auksjonsanalyse
+```
+
+---
+
+## 34. Index — historisk og finansiell kontekst
+
+Index skal kunne bruke historiske og finansielle tidslag.
+
+Historisk grunnlag kan vise:
+
+```text
+år
+periode
+regent
+union
+historisk hendelse
+befolkning
+land / område
+samfunnskontekst
+```
+
+Finansielt grunnlag kan vise:
+
+```text
+KPI
+inflasjon
+pengeverdi
+lønnsutvikling
+gull
+sølv
+valuta
+rente
+marked
+prisobservasjoner
+auksjonsresultater
+nettbutikkpriser
+samlingstransaksjoner
+```
+
+Index skal forklare utvikling, ikke bare vise tall.
+
+---
+
+## 35. Medlemskap og tilgang i UI/UX 8.6
+
+Medlemskap skal ikke bare være betaling.
+
+Medlemskap styrer:
+
+```text
+tilgang til katalog
+tilgang til filter
+tilgang til relasjoner
+tilgang til periodefilter
+tilgang til index
+tilgang til finansdata
+tilgang til historisk dybde
+objektkapasitet
+bilde-/filkapasitet
+datapakker
+```
+
+Robot skal aldri vise låst informasjon uten tilgangskontroll.
+
+Robot skal vise tydelig hvorfor noe er låst.
+
+Eksempel:
+
+```text
+Krever Silver for avansert periodefilter.
+Krever Gold for dypere auksjons- og markedsanalyse.
+Krever Platinum for alle land og full relasjons-/finansdata.
+```
+
+---
+
+## 36. Tilgangsnivåer
+
+```text
+Free / Bronze
+→ Filter Master basis
+→ enkel periodefilter
+→ begrenset objektspesifikt filter
+→ begrenset objektpresentasjon
+→ begrenset relasjonsside
+
+Silver
+→ avansert periodefilter
+→ flere historiske filter
+→ flere marked/index-filter
+→ bedre objektpresentasjon
+→ mer relasjonsdata
+
+Gold
+→ forhandler-, auksjon- og markedskoblinger
+→ dypere objekt- og handelsfilter
+→ mer avansert finansdata
+→ dypere samlingsanalyse
+
+Platinum
+→ alle land
+→ alle samletyper
+→ full relasjons-, periode- og finansfiltrering
+→ full index
+→ full eksport
+```
+
+---
+
+## 37. Medlemskap og datapakker — brukerrettet visning
+
+UI/UX skal vise medlemskap som objektkapasitet og data-/filkapasitet.
+
+Eksempel:
+
+```text
+Free
+→ 10 objekter
+→ 250 MB intern bilde-/filkapasitet
+
+Bronze
+→ 100 objekter
+→ 2 GB intern bilde-/filkapasitet
+
+Silver
+→ 1 000 objekter
+→ 20 GB intern bilde-/filkapasitet
+
+Gold
+→ 10 000 objekter
+→ 250 GB intern bilde-/filkapasitet
+
+Gold+
+→ 15 000 objekter
+→ 350 GB intern bilde-/filkapasitet
+
+Gold++
+→ 20 000 objekter
+→ 450 GB intern bilde-/filkapasitet
+
+Gold+++
+→ 25 000 objekter
+→ 550 GB intern bilde-/filkapasitet
+
+Platinum
+→ 25 000+ objekter
+→ avtalt kapasitet
+```
+
+Datapakker skal vises som praktiske brukerpakker, ikke som tekniske GB først.
+
+Teknisk kapasitet kan vises under detaljer.
+
+---
+
+## 38. Faktura- og betalingsansvar i UI/UX
+
+UI/UX skal vise tydelig hvem som fakturerer hvem.
+
+Hovedregel:
+
+```text
+Forhandler fakturerer kunden for kjøp i nettbutikk og auksjon.
+Collectium fakturerer bruker for medlemskap og datapakker.
+Collectium fakturerer forhandler for plattformtilgang, forhandleravtale, objektgruppetilgang og eventuelle datapakker.
+```
+
+Collectium skal ikke fremstå som selger av forhandlerens objekt hvis forhandleren er juridisk selger.
+
+UI/UX skal vise:
+
+```text
+selger / forhandler
+fakturautsteder
+betalingsfrist
+betalingsstatus
+oppgjørsstatus
+Collectium-medlemskap separat
+Collectium-datapakke separat
+forhandlerkostnad separat
+```
+
+---
+
+## 39. Auksjon og budgivning
+
+Alle brukere som gir bud, må være pålogget.
+
+Budgivning skal kreve:
+
+```text
+aktiv bruker
+gyldig session
+medlemskap / tilgang
+aksept av auksjonsvilkår
+tilgang til objektpresentasjon
+tilgang til nødvendig relasjon / periodeinformasjon
+```
+
+Auksjon skal kobles til:
+
+```text
+objekt
+forhandler
+budgiver
+betalingsfrist
+oppgjør
+transaksjon
+historikk
+```
+
+Robot skal ikke lage løs budknapp.
+
+Budknapp skal kobles til:
+
+```text
+feature_key
+access_rule
+action_route
+API/server action
+write_table
+log_action
+```
+
+---
+
+## 40. Samling
+
+Samling skal alltid kobles til objektet.
+
+Samling skal støtte:
+
+```text
+i min samling
+ønskeliste / hjerte
+favoritt / stjerne
+egne lister
+kjøpt
+solgt
+fulgte objekter
+fulgte auksjoner
+private bilder
+private notater
+deling
+```
+
+Samling skal bruke samme objektidentitet:
+
+```text
+object_id + object_group + source_key
+```
+
+Samling skal kunne bruke:
+
+```text
+Filter Master
+Objektfilter
+Periodefilter
+Index
+Relasjonssider
+```
+
+---
+
+## 41. Forhandler
+
+Forhandlerflate skal alltid kobles til objekt, prosess, auksjon, nettbutikk og oppgjør.
+
+Forhandler skal kunne se:
+
+```text
+forhandlerstatus
+godkjente objektgrupper
+nye innleveringer
+objekter til vurdering
+objekter klare for auksjon
+aktive auksjoner
+aktive nettbutikkobjekter
+solgte objekter
+oppgjør venter
+meldinger
+dokumenter
+avtaler
+fee / kostnader
+```
+
+Forhandler skal ikke sette Collectium-fee.
+
+Forhandler kan sette eller vise forhandler-fee der avtalen åpner for det.
+
+Collectium-fee settes av Collectium/admin.
+
+---
+
+## 42. Admin
+
+Admin skal kontrollere at UI/UX 8.6 og DB Neon 8.6 henger sammen.
+
+Admin skal kunne se:
+
+```text
+sider
+feature_keys
+access_rules
+action_routes
+API-ruter
+read_views
+write_tables
+logger
+manglende koblinger
+manglende filter
+manglende relasjoner
+manglende data
+manglende bilder
+manglende verdi
+```
+
+Admin skal ikke bare se UI.
+
+Admin skal se hvorfor UI fungerer eller ikke fungerer.
+
+---
+
+## 43. URL-regler
+
+### Objekt
+
+```text
+/objekt/[sourceKey]/[objectGroup]/[objectId]
+```
+
+Eksempel:
+
+```text
+/objekt/norske_sedler/banknote/1459
+```
+
+Med segment:
+
+```text
+/objekt/norske_sedler/banknote/1459?segment=historie&from=katalog&view=list
+```
+
+### Relasjon
+
+```text
+/relasjon/[relationType]/[relationKey]
+```
+
+Eksempel:
+
+```text
+/relasjon/regent/oscar-ii
+/relasjon/ar/1877
+/relasjon/periode/unionstid
+/relasjon/signatur/winge-getz
+/relasjon/kilde/norske-sedler
+/relasjon/utgave/1-utgave
+```
+
+### Index med periodefilter
+
+```text
+/index?periode=unionstid
+/index?regent=oscar-ii
+/index?year_from=1872&year_to=1905
+/index?trend_period=12m
+/index?segment=finans
+```
+
+### Relasjon med periodefilter
+
+```text
+/relasjon/regent/oscar-ii?year_from=1872&year_to=1905
+/relasjon/ar/1877?segment=finans
+/relasjon/periode/unionstid?object_group=banknote
+```
+
+### Periodefilter egen side
+
+```text
+/filter/periode
+/filter/periode/avansert
+```
+
+---
+
+## 44. API-regler
+
+### Filter API
+
+```text
+GET  /api/filter/master
+GET  /api/filter/options
+POST /api/filter/resolve
+GET  /api/filter/period/simple
+GET  /api/filter/period/advanced
+POST /api/filter/apply
+```
+
+### Systemkontroll
+
+```text
+GET /api/system/filter-master-check
+GET /api/system/period-filter-check
+```
+
+### Objekt
+
+```text
+GET /api/object/presentation
+GET /api/object/relations
+GET /api/object/market
+GET /api/object/user-state
+```
+
+### Relasjon
+
+```text
+GET /api/relations/[relationType]/[relationKey]
+GET /api/relations/[relationType]/[relationKey]/objects
+GET /api/relations/[relationType]/[relationKey]/object-groups
+GET /api/relations/[relationType]/[relationKey]/timeline
+GET /api/relations/[relationType]/[relationKey]/linked-relations
+GET /api/relations/[relationType]/[relationKey]/market
+```
+
+### Index
+
+```text
+GET /api/index/market
+GET /api/index/period
+GET /api/index/trends
+GET /api/index/object-performance
+GET /api/index/relation-performance
+```
+
+---
+
+## 45. DB Neon 8.6-kontrollregel
+
+Filter, relasjoner, visningskort, objektpresentasjon, index og periodefilter skal følge samme kontrollkjede:
+
+```text
+page_key
+→ feature_key
+→ access_rule
+→ action_route
+→ API route / server action
+→ registry / table / view
+→ log
+```
+
+Eksempel feature keys:
+
+```text
+filter.master.view
+filter.master.resolve
+filter.period.simple.view
+filter.period.advanced.view
+filter.period.advanced.use
+filter.catalog.apply
+filter.relation.apply
+filter.index.apply
+object.presentation.view
+object.relations.view
+relation.presentation.view
+index.period.view
+index.market.view
+catalog.object.open
+collection.item.add
+collection.wishlist.toggle
+collection.favorite.toggle
+auction.bid
+dealer.object.manage
+shop.object.buy
+```
+
+---
+
+## 46. Robotregel for knapper
+
+Ingen knapp skal være løs.
+
+Alle knapper skal være én av tre typer:
+
+```text
+1. Systemhandling
+2. Låst handling
+3. Lokal UI-handling
+```
+
+### Systemhandling
+
+Må ha:
+
+```text
+feature_key
+access_rule
+action_route
+API/server action
+read_view eller write_table
+log_action
+```
+
+### Låst handling
+
+Må vise hvorfor den er låst.
+
+Eksempel:
+
+```text
+Krever Silver
+Krever innlogging
+Krever forhandlergodkjenning
+Krever aktiv auksjon
+```
+
+### Lokal UI-handling
+
+Kan brukes for:
+
+```text
+åpne/lukke panel
+bytte fane
+sortere lokalt
+vise/skjule forklaring
+```
+
+Lokal UI-handling skal ikke skrive data.
+
+---
+
+## 47. Robotregel for fallback
+
+Robot skal alltid vise trygg fallback ved manglende data.
+
+```text
+Mangler bilde
+→ Bilde ikke registrert
+
+Mangler verdi
+→ Ikke vurdert
+
+Mangler relasjon
+→ Relasjon ikke registrert
+
+Mangler tilgang
+→ Krever høyere medlemskap
+
+Mangler API
+→ Funksjon ikke aktivert
+
+Mangler auksjonsdata
+→ Ikke på auksjon
+
+Mangler nettbutikkdata
+→ Ikke tilgjengelig i nettbutikk
+```
+
+Robot skal aldri vise falsk verdi, tom knapp eller hardkodet testdata som sannhet.
+
+---
+
+## 48. Robotregel for design
+
+UI/UX 8.6 skal bruke global designmotor.
+
+Robot skal ikke lage:
+
+```text
+lokal sidebar
+lokal topbar
+lokal body/html
+lokal bakgrunn
+lokal global CSS
+lokale skin-regler
+lokale filtermotorer
+lokale rammer som bryter template
+```
+
+Vanlige sider skal bruke:
+
+```text
+RootLayout
+→ AppShell
+→ Topbar
+→ Sidebar / MobileMenu
+→ PageFrame
+→ PageContent
+```
+
+Design skal styres globalt.
+
+---
+
+## 49. Robotregel for relasjoner
+
+Relasjon er både:
+
+```text
+datakobling
+frontend-navigasjon
+kunnskapspresentasjon
+```
+
+Når en kjent verdi vises i visningskort, objektpresentasjon, relasjonsside, index eller filter, skal den kunne bli klikkbar hvis API/DB har relasjonslenke.
+
+Eksempler:
+
+```text
+Oscar II
+1877
+Winge / Getz
+Riksvåpen
+Norske sedler
+1. utgave
+100 kroner
+Norges Bank
+Unionstid
+```
+
+Robot skal ikke lage relasjonslenke uten at API/DB leverer relasjon eller href.
+
+---
+
+## 50. Robotregel for index
+
+Index skal ikke bygges som vanlig forside.
+
+Index skal bygges som:
+
+```text
+markedsindex
+analyseforside
+utviklingsdashboard
+periodeanalyse
+relasjonsanalyse
+samleranalyse
+```
+
+Index skal bruke:
+
+```text
+Filter Master
+Periodefilter
+relasjoner
+marked
+transaksjoner
+auksjon
+nettbutikk
+samling
+historiske prisobservasjoner
+finansdata
+```
+
+Index skal alltid kunne åpne filtrert katalog og relasjonssider.
+
+---
+
+## 51. Robotregel for dokumentasjon
+
+Alle nye hovedfiler som bygges etter denne robotfilen, skal dokumenteres med:
+
+```text
+Overskrift
+Formål
+Bruksområde
+Berørte sider/routes
+Berørte feature_keys
+Berørte API-ruter
+Berørte tabeller/views
+Dataretning
+Logging
+Versjon/endrings-ID
+```
+
+Robot skal ikke lage produksjonskode uten dokumentasjonsheader.
+
+---
+
+## 52. Teknisk prioritet
+
+Riktig rekkefølge for bygging:
+
+```text
+1. /admin/system/mariadb-neon
+2. /admin/system/db-neon-86
+3. /admin/system/filter-master
+4. /admin/system/period-filter
+5. /filter/master
+6. /filter/periode
+7. /filter/periode/avansert
+8. /katalog
+9. /objekt/[sourceKey]/[objectGroup]/[objectId]
+10. /relasjon/[type]/[slug]
+11. /index
+12. /min-side
+13. /auksjon
+14. /nettbutikk
+15. /forhandler
+```
+
+Filter Master og Periodefilter må bygges før katalog, objektpresentasjon, relasjonspresentasjon og index låses ferdig.
+
+---
+
+## 53. Endelig låst modell
+
+```text
+Visningskort
+= kompakt objektinngang
+= viser objekt, verdi, år, periode og raske relasjoner
+= åpner objekt, relasjon eller samlingshandling
+
+Objektpresentasjon
+= full visning av ett objekt
+= viser Samler, Historie og Finans
+= bruker periode og relasjon som kontekst
+= tilgangsstyrt etter medlemskap og rolle
+
+Relasjonsside
+= kunnskapsside for én node
+= viser objekter, periode, historikk, marked og videre relasjoner
+= har fane for relasjon til andre samleobjekter
+
+Index
+= analyse- og markedsmotor
+= eier bred periodeanalyse og utvikling over tid
+= bruker Filter Master og periodefilter
+
+Periodefilter
+= felles tidsmotor
+= brukes på katalog, objekt, relasjon, index, auksjon, nettbutikk, forhandler og samling
+
+Filter Master
+= felles filterkontrakt
+= hindrer at hver side lager sin egen filterlogikk
+
+DB Neon 8.6
+= sannhet for data, tilgang, relasjoner, filter, action routes, logging og kontroll
+
+UI/UX 8.6
+= viser riktig informasjon, riktig handling og riktig forklaring til bruker
+```
+
+---
+
+## 54. Kort låsbar formulering
+
+Collectium UI/UX 8.6 skal bygges slik at visningskort, objektpresentasjon, relasjonsside, index, auksjon, nettbutikk, forhandler og samling deler samme Filter Master og periodefilter. Visningskortet viser kort objektkontekst, objektpresentasjonen forklarer ett objekt, relasjonssiden forklarer én relasjonsnode, og index analyserer utvikling på tvers av perioder, marked, relasjoner og objekter. Frontend skal ikke finne opp relasjoner, perioder, priser, filterverdier, medlemskap eller fakturaflyt. API/DB Neon 8.6 skal levere nøkler, href-er, tilgang, status, datagrunnlag og logging.

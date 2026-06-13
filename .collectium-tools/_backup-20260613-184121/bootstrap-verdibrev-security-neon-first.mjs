@@ -39,7 +39,7 @@ if (!databaseUrl) {
 const sql = neon(databaseUrl);
 
 async function q(text, params = []) {
-  return sql.query(text, params);
+  return sql(text, params);
 }
 
 const SOURCE_KEY = "verdibrev";
@@ -402,5 +402,3 @@ const result = {
 };
 
 console.log(JSON.stringify(result, null, 2));
-
-

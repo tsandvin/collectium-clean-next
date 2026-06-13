@@ -1,0 +1,173 @@
+:root {
+  --ct-app-bg: #f7efe2;
+  --ct-panel-solid: #fff9ed;
+  --ct-panel-bg: rgba(255, 249, 237, 0.86);
+  --ct-card-bg: #fbf2e4;
+
+  --ct-border: #e1cfaa;
+  --ct-border-strong: #c49a59;
+  --ct-line: #e8d9be;
+
+  --ct-text: #06372f;
+  --ct-text-muted: #907d58;
+  --ct-text-soft: #415f54;
+
+  --ct-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ct-font-head: Georgia, "Times New Roman", serif;
+  --ct-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --ct-accent: #0f6a45;
+  --ct-accent-dark: #06372f;
+  --ct-accent-soft: rgba(214, 173, 62, 0.18);
+
+  --ct-signature: #ad7f2e;
+  --ct-watermark: rgba(164, 59, 35, 0.1);
+
+  --ct-status-ok: #14643c;
+  --ct-status-pending: #a97d36;
+  --ct-status-rejected: #a43b23;
+
+  --ct-shadow: 0 18px 46px rgba(88, 54, 14, 0.13);
+  --ct-shadow-soft: 0 10px 26px rgba(88, 54, 14, 0.09);
+
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 10px;
+  --ct-radius-lg: 18px;
+  --ct-density: 16px;
+}
+
+/* 01 Collectium - lys premium */
+html[data-theme="collectium"] {
+  --ct-app-bg: #f7efe2;
+  --ct-panel-solid: #fff9ed;
+  --ct-panel-bg: rgba(255, 249, 237, 0.86);
+  --ct-card-bg: #fbf2e4;
+
+  --ct-border: #e1cfaa;
+  --ct-border-strong: #c49a59;
+  --ct-line: #e8d9be;
+
+  --ct-text: #06372f;
+  --ct-text-muted: #907d58;
+  --ct-text-soft: #415f54;
+
+  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-head: Georgia, "Times New Roman", serif;
+  --ct-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --ct-accent: #0f6a45;
+  --ct-accent-dark: #06372f;
+  --ct-accent-soft: rgba(214, 173, 62, 0.18);
+
+  --ct-signature: #ad7f2e;
+  --ct-watermark: rgba(164, 59, 35, 0.1);
+
+  --ct-status-ok: #14643c;
+  --ct-status-pending: #a97d36;
+  --ct-status-rejected: #a43b23;
+
+  --ct-shadow: 0 18px 46px rgba(88, 54, 14, 0.13);
+  --ct-shadow-soft: 0 10px 26px rgba(88, 54, 14, 0.09);
+}
+
+/* 02 Samler - lys katalog/samler */
+html[data-theme="samler"] {
+  --ct-app-bg: #f4f8fc;
+  --ct-panel-solid: #ffffff;
+  --ct-panel-bg: rgba(255, 255, 255, 0.9);
+  --ct-card-bg: #f1f7fc;
+
+  --ct-border: #d8e5f1;
+  --ct-border-strong: #7fa4cb;
+  --ct-line: #d9e7f3;
+
+  --ct-text: #062d52;
+  --ct-text-muted: #7c8ea6;
+  --ct-text-soft: #405670;
+
+  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-head: Georgia, "Times New Roman", serif;
+  --ct-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --ct-accent: #23609d;
+  --ct-accent-dark: #0b3156;
+  --ct-accent-soft: rgba(157, 207, 180, 0.22);
+
+  --ct-signature: #23609d;
+  --ct-watermark: rgba(35, 96, 157, 0.10);
+
+  --ct-status-ok: #3f755b;
+  --ct-status-pending: #836327;
+  --ct-status-rejected: #a33b23;
+
+  --ct-shadow: 0 14px 34px rgba(8, 41, 67, 0.08);
+  --ct-shadow-soft: 0 8px 22px rgba(8, 41, 67, 0.07);
+}
+
+/* 03 Museum - mÃƒÂ¸rk historisk */
+html[data-theme="museum"] {
+  --ct-app-bg: #11110f;
+  --ct-panel-solid: #1d1b16;
+  --ct-panel-bg: rgba(29, 27, 22, 0.94);
+  --ct-card-bg: #252219;
+
+  --ct-border: rgba(201, 169, 91, 0.24);
+  --ct-border-strong: rgba(201, 169, 91, 0.52);
+  --ct-line: #383127;
+
+  --ct-text: #f4ecd7;
+  --ct-text-muted: #8e8268;
+  --ct-text-soft: #cbbf9f;
+
+  --ct-font-body: Georgia, "Times New Roman", serif;
+  --ct-font-head: Georgia, "Times New Roman", serif;
+  --ct-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --ct-accent: #c9a95b;
+  --ct-accent-dark: #9e7c32;
+  --ct-accent-soft: rgba(201, 169, 91, 0.13);
+
+  --ct-signature: #c9a95b;
+  --ct-watermark: rgba(201, 169, 91, 0.10);
+
+  --ct-status-ok: #8fbf82;
+  --ct-status-pending: #d9bf6d;
+  --ct-status-rejected: #c9775d;
+
+  --ct-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+  --ct-shadow-soft: 0 12px 34px rgba(0, 0, 0, 0.24);
+}
+
+/* 04 Finans - mÃƒÂ¸rk marked/dashboard */
+html[data-theme="finans"] {
+  --ct-app-bg: #0d1b20;
+  --ct-panel-solid: #1d3039;
+  --ct-panel-bg: rgba(25, 42, 50, 0.9);
+  --ct-card-bg: #1a2d36;
+
+  --ct-border: #29424d;
+  --ct-border-strong: #236b57;
+  --ct-line: #2b414b;
+
+  --ct-text: #f4f7f4;
+  --ct-text-muted: #7690a0;
+  --ct-text-soft: #b9c7ce;
+
+  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-head: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ct-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --ct-accent: #29ad7f;
+  --ct-accent-dark: #1d8f66;
+  --ct-accent-soft: rgba(188, 147, 64, 0.18);
+
+  --ct-signature: #29ad7f;
+  --ct-watermark: rgba(41, 173, 127, 0.12);
+
+  --ct-status-ok: #29ad7f;
+  --ct-status-pending: #bc9340;
+  --ct-status-rejected: #d34d4d;
+
+  --ct-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  --ct-shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.22);
+}

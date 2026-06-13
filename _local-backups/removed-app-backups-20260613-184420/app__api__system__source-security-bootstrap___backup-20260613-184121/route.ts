@@ -70,15 +70,9 @@ function db() {
   return neon(getDatabaseUrl());
 }
 
-async function query<T = Record<string, unknown>>(
-  text: string,
-  params: unknown[] = []
-): Promise<T[]> {
-  const sql = db() as unknown as {
-    query: (queryText: string, queryParams?: unknown[]) => Promise<T[]>;
-  };
-
-  return sql.query(text, params);
+async function query(text: string, params: unknown[] = []) {
+  const sql = db();
+  return sql(text, params);
 }
 
 async function checkStatus() {
@@ -531,5 +525,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-

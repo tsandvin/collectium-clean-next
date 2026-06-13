@@ -5,7 +5,7 @@
  * Collectium Sidebar UI 8.5
  *
  * Definering / formÃ¥l:
- * Global sidemeny med SVG-ikoner, temaavhengig visuell stil, aktivt menypanel, statuskort og Collectium-identitet.
+ * Global sidemeny med faktiske SVG-ikoner, aktivt menypanel, statuskort og Collectium-identitet.
  *
  * BruksomrÃ¥de:
  * Brukes av global app/layout eller AppShell.
@@ -95,8 +95,8 @@ export default function Sidebar() {
         <div className="ct-logo-mark">C</div>
         <div className="ct-logo-copy">
           <span className="ct-logo-kicker">Collectium</span>
-          <strong>Beta UI/UX 8.5</strong>
-          <span className="ct-logo-pill">Collectium</span>
+          <strong>AppShell</strong>
+          <span className="ct-logo-pill">Beta UI/UX 8.5</span>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export default function Sidebar() {
           <span style={{ width: "82%" }} />
         </div>
         <p>
-          01 Sidemeny Â· Global layout. Aktiv knapp, SVG-ikon og statusfelt fÃ¸lger valgt tema.
+          01 Sidemeny Â· Global AppShell. Aktiv knapp, SVG-ikon og statusfelt er markert i global template.
         </p>
       </div>
     </aside>

@@ -1,6 +1,6 @@
+import CollectiumFolderTabs from "@/components/ui/CollectiumFolderTabs";
 "use client";
 
-import CollectiumFolderTabs from "@/components/ui/CollectiumFolderTabs";
 import { useState } from "react";
 import CollectiumCard from "@/components/ui/CollectiumCard";
 

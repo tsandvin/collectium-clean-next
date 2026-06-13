@@ -1,0 +1,543 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 sidebar theme/layout correction
+ *
+ * Definering / formÃ¥l:
+ * Retter forhold mellom sidemeny og innhold, og lar sidemeny/faner fÃ¸lge valgt tema.
+ *
+ * BruksomrÃ¥de:
+ * Importeres globalt fra app/layout.tsx.
+ *
+ * BerÃ¸rte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI/template-styling.
+ */
+
+/* ----------------------------------------------------------------------
+   Theme-aware sidebar tokens
+   ---------------------------------------------------------------------- */
+
+:root,
+html[data-theme="collectium"],
+html[data-skin="collectium"] {
+  --ct-sidebar-width: 300px;
+  --ct-sidebar-bg:
+    radial-gradient(circle at 45px 48px, rgba(0, 122, 77, 0.16), transparent 34px),
+    radial-gradient(circle at 82% 9%, rgba(255, 255, 255, 0.46), transparent 132px),
+    linear-gradient(180deg, rgba(255, 249, 235, 0.98), rgba(236, 220, 184, 0.88));
+  --ct-sidebar-border: rgba(198, 163, 90, 0.42);
+  --ct-sidebar-shadow: 18px 0 48px rgba(64, 48, 20, 0.065);
+  --ct-sidebar-card-bg: linear-gradient(180deg, rgba(255,255,255,.68), rgba(255,250,238,.35)), rgba(255, 248, 232, .70);
+  --ct-sidebar-link-active: linear-gradient(90deg, rgba(0, 122, 77, .16), rgba(255, 249, 235, .86));
+  --ct-sidebar-link-hover: rgba(0, 122, 77, .075);
+  --ct-sidebar-text: #003f34;
+  --ct-sidebar-muted: rgba(91, 68, 30, .72);
+  --ct-sidebar-accent: #007a4d;
+  --ct-sidebar-gold: #c5a040;
+}
+
+html[data-theme="samler"],
+html[data-skin="samler"] {
+  --ct-sidebar-bg:
+    radial-gradient(circle at 45px 48px, rgba(70, 111, 143, 0.15), transparent 34px),
+    linear-gradient(180deg, rgba(247, 250, 252, 0.98), rgba(221, 232, 240, 0.90));
+  --ct-sidebar-border: rgba(112, 141, 161, 0.42);
+  --ct-sidebar-shadow: 18px 0 48px rgba(32, 61, 78, 0.08);
+  --ct-sidebar-card-bg: linear-gradient(180deg, rgba(255,255,255,.72), rgba(239,246,250,.42)), rgba(236, 245, 250, .74);
+  --ct-sidebar-link-active: linear-gradient(90deg, rgba(70, 111, 143, .18), rgba(244, 249, 252, .88));
+  --ct-sidebar-link-hover: rgba(70, 111, 143, .10);
+  --ct-sidebar-text: #183c4d;
+  --ct-sidebar-muted: rgba(60, 89, 107, .76);
+  --ct-sidebar-accent: #315f78;
+  --ct-sidebar-gold: #7d9aad;
+}
+
+html[data-theme="museum"],
+html[data-skin="museum"],
+html[data-theme="historie"],
+html[data-skin="historie"] {
+  --ct-sidebar-bg:
+    radial-gradient(circle at 45px 48px, rgba(140, 100, 44, 0.18), transparent 34px),
+    radial-gradient(circle at 82% 9%, rgba(255, 240, 198, 0.18), transparent 132px),
+    linear-gradient(180deg, rgba(41, 33, 22, 0.98), rgba(18, 17, 14, 0.95));
+  --ct-sidebar-border: rgba(198, 163, 90, 0.35);
+  --ct-sidebar-shadow: 18px 0 48px rgba(0, 0, 0, 0.24);
+  --ct-sidebar-card-bg: linear-gradient(180deg, rgba(255, 240, 198, .13), rgba(255, 240, 198, .05)), rgba(27, 24, 18, .86);
+  --ct-sidebar-link-active: linear-gradient(90deg, rgba(198, 163, 90, .20), rgba(27, 24, 18, .88));
+  --ct-sidebar-link-hover: rgba(198, 163, 90, .105);
+  --ct-sidebar-text: #f3e7c8;
+  --ct-sidebar-muted: rgba(220, 199, 151, .75);
+  --ct-sidebar-accent: #d5b46a;
+  --ct-sidebar-gold: #d5b46a;
+}
+
+html[data-theme="finans"],
+html[data-skin="finans"] {
+  --ct-sidebar-bg:
+    radial-gradient(circle at 45px 48px, rgba(101, 200, 220, 0.13), transparent 34px),
+    linear-gradient(180deg, rgba(12, 22, 30, 0.99), rgba(15, 28, 36, 0.96));
+  --ct-sidebar-border: rgba(101, 200, 220, 0.30);
+  --ct-sidebar-shadow: 18px 0 48px rgba(0, 0, 0, 0.26);
+  --ct-sidebar-card-bg: linear-gradient(180deg, rgba(101, 200, 220, .10), rgba(101, 200, 220, .04)), rgba(19, 34, 44, .88);
+  --ct-sidebar-link-active: linear-gradient(90deg, rgba(101, 200, 220, .18), rgba(20, 34, 43, .90));
+  --ct-sidebar-link-hover: rgba(101, 200, 220, .10);
+  --ct-sidebar-text: #edf8fb;
+  --ct-sidebar-muted: rgba(172, 205, 215, .72);
+  --ct-sidebar-accent: #65c8dc;
+  --ct-sidebar-gold: #d5b46a;
+}
+
+/* ----------------------------------------------------------------------
+   Fix shell proportions: content should start after sidebar
+   ---------------------------------------------------------------------- */
+
+body {
+  overflow-x: hidden;
+}
+
+.collectium-shell,
+.ct-shell,
+.app-shell,
+main[class*="shell"],
+div[class*="shell"] {
+  min-width: 0;
+}
+
+.ct-sidebar-enhanced {
+  flex: 0 0 var(--ct-sidebar-width);
+  width: var(--ct-sidebar-width);
+  max-width: var(--ct-sidebar-width);
+  min-height: 100vh;
+  padding: 22px 18px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  color: var(--ct-sidebar-text);
+  background: var(--ct-sidebar-bg);
+  border-right: 1px solid var(--ct-sidebar-border);
+  box-shadow:
+    inset -1px 0 0 rgba(255,255,255,.13),
+    var(--ct-sidebar-shadow);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.ct-sidebar-enhanced::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .50;
+  background-image:
+    linear-gradient(135deg, rgba(198, 163, 90, .13) 0 1px, transparent 1px 10px),
+    linear-gradient(90deg, rgba(255,255,255,.13), transparent 32%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.72) 55%, rgba(0,0,0,.16) 100%);
+}
+
+.ct-sidebar-enhanced::after {
+  content: "Collectium";
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  color: var(--ct-sidebar-muted);
+  font-size: 9px;
+  font-style: italic;
+  letter-spacing: .06em;
+}
+
+.ct-sidebar-enhanced > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Make direct parent layout behave if old layout uses flex/grid */
+body:has(.ct-sidebar-enhanced) .ct-sidebar-enhanced + * {
+  min-width: 0;
+}
+
+/* Fallback: if AppShell is first child with sidebar + content */
+body:has(.ct-sidebar-enhanced) > div,
+body:has(.ct-sidebar-enhanced) #__next,
+body:has(.ct-sidebar-enhanced) [data-nextjs-root] {
+  min-width: 0;
+}
+
+/* ----------------------------------------------------------------------
+   Sidebar visual components
+   ---------------------------------------------------------------------- */
+
+.ct-sidebar-logo-card {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--ct-sidebar-border);
+  background: var(--ct-sidebar-card-bg);
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, .11),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.ct-logo-mark {
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff7df;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.32), transparent 28px),
+    linear-gradient(135deg, var(--ct-sidebar-accent), color-mix(in srgb, var(--ct-sidebar-accent) 62%, #203d34));
+  box-shadow:
+    0 12px 25px rgba(0, 0, 0, .23),
+    inset 0 1px 0 rgba(255,255,255,.28);
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.ct-logo-copy {
+  display: grid;
+  gap: 4px;
+  line-height: 1;
+  min-width: 0;
+}
+
+.ct-logo-kicker {
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: 10px;
+  color: var(--ct-sidebar-muted);
+  font-weight: 850;
+}
+
+.ct-logo-copy strong {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  color: var(--ct-sidebar-text);
+}
+
+.ct-logo-pill {
+  width: max-content;
+  margin-top: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ct-sidebar-accent) 32%, transparent);
+  background: color-mix(in srgb, var(--ct-sidebar-accent) 12%, transparent);
+  color: var(--ct-sidebar-accent);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+}
+
+.ct-sidebar-nav {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ct-sidebar-link {
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 11px 8px 10px;
+  text-decoration: none;
+  color: var(--ct-sidebar-text);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,.055);
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+.ct-sidebar-link:hover {
+  transform: translateX(4px);
+  border-color: color-mix(in srgb, var(--ct-sidebar-accent) 20%, transparent);
+  background: var(--ct-sidebar-link-hover);
+  box-shadow:
+    inset 3px 0 0 color-mix(in srgb, var(--ct-sidebar-accent) 70%, transparent),
+    0 12px 28px rgba(0, 0, 0, .06);
+}
+
+.ct-sidebar-link.is-active,
+.ct-sidebar-link[aria-current="page"] {
+  border-color: var(--ct-sidebar-border);
+  background: var(--ct-sidebar-link-active);
+  box-shadow:
+    inset 4px 0 0 var(--ct-sidebar-accent),
+    0 14px 28px rgba(0, 0, 0, .08);
+}
+
+.ct-sidebar-icon {
+  width: 33px;
+  height: 33px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-sidebar-accent) 14%, transparent), color-mix(in srgb, var(--ct-sidebar-accent) 6%, transparent));
+  border: 1px solid color-mix(in srgb, var(--ct-sidebar-accent) 16%, transparent);
+}
+
+.ct-sidebar-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: var(--ct-sidebar-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ct-sidebar-label {
+  font-weight: 850;
+  font-size: 14px;
+  letter-spacing: -.01em;
+}
+
+.ct-sidebar-count {
+  font-size: 11px;
+  font-weight: 850;
+  color: var(--ct-sidebar-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ct-sidebar-status,
+.ct-sidebar-progress {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--ct-sidebar-border);
+  background: var(--ct-sidebar-card-bg);
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, .065),
+    inset 0 1px 0 rgba(255,255,255,.13);
+}
+
+.ct-sidebar-status-title,
+.ct-sidebar-progress > span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ct-sidebar-muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.ct-sidebar-progress > strong {
+  float: right;
+  margin-top: -35px;
+  color: var(--ct-sidebar-accent);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ct-sidebar-progress p {
+  clear: both;
+  margin: 10px 0 0;
+  color: color-mix(in srgb, var(--ct-sidebar-text) 78%, transparent);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.ct-sidebar-meter-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--ct-sidebar-text) 78%, transparent);
+}
+
+.ct-sidebar-meter-row strong {
+  color: var(--ct-sidebar-text);
+}
+
+.ct-sidebar-meter {
+  height: 4px;
+  margin: 8px 0 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ct-sidebar-gold) 24%, transparent);
+  overflow: hidden;
+}
+
+.ct-sidebar-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ct-sidebar-accent), var(--ct-sidebar-gold));
+}
+
+/* ----------------------------------------------------------------------
+   Content alignment after sidebar
+   ---------------------------------------------------------------------- */
+
+.ct-sidebar-enhanced ~ main,
+.ct-sidebar-enhanced + main,
+.ct-sidebar-enhanced ~ .collectium-main,
+.ct-sidebar-enhanced + .collectium-main,
+.ct-sidebar-enhanced ~ .collectium-page,
+.ct-sidebar-enhanced + .collectium-page {
+  min-width: 0;
+  width: calc(100vw - var(--ct-sidebar-width));
+  max-width: calc(100vw - var(--ct-sidebar-width));
+}
+
+/* ----------------------------------------------------------------------
+   Folder tabs theme-aware
+   ---------------------------------------------------------------------- */
+
+.ct-folder-tabs,
+.collectium-tabs,
+.collectium-archive-tabs,
+[role="tablist"]:not(.ct-folder-tabs) {
+  display: flex;
+  align-items: flex-end;
+  gap: 0 !important;
+  padding: 0 14px !important;
+  margin-top: 18px;
+  border-bottom: 1px solid var(--ct-sidebar-border);
+  overflow-x: auto;
+}
+
+.ct-folder-tab,
+.collectium-tabs > button,
+.collectium-archive-tabs > button,
+[role="tablist"]:not(.ct-folder-tabs) > button {
+  min-width: 132px;
+  min-height: 52px;
+  padding: 12px 18px 10px;
+  margin-right: -1px;
+  border: 1px solid var(--ct-sidebar-border) !important;
+  border-bottom: 0 !important;
+  border-radius: 17px 17px 0 0 !important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--ct-sidebar-card-bg) 30%, rgba(255,255,255,.55)),
+      color-mix(in srgb, var(--ct-sidebar-accent) 7%, transparent)
+    ) !important;
+  color: var(--ct-sidebar-text) !important;
+  font-weight: 900 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18) !important;
+  transition:
+    transform 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.ct-folder-tab:hover,
+.collectium-tabs > button:hover,
+.collectium-archive-tabs > button:hover,
+[role="tablist"]:not(.ct-folder-tabs) > button:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--ct-sidebar-accent) 42%, transparent) !important;
+  box-shadow:
+    0 -12px 26px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+
+.ct-folder-tab.is-active,
+.ct-folder-tab[aria-selected="true"],
+.collectium-tabs > button[aria-selected="true"],
+.collectium-archive-tabs > button[aria-selected="true"],
+[role="tablist"]:not(.ct-folder-tabs) > button[aria-selected="true"],
+.collectium-tabs > button.active,
+.collectium-tabs > button.is-active {
+  transform: translateY(1px);
+  color: var(--ct-sidebar-text) !important;
+  border-color: color-mix(in srgb, var(--ct-sidebar-accent) 42%, transparent) !important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--ct-sidebar-accent) 10%, rgba(255,255,255,.70)),
+      color-mix(in srgb, var(--ct-sidebar-accent) 5%, transparent)
+    ) !important;
+  box-shadow:
+    0 -12px 26px rgba(0,0,0,.12),
+    inset 0 3px 0 var(--ct-sidebar-accent) !important;
+}
+
+.ct-folder-tab-icon {
+  grid-row: 1 / span 2;
+  width: 27px;
+  height: 27px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: var(--ct-sidebar-accent);
+  background: color-mix(in srgb, var(--ct-sidebar-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ct-sidebar-accent) 16%, transparent);
+  font-weight: 900;
+}
+
+.ct-folder-tab-text {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  line-height: 1;
+}
+
+.ct-folder-tab-note {
+  margin-top: 4px;
+  color: var(--ct-sidebar-muted);
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+}
+
+/* ----------------------------------------------------------------------
+   Mojibake visibility note: do not hide, but improve legibility
+   ---------------------------------------------------------------------- */
+
+.collectium-page,
+main,
+body {
+  text-rendering: geometricPrecision;
+}
+
+/* ----------------------------------------------------------------------
+   Mobile/tablet
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  :root {
+    --ct-sidebar-width: 100%;
+  }
+
+  .ct-sidebar-enhanced {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    position: relative;
+    border-right: 0;
+    border-bottom: 1px solid var(--ct-sidebar-border);
+  }
+
+  .ct-sidebar-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ct-sidebar-enhanced ~ main,
+  .ct-sidebar-enhanced + main,
+  .ct-sidebar-enhanced ~ .collectium-main,
+  .ct-sidebar-enhanced + .collectium-main,
+  .ct-sidebar-enhanced ~ .collectium-page,
+  .ct-sidebar-enhanced + .collectium-page {
+    width: 100%;
+    max-width: 100%;
+  }
+}
