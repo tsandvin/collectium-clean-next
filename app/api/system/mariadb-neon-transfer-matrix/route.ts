@@ -1,11 +1,12 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  * Overskrift:
  * MariaDB - Neon Postgres transfer matrix API
  *
  * Definering / formål:
  * - Viser overføringsstatus fra MariaDB-kilder til Neon Postgres staging.
- * - Skiller mellom primary_source, staging_source, legacy_resolved_table og neon_first.
+ * - Viser også regel-/metodelaget fra ct_migration_source_rules / ct_v_migration_transfer_matrix_full.
+ * - Skiller mellom kilde- og radstatus, regler, metoder, blokkering og truth-godkjenning.
  *
  * Bruksområde:
  * - Brukes av MariaDB - Neon Postgres Control.
@@ -18,11 +19,13 @@
  *
  * Berørte tabeller / views:
  * - Neon: ct_migration_table_map
+ * - Neon: ct_migration_source_rules
+ * - Neon: ct_v_migration_transfer_matrix_full
  * - Neon: ct_migration_catalog_object_staging
  * - MariaDB: fysiske kilde-/legacy-tabeller definert i ct_migration_table_map
  *
  * Dataretning:
- * MariaDB read-only + Neon → API/backend → Next.js → React → UI
+ * MariaDB read-only + Neon -> API/backend -> Next.js -> React -> UI
  *
  * Viktig:
  * - Denne ruten migrerer ikke data.
@@ -38,7 +41,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type TransferStatus = "OK" | "VARSEL" | "MANGLER" | "INFO";
-
 type TransferStatusColor = "green" | "yellow" | "red" | "blue";
 
 type TableMapRow = {
@@ -55,6 +57,29 @@ type TableMapRow = {
   notes_no: string | null;
 };
 
+type SourceRuleRow = {
+  source_key: string;
+  object_group: string;
+  source_role: string;
+  source_role_label: string;
+  primary_source_table: string | null;
+  legacy_control_source: string | null;
+  neon_target_table: string | null;
+  import_method: string;
+  mapping_rule: string;
+  validation_rule: string;
+  utf8_rule: string;
+  id_rule: string;
+  relation_rule: string;
+  filter_rule: string;
+  migration_allowed: boolean;
+  truth_approval_allowed: boolean;
+  status: string;
+  blocking_level: string;
+  next_action: string | null;
+  notes: string | null;
+};
+
 type TransferRow = {
   line_no: number;
   source_key: string;
@@ -63,6 +88,7 @@ type TransferRow = {
   physical_mariadb_source: string | null;
   legacy_table_name: string | null;
   source_role: string | null;
+  source_role_label: string;
   source_status: string | null;
   mariadb_table: string | null;
   neon_table: string;
@@ -137,6 +163,15 @@ function escapeMariaDbIdentifier(identifier: string): string {
   return `\`${identifier}\``;
 }
 
+function sourceRoleLabel(sourceRole: string | null): string {
+  if (sourceRole === "primary_import" || sourceRole === "primary_source") return "Primær importkilde";
+  if (sourceRole === "legacy_control" || sourceRole === "legacy_resolved_table") return "Kontrollkilde";
+  if (sourceRole === "neon_first") return "Neon-first kilde";
+  if (sourceRole === "staging_source") return "Stagingkilde";
+  if (sourceRole === "control_source") return "Kontrollkilde";
+  return sourceRole || "Ukjent rolle";
+}
+
 async function neonTableExists(pool: Pool, tableName: string): Promise<boolean> {
   const result = await pool.query(
     `
@@ -148,6 +183,22 @@ async function neonTableExists(pool: Pool, tableName: string): Promise<boolean> 
       ) as exists
     `,
     [tableName]
+  );
+
+  return Boolean(result.rows[0]?.exists);
+}
+
+async function neonViewExists(pool: Pool, viewName: string): Promise<boolean> {
+  const result = await pool.query(
+    `
+      select exists (
+        select 1
+        from information_schema.views
+        where table_schema = 'public'
+          and table_name = $1
+      ) as exists
+    `,
+    [viewName]
   );
 
   return Boolean(result.rows[0]?.exists);
@@ -262,7 +313,11 @@ function resolveStatus(input: {
     };
   }
 
-  if (sourceRole === "legacy_resolved_table" || sourceStatus === "control_only") {
+  if (
+    sourceRole === "legacy_control" ||
+    sourceRole === "legacy_resolved_table" ||
+    sourceStatus === "control_only"
+  ) {
     return {
       status: "INFO",
       status_color: "blue",
@@ -327,6 +382,129 @@ function resolveStatus(input: {
   };
 }
 
+async function loadSourceRules(pool: Pool): Promise<SourceRuleRow[]> {
+  const fullViewExists = await neonViewExists(pool, "ct_v_migration_transfer_matrix_full");
+
+  if (fullViewExists) {
+    const result = await pool.query(
+      `
+        select
+          source_key,
+          object_group,
+          source_role,
+          coalesce(source_role_label, source_role) as source_role_label,
+          primary_source_table,
+          legacy_control_source,
+          neon_target_table,
+          import_method,
+          mapping_rule,
+          validation_rule,
+          utf8_rule,
+          id_rule,
+          relation_rule,
+          filter_rule,
+          migration_allowed,
+          truth_approval_allowed,
+          status,
+          blocking_level,
+          next_action,
+          notes
+        from ct_v_migration_transfer_matrix_full
+        order by
+          case status
+            when 'MANGLER' then 1
+            when 'VARSEL' then 2
+            when 'MÅ_DEFINERES' then 3
+            when 'INFO' then 4
+            when 'OK' then 5
+            else 9
+          end,
+          source_key,
+          object_group,
+          source_role
+      `
+    );
+
+    return result.rows.map((row, index) => ({
+      line_no: index + 1,
+      source_key: String(row.source_key || ""),
+      object_group: String(row.object_group || ""),
+      source_role: String(row.source_role || ""),
+      source_role_label: String(row.source_role_label || row.source_role || ""),
+      primary_source_table: row.primary_source_table,
+      legacy_control_source: row.legacy_control_source,
+      neon_target_table: row.neon_target_table,
+      import_method: String(row.import_method || "not_defined"),
+      mapping_rule: String(row.mapping_rule || "not_defined"),
+      validation_rule: String(row.validation_rule || "not_defined"),
+      utf8_rule: String(row.utf8_rule || "not_defined"),
+      id_rule: String(row.id_rule || "not_defined"),
+      relation_rule: String(row.relation_rule || "not_defined"),
+      filter_rule: String(row.filter_rule || "not_defined"),
+      migration_allowed: Boolean(row.migration_allowed),
+      truth_approval_allowed: Boolean(row.truth_approval_allowed),
+      status: String(row.status || "INFO"),
+      blocking_level: String(row.blocking_level || "BLOKKERT"),
+      next_action: row.next_action,
+      notes: row.notes
+    }));
+  }
+
+  const tableExists = await neonTableExists(pool, "ct_migration_source_rules");
+  if (!tableExists) return [];
+
+  const result = await pool.query(
+    `
+      select
+        source_key,
+        object_group,
+        source_role,
+        primary_source_table,
+        legacy_control_source,
+        neon_target_table,
+        import_method,
+        mapping_rule,
+        validation_rule,
+        utf8_rule,
+        id_rule,
+        relation_rule,
+        filter_rule,
+        migration_allowed,
+        truth_approval_allowed,
+        status,
+        blocking_level,
+        next_action,
+        notes
+      from ct_migration_source_rules
+      order by source_key, object_group, source_role
+    `
+  );
+
+  return result.rows.map((row, index) => ({
+    line_no: index + 1,
+    source_key: String(row.source_key || ""),
+    object_group: String(row.object_group || ""),
+    source_role: String(row.source_role || ""),
+    source_role_label: sourceRoleLabel(row.source_role),
+    primary_source_table: row.primary_source_table,
+    legacy_control_source: row.legacy_control_source,
+    neon_target_table: row.neon_target_table,
+    import_method: String(row.import_method || "not_defined"),
+    mapping_rule: String(row.mapping_rule || "not_defined"),
+    validation_rule: String(row.validation_rule || "not_defined"),
+    utf8_rule: String(row.utf8_rule || "not_defined"),
+    id_rule: String(row.id_rule || "not_defined"),
+    relation_rule: String(row.relation_rule || "not_defined"),
+    filter_rule: String(row.filter_rule || "not_defined"),
+    migration_allowed: Boolean(row.migration_allowed),
+    truth_approval_allowed: Boolean(row.truth_approval_allowed),
+    status: String(row.status || "INFO"),
+    blocking_level: String(row.blocking_level || "BLOKKERT"),
+    next_action: row.next_action,
+    notes: row.notes
+  }));
+}
+
 export async function GET() {
   const neonPool = new Pool({
     connectionString: getNeonConnectionString(),
@@ -339,14 +517,31 @@ export async function GET() {
     await mariaConn.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
     const mapExists = await neonTableExists(neonPool, "ct_migration_table_map");
+    const sourceRules = await loadSourceRules(neonPool);
 
     if (!mapExists) {
       return NextResponse.json({
         ok: false,
         source: "mariadb-neon-transfer-matrix",
         checked_at: new Date().toISOString(),
-        summary: { total: 0, ok: 0, varsel: 0, mangler: 1, info: 0 },
+        summary: {
+          total: 0,
+          ok: 0,
+          varsel: 0,
+          mangler: 1,
+          info: 0,
+          rules_defined: sourceRules.length,
+          methods_defined: sourceRules.filter((row) => row.import_method !== "not_defined").length,
+          migration_allowed: sourceRules.filter((row) => row.migration_allowed).length,
+          truth_approval_allowed: sourceRules.filter((row) => row.truth_approval_allowed).length,
+          blocked: sourceRules.filter((row) => row.blocking_level !== "OK").length
+        },
+        database_summary: {
+          mariadb_table_or_view_count: await countMariaDbObjects(mariaConn),
+          neon_table_or_view_count: await countNeonObjects(neonPool)
+        },
         rows: [],
+        source_rules: sourceRules,
         error_no: "ct_migration_table_map mangler i Neon."
       });
     }
@@ -370,6 +565,8 @@ export async function GET() {
           case source_role
             when 'staging_source' then 1
             when 'primary_source' then 2
+            when 'primary_import' then 2
+            when 'legacy_control' then 3
             when 'legacy_resolved_table' then 3
             when 'control_source' then 4
             when 'neon_first' then 5
@@ -380,7 +577,6 @@ export async function GET() {
     );
 
     const mapRows = mapResult.rows as TableMapRow[];
-
     const neonStagingExists = await neonTableExists(neonPool, "ct_migration_catalog_object_staging");
     const rows: TransferRow[] = [];
 
@@ -416,6 +612,7 @@ export async function GET() {
         physical_mariadb_source: mapRow.physical_mariadb_source,
         legacy_table_name: mapRow.legacy_table_name,
         source_role: mapRow.source_role,
+        source_role_label: sourceRoleLabel(mapRow.source_role),
         source_status: mapRow.source_status,
         mariadb_table: mariaTable,
         neon_table: "ct_migration_catalog_object_staging",
@@ -436,15 +633,31 @@ export async function GET() {
         if (row.status === "INFO") acc.info += 1;
         return acc;
       },
-      { total: 0, ok: 0, varsel: 0, mangler: 0, info: 0 }
+      {
+        total: 0,
+        ok: 0,
+        varsel: 0,
+        mangler: 0,
+        info: 0,
+        rules_defined: sourceRules.length,
+        methods_defined: sourceRules.filter((row) => row.import_method !== "not_defined").length,
+        migration_allowed: sourceRules.filter((row) => row.migration_allowed).length,
+        truth_approval_allowed: sourceRules.filter((row) => row.truth_approval_allowed).length,
+        blocked: sourceRules.filter((row) => row.blocking_level !== "OK").length
+      }
     );
 
     return NextResponse.json({
-      ok: summary.mangler === 0 && summary.varsel === 0,
+      ok:
+        summary.mangler === 0 &&
+        summary.varsel === 0 &&
+        summary.migration_allowed === 0 &&
+        summary.truth_approval_allowed === 0,
       source: "mariadb-neon-transfer-matrix",
       checked_at: new Date().toISOString(),
       summary,
       rows,
+      source_rules: sourceRules,
       database_summary: {
         mariadb_table_or_view_count: await countMariaDbObjects(mariaConn),
         neon_table_or_view_count: await countNeonObjects(neonPool)
@@ -453,7 +666,7 @@ export async function GET() {
         migration_allowed: false,
         neon_truth_approval_allowed: false,
         reason:
-          "Overføringsmatrisen viser om MariaDB-kilder har tilsvarende Neon Postgres staging/mål og om radtall samsvarer. Den migrerer ikke data."
+          "Overføringsmatrisen viser kilde-/radstatus og regel-/metodelaget. Den migrerer ikke data og kan ikke truth-godkjenne Neon."
       }
     });
   } finally {
