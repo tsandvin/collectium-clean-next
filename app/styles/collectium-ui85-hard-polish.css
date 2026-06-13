@@ -1,0 +1,72 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Collectium UI 8.5 hard polish
+ *
+ * Definering / formål:
+ * Global finpolering for Collectium AppShell, topbar, sidebar, paneler og tabeller.
+ * Filen finnes fordi app/layout.tsx importerer den som del av låst UI 8.5 CSS-kjede.
+ *
+ * Bruksområde:
+ * Importeres globalt fra app/layout.tsx før øvrige UI 8.5-spesifikke CSS-lag.
+ *
+ * Berørte DB-brytere / feature_keys:
+ * - Ingen. Ren global UI-styling.
+ *
+ * Berørte sider / routes:
+ * - Alle sider som bruker global Collectium layout.
+ *
+ * Dataretning:
+ * Ingen data. Kun visuell template-støtte.
+ *
+ * Endringsregel:
+ * Denne filen skal ikke inneholde side-spesifikk data eller lokal database-/API-logikk.
+ */
+
+:root {
+  --ct-ui85-soft-border: rgba(148, 163, 184, 0.34);
+  --ct-ui85-strong-border: rgba(10, 87, 73, 0.44);
+  --ct-ui85-card-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  --ct-ui85-radius: 18px;
+}
+
+.collectium-app {
+  min-width: 0;
+}
+
+.collectium-app :where(section, article, table, input, select, button, a) {
+  box-sizing: border-box;
+}
+
+.collectium-app :where(h1, h2, h3) {
+  letter-spacing: -0.02em;
+}
+
+.collectium-app :where(code) {
+  font-size: 0.92em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.collectium-topbar :where(input, select, button, a),
+.collectium-sidebar :where(a),
+.collectium-app :where(button, a, input, select) {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.collectium-topbar :where(input, select, button, a):focus-visible,
+.collectium-sidebar :where(a):focus-visible,
+.collectium-app :where(button, a, input, select):focus-visible {
+  outline: 2px solid rgba(10, 87, 73, 0.55);
+  outline-offset: 3px;
+}
+
+.collectium-app :where(.panel, .card, [class*="panel"], [class*="Card"]) {
+  border-color: var(--ct-ui85-soft-border);
+}
