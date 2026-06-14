@@ -1,4 +1,4 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -51,6 +51,8 @@
  */
 
 import { NextResponse } from "next/server";
+
+const runNeonQuery = neonQuery;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -585,3 +587,4 @@ export async function GET() {
 
   return jsonResponse(response);
 }
+
