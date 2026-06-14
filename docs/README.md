@@ -1,5 +1,7 @@
 # Collectium UI 8.5 v36 — React / Next.js package
 
+Denne pakken følger ønsket struktur, og Antigravity er inkludert som et av de relevante utviklings- og kontrollverktøyene for prosjektet.
+
 Denne pakken følger ønsket struktur:
 
 ```txt
