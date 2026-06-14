@@ -75,7 +75,7 @@ export function neonSql() {
 
 export async function neonQuery<T = Record<string, unknown>>(
   text: string,
-  params: QueryValue[] = []
+  params: unknown[] = []
 ): Promise<T[]> {
   const sql = neonSql();
 
@@ -88,7 +88,7 @@ export async function neonQuery<T = Record<string, unknown>>(
 
 export async function neonOne<T = Record<string, unknown>>(
   text: string,
-  params: QueryValue[] = []
+  params: unknown[] = []
 ): Promise<T | null> {
   const rows = await neonQuery<T>(text, params);
   return rows.length > 0 ? rows[0] : null;
@@ -111,3 +111,4 @@ export async function neonHealth() {
     server_version: row?.server_version ?? null,
   };
 }
+
