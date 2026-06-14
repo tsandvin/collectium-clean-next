@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -95,23 +95,17 @@ function getMariaEnv() {
   };
 }
 
-function getNeonUrl() {
-  return (
-    process.env.NEON_DATABASE_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.DATABASE_URL ||
-    ""
-  );
-}
-
 function hasMariaConfig() {
   const env = getMariaEnv();
   return Boolean(env.host && env.database && env.user);
 }
 
 function hasNeonConfig() {
-  return Boolean(getNeonUrl());
+  return Boolean(
+    process.env.DATABASE_URL ||
+    process.env.NEON_DATABASE_URL ||
+    process.env.POSTGRES_URL
+  );
 }
 
 async function mariaQuery(sql: string, params: any[] = []): Promise<QueryResult> {
@@ -156,21 +150,16 @@ async function mariaQuery(sql: string, params: any[] = []): Promise<QueryResult>
 }
 
 async function neonQuery(sql: string, params: any[] = []): Promise<QueryResult> {
-  const databaseUrl = getNeonUrl();
-
-  if (!databaseUrl) {
+  if (!hasNeonConfig()) {
     return {
       ok: false,
       rows: [],
-      error: "Neon/Postgres env mangler. Bruk NEON_DATABASE_URL, POSTGRES_URL eller DATABASE_URL.",
+      error: "Neon/Postgres env mangler. Bruk DATABASE_URL, NEON_DATABASE_URL eller POSTGRES_URL.",
     };
   }
 
   try {
-    const neonModule = await dynamicImport("@neondatabase/serverless");
-    const sqlClient = neonModule.neon(databaseUrl);
-    const rows = await sqlClient(sql, params);
-
+    const rows = await runNeonQuery(sql, params);
     return {
       ok: true,
       rows: Array.isArray(rows) ? rows : [],
