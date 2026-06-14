@@ -71,3 +71,10 @@ docs/sandbox-reports/
 # Local/generated backup archives
 docs/backup-archives/
 *.backup-*
+# Collectium local backups - must never be built by Vercel
+_local-backups/
+local-backups/
+removed-app-backups-*/
+*.local-backup
+*.backup.ts
+*.backup.tsx

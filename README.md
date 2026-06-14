@@ -8,6 +8,8 @@ Plattformen bygges som en moderne webapplikasjon med kontrollert frontend, API-b
 
 Collectium er under aktiv utvikling.
 
+Automatiske utviklings- og kontrollverktøy i prosjektet inkluderer AI, Codex og Antigravity.
+
 Nåværende hovedområder:
 
 - Next.js-applikasjonsstruktur
