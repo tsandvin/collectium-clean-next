@@ -4,91 +4,110 @@
  * Overskrift:
  * Neon database helper
  *
- * Definering / formÃ¥l:
- * Felles Postgres/Neon databasekobling for Next.js API-ruter.
+ * Definering / formål:
+ * Felles Neon Postgres helper for Next.js route handlers.
  *
- * BruksomrÃ¥de:
- * Brukes av auth API og senere Neon-baserte Collectium-ruter.
+ * Bruksområde:
+ * Brukes av API-ruter som trenger read/write mot Neon.
  *
- * BerÃ¸rte sider / routes:
- * - /api/auth/login
- * - /api/auth/register
- * - /api/auth/logout
- * - /api/auth/session
+ * Berørte sider / routes:
+ * - /api/system/neon-health
+ * - /api/system/*
+ * - /api/relation/*
+ * - /api/filter/*
  *
- * BerÃ¸rte DB-brytere / feature_keys:
- * - auth.login
- * - auth.register
- * - auth.logout
- * - auth.session.view
+ * Berørte DB-brytere / feature_keys:
+ * - system.neon.health
+ * - system.db.control
+ * - relation.registry.view
+ * - filter.master.view
  *
- * BerÃ¸rte API-ruter:
- * - /api/auth/*
+ * Berørte API-ruter:
+ * - GET /api/system/neon-health
+ * - GET /api/system/table-mapping
+ * - GET /api/system/field-mapping
+ * - GET /api/relation/types
+ * - GET /api/relation/paths
  *
- * BerÃ¸rte tabeller / views:
- * - ct_users
- * - ct_user_sessions
- * - ct_login_attempts
+ * Berørte tabeller / views:
+ * - Neon public schema
+ * - Collectium ct_* tabeller/views etter rute
  *
  * Dataretning:
- * Neon/Postgres -> API/backend -> Next.js -> React -> UI
+ * Neon Postgres -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
- * log_category: auth
- * log_action: db.query
+ * log_category: system
+ * log_action: neon_query
  *
- * Versjon:
- * CT-FILE-AUTH-NEON-0001 / CHANGE-2026-06-10-0002
+ * Endringsregel:
+ * Dette er en felles DB-helper. Endres kontrollert.
  */
 
-import { Pool, type QueryResultRow } from "pg";
+import { neon } from "@neondatabase/serverless";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var collectiumNeonPool: Pool | undefined;
-}
+type QueryValue = string | number | boolean | null | Date | Buffer | undefined;
 
-function getConnectionString(): string {
-  const value =
+let sqlClient: ReturnType<typeof neon> | null = null;
+
+function getDatabaseUrl(): string {
+  const databaseUrl =
     process.env.DATABASE_URL ||
-    process.env.POSTGRES_URL ||
     process.env.NEON_DATABASE_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.POSTGRES_URL_NON_POOLING;
+    process.env.POSTGRES_URL;
 
-  if (!value) {
-    throw new Error("Missing Neon/Postgres connection string. Set DATABASE_URL or POSTGRES_URL in Vercel Environment Variables.");
+  if (!databaseUrl) {
+    throw new Error(
+      "Missing Neon database URL. Set DATABASE_URL, NEON_DATABASE_URL or POSTGRES_URL in Vercel Environment Variables."
+    );
   }
 
-  return value;
+  return databaseUrl;
 }
 
-export function getNeonPool(): Pool {
-  if (!global.collectiumNeonPool) {
-    global.collectiumNeonPool = new Pool({
-      connectionString: getConnectionString(),
-      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
-      max: 5,
-      connectionTimeoutMillis: 10000,
-      idleTimeoutMillis: 30000,
-    });
+export function neonSql() {
+  if (!sqlClient) {
+    sqlClient = neon(getDatabaseUrl());
   }
 
-  return global.collectiumNeonPool;
+  return sqlClient;
 }
 
-export async function neonQuery<T extends QueryResultRow = QueryResultRow>(
-  sql: string,
-  params: unknown[] = [],
+export async function neonQuery<T = Record<string, unknown>>(
+  text: string,
+  params: QueryValue[] = []
 ): Promise<T[]> {
-  const result = await getNeonPool().query<T>(sql, params);
-  return result.rows;
+  const sql = neonSql();
+
+  if (params.length > 0) {
+    return (await sql.query(text, params)) as T[];
+  }
+
+  return (await sql.query(text)) as T[];
 }
 
-export async function neonOne<T extends QueryResultRow = QueryResultRow>(
-  sql: string,
-  params: unknown[] = [],
+export async function neonOne<T = Record<string, unknown>>(
+  text: string,
+  params: QueryValue[] = []
 ): Promise<T | null> {
-  const rows = await neonQuery<T>(sql, params);
-  return rows[0] ?? null;
+  const rows = await neonQuery<T>(text, params);
+  return rows.length > 0 ? rows[0] : null;
+}
+
+export async function neonHealth() {
+  const row = await neonOne<{
+    ok: number;
+    database_name: string;
+    current_user: string;
+    server_version: string;
+  }>(
+    "select 1 as ok, current_database() as database_name, current_user as current_user, version() as server_version"
+  );
+
+  return {
+    ok: Boolean(row?.ok),
+    database_name: row?.database_name ?? null,
+    current_user: row?.current_user ?? null,
+    server_version: row?.server_version ?? null,
+  };
 }
