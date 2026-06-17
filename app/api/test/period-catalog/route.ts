@@ -138,8 +138,8 @@ function segmentSummary(row: DbRow, segment: Segment): string {
   }
 
   const ruler = text(row.ruler_name_raw_no) ?? "Mangler regent";
-  const year = text(row.object_year_label) ?? text(row.publication_year_label) ?? "Mangler år";
-  const issue = text(row.denomination_issue_raw_no) ?? "Mangler valørutgave / serie";
+  const year = text(row.object_year_label) ?? text(row.publication_year_label) ?? "Mangler Ã¥r";
+  const issue = text(row.denomination_issue_raw_no) ?? "Mangler valÃ¸rutgave / serie";
 
   return `${year} / ${ruler} / ${issue}`;
 }
@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
         from public.ct_v_object_relations_resolved
         where source_key = $1
           and object_group = $2
-          and object_id = any($3::bigint[])
+          and object_id::text = any($3::text[])
         order by object_id, relation_type, display_name_no
       `,
       [sourceKey, objectGroup, objectKeys]
