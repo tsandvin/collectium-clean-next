@@ -250,7 +250,7 @@ export async function GET(request: NextRequest) {
   }
 
   const objects = rows.map((row) => {
-    const objectId = numberValue(row.object_id);
+    const objectId = String(row.object_id ?? "").trim();
     return toObject(row, relationsByObjectId.get(objectId) ?? [], segment);
   });
 
