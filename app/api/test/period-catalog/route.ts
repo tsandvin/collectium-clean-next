@@ -241,7 +241,7 @@ export async function GET(request: NextRequest) {
     relationRows = relationDbRows.map(toRelation);
   }
 
-  const relationsByObjectId = new Map<number, RelationRow[]>();
+  const relationsByObjectId = new Map<string, RelationRow[]>();
 
   for (const relation of relationRows) {
     const group = relationsByObjectId.get(relation.object_id) ?? [];
