@@ -43,6 +43,8 @@
     "_collectium-backups/**",
     "_collectium-checks",
     "_collectium-checks/**",
+    "_collectium-install-reports",
+    "_collectium-install-reports/**",
     "collectium-conflict-backup",
     "collectium-conflict-backup/**",
     "reports",

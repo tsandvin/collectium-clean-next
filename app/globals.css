@@ -10,8 +10,12 @@ body {
   min-height: 100%;
   overflow-x: hidden;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #eef5fb;
-  color: #102f55;
+  background: var(--ct-app-bg);
+  color: var(--ct-text);
+}
+
+body {
+  min-height: 100dvh;
 }
 
 a {
@@ -29,22 +33,85 @@ textarea {
   min-height: 100%;
 }
 
-:root {
-  --ct-card-radius: 18px;
-  --ct-inner-radius: 12px;
-  --ct-blue: #174f98;
-  --ct-blue-soft: #eaf4ff;
-  --ct-line: #d7e5f2;
+:root,
+html[data-skin="signature-light"] {
+  color-scheme: light;
+  --ct-app-bg: #eef5fb;
+  --ct-sidebar-bg: linear-gradient(180deg, #ffffff 0%, #edf5fc 100%);
+  --ct-topbar-bg: rgba(255, 255, 255, 0.88);
+  --ct-page-bg: #f8fbff;
+  --ct-panel: #ffffff;
+  --ct-panel-soft: #f7fbff;
+  --ct-input-bg: #f7fbff;
   --ct-text: #102f55;
-  --ct-subtext: #607891;
-  --ct-surface: #ffffff;
-  --ct-surface-soft: #f7fbff;
-  --ct-shadow-soft: 0 18px 45px rgba(16, 47, 85, 0.10);
+  --ct-muted: #607891;
+  --ct-border: #d7e5f2;
+  --ct-border-strong: #c4d8ed;
+  --ct-accent: #174f98;
+  --ct-accent-2: #80b8ff;
+  --ct-hover: rgba(23, 79, 152, 0.08);
+  --ct-shadow-soft: 0 18px 45px rgb(16 47 85 / 10%);
+  --ct-shadow-card: 0 16px 38px rgb(16 47 85 / 9%);
 }
 
-[data-skin="signature-dark"],
-[data-theme="dark"] {
+html[data-skin="signature-dark"] {
   color-scheme: dark;
+  --ct-app-bg: #071525;
+  --ct-sidebar-bg: linear-gradient(180deg, #0b1e32 0%, #071525 100%);
+  --ct-topbar-bg: rgba(7, 21, 37, 0.92);
+  --ct-page-bg: #0b1e32;
+  --ct-panel: #10263d;
+  --ct-panel-soft: #132d47;
+  --ct-input-bg: rgba(255, 255, 255, 0.06);
+  --ct-text: #e7f1ff;
+  --ct-muted: #a8bed7;
+  --ct-border: rgba(184, 211, 241, 0.22);
+  --ct-border-strong: rgba(184, 211, 241, 0.34);
+  --ct-accent: #80b8ff;
+  --ct-accent-2: #4da3ff;
+  --ct-hover: rgba(128, 184, 255, 0.11);
+  --ct-shadow-soft: 0 18px 45px rgb(0 0 0 / 30%);
+  --ct-shadow-card: 0 18px 42px rgb(0 0 0 / 28%);
+}
+
+html[data-skin="museum"] {
+  color-scheme: light;
+  --ct-app-bg: #f4efe7;
+  --ct-sidebar-bg: linear-gradient(180deg, #fffaf1 0%, #efe5d3 100%);
+  --ct-topbar-bg: rgba(255, 250, 241, 0.9);
+  --ct-page-bg: #fffaf1;
+  --ct-panel: #fffdf8;
+  --ct-panel-soft: #f6efe1;
+  --ct-input-bg: #fffdf8;
+  --ct-text: #2d2618;
+  --ct-muted: #786b55;
+  --ct-border: #ded0b7;
+  --ct-border-strong: #c9b792;
+  --ct-accent: #7b5d22;
+  --ct-accent-2: #b99443;
+  --ct-hover: rgba(123, 93, 34, 0.09);
+  --ct-shadow-soft: 0 18px 45px rgb(70 48 20 / 10%);
+  --ct-shadow-card: 0 16px 38px rgb(70 48 20 / 9%);
+}
+
+html[data-skin="finance"] {
+  color-scheme: light;
+  --ct-app-bg: #edf6f2;
+  --ct-sidebar-bg: linear-gradient(180deg, #f7fffb 0%, #e1f1ea 100%);
+  --ct-topbar-bg: rgba(247, 255, 251, 0.9);
+  --ct-page-bg: #f6fffb;
+  --ct-panel: #ffffff;
+  --ct-panel-soft: #ecf8f2;
+  --ct-input-bg: #f6fffb;
+  --ct-text: #123c2b;
+  --ct-muted: #5b806e;
+  --ct-border: #cfe4d8;
+  --ct-border-strong: #b8d6c7;
+  --ct-accent: #18734f;
+  --ct-accent-2: #56b98e;
+  --ct-hover: rgba(24, 115, 79, 0.09);
+  --ct-shadow-soft: 0 18px 45px rgb(17 89 61 / 10%);
+  --ct-shadow-card: 0 16px 38px rgb(17 89 61 / 9%);
 }
 
 .ct-page-lock,

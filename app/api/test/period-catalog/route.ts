@@ -195,15 +195,15 @@ export async function GET(request: NextRequest) {
         left join ct_v_no_banknote_object_presentation b
           on b.source_key = p.source_key
          and b.object_group = p.object_group
-         and b.object_id = p.object_id
+         and b.object_id::text = p.object_id::text
         left join ct_v_object_market_resolved m
           on m.source_key = p.source_key
          and m.object_group = p.object_group
-         and m.object_id = p.object_id
+         and m.object_id::text = p.object_id::text
         left join ct_v_object_user_state_resolved u
           on u.source_key = p.source_key
          and u.object_group = p.object_group
-         and u.object_id = p.object_id
+         and u.object_id::text = p.object_id::text
         where p.source_key = $1
           and p.object_group = $2
           and ${yearExpr} between $3 and $4
