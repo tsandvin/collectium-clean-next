@@ -2,7 +2,8 @@
  * API: /api/test/period-catalog
  * Purpose: read-only DB backed endpoint for Collectium period filter and view cards.
  *
- * v4 fix:
+ * v10 fix:
+ * - Fixes Turbopack parse error by never mixing ?? and || in the same title expression.
  * - Does not select u.wishlist_count or u.favorite_count because those columns are not present in current Neon view.
  * - Uses safe default counters until user-state/count resolved views are defined.
  * - Forces sourceKey=norske_sedler to objectGroup=banknote.
@@ -27,8 +28,8 @@ const SEGMENTS: CollectiumSegment[] = ["samler", "historie", "finans"];
 const VIEWS: CollectiumResultView[] = ["liste", "horisontal", "museum"];
 
 function asNumber(value: string | null, fallback: number): number {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function cleanSegment(value: string | null): CollectiumSegment {
@@ -66,15 +67,16 @@ function generatedTitle(row: DbRow): string {
     s(row.variant_type_raw_no),
   ]
     .filter(Boolean)
-    .join(" â€¢ ");
+    .join(" • ");
 }
 
 function toObject(row: DbRow, relations: RelationRow[]): PeriodCatalogObject {
-  const title =
+  const rawTitle =
     s(row.collectium_title_no) ??
     s(row.title_no) ??
-    generatedTitle(row) ||
-    "Uten tittel";
+    generatedTitle(row);
+
+  const title = rawTitle || "Uten tittel";
 
   const marketValue = s(row.market_value_raw_no) ?? s(row.value_raw_no);
   const auctionText = s(row.auction_status_raw_no);
