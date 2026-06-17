@@ -7,41 +7,25 @@
  * CollectiumPeriodFilterTest
  *
  * Definering / formål:
- * Frontend-kontrollside for periodefilter med tidslinje og katalogresultater.
+ * Testside for periodefilter med filtertyper, faktiske periodevalg fra
+ * ct_v_period_filter_options og katalogresultater under tidslinjen.
  *
- * Bruksområde:
- * Brukes av /test/periodefilter for å vise:
- * - periodefilter/tidslinje øverst
- * - segmentbrytere Samler / Historie / Finans
- * - katalogresultater under tidslinjen
- * - valgt objekt, relasjoner og markedsstatus fra Neon/API
- *
- * Berørte DB-brytere / feature_keys:
- * - filter.period.view
- * - filter.period.simple.view
- * - filter.period.advanced.view
- * - object.presentation.view
- * - object.relations.view
- * - object.market.view
- *
- * Berørte routes:
+ * Routes:
  * - /test/periodefilter
  *
- * Berørte API-ruter:
- * - GET /api/filter/period
- * - GET /api/test/period-catalog
- * - GET /api/object/presentation
- * - GET /api/object/relations
- * - GET /api/object/market
- *
- * Designregel:
- * Bruker eksisterende globalt design. Ingen global CSS, shell, topbar eller sidebar endres.
+ * API:
+ * - /api/filter/period
+ * - /api/filter/period/options
+ * - /api/test/period-catalog
+ * - /api/object/presentation
+ * - /api/object/relations
+ * - /api/object/market
  */
 
 import { useEffect, useMemo, useState } from "react";
 
 type Segment = "samler" | "historie" | "finans";
-type LoadState = "loading" | "ready" | "error";
+type LoadState = "loading" | "ready";
 
 type ApiResult<T> = {
   ok: boolean;
@@ -55,27 +39,42 @@ type ApiResult<T> = {
 type ApiEnvelope = {
   ok?: boolean;
   source?: string;
+  count?: number;
   error?: string;
-  period_filters?: PeriodFilterRow[];
-  filters?: PeriodFilterRow[];
+  period_filters?: PeriodFilterType[];
+  filters?: PeriodFilterType[];
+  options?: PeriodOption[];
   rows?: unknown[];
   objects?: CatalogObject[];
   data?: unknown[];
   [key: string]: unknown;
 };
 
-type PeriodFilterRow = {
+type PeriodFilterType = {
   period_filter_key?: string;
   period_filter_label_no?: string;
   period_filter_level?: string;
-  description_no?: string | null;
   sort_order?: number | string | null;
+  [key: string]: unknown;
+};
+
+type PeriodOption = {
+  option_key?: string;
+  option_label_no?: string;
+  period_filter_key?: string;
+  timeline_start_year?: number | string | null;
+  timeline_end_year?: number | string | null;
+  timeline_sort_year?: number | string | null;
+  relation_type?: string | null;
+  relation_slug?: string | null;
+  relation_href?: string | null;
+  period_label_no?: string | null;
+  relation_label_no?: string | null;
+  display_name_no?: string | null;
   start_year?: number | string | null;
   end_year?: number | string | null;
   year_from?: number | string | null;
   year_to?: number | string | null;
-  period_start_year?: number | string | null;
-  period_end_year?: number | string | null;
   [key: string]: unknown;
 };
 
@@ -94,9 +93,6 @@ type CatalogObject = {
   signature_raw_no?: string | null;
   ruler_name_raw_no?: string | null;
   alias_ruler_name_raw_no?: string | null;
-  rarity_raw_no?: string | null;
-  market_value_raw_no?: string | null;
-  trend_raw_no?: string | null;
   relations?: RelationRow[];
   [key: string]: unknown;
 };
@@ -135,94 +131,89 @@ type ObjectMarketResponse = ApiEnvelope & {
 };
 
 type PageData = {
-  periodApi: ApiResult<ApiEnvelope> | null;
-  catalogApi: ApiResult<ApiEnvelope> | null;
-  periodFilters: PeriodFilterRow[];
+  filterTypes: PeriodFilterType[];
+  periodOptions: PeriodOption[];
   objects: CatalogObject[];
   selectedObject: CatalogObject | null;
+  periodApi: ApiResult<ApiEnvelope> | null;
+  optionsApi: ApiResult<ApiEnvelope> | null;
+  catalogApi: ApiResult<ApiEnvelope> | null;
   presentation: ApiResult<ObjectPresentationResponse> | null;
   relations: ApiResult<ObjectRelationsResponse> | null;
   market: ApiResult<ObjectMarketResponse> | null;
 };
 
 function asText(value: unknown, fallback = "Mangler"): string {
-  if (value === null || value === undefined) {
-    return fallback;
-  }
-
+  if (value === null || value === undefined) return fallback;
   const text = String(value).trim();
   return text.length > 0 ? text : fallback;
 }
 
 function asYear(value: unknown): number | null {
-  if (value === null || value === undefined) {
-    return null;
-  }
-
+  if (value === null || value === undefined) return null;
   const match = String(value).match(/-?\d{1,4}/);
-  if (!match) {
-    return null;
-  }
-
+  if (!match) return null;
   const numberValue = Number(match[0]);
   return Number.isFinite(numberValue) ? numberValue : null;
 }
 
-function getPeriodStart(row: PeriodFilterRow): number | null {
-  return (
-    asYear(row.start_year) ??
-    asYear(row.year_from) ??
-    asYear(row.period_start_year) ??
-    asYear(row.period_filter_key) ??
-    null
+function optionKey(option: PeriodOption, index: number): string {
+  return asText(option.option_key ?? option.relation_slug ?? `period-option-${index}`, `period-option-${index}`);
+}
+
+function optionLabel(option: PeriodOption): string {
+  return asText(
+    option.option_label_no ??
+      option.period_label_no ??
+      option.relation_label_no ??
+      option.display_name_no ??
+      option.relation_slug ??
+      option.option_key,
+    "Uten periode"
   );
 }
 
-function getPeriodEnd(row: PeriodFilterRow): number | null {
+function optionStart(option: PeriodOption): number | null {
   return (
-    asYear(row.end_year) ??
-    asYear(row.year_to) ??
-    asYear(row.period_end_year) ??
-    getPeriodStart(row)
+    asYear(option.timeline_start_year) ??
+    asYear(option.start_year) ??
+    asYear(option.year_from) ??
+    asYear(option.option_label_no) ??
+    asYear(option.period_label_no) ??
+    asYear(option.relation_label_no)
   );
 }
 
-function getPeriodFilters(payload: ApiEnvelope | null): PeriodFilterRow[] {
-  if (!payload) {
-    return [];
+function optionEnd(option: PeriodOption): number | null {
+  return asYear(option.timeline_end_year) ?? asYear(option.end_year) ?? asYear(option.year_to) ?? optionStart(option);
+}
+
+function getFilterTypes(payload: ApiEnvelope | null): PeriodFilterType[] {
+  if (!payload) return [];
+  for (const candidate of [payload.period_filters, payload.filters, payload.rows, payload.data]) {
+    if (Array.isArray(candidate)) return candidate as PeriodFilterType[];
   }
+  return [];
+}
 
-  const candidates = [payload.period_filters, payload.filters, payload.rows, payload.data];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate as PeriodFilterRow[];
-    }
+function getPeriodOptions(payload: ApiEnvelope | null): PeriodOption[] {
+  if (!payload) return [];
+  for (const candidate of [payload.options, payload.rows, payload.data]) {
+    if (Array.isArray(candidate)) return candidate as PeriodOption[];
   }
-
   return [];
 }
 
 function getCatalogObjects(payload: ApiEnvelope | null): CatalogObject[] {
-  if (!payload) {
-    return [];
+  if (!payload) return [];
+  for (const candidate of [payload.objects, payload.rows, payload.data]) {
+    if (Array.isArray(candidate)) return candidate as CatalogObject[];
   }
-
-  const candidates = [payload.objects, payload.rows, payload.data];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate as CatalogObject[];
-    }
-  }
-
   return [];
 }
 
 function objectTitle(object: CatalogObject | null): string {
-  if (!object) {
-    return "Ingen objekt valgt";
-  }
+  if (!object) return "Ingen objekt valgt";
 
   return asText(
     object.title ??
@@ -240,48 +231,36 @@ function objectTitle(object: CatalogObject | null): string {
 }
 
 function objectQuery(object: CatalogObject): string {
-  const sourceKey = encodeURIComponent(asText(object.source_key, "norske_sedler"));
-  const objectGroup = encodeURIComponent(asText(object.object_group, "banknote"));
-  const objectId = encodeURIComponent(String(object.object_id));
-
-  return `source_key=${sourceKey}&object_group=${objectGroup}&object_id=${objectId}`;
+  return [
+    `source_key=${encodeURIComponent(asText(object.source_key, "norske_sedler"))}`,
+    `object_group=${encodeURIComponent(asText(object.object_group, "banknote"))}`,
+    `object_id=${encodeURIComponent(String(object.object_id))}`,
+  ].join("&");
 }
 
 async function fetchApi<T extends ApiEnvelope>(url: string): Promise<ApiResult<T>> {
   try {
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers: { Accept: "application/json" },
       cache: "no-store",
     });
 
     const raw = await response.text();
 
     if (!raw || raw.trim().length === 0) {
-      return {
-        ok: false,
-        status: response.status,
-        url,
-        data: null,
-        error: `Tomt API-svar fra ${url}`,
-        raw,
-      };
+      return { ok: false, status: response.status, url, data: null, error: `Tomt API-svar fra ${url}`, raw };
     }
 
     try {
       const data = JSON.parse(raw) as T;
-
+      const ok = response.ok && data.ok !== false;
       return {
-        ok: response.ok && data.ok !== false,
+        ok,
         status: response.status,
         url,
         data,
-        error:
-          response.ok && data.ok !== false
-            ? null
-            : asText(data.error, `HTTP ${response.status} fra ${url}`),
+        error: ok ? null : asText(data.error, `HTTP ${response.status}`),
         raw,
       };
     } catch {
@@ -306,66 +285,72 @@ async function fetchApi<T extends ApiEnvelope>(url: string): Promise<ApiResult<T
   }
 }
 
-function Timeline({
+function FilterTypeBar({
   filters,
-  selectedKey,
+  selected,
   onSelect,
 }: {
-  filters: PeriodFilterRow[];
-  selectedKey: string | null;
-  onSelect: (key: string | null) => void;
+  filters: PeriodFilterType[];
+  selected: string | null;
+  onSelect: (value: string | null) => void;
 }) {
-  const timelineRows = useMemo(() => {
-    const rows = filters.map((filter, index) => {
-      const start = getPeriodStart(filter);
-      const end = getPeriodEnd(filter);
-      const key = asText(filter.period_filter_key ?? `period-${index}`, `period-${index}`);
-      const label = asText(filter.period_filter_label_no ?? filter.period_filter_key, "Uten periode");
+  return (
+    <div className="ct-inline-actions" aria-label="Periodefiltertype">
+      <button type="button" className={selected === null ? "is-active" : ""} onClick={() => onSelect(null)}>
+        Alle filtertyper
+      </button>
 
-      return {
-        filter,
-        key,
-        label,
-        level: asText(filter.period_filter_level, "periode"),
-        start,
-        end,
-        sort: start ?? Number(filter.sort_order ?? index),
-      };
-    });
+      {filters.map((filter, index) => {
+        const key = asText(filter.period_filter_key, `filter-${index}`);
+        return (
+          <button key={key} type="button" className={selected === key ? "is-active" : ""} onClick={() => onSelect(key)}>
+            {asText(filter.period_filter_label_no ?? filter.period_filter_key, key)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
-    return rows.sort((a, b) => a.sort - b.sort);
-  }, [filters]);
+function Timeline({
+  options,
+  selected,
+  onSelect,
+}: {
+  options: PeriodOption[];
+  selected: string | null;
+  onSelect: (value: string | null) => void;
+}) {
+  const rows = useMemo(() => {
+    return options
+      .map((option, index) => ({
+        option,
+        key: optionKey(option, index),
+        label: optionLabel(option),
+        start: optionStart(option),
+        end: optionEnd(option),
+        sort: asYear(option.timeline_sort_year) ?? optionStart(option) ?? index,
+      }))
+      .sort((a, b) => a.sort - b.sort || a.label.localeCompare(b.label, "nb"));
+  }, [options]);
 
-  if (timelineRows.length === 0) {
-    return (
-      <div className="ct-status-box">
-        Ingen periodefilterrader fra API. Tidslinjen venter på registry-data.
-      </div>
-    );
+  if (rows.length === 0) {
+    return <p>Ingen periodevalg returnert fra ct_v_period_filter_options.</p>;
   }
 
   return (
-    <div className="ct-period-timeline" aria-label="Periodefilter tidslinje">
-      <button
-        type="button"
-        className={selectedKey === null ? "is-active" : ""}
-        onClick={() => onSelect(null)}
-      >
+    <div className="ct-period-timeline" aria-label="Periodevalg tidslinje">
+      <button type="button" className={selected === null ? "is-active" : ""} onClick={() => onSelect(null)}>
         Alle perioder
+        <span>{rows.length} valg</span>
       </button>
 
-      {timelineRows.map((row) => (
-        <button
-          key={row.key}
-          type="button"
-          className={selectedKey === row.key ? "is-active" : ""}
-          onClick={() => onSelect(row.key)}
-          title={`${row.label} ${row.start ?? ""}${row.end && row.end !== row.start ? `-${row.end}` : ""}`}
-        >
+      {rows.map((row) => (
+        <button key={row.key} type="button" className={selected === row.key ? "is-active" : ""} onClick={() => onSelect(row.key)}>
           <strong>{row.label}</strong>
           <span>
             {row.start ? row.start : "Udatert"}
-            {row.end && row.end !== row.start ? `-${row.end}` : ""}
+            {row.end && row.start && row.end !== row.start ? `-${row.end}` : ""}
           </span>
         </button>
       ))}
@@ -376,13 +361,16 @@ function Timeline({
 export default function CollectiumPeriodFilterTest() {
   const [state, setState] = useState<LoadState>("loading");
   const [segment, setSegment] = useState<Segment>("historie");
-  const [selectedPeriodKey, setSelectedPeriodKey] = useState<string | null>(null);
+  const [selectedFilterType, setSelectedFilterType] = useState<string | null>(null);
+  const [selectedPeriodOption, setSelectedPeriodOption] = useState<string | null>(null);
   const [data, setData] = useState<PageData>({
-    periodApi: null,
-    catalogApi: null,
-    periodFilters: [],
+    filterTypes: [],
+    periodOptions: [],
     objects: [],
     selectedObject: null,
+    periodApi: null,
+    optionsApi: null,
+    catalogApi: null,
     presentation: null,
     relations: null,
     market: null,
@@ -395,13 +383,13 @@ export default function CollectiumPeriodFilterTest() {
       setState("loading");
 
       const periodApi = await fetchApi<ApiEnvelope>("/api/filter/period");
+      const optionsApi = await fetchApi<ApiEnvelope>("/api/filter/period/options");
+      const catalogApi = await fetchApi<ApiEnvelope>(
+        `/api/test/period-catalog?source_key=norske_sedler&object_group=banknote&segment=${segment}&view=liste&limit=25`
+      );
 
-      const catalogUrl =
-        `/api/test/period-catalog?source_key=norske_sedler&object_group=banknote&segment=${segment}&view=liste&limit=25`;
-
-      const catalogApi = await fetchApi<ApiEnvelope>(catalogUrl);
-
-      const periodFilters = getPeriodFilters(periodApi.data);
+      const filterTypes = getFilterTypes(periodApi.data);
+      const periodOptions = getPeriodOptions(optionsApi.data);
       const objects = getCatalogObjects(catalogApi.data);
       const selectedObject = objects[0] ?? null;
 
@@ -411,7 +399,6 @@ export default function CollectiumPeriodFilterTest() {
 
       if (selectedObject) {
         const query = objectQuery(selectedObject);
-
         const [presentationResult, relationsResult, marketResult] = await Promise.all([
           fetchApi<ObjectPresentationResponse>(`/api/object/presentation?${query}`),
           fetchApi<ObjectRelationsResponse>(`/api/object/relations?${query}`),
@@ -425,11 +412,13 @@ export default function CollectiumPeriodFilterTest() {
 
       if (!cancelled) {
         setData({
-          periodApi,
-          catalogApi,
-          periodFilters,
+          filterTypes,
+          periodOptions,
           objects,
           selectedObject,
+          periodApi,
+          optionsApi,
+          catalogApi,
           presentation,
           relations,
           market,
@@ -445,41 +434,34 @@ export default function CollectiumPeriodFilterTest() {
     };
   }, [segment]);
 
-  const filteredObjects = useMemo(() => {
-    if (!selectedPeriodKey) {
-      return data.objects;
-    }
+  const visibleOptions = useMemo(() => {
+    if (!selectedFilterType) return data.periodOptions;
 
-    const selectedPeriod = data.periodFilters.find(
-      (filter, index) =>
-        asText(filter.period_filter_key ?? `period-${index}`, `period-${index}`) === selectedPeriodKey
-    );
+    return data.periodOptions.filter((option) => {
+      return asText(option.period_filter_key ?? option.relation_type, "") === selectedFilterType;
+    });
+  }, [data.periodOptions, selectedFilterType]);
 
-    if (!selectedPeriod) {
-      return data.objects;
-    }
+  const visibleObjects = useMemo(() => {
+    if (!selectedPeriodOption) return data.objects;
 
-    const start = getPeriodStart(selectedPeriod);
-    const end = getPeriodEnd(selectedPeriod);
+    const selected = data.periodOptions.find((option, index) => optionKey(option, index) === selectedPeriodOption);
+    if (!selected) return data.objects;
 
-    if (!start) {
-      return data.objects;
-    }
+    const start = optionStart(selected);
+    const end = optionEnd(selected);
+    if (!start) return data.objects;
 
     return data.objects.filter((object) => {
       const objectYear = asYear(object.object_year_label ?? object.publication_year_label);
-      if (!objectYear) {
-        return false;
-      }
-
+      if (!objectYear) return false;
       return objectYear >= start && objectYear <= (end ?? start);
     });
-  }, [data.objects, data.periodFilters, selectedPeriodKey]);
+  }, [data.objects, data.periodOptions, selectedPeriodOption]);
 
   const relationRows = useMemo(() => {
-    const relationData = data.relations?.data;
-    if (relationData?.rows && Array.isArray(relationData.rows)) {
-      return relationData.rows;
+    if (data.relations?.data?.rows && Array.isArray(data.relations.data.rows)) {
+      return data.relations.data.rows as RelationRow[];
     }
 
     if (data.selectedObject?.relations && Array.isArray(data.selectedObject.relations)) {
@@ -492,12 +474,14 @@ export default function CollectiumPeriodFilterTest() {
   const presentationRow = data.presentation?.data?.row ?? data.selectedObject;
   const marketRow = data.market?.data?.row ?? null;
 
-  const hasApiError =
-    data.periodApi?.ok === false ||
-    data.catalogApi?.ok === false ||
-    data.presentation?.ok === false ||
-    data.relations?.ok === false ||
-    data.market?.ok === false;
+  const apiWarnings = [
+    data.periodApi?.ok === false ? `Filtertyper: ${data.periodApi.error}` : null,
+    data.optionsApi?.ok === false ? `Periodevalg: ${data.optionsApi.error}` : null,
+    data.catalogApi?.ok === false ? `Katalog: ${data.catalogApi.error}` : null,
+    data.presentation?.ok === false ? `Objektpresentasjon: ${data.presentation.error}` : null,
+    data.relations?.ok === false ? `Relasjoner: ${data.relations.error}` : null,
+    data.market?.ok === false ? `Marked: ${data.market.error}` : null,
+  ].filter(Boolean);
 
   return (
     <main className="ct-period-test-page">
@@ -505,19 +489,13 @@ export default function CollectiumPeriodFilterTest() {
         <p className="ct-eyebrow">Periodefilter - DB-test</p>
         <h1>Periodefilter med tidslinje</h1>
         <p>
-          Øverst ligger periodefilteret som tidslinje. Under tidslinjen vises
-          katalogresultater fra Neon/API. Segmentene styrer hvilken type
-          informasjon som prioriteres i resultatene.
+          Filtertypene kommer fra periodefilter-registeret. Tidslinjeverdiene kommer fra
+          ct_v_period_filter_options. Under tidslinjen vises katalogresultater fra Neon/API.
         </p>
 
         <div className="ct-inline-actions" aria-label="Segmentvalg">
           {(["samler", "historie", "finans"] as const).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={segment === item ? "is-active" : ""}
-              onClick={() => setSegment(item)}
-            >
+            <button key={item} type="button" className={segment === item ? "is-active" : ""} onClick={() => setSegment(item)}>
               {item === "samler" ? "Samler" : item === "historie" ? "Historie" : "Finans"}
             </button>
           ))}
@@ -525,32 +503,48 @@ export default function CollectiumPeriodFilterTest() {
       </section>
 
       <section className="ct-section">
-        <h2>Tidslinje / periodefilter</h2>
+        <h2>Filtertype</h2>
         {state === "loading" ? (
-          <p>Henter periodefilter og katalogresultater...</p>
+          <p>Henter filtertyper...</p>
         ) : (
-          <Timeline
-            filters={data.periodFilters}
-            selectedKey={selectedPeriodKey}
-            onSelect={setSelectedPeriodKey}
+          <FilterTypeBar
+            filters={data.filterTypes}
+            selected={selectedFilterType}
+            onSelect={(value) => {
+              setSelectedFilterType(value);
+              setSelectedPeriodOption(null);
+            }}
           />
+        )}
+      </section>
+
+      <section className="ct-section">
+        <h2>Tidslinje / periodevalg</h2>
+        {state === "loading" ? (
+          <p>Henter periodevalg...</p>
+        ) : (
+          <Timeline options={visibleOptions} selected={selectedPeriodOption} onSelect={setSelectedPeriodOption} />
         )}
       </section>
 
       <section className="ct-section">
         <h2>Status</h2>
 
-        {state === "loading" && <p>Venter på API...</p>}
-
-        {state === "ready" && (
+        {state === "loading" ? (
+          <p>Venter på API...</p>
+        ) : (
           <div className="ct-status-grid">
             <div>
-              <strong>Periodefilter</strong>
-              <span>{data.periodFilters.length} rader</span>
+              <strong>Filtertyper</strong>
+              <span>{data.filterTypes.length} rader</span>
+            </div>
+            <div>
+              <strong>Periodevalg</strong>
+              <span>{visibleOptions.length} av {data.periodOptions.length}</span>
             </div>
             <div>
               <strong>Katalogresultater</strong>
-              <span>{filteredObjects.length} av {data.objects.length}</span>
+              <span>{visibleObjects.length} av {data.objects.length}</span>
             </div>
             <div>
               <strong>Objektpresentasjon</strong>
@@ -567,18 +561,16 @@ export default function CollectiumPeriodFilterTest() {
           </div>
         )}
 
-        {state === "ready" && hasApiError && (
+        {state === "ready" && apiWarnings.length > 0 ? (
           <div className="ct-status-box ct-status-error">
             <strong>API-varsel</strong>
             <ul>
-              {data.periodApi?.ok === false ? <li>Periodefilter: {data.periodApi.error}</li> : null}
-              {data.catalogApi?.ok === false ? <li>Katalog: {data.catalogApi.error}</li> : null}
-              {data.presentation?.ok === false ? <li>Objektpresentasjon: {data.presentation.error}</li> : null}
-              {data.relations?.ok === false ? <li>Relasjoner: {data.relations.error}</li> : null}
-              {data.market?.ok === false ? <li>Marked: {data.market.error}</li> : null}
+              {apiWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
             </ul>
           </div>
-        )}
+        ) : null}
       </section>
 
       <section className="ct-section">
@@ -586,24 +578,19 @@ export default function CollectiumPeriodFilterTest() {
 
         {state === "loading" ? (
           <p>Laster katalogresultater...</p>
-        ) : filteredObjects.length === 0 ? (
+        ) : visibleObjects.length === 0 ? (
           <p>Ingen katalogobjekter for valgt periode.</p>
         ) : (
           <div className="ct-object-list">
-            {filteredObjects.map((object) => (
-              <article
-                key={`${object.source_key}-${object.object_group}-${object.object_id}`}
-                className="ct-object-row"
-              >
+            {visibleObjects.map((object) => (
+              <article key={`${object.source_key}-${object.object_group}-${object.object_id}`} className="ct-object-row">
                 <div>
                   <strong>{objectTitle(object)}</strong>
                   <p>
-                    {asText(object.denomination_raw_no)} ·{" "}
-                    {asText(object.object_year_label ?? object.publication_year_label)} ·{" "}
+                    {asText(object.denomination_raw_no)} · {asText(object.object_year_label ?? object.publication_year_label)} ·{" "}
                     {asText(object.denomination_issue_raw_no)}
                   </p>
                 </div>
-
                 <div>
                   <span>{asText(object.alias_ruler_name_raw_no ?? object.ruler_name_raw_no, "Mangler regent")}</span>
                   <span>{asText(object.signature_raw_no, "Mangler signatur")}</span>
@@ -619,38 +606,14 @@ export default function CollectiumPeriodFilterTest() {
 
         {presentationRow ? (
           <div className="ct-detail-grid">
-            <div>
-              <span>Tittel</span>
-              <strong>{objectTitle(presentationRow)}</strong>
-            </div>
-            <div>
-              <span>Kilde</span>
-              <strong>{asText(presentationRow.source_key)}</strong>
-            </div>
-            <div>
-              <span>Objektgruppe</span>
-              <strong>{asText(presentationRow.object_group)}</strong>
-            </div>
-            <div>
-              <span>Object ID</span>
-              <strong>{String(presentationRow.object_id)}</strong>
-            </div>
-            <div>
-              <span>Valør</span>
-              <strong>{asText(presentationRow.denomination_raw_no)}</strong>
-            </div>
-            <div>
-              <span>År</span>
-              <strong>{asText(presentationRow.object_year_label ?? presentationRow.publication_year_label)}</strong>
-            </div>
-            <div>
-              <span>Utgave</span>
-              <strong>{asText(presentationRow.denomination_issue_raw_no)}</strong>
-            </div>
-            <div>
-              <span>Variant</span>
-              <strong>{asText(presentationRow.variant_type_raw_no)}</strong>
-            </div>
+            <div><span>Tittel</span><strong>{objectTitle(presentationRow)}</strong></div>
+            <div><span>Kilde</span><strong>{asText(presentationRow.source_key)}</strong></div>
+            <div><span>Objektgruppe</span><strong>{asText(presentationRow.object_group)}</strong></div>
+            <div><span>Object ID</span><strong>{String(presentationRow.object_id)}</strong></div>
+            <div><span>Valør</span><strong>{asText(presentationRow.denomination_raw_no)}</strong></div>
+            <div><span>År</span><strong>{asText(presentationRow.object_year_label ?? presentationRow.publication_year_label)}</strong></div>
+            <div><span>Utgave</span><strong>{asText(presentationRow.denomination_issue_raw_no)}</strong></div>
+            <div><span>Variant</span><strong>{asText(presentationRow.variant_type_raw_no)}</strong></div>
           </div>
         ) : (
           <p>Ingen valgt objektpresentasjon.</p>
@@ -665,10 +628,7 @@ export default function CollectiumPeriodFilterTest() {
         ) : (
           <div className="ct-list-grid">
             {relationRows.map((relation, index) => (
-              <article
-                key={`${relation.relation_type ?? "relation"}-${relation.relation_slug ?? index}`}
-                className="ct-mini-card"
-              >
+              <article key={`${relation.relation_type ?? "relation"}-${relation.relation_slug ?? index}`} className="ct-mini-card">
                 <strong>{asText(relation.relation_label_no ?? relation.display_name_no, "Uten navn")}</strong>
                 <span>{asText(relation.relation_type, "Mangler type")}</span>
                 <p>{asText(relation.relation_href ?? relation.href, "Mangler href")}</p>
@@ -683,22 +643,10 @@ export default function CollectiumPeriodFilterTest() {
 
         {marketRow ? (
           <div className="ct-detail-grid">
-            <div>
-              <span>Markedsverdi</span>
-              <strong>{asText(marketRow.market_value_raw_no ?? marketRow.value_raw_no, "Mangler markedsverdi")}</strong>
-            </div>
-            <div>
-              <span>Status</span>
-              <strong>{asText(marketRow.market_value_status_no, "Mangler status")}</strong>
-            </div>
-            <div>
-              <span>Trend</span>
-              <strong>{asText(marketRow.trend_raw_no, "Mangler trend")}</strong>
-            </div>
-            <div>
-              <span>Auksjon</span>
-              <strong>{asText(marketRow.auction_status_raw_no, "Ingen auksjonsstatus")}</strong>
-            </div>
+            <div><span>Markedsverdi</span><strong>{asText(marketRow.market_value_raw_no ?? marketRow.value_raw_no, "Mangler markedsverdi")}</strong></div>
+            <div><span>Status</span><strong>{asText(marketRow.market_value_status_no, "Mangler status")}</strong></div>
+            <div><span>Trend</span><strong>{asText(marketRow.trend_raw_no, "Mangler trend")}</strong></div>
+            <div><span>Auksjon</span><strong>{asText(marketRow.auction_status_raw_no, "Ingen auksjonsstatus")}</strong></div>
           </div>
         ) : (
           <p>Marked svarer ikke for valgt objekt, eller objektet mangler markedsdata.</p>

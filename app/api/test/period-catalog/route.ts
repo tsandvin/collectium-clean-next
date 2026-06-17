@@ -116,7 +116,7 @@ function generatedTitle(row: DbRow): string | null {
 }
 
 function objectHref(row: DbRow): string {
-  return `/objekt/${text(row.source_key) ?? "unknown"}/${text(row.object_group) ?? "unknown"}/${numberValue(row.object_id)}`;
+  return `/objekt/${text(row.source_key) ?? "unknown"}/${text(row.object_group) ?? "unknown"}/${String(row.object_id ?? "")}`;
 }
 
 function segmentSummary(row: DbRow, segment: Segment): string {
@@ -138,8 +138,8 @@ function segmentSummary(row: DbRow, segment: Segment): string {
   }
 
   const ruler = text(row.ruler_name_raw_no) ?? "Mangler regent";
-  const year = text(row.object_year_label) ?? text(row.publication_year_label) ?? "Mangler Ã¥r";
-  const issue = text(row.denomination_issue_raw_no) ?? "Mangler valÃ¸rutgave / serie";
+  const year = text(row.object_year_label) ?? text(row.publication_year_label) ?? "Mangler ÃƒÂ¥r";
+  const issue = text(row.denomination_issue_raw_no) ?? "Mangler valÃƒÂ¸rutgave / serie";
 
   return `${year} / ${ruler} / ${issue}`;
 }
@@ -148,7 +148,7 @@ function toRelation(row: DbRow): RelationRow {
   return {
     source_key: text(row.source_key) ?? "unknown",
     object_group: text(row.object_group) ?? "unknown",
-    object_id: numberValue(row.object_id),
+    object_id: String(row.object_id ?? ""),
     relation_type: text(row.relation_type),
     relation_key: text(row.relation_key),
     relation_slug: text(row.relation_slug),
@@ -164,7 +164,7 @@ function toObject(row: DbRow, relations: RelationRow[], segment: Segment): Perio
   return {
     source_key: text(row.source_key) ?? "unknown",
     object_group: text(row.object_group) ?? "unknown",
-    object_id: numberValue(row.object_id),
+    object_id: String(row.object_id ?? ""),
     title,
     source_catalog_number: text(row.source_catalog_number),
     denomination_raw_no: text(row.denomination_raw_no),
@@ -203,7 +203,7 @@ export async function GET(request: NextRequest) {
       from public.ct_v_object_presentation_resolved
       where source_key = $1
         and object_group = $2
-      order by object_id
+      order by object_id::text
       limit $3
       offset $4
     `,
@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
         where source_key = $1
           and object_group = $2
           and object_id::text = any($3::text[])
-        order by object_id, relation_type, display_name_no
+        order by object_id::text, relation_type, display_name_no
       `,
       [sourceKey, objectGroup, objectKeys]
     );
