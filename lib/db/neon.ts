@@ -4,35 +4,34 @@
  * Overskrift:
  * Neon database connection
  *
- * Definering / formÃ¥l:
+ * Definering / formål:
  * Felles Neon Postgres-kobling for Collectium Next.js/Vercel.
- * Filen eksporterer bÃ¥de ny hovedkobling `sql` og kompatibilitetsfunksjoner
- * som eksisterende API-ruter allerede bruker: `neonQuery`, `neonOne` og `neonPool`.
+ * Filen eksporterer sql, neonQuery, neonOne og neonPool.
  *
- * BruksomrÃ¥de:
+ * Bruksområde:
  * Brukes av API-ruter og server-side datahenting som skal lese Collectium-data fra Neon.
  *
- * BerÃ¸rte sider / routes:
+ * Berørte sider / routes:
  * - /katalog
  * - /objekt/[sourceKey]/[objectGroup]/[objectId]
  * - /relasjon/[relationType]/[relationKey]
  * - /admin/system/mariadb-neon
  *
- * BerÃ¸rte DB-brytere / feature_keys:
+ * Berørte DB-brytere / feature_keys:
  * - catalog.search
  * - catalog.object.open
  * - object.presentation.view
  * - object.relations.view
  * - admin.system.mariadb_neon.view
  *
- * BerÃ¸rte API-ruter:
+ * Berørte API-ruter:
  * - GET /api/catalog/search
  * - GET /api/object/presentation
  * - GET /api/object/relations
  * - GET /api/system/neon-health
- * - GET/POST auth routes using Neon session
+ * - Auth/session routes
  *
- * BerÃ¸rte tabeller / views:
+ * Berørte tabeller / views:
  * - ct_no_banknote_catalog
  * - ct_no_coin_catalog
  * - ct_v_object_presentation_resolved
@@ -46,63 +45,84 @@
  * log_action: neon_query
  *
  * Versjon:
- * CT-FILE-NEON-0002 / CHANGE-2026-06-17-0002
+ * CT-FILE-NEON-0003 / CHANGE-2026-06-17-0003
  *
  * Endringsnotat:
- * CT-FILE-NEON-0002 legger tilbake kompatible exports som brukes av eksisterende
- * route.ts-filer: neonQuery, neonOne og neonPool.
+ * CT-FILE-NEON-0003 velger første gyldige database-URL og hopper over ugyldige
+ * Vercel/Neon miljøvariabler. Dette hindrer at en feil NEON_DATABASE_URL stopper
+ * build når DATABASE_URL eller neon_DATABASE_URL er riktig.
  */
 
 import { neon } from "@neondatabase/serverless";
 
-const connectionString =
-  process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+type EnvCandidate = {
+  name: string;
+  value: string | undefined;
+};
 
-if (!connectionString) {
+function isValidDatabaseUrl(value: string | undefined): value is string {
+  if (!value) {
+    return false;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "postgres:" || parsed.protocol === "postgresql:";
+  } catch {
+    return false;
+  }
+}
+
+const candidates: EnvCandidate[] = [
+  { name: "NEON_DATABASE_URL", value: process.env.NEON_DATABASE_URL },
+  { name: "DATABASE_URL", value: process.env.DATABASE_URL },
+  { name: "neon_DATABASE_URL", value: process.env.neon_DATABASE_URL },
+  { name: "neon_POSTGRES_URL", value: process.env.neon_POSTGRES_URL },
+  { name: "neon_POSTGRES_PRISMA_URL", value: process.env.neon_POSTGRES_PRISMA_URL },
+];
+
+const selected = candidates.find((candidate) =>
+  isValidDatabaseUrl(candidate.value)
+);
+
+if (!selected?.value) {
+  const availableNames = candidates
+    .filter((candidate) => Boolean(candidate.value))
+    .map((candidate) => candidate.name)
+    .join(", ");
+
   throw new Error(
-    "Missing NEON_DATABASE_URL or DATABASE_URL. Collectium must use Neon as primary database."
+    `Missing valid Neon/Postgres database URL. Checked NEON_DATABASE_URL, DATABASE_URL, neon_DATABASE_URL, neon_POSTGRES_URL and neon_POSTGRES_PRISMA_URL. Available env names: ${availableNames || "none"}.`
   );
 }
 
-/**
- * Hovedkobling mot Neon.
- *
- * Kan brukes direkte som tagged template:
- *   await sql`select now()`
- *
- * Kan ogsÃ¥ brukes internt via compatibility wrappers under.
- */
-export const sql = neon(connectionString);
+export const databaseUrlSource = selected.name;
+export const sql = neon(selected.value);
 
-export type NeonRow = Record<string, unknown>;
 export type NeonQueryValue = unknown;
 type NeonQueryParams = readonly unknown[];
 
-/**
- * Kompatibel query-helper for eksisterende Collectium API-ruter.
- *
- * StÃ¸tter typisk bruk:
- *   await neonQuery("select * from table where id = $1", [id])
- */
-export async function neonQuery<T extends NeonRow = NeonRow>(
+type NeonRunner = (
+  queryText: string,
+  params?: NeonQueryParams
+) => Promise<Record<string, unknown>[]>;
+
+export async function neonQuery<T extends Record<string, unknown> = Record<string, unknown>>(
   queryText: string,
   params: NeonQueryParams = []
 ): Promise<T[]> {
-  const runner = sql as unknown as (
-    queryText: string,
-    params?: NeonQueryParams
-  ) => Promise<T[]>;
-
-  return runner(queryText, params);
+  const runner = sql as unknown as NeonRunner;
+  const rows = await runner(queryText, params);
+  return rows as T[];
 }
 
-/**
- * Returnerer fÃ¸rste rad eller null.
- *
- * StÃ¸tter typisk bruk:
- *   const user = await neonOne("select * from ct_users where email = $1", [email])
- */
-export async function neonOne<T extends NeonRow = NeonRow>(
+export async function neonOne<T extends Record<string, unknown> = Record<string, unknown>>(
   queryText: string,
   params: NeonQueryParams = []
 ): Promise<T | null> {
@@ -110,16 +130,8 @@ export async function neonOne<T extends NeonRow = NeonRow>(
   return rows[0] ?? null;
 }
 
-/**
- * Pool-kompatibelt objekt for eldre route-filer som bruker:
- *   await neonPool.query("select ...", [params])
- *
- * Dette er ikke en ekte Node Pool. Det er en kontrollert kompatibilitetsadapter
- * rundt Neon serverless-driveren, slik at eksisterende API-ruter kan bygge uten
- * at alle importene mÃ¥ skrives om samtidig.
- */
 export const neonPool = {
-  async query<T extends NeonRow = NeonRow>(
+  async query<T extends Record<string, unknown> = Record<string, unknown>>(
     queryText: string,
     params: NeonQueryParams = []
   ): Promise<{ rows: T[] }> {
