@@ -45,12 +45,11 @@
  * log_action: neon_query
  *
  * Versjon:
- * CT-FILE-NEON-0003 / CHANGE-2026-06-17-0003
+ * CT-FILE-NEON-0004 / CHANGE-2026-06-17-0004
  *
  * Endringsnotat:
- * CT-FILE-NEON-0003 velger første gyldige database-URL og hopper over ugyldige
- * Vercel/Neon miljøvariabler. Dette hindrer at en feil NEON_DATABASE_URL stopper
- * build når DATABASE_URL eller neon_DATABASE_URL er riktig.
+ * CT-FILE-NEON-0004 bruker sql.query(...) for vanlige parameter-spørringer.
+ * Neon serverless-driveren tillater ikke lenger sql("SELECT $1", [value]).
  */
 
 import { neon } from "@neondatabase/serverless";
@@ -108,18 +107,23 @@ export const sql = neon(selected.value);
 export type NeonQueryValue = unknown;
 type NeonQueryParams = readonly unknown[];
 
-type NeonRunner = (
-  queryText: string,
-  params?: NeonQueryParams
-) => Promise<Record<string, unknown>[]>;
+type NeonSqlQuery = {
+  query: <T extends Record<string, unknown> = Record<string, unknown>>(
+    queryText: string,
+    params?: NeonQueryParams
+  ) => Promise<T[]>;
+};
+
+function getQueryRunner(): NeonSqlQuery {
+  return sql as unknown as NeonSqlQuery;
+}
 
 export async function neonQuery<T extends Record<string, unknown> = Record<string, unknown>>(
   queryText: string,
   params: NeonQueryParams = []
 ): Promise<T[]> {
-  const runner = sql as unknown as NeonRunner;
-  const rows = await runner(queryText, params);
-  return rows as T[];
+  const runner = getQueryRunner();
+  return runner.query<T>(queryText, params);
 }
 
 export async function neonOne<T extends Record<string, unknown> = Record<string, unknown>>(
