@@ -4,23 +4,23 @@
  * Overskrift:
  * Generisk objektrelasjoner API
  *
- * Definering / formål:
+ * Definering / formÃ¥l:
  * Leser klikkbare relasjoner for ett katalogobjekt fra Neon resolved view.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Brukes av objektpresentasjon, visningskort og senere relasjonspresentasjon.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - /objekt/[sourceKey]/[objectGroup]/[objectId]
  * - /relasjon/[relationType]/[slug]
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - object.relations.view
  *
- * Berørte API-ruter:
+ * BerÃ¸rte API-ruter:
  * - GET /api/object/relations
  *
- * Berørte tabeller / views:
+ * BerÃ¸rte tabeller / views:
  * - ct_v_object_relations_resolved
  *
  * Dataretning:
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
         from public.ct_v_object_relations_resolved
         where source_key = $1
           and object_group = $2
-          and object_id = $3::bigint
+          and object_id::text = $3::text
         order by relation_type, relation_label_no
       `,
       [sourceKey, objectGroup, objectId]

@@ -4,22 +4,22 @@
  * Overskrift:
  * Generisk objekt brukerstatus API
  *
- * Definering / formål:
+ * Definering / formÃ¥l:
  * Leser innlogget brukers status for ett katalogobjekt.
  *
- * Bruksområde:
- * Brukes av Samler-segmentet på objektpresentasjon.
+ * BruksomrÃ¥de:
+ * Brukes av Samler-segmentet pÃ¥ objektpresentasjon.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - /objekt/[sourceKey]/[objectGroup]/[objectId]
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - object.user_state.view
  *
- * Berørte API-ruter:
+ * BerÃ¸rte API-ruter:
  * - GET /api/object/user-state
  *
- * Berørte tabeller / views:
+ * BerÃ¸rte tabeller / views:
  * - ct_v_object_user_state_resolved
  *
  * Dataretning:
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
         found: false,
         row: null,
         rows: [],
-        fallback_status_no: "Logg inn for å legge objektet i samling, ønskeliste eller favoritter.",
+        fallback_status_no: "Logg inn for Ã¥ legge objektet i samling, Ã¸nskeliste eller favoritter.",
       });
     }
 
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         from public.ct_v_object_user_state_resolved
         where source_key = $1
           and object_group = $2
-          and object_id = $3::bigint
+          and object_id::text = $3::text
           and user_id = $4
         limit 1
       `,
