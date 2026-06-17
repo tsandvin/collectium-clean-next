@@ -1,4 +1,4 @@
-﻿.wrap {
+.wrap {
   width: 100%;
   max-width: none;
   margin: 0;
@@ -531,4 +531,19 @@
   .objectCard {
     min-width: 0;
   }
+}
+
+/* CT v9 shell-width compatibility patch */
+:global(.ctPeriodFilterTest),
+.ctPeriodFilterTest,
+.wrap,
+.page,
+.root {
+  max-width: none !important;
+}
+
+:global(main) .ctPeriodFilterTest,
+:global(main) .wrap,
+:global(main) .page {
+  width: 100% !important;
 }

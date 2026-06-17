@@ -1,137 +1,55 @@
-﻿/*
- * COLLECTIUM FILE HEADER
- * Global Collectium CSS / design tokens
- * Denne filen eier bakgrunn, typografi, layouttokens, lys/mÃ¸rk skin og standard panel/kort.
- */
-:root {
-  --ct-sidebar-width: 238px;
-  --ct-topbar-height: 74px;
-  --ct-page-pad: clamp(18px, 2vw, 34px);
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap");
 
-  --ct-page-bg: #edf4fb;
-  --ct-sidebar-bg: linear-gradient(180deg, #f8fbff 0%, #eaf3fb 100%);
-  --ct-card-bg: #ffffff;
-  --ct-panel-bg: rgba(255,255,255,.86);
-  --ct-field-bg: #f8fbff;
-
-  --ct-text: #102b4a;
-  --ct-muted: #587391;
-  --ct-soft: #7890aa;
-
-  --ct-blue-950: #0b294c;
-  --ct-blue-900: #123f82;
-  --ct-blue-850: #164f91;
-  --ct-blue-800: #1d5ca4;
-  --ct-accent: #2f7fd3;
-
-  --ct-border: #d7e4f2;
-  --ct-border-strong: #bdd2e9;
-  --ct-shadow-soft: 0 18px 50px rgba(16, 47, 85, .10);
-  --ct-shadow-card: 0 10px 30px rgba(16, 47, 85, .08);
-
-  --ct-radius-lg: 22px;
-  --ct-radius-md: 16px;
-  --ct-radius-sm: 10px;
-
-  --ct-samler-soft: #e8f3fb;
-  --ct-historie-soft: #fff4d8;
-  --ct-finans-soft: #eaf8f0;
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ct-page-bg: #0f1824;
-    --ct-sidebar-bg: linear-gradient(180deg, #111e2d 0%, #0d1723 100%);
-    --ct-card-bg: #172334;
-    --ct-panel-bg: rgba(23,35,52,.92);
-    --ct-field-bg: #121d2b;
-    --ct-text: #e7f0fb;
-    --ct-muted: #aac0d8;
-    --ct-soft: #8ea8c4;
-    --ct-blue-950: #e7f0fb;
-    --ct-blue-900: #d4e8ff;
-    --ct-blue-850: #b7d5f7;
-    --ct-blue-800: #73a9e8;
-    --ct-accent: #86bbff;
-    --ct-border: #2d425b;
-    --ct-border-strong: #3e5c7c;
-    --ct-shadow-soft: 0 18px 50px rgba(0,0,0,.24);
-    --ct-shadow-card: 0 10px 30px rgba(0,0,0,.22);
-    --ct-samler-soft: #152b3d;
-    --ct-historie-soft: #2f2714;
-    --ct-finans-soft: #143125;
-  }
-}
-
-* { box-sizing: border-box; }
-html { min-height: 100%; background: var(--ct-page-bg); }
+html,
 body {
+  margin: 0;
   min-height: 100%;
-  margin: 0;
-  background: var(--ct-page-bg);
-  color: var(--ct-text);
+  overflow-x: hidden;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
+  background: #eef5fb;
+  color: #102f55;
 }
 
-button, input, select, textarea { font: inherit; }
-a { color: inherit; }
-
-.ct-page,
-.ct-page-full,
-.ct-standard-page {
-  width: 100%;
-  max-width: none;
-  margin: 0;
+a {
+  color: inherit;
 }
 
-.ct-panel,
-.ct-card,
-.ct-info-box {
-  position: relative;
-  background: var(--ct-panel-bg);
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-radius-lg);
-  box-shadow: var(--ct-shadow-card);
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-.ct-panel::after,
-.ct-card::after,
-.ct-info-box::after {
-  content: "";
-  position: absolute;
-  right: 52px;
-  bottom: 12px;
-  width: 86px;
-  height: 1px;
-  background: var(--ct-border-strong);
+#__next {
+  min-height: 100%;
 }
 
-.ct-panel::before,
-.ct-card::before,
-.ct-info-box::before {
-  content: "Collectium";
-  position: absolute;
-  right: 14px;
-  bottom: 6px;
-  font-size: 8px;
-  font-style: italic;
-  font-weight: 800;
-  color: var(--ct-soft);
+:root {
+  --ct-card-radius: 18px;
+  --ct-inner-radius: 12px;
+  --ct-blue: #174f98;
+  --ct-blue-soft: #eaf4ff;
+  --ct-line: #d7e5f2;
+  --ct-text: #102f55;
+  --ct-subtext: #607891;
+  --ct-surface: #ffffff;
+  --ct-surface-soft: #f7fbff;
+  --ct-shadow-soft: 0 18px 45px rgba(16, 47, 85, 0.10);
 }
 
-/* Local legacy cleanup: prevent old test pages from forcing dark full shell */
-[class*="periodFilter"],
-[class*="PeriodFilter"],
-[class*="testShell"] {
-  max-width: none;
+[data-skin="signature-dark"],
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
-@media (max-width: 900px) {
-  :root {
-    --ct-sidebar-width: 0px;
-    --ct-topbar-height: 64px;
-    --ct-page-pad: 14px;
-  }
+.ct-page-lock,
+.collectium-page,
+.collectium-content,
+main {
+  min-width: 0;
 }

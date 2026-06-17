@@ -78,3 +78,17 @@ removed-app-backups-*/
 *.local-backup
 *.backup.ts
 *.backup.tsx
+
+# Collectium local generated files
+_collectium-backups/
+_collectium-checks/
+_collectium-install-reports/
+collectium-conflict-backup/
+reports/
+tools/
+dbeaver/
+install-collectium-*.ps1
+install-objectpresentation-*.ps1
+collectium_repair_*.ps1
+neon-*-report.json
+neon-raw-*.json

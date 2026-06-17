@@ -35,10 +35,22 @@
                     ".next/types/**/*.ts",
                     ".next/dev/types/**/*.ts"
                 ],
-    "exclude":  [
-                    "node_modules",
-                    "_local-backups",
-                    "local-backups",
-                    "removed-app-backups-*"
-                ]
+    "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "_collectium-backups",
+    "_collectium-backups/**",
+    "_collectium-checks",
+    "_collectium-checks/**",
+    "collectium-conflict-backup",
+    "collectium-conflict-backup/**",
+    "reports",
+    "reports/**",
+    "tools",
+    "tools/**",
+    "dbeaver",
+    "dbeaver/**",
+    "**/*.ps1"
+  ]
 }

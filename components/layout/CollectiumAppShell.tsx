@@ -1,48 +1,29 @@
-﻿/**
- * COLLECTIUM FILE HEADER
- *
- * Overskrift:
- * CollectiumAppShell
- *
- * Definering / formÃ¥l:
- * Globalt visuelt skall for Collectium: sidemeny, toppbar og innholdsramme.
- * Skal hindre at enkeltsider lager egen shell/topbar/sidebar.
- *
- * BruksomrÃ¥de:
- * Importeres i app/layout.tsx og pakker alle sider.
- *
- * BerÃ¸rte sider / routes:
- * - Alle sider
- *
- * BerÃ¸rte DB-brytere / feature_keys:
- * - navigation.view
- * - layout.view
- *
- * Dataretning:
- * UI-shell. Ingen direkte DB-skriving.
- */
 import Link from "next/link";
 import styles from "./CollectiumAppShell.module.css";
 
+type CollectiumAppShellProps = {
+  children: React.ReactNode;
+};
+
 const navItems = [
-  { href: "/", label: "Index", icon: "âŒ‚" },
-  { href: "/katalog", label: "Katalog", icon: "â–¦" },
-  { href: "/test/periodefilter", label: "Periodefilter test", icon: "âŒ" },
-  { href: "/objekt/norske_sedler/banknote/1459", label: "Objekt", icon: "â—ˆ" },
-  { href: "/relasjon/regent/oscar-ii", label: "Relasjoner", icon: "â—‡" },
-  { href: "/samling", label: "Min samling", icon: "â™¡" },
-  { href: "/auksjon", label: "Auksjon", icon: "âš‘" },
-  { href: "/forhandler", label: "Forhandler", icon: "â–£" },
-  { href: "/admin", label: "Admin", icon: "âš™" },
+  { href: "/", label: "Index", icon: "⌁" },
+  { href: "/katalog", label: "Katalog", icon: "▦" },
+  { href: "/test/periodefilter", label: "Periodefilter test", icon: "⌘" },
+  { href: "/objekt/norske_sedler/banknote/1459", label: "Objekt", icon: "◫" },
+  { href: "/relasjon/regent/oscar-ii", label: "Relasjoner", icon: "◇" },
+  { href: "/min-side", label: "Min samling", icon: "♡" },
+  { href: "/auksjon", label: "Auksjon", icon: "⚑" },
+  { href: "/forhandler", label: "Forhandler", icon: "□" },
+  { href: "/admin", label: "Admin", icon: "⚙" },
 ];
 
-export default function CollectiumAppShell({ children }: { children: React.ReactNode }) {
+export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
   return (
     <div className={styles.shell}>
-      <aside className={styles.sidebar} aria-label="Collectium meny">
+      <aside className={styles.sidebar} aria-label="Collectium navigasjon">
         <Link href="/" className={styles.brand}>
           <span className={styles.brandMark}>C</span>
-          <span>
+          <span className={styles.brandText}>
             <strong>Collectium</strong>
             <small>UI/UX 8.6</small>
           </span>
@@ -57,7 +38,7 @@ export default function CollectiumAppShell({ children }: { children: React.React
           ))}
         </nav>
 
-        <div className={styles.sidebarFoot}>
+        <div className={styles.statusPill}>
           <span className={styles.statusDot} />
           Global layout aktiv
         </div>
@@ -66,7 +47,7 @@ export default function CollectiumAppShell({ children }: { children: React.React
       <div className={styles.mainColumn}>
         <header className={styles.topbar}>
           <div className={styles.searchWrap}>
-            <input className={styles.search} placeholder="SÃ¸k i Collectium katalogen / bruker..." />
+            <input className={styles.search} placeholder="Søk i Collectium / bruker..." aria-label="Søk" />
           </div>
           <div className={styles.topActions}>
             <select className={styles.segmentSelect} defaultValue="samler" aria-label="Segment">
@@ -74,7 +55,7 @@ export default function CollectiumAppShell({ children }: { children: React.React
               <option value="historie">Historie</option>
               <option value="finans">Finans</option>
             </select>
-            <Link href="/login" className={styles.loginButton}>Login</Link>
+            <Link className={styles.loginButton} href="/login">Login</Link>
           </div>
         </header>
 
