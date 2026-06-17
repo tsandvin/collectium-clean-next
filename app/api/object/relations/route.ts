@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
         from public.ct_v_object_relations_resolved
         where source_key = $1
           and object_group = $2
-          and object_id = $3
+          and object_id = $3::bigint
         order by relation_type, relation_label_no
       `,
       [sourceKey, objectGroup, objectId]

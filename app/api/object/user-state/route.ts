@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         from public.ct_v_object_user_state_resolved
         where source_key = $1
           and object_group = $2
-          and object_id = $3
+          and object_id = $3::bigint
           and user_id = $4
         limit 1
       `,
