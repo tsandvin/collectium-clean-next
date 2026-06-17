@@ -12,7 +12,7 @@ type DbRow = Record<string, unknown>;
 type RelationRow = {
   source_key: string;
   object_group: string;
-  object_id: number;
+  object_id: string;
   relation_type: string | null;
   relation_key: string | null;
   relation_slug: string | null;
@@ -23,7 +23,7 @@ type RelationRow = {
 type PeriodCatalogObject = {
   source_key: string;
   object_group: string;
-  object_id: number;
+  object_id: string;
   title: string;
   source_catalog_number: string | null;
   denomination_raw_no: string | null;
