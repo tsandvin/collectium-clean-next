@@ -1,0 +1,236 @@
+﻿.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--ct-sidebar-width) minmax(0, 1fr);
+  background: var(--ct-page-bg);
+  color: var(--ct-text);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+  background: var(--ct-sidebar-bg);
+  border-right: 1px solid var(--ct-border);
+  box-shadow: var(--ct-shadow-soft);
+  padding: 18px 14px;
+  z-index: 40;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ct-blue-950);
+  padding: 8px 8px 18px;
+}
+
+.brandMark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 900;
+  color: var(--ct-blue-900);
+  background: linear-gradient(145deg, #fff7df, #e9f3ff);
+  border: 1px solid var(--ct-border-strong);
+}
+
+.brand strong {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.brand small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ct-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.nav {
+  display: grid;
+  gap: 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 8px 9px;
+  border-radius: 12px;
+  color: var(--ct-blue-850);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.navItem:hover {
+  background: var(--ct-card-bg);
+  border-color: var(--ct-border);
+  color: var(--ct-blue-950);
+}
+
+.navIcon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #eef5fd;
+  color: var(--ct-blue-800);
+}
+
+.sidebarFoot {
+  margin-top: 22px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid var(--ct-border);
+  color: var(--ct-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #2aa66a;
+  margin-right: 6px;
+}
+
+.mainColumn {
+  min-width: 0;
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: var(--ct-topbar-height) minmax(0, 1fr);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.searchWrap {
+  flex: 1;
+  max-width: 560px;
+}
+
+.search {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--ct-border);
+  border-radius: 10px;
+  padding: 0 14px;
+  color: var(--ct-text);
+  background: var(--ct-card-bg);
+  outline: none;
+  font-weight: 750;
+}
+
+.search:focus {
+  border-color: var(--ct-accent);
+  box-shadow: 0 0 0 3px rgba(42,113,200,.14);
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.segmentSelect,
+.loginButton {
+  height: 40px;
+  border-radius: 9px;
+  border: 1px solid var(--ct-border-strong);
+  background: var(--ct-card-bg);
+  color: var(--ct-blue-900);
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 12px;
+  text-decoration: none;
+}
+
+.loginButton {
+  display: inline-flex;
+  align-items: center;
+  background: var(--ct-blue-800);
+  color: #fff;
+  border-color: var(--ct-blue-800);
+}
+
+.content {
+  min-width: 0;
+  padding: var(--ct-page-pad);
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    display: block;
+    padding: 10px 12px;
+  }
+
+  .brand {
+    padding-bottom: 10px;
+  }
+
+  .nav {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .sidebarFoot {
+    display: none;
+  }
+
+  .mainColumn {
+    grid-template-rows: auto minmax(0,1fr);
+  }
+
+  .topbar {
+    position: sticky;
+    min-height: 64px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .searchWrap {
+    max-width: none;
+    min-width: 220px;
+  }
+
+  .content {
+    padding: 14px;
+  }
+}

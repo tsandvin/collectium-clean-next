@@ -1,577 +1,137 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+﻿/*
+ * COLLECTIUM FILE HEADER
+ * Global Collectium CSS / design tokens
+ * Denne filen eier bakgrunn, typografi, layouttokens, lys/mÃ¸rk skin og standard panel/kort.
+ */
+:root {
+  --ct-sidebar-width: 238px;
+  --ct-topbar-height: 74px;
+  --ct-page-pad: clamp(18px, 2vw, 34px);
+
+  --ct-page-bg: #edf4fb;
+  --ct-sidebar-bg: linear-gradient(180deg, #f8fbff 0%, #eaf3fb 100%);
+  --ct-card-bg: #ffffff;
+  --ct-panel-bg: rgba(255,255,255,.86);
+  --ct-field-bg: #f8fbff;
+
+  --ct-text: #102b4a;
+  --ct-muted: #587391;
+  --ct-soft: #7890aa;
+
+  --ct-blue-950: #0b294c;
+  --ct-blue-900: #123f82;
+  --ct-blue-850: #164f91;
+  --ct-blue-800: #1d5ca4;
+  --ct-accent: #2f7fd3;
+
+  --ct-border: #d7e4f2;
+  --ct-border-strong: #bdd2e9;
+  --ct-shadow-soft: 0 18px 50px rgba(16, 47, 85, .10);
+  --ct-shadow-card: 0 10px 30px rgba(16, 47, 85, .08);
+
+  --ct-radius-lg: 22px;
+  --ct-radius-md: 16px;
+  --ct-radius-sm: 10px;
+
+  --ct-samler-soft: #e8f3fb;
+  --ct-historie-soft: #fff4d8;
+  --ct-finans-soft: #eaf8f0;
 }
 
-html {
-  min-height: 100%;
-  text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ct-page-bg: #0f1824;
+    --ct-sidebar-bg: linear-gradient(180deg, #111e2d 0%, #0d1723 100%);
+    --ct-card-bg: #172334;
+    --ct-panel-bg: rgba(23,35,52,.92);
+    --ct-field-bg: #121d2b;
+    --ct-text: #e7f0fb;
+    --ct-muted: #aac0d8;
+    --ct-soft: #8ea8c4;
+    --ct-blue-950: #e7f0fb;
+    --ct-blue-900: #d4e8ff;
+    --ct-blue-850: #b7d5f7;
+    --ct-blue-800: #73a9e8;
+    --ct-accent: #86bbff;
+    --ct-border: #2d425b;
+    --ct-border-strong: #3e5c7c;
+    --ct-shadow-soft: 0 18px 50px rgba(0,0,0,.24);
+    --ct-shadow-card: 0 10px 30px rgba(0,0,0,.22);
+    --ct-samler-soft: #152b3d;
+    --ct-historie-soft: #2f2714;
+    --ct-finans-soft: #143125;
+  }
 }
 
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--ct-page-bg); }
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--ct-app-bg);
+  background: var(--ct-page-bg);
   color: var(--ct-text);
-  font-family: var(--ct-font-body);
-  font-size: 15px;
-  line-height: 1.5;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
 }
 
-html,
-body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
+button, input, select, textarea { font: inherit; }
+a { color: inherit; }
 
-body {
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
-}
-
-img,
-picture,
-svg,
-canvas,
-video {
-  display: block;
-  max-width: 100%;
-}
-
-img {
-  height: auto;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled,
-[aria-disabled="true"] {
-  cursor: not-allowed;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-figure,
-blockquote,
-dl,
-dd {
+.ct-page,
+.ct-page-full,
+.ct-standard-page {
+  width: 100%;
+  max-width: none;
   margin: 0;
 }
 
-ul,
-ol {
-  margin: 0;
-  padding: 0;
-}
-
-li {
-  list-style: none;
-}
-
-:focus {
-  outline: none;
-}
-
-:focus-visible {
-  outline: 2px solid var(--ct-accent);
-  outline-offset: 3px;
-}
-
-::selection {
-  background: color-mix(in srgb, var(--ct-accent) 24%, transparent);
-  color: var(--ct-text);
-}
-
-.collectium-shell {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  background: var(--ct-app-bg);
-  color: var(--ct-text);
-}
-
-.collectium-sidebar {
-  min-height: 100vh;
-  padding: 24px;
-  border-right: 1px solid var(--ct-border);
-  background: var(--ct-panel-solid);
-  display: flex;
-  flex-direction: column;
-}
-
-.collectium-brand {
-  margin-bottom: 32px;
-  color: var(--ct-accent);
-  font-weight: 800;
-}
-
-.collectium-sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.collectium-sidebar a {
-  padding: 10px;
-  border-radius: 6px;
-  color: var(--ct-text-soft);
-}
-
-.collectium-sidebar a:hover,
-.collectium-sidebar a.is-active {
-  background: var(--ct-accent-soft);
-  color: var(--ct-text);
-}
-
-.collectium-workspace {
-  min-width: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.collectium-topbar {
-  min-height: 70px;
-  border-bottom: 1px solid var(--ct-border);
-  background: var(--ct-panel-solid);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  gap: 24px;
-}
-
-.collectium-search {
-  min-width: min(420px, 45vw);
-  background: var(--ct-app-bg);
-  color: var(--ct-text);
-  border: 1px solid var(--ct-border);
-  padding: 8px 16px;
-  border-radius: 6px;
-}
-
-.collectium-topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.collectium-theme-select,
-.collectium-login-button {
-  background: var(--ct-app-bg);
-  color: var(--ct-text);
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--ct-border);
-}
-
-.collectium-login-button {
-  background: var(--ct-accent);
-  color: var(--ct-panel-solid);
-  font-weight: 700;
-}
-
-.collectium-app {
-  min-height: 100%;
-  overflow-y: auto;
-  flex-grow: 1;
-  background:
-    radial-gradient(
-      circle at 18% 8%,
-      color-mix(in srgb, var(--ct-panel-solid) 72%, transparent),
-      transparent 330px
-    ),
-    radial-gradient(
-      circle at 86% 64%,
-      color-mix(in srgb, var(--ct-accent-soft) 13%, transparent),
-      transparent 360px
-    ),
-    var(--ct-app-bg);
-  color: var(--ct-text);
-}
-
-.collectium-page {
-  width: 100%;
-  min-width: 0;
-}
-
-.collectium-page-inner {
-  width: min(100%, 1680px);
-  margin: 0 auto;
-  padding: 24px;
-  display: grid;
-  gap: 24px;
-}
-
-.collectium-full-width {
-  width: 100%;
-}
-
-.collectium-muted {
-  color: var(--ct-text-muted);
-}
-
-.collectium-soft {
-  color: var(--ct-text-soft);
-}
-
-.collectium-card {
+.ct-panel,
+.ct-card,
+.ct-info-box {
   position: relative;
-  container-type: inline-size;
-  padding-bottom: max(var(--ct-density, 16px), 28px);
+  background: var(--ct-panel-bg);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
+  box-shadow: var(--ct-shadow-card);
 }
 
-.collectium-card::after {
-  content: "Collectium anno 2022";
+.ct-panel::after,
+.ct-card::after,
+.ct-info-box::after {
+  content: "";
   position: absolute;
-  right: 8px;
-  bottom: 8px;
-  color: var(--ct-signature);
-  font: italic 8px/1 var(--ct-font-head);
-  opacity: 0.5;
-  pointer-events: none;
-  white-space: nowrap;
+  right: 52px;
+  bottom: 12px;
+  width: 86px;
+  height: 1px;
+  background: var(--ct-border-strong);
 }
 
-@container (max-width: 180px) {
-  .collectium-card::after {
-    content: none;
+.ct-panel::before,
+.ct-card::before,
+.ct-info-box::before {
+  content: "Collectium";
+  position: absolute;
+  right: 14px;
+  bottom: 6px;
+  font-size: 8px;
+  font-style: italic;
+  font-weight: 800;
+  color: var(--ct-soft);
+}
+
+/* Local legacy cleanup: prevent old test pages from forcing dark full shell */
+[class*="periodFilter"],
+[class*="PeriodFilter"],
+[class*="testShell"] {
+  max-width: none;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --ct-sidebar-width: 0px;
+    --ct-topbar-height: 64px;
+    --ct-page-pad: 14px;
   }
 }
-
-@media (max-width: 719px) {
-  body {
-    font-size: 14px;
-  }
-
-  .collectium-shell {
-    display: block;
-  }
-
-  .collectium-sidebar {
-    display: none;
-  }
-
-  .collectium-topbar {
-    padding: 12px 14px;
-    flex-wrap: wrap;
-  }
-
-  .collectium-search {
-    min-width: 100%;
-    order: 2;
-  }
-
-  .collectium-page-inner {
-    padding: 14px;
-  }
-}
-
-@media (min-width: 720px) and (max-width: 1100px) {
-  .collectium-shell {
-    grid-template-columns: 220px minmax(0, 1fr);
-  }
-
-  .collectium-page-inner {
-    padding: 18px;
-  }
-}
-
-@media (min-width: 1101px) and (max-width: 1899px) {
-  .collectium-page-inner {
-    padding: 24px;
-  }
-}
-
-@media (min-width: 1900px) {
-  .collectium-page-inner {
-    max-width: none;
-    padding: 28px;
-  }
-}
-
-@media (min-width: 2900px) {
-  body {
-    font-size: 17px;
-  }
-
-  .collectium-page-inner {
-    padding: 36px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
-  }
-}
-
-/* ==========================================================================
-   Collectium object presentation UI 8.6
-   Brukes av: app/objekt/[sourceKey]/[objectGroup]/[objectId]/page.tsx
-   ========================================================================== */
-
-.ct-object-page {
-  min-height: 100vh;
-  padding: 32px;
-  background:
-    radial-gradient(circle at top left, rgba(57, 97, 140, 0.10), transparent 34rem),
-    linear-gradient(180deg, #eef3f7 0%, #f8fafc 100%);
-  color: #17212f;
-}
-
-.ct-object-hero {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-  padding: 28px;
-  border: 1px solid rgba(85, 117, 150, 0.24);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 20px 60px rgba(20, 41, 64, 0.10);
-}
-
-.ct-kicker {
-  margin: 0 0 8px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: #57718e;
-}
-
-.ct-object-hero h1 {
-  margin: 0;
-  font-size: clamp(24px, 4vw, 46px);
-  line-height: 1.05;
-  letter-spacing: -0.04em;
-}
-
-.ct-subtitle {
-  margin: 12px 0 0;
-  color: #5d6c7d;
-}
-
-.ct-status-box {
-  min-width: 180px;
-  padding: 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(85, 117, 150, 0.22);
-  background: #f8fbff;
-}
-
-.ct-status-box span {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #73859a;
-}
-
-.ct-status-box strong {
-  display: block;
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-.ct-object-grid {
-  display: grid;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.ct-panel {
-  position: relative;
-  padding: 22px;
-  border: 1px solid rgba(85, 117, 150, 0.24);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 16px 45px rgba(20, 41, 64, 0.08);
-}
-
-.ct-panel h2 {
-  margin: 0 0 18px;
-  font-size: 17px;
-  letter-spacing: -0.02em;
-}
-
-.ct-image-placeholder {
-  display: grid;
-  min-height: 340px;
-  place-items: center;
-  border-radius: 18px;
-  border: 1px dashed rgba(85, 117, 150, 0.38);
-  background: linear-gradient(135deg, #f8fbff, #e8eef5);
-  color: #6f7f91;
-  text-align: center;
-}
-
-.ct-image-list {
-  display: grid;
-  gap: 8px;
-  margin-top: 16px;
-  font-size: 12px;
-  color: #6b7786;
-}
-
-.ct-fact-list {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-}
-
-.ct-fact-list div {
-  display: grid;
-  grid-template-columns: minmax(130px, 0.55fr) minmax(160px, 1fr);
-  gap: 12px;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(85, 117, 150, 0.12);
-}
-
-.ct-fact-list.compact div {
-  grid-template-columns: minmax(150px, 0.7fr) 1fr;
-}
-
-.ct-fact-list dt {
-  color: #728095;
-  font-size: 12px;
-}
-
-.ct-fact-list dd {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.ct-relation-button,
-.ct-relation-row a,
-.ct-period-links a {
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  justify-content: center;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(54, 92, 132, 0.22);
-  background: #edf4fb;
-  color: #21486f;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.ct-tabs {
-  display: grid;
-  gap: 0;
-}
-
-.ct-tab-row {
-  display: flex;
-  gap: 8px;
-  padding-left: 12px;
-}
-
-.ct-tab {
-  padding: 12px 18px;
-  border: 1px solid rgba(85, 117, 150, 0.24);
-  border-bottom: 0;
-  border-radius: 16px 16px 0 0;
-  background: rgba(236, 242, 248, 0.78);
-  color: #56697f;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.ct-tab.active {
-  background: #ffffff;
-  color: #162536;
-}
-
-.ct-tab-content {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(240px, 1fr));
-  gap: 24px;
-}
-
-.ct-relation-list {
-  display: grid;
-  gap: 10px;
-}
-
-.ct-relation-row {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(85, 117, 150, 0.14);
-  background: #f8fbff;
-}
-
-.ct-relation-row span {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: #75879a;
-}
-
-.ct-period-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-@media (max-width: 980px) {
-  .ct-object-page {
-    padding: 18px;
-  }
-
-  .ct-object-hero,
-  .ct-object-grid,
-  .ct-tab-content {
-    grid-template-columns: 1fr;
-  }
-
-  .ct-object-hero {
-    display: grid;
-  }
-
-  .ct-fact-list div {
-    grid-template-columns: 1fr;
-  }
-}
-
