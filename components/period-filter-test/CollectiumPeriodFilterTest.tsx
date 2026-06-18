@@ -7,11 +7,8 @@
  * CollectiumPeriodFilterTest
  *
  * Formål:
- * Enkel og lesbar periodefilter-test.
- * Masterfilter styrer land, objekttype og år fra/til.
- * Hurtigvalg setter årstall og periode.
- * Rad 2 og Rad 3 viser bare perioder som passer valgt år fra/til.
- * Tidslinjen vises én gang og kan klikkes direkte.
+ * Lesbar periodefilter-test med riktig skall, Rad 1/Rad 2/Rad 3,
+ * år fra/til og én enkel klikkbar tidslinje.
  *
  * Route:
  * - /test/periodefilter
@@ -94,37 +91,6 @@ const LINK_TYPES = [
   { value: "producer", label: "Produsent / utsteder" },
   { value: "find_provenance", label: "Funn / proveniens" },
   { value: "market_index", label: "Marked / index" },
-];
-
-const QUICK_PRESETS = [
-  {
-    label: "1814–1905",
-    yearFrom: "1814",
-    yearTo: "1905",
-    mainSlug: "unionen-sverige-norge",
-    subSlug: "norges-bank-speciedaler",
-  },
-  {
-    label: "1875–1914",
-    yearFrom: "1875",
-    yearTo: "1914",
-    mainSlug: "krone-oreperioden",
-    subSlug: "skandinavisk-myntunion-kroneinnforing",
-  },
-  {
-    label: "1940–1945",
-    yearFrom: "1940",
-    yearTo: "1945",
-    mainSlug: "andre-verdenskrig-okkupasjon",
-    subSlug: "forste-verdenskrig-norge",
-  },
-  {
-    label: "1905–2024",
-    yearFrom: "1905",
-    yearTo: "2024",
-    mainSlug: "selvstendig-norge",
-    subSlug: "oljealderen",
-  },
 ];
 
 function makeState(url: string): ApiState {
@@ -226,7 +192,7 @@ function periodYearText(option: PeriodOption): string {
 }
 
 function periodSummary(option: PeriodOption | null): string {
-  if (!option) return "Velg en periode fra tidslinjen.";
+  if (!option) return "Velg en periode i tidslinjen.";
   return String(option.summary_short_no || option.collectium_relevance_no || "Periode fra Collectium perioderegister.");
 }
 
@@ -242,103 +208,95 @@ function linkTypeLabel(value: string): string {
   return LINK_TYPES.find((item) => item.value === value)?.label ?? value;
 }
 
-function findPeriodKey(options: PeriodOption[], slug: string): string {
-  const found = options.find((option) => option.period_slug === slug || option.option_key === slug);
-  if (!found) return options[0] ? optionKey(options[0], 0) : "";
-  return optionKey(found, options.indexOf(found));
-}
+function fallbackObjects(objectType: ObjectType, objectTypeLabel: string, yearFrom: string, yearTo: string): PreviewObject[] {
+  const from = Number(yearFrom || "0");
+  const to = Number(yearTo || "9999");
 
-function fallbackObjects(objectType: ObjectType, objectTypeLabel: string, yearFrom: string, yearTo: string, segment: Segment): PreviewObject[] {
-  const common = {
-    object_type_label: objectTypeLabel,
-  };
+  const all: PreviewObject[] =
+    objectType === "coin"
+      ? [
+          {
+            object_id: "coin-preview-1875",
+            source_key: "norske_mynter",
+            object_group: "coin",
+            title: "MYNT · Oscar II · 1875",
+            subtitle: "Krone- og øreperioden · 1875",
+            object_type_label: objectTypeLabel,
+            year: "1875",
+            period: "Oscar II",
+            variant: "Krone",
+          },
+          {
+            object_id: "coin-preview-1905",
+            source_key: "norske_mynter",
+            object_group: "coin",
+            title: "MYNT · Haakon VII · 1905",
+            subtitle: "Selvstendig Norge · 1905",
+            object_type_label: objectTypeLabel,
+            year: "1905",
+            period: "Haakon VII",
+            variant: "Krone",
+          },
+        ]
+      : objectType === "security"
+        ? [
+            {
+              object_id: "security-preview-1898",
+              source_key: "verdibrev",
+              object_group: "security",
+              title: "VERDIBREV · Oscar II · 1898",
+              subtitle: "Aksjebrev · industri · 1898",
+              object_type_label: objectTypeLabel,
+              year: "1898",
+              period: "Oscar II",
+              variant: "Papir",
+            },
+            {
+              object_id: "security-preview-1942",
+              source_key: "verdibrev",
+              object_group: "security",
+              title: "VERDIBREV · Andre verdenskrig · 1942",
+              subtitle: "Krigsobligasjon · 1942",
+              object_type_label: objectTypeLabel,
+              year: "1942",
+              period: "Andre verdenskrig",
+              variant: "Obligasjon",
+            },
+          ]
+        : [
+            {
+              object_id: "banknote-preview-1898",
+              source_key: "norske_sedler",
+              object_group: "banknote",
+              title: "SEDDEL · Oscar II · 1898",
+              subtitle: "Norges Bank · utgave I · 1898",
+              object_type_label: objectTypeLabel,
+              year: "1898",
+              period: "Oscar II",
+              variant: "Utgave I",
+            },
+            {
+              object_id: "banknote-preview-1942",
+              source_key: "norske_sedler",
+              object_group: "banknote",
+              title: "SEDDEL · Andre verdenskrig · 1942",
+              subtitle: "Krigsøkonomi · okkupasjonstid",
+              object_type_label: objectTypeLabel,
+              year: "1942",
+              period: "Andre verdenskrig",
+              variant: "Krigsperiode",
+            },
+          ];
 
-  if (objectType === "coin") {
-    return [
-      {
-        ...common,
-        object_id: "coin-preview-1875",
-        source_key: "norske_mynter",
-        object_group: "coin",
-        title: "MYNT · Oscar II · 1875",
-        subtitle: "Krone- og øreperioden · 1875",
-        year: "1875",
-        period: "Oscar II",
-        variant: "Krone",
-      },
-      {
-        ...common,
-        object_id: "coin-preview-1905",
-        source_key: "norske_mynter",
-        object_group: "coin",
-        title: "MYNT · Haakon VII · 1905",
-        subtitle: "Selvstendig Norge · 1905",
-        year: "1905",
-        period: "Haakon VII",
-        variant: "Krone",
-      },
-    ];
-  }
-
-  if (objectType === "security") {
-    return [
-      {
-        ...common,
-        object_id: "security-preview-1898",
-        source_key: "verdibrev",
-        object_group: "security",
-        title: "VERDIBREV · Oscar II · 1898",
-        subtitle: "Aksjebrev · industri · 1898",
-        year: "1898",
-        period: "Oscar II",
-        variant: "Papir",
-      },
-      {
-        ...common,
-        object_id: "security-preview-1942",
-        source_key: "verdibrev",
-        object_group: "security",
-        title: "VERDIBREV · Andre verdenskrig · 1942",
-        subtitle: "Krigsobligasjon · 1942",
-        year: "1942",
-        period: "Andre verdenskrig",
-        variant: "Obligasjon",
-      },
-    ];
-  }
-
-  return [
-    {
-      ...common,
-      object_id: "banknote-preview-1898",
-      source_key: "norske_sedler",
-      object_group: "banknote",
-      title: "SEDDEL · Oscar II · 1898",
-      subtitle: "Norges Bank · utgave I · 1898",
-      year: "1898",
-      period: "Oscar II",
-      variant: "Utgave I",
-    },
-    {
-      ...common,
-      object_id: "banknote-preview-1942",
-      source_key: "norske_sedler",
-      object_group: "banknote",
-      title: "SEDDEL · Andre verdenskrig · 1942",
-      subtitle: "Krigsøkonomi · okkupasjonstid",
-      year: "1942",
-      period: "Andre verdenskrig",
-      variant: "Krigsperiode",
-    },
-  ].filter((item) => {
+  return all.filter((item) => {
     const year = Number(item.year);
-    return year >= Number(yearFrom || "0") && year <= Number(yearTo || "9999");
+    return year >= from && year <= to;
   });
 }
 
-function FieldValue({ label, value }: { label: string; value: string }) {
+function SmallValue({ label, value }: { label: string; value: string }) {
   return (
-    <div className="ct-v6-value">
+    <div className="ct-v7-small-value">
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
@@ -347,7 +305,7 @@ function FieldValue({ label, value }: { label: string; value: string }) {
 
 export default function CollectiumPeriodFilterTest() {
   const [country, setCountry] = useState("NO");
-  const [objectType, setObjectType] = useState<ObjectType>("coin");
+  const [objectType, setObjectType] = useState<ObjectType>("banknote");
   const [yearFrom, setYearFrom] = useState("1814");
   const [yearTo, setYearTo] = useState("2024");
   const [segment, setSegment] = useState<Segment>("historie");
@@ -399,7 +357,8 @@ export default function CollectiumPeriodFilterTest() {
     }
 
     if (!subPeriodKey || !visibleKeys.has(subPeriodKey)) {
-      setSubPeriodKey(optionKey(visiblePeriods[Math.min(1, visiblePeriods.length - 1)], Math.min(1, visiblePeriods.length - 1)));
+      const secondIndex = Math.min(1, visiblePeriods.length - 1);
+      setSubPeriodKey(optionKey(visiblePeriods[secondIndex], secondIndex));
     }
   }, [visiblePeriods, mainPeriodKey, subPeriodKey]);
 
@@ -417,9 +376,9 @@ export default function CollectiumPeriodFilterTest() {
         country_scope: country,
         year_from: yearFrom,
         year_to: yearTo,
-        national_link_type: linkType,
-        main_period_key: mainPeriodKey,
-        sub_period_key: subPeriodKey,
+        row1_link_type: linkType,
+        row2_main_period_key: mainPeriodKey,
+        row3_sub_period_key: subPeriodKey,
       });
 
       const url = `/api/test/period-catalog?${params.toString()}`;
@@ -438,45 +397,32 @@ export default function CollectiumPeriodFilterTest() {
     return rows.length ? rows : objects;
   }, [catalogState.data]);
 
-  const cards = apiObjects.length
-    ? apiObjects
-    : fallbackObjects(objectType, objectTypeLabel, yearFrom, yearTo, segment);
-
-  function applyPreset(preset: (typeof QUICK_PRESETS)[number]) {
-    setYearFrom(preset.yearFrom);
-    setYearTo(preset.yearTo);
-
-    const nextVisible = allPeriods.filter((option) => inYearRange(option, preset.yearFrom, preset.yearTo));
-    if (!nextVisible.length) return;
-
-    setMainPeriodKey(findPeriodKey(nextVisible, preset.mainSlug));
-    setSubPeriodKey(findPeriodKey(nextVisible, preset.subSlug));
-  }
+  const cards = apiObjects.length ? apiObjects : fallbackObjects(objectType, objectTypeLabel, yearFrom, yearTo);
 
   return (
-    <main className="ct-v6-page">
-      <section className="ct-v6-hero">
-        <p className="ct-eyebrow">Periodefilter · DB-test</p>
-        <h1>Velg periode</h1>
-        <p>Velg land, objekttype og år. Klikk deretter direkte i tidslinjen.</p>
+    <main className="ct-v7-shell">
+      <section className="ct-v7-hero">
+        <p>Periodefilter · DB-test</p>
+        <h1>Periodefilter</h1>
+        <span>Masterfilter → Rad 1 → Rad 2 → Rad 3 → tidslinje → resultat</span>
       </section>
 
-      <section className="ct-v6-status">
-        <FieldValue label="Periodevalg" value={periodOptionsState.status === "ok" ? "OK" : periodOptionsState.status === "error" ? "Feil" : "Laster"} />
-        <FieldValue label="Katalog" value={catalogState.status === "ok" ? "OK" : catalogState.status === "error" ? "Feil" : "Laster"} />
-        <FieldValue label="Modell" value={`${country} · ${objectTypeLabel} · ${yearFrom}–${yearTo}`} />
+      <section className="ct-v7-status">
+        <SmallValue label="Periodevalg" value={periodOptionsState.status === "ok" ? "OK" : periodOptionsState.status === "error" ? "Feil" : "Laster"} />
+        <SmallValue label="Katalog" value={catalogState.status === "ok" ? "OK" : catalogState.status === "error" ? "Feil" : "Laster"} />
+        <SmallValue label="Modell" value={`${country} · ${objectTypeLabel} · ${yearFrom}–${yearTo}`} />
       </section>
 
-      <section className="ct-v6-panel">
-        <div className="ct-v6-head">
+      <section className="ct-v7-panel">
+        <div className="ct-v7-head">
           <div>
-            <span>Steg 1</span>
-            <h2>Masterfilter</h2>
+            <span>Masterfilter</span>
+            <h2>Grunnvalg</h2>
           </div>
-          <p>Disse feltene styrer hvilke perioder som vises.</p>
+          <p>År fra og år til styrer hvilke perioder som kan velges i Rad 2, Rad 3 og tidslinjen.</p>
         </div>
 
-        <div className="ct-v6-master">
+        <div className="ct-v7-master-grid">
           <label>
             <span>Land</span>
             <select value={country} onChange={(event) => setCountry(event.target.value)}>
@@ -505,61 +451,48 @@ export default function CollectiumPeriodFilterTest() {
             <input value={yearTo} onChange={(event) => setYearTo(event.target.value)} inputMode="numeric" />
           </label>
         </div>
-
-        <div className="ct-v6-presets">
-          <span>Hurtigvalg</span>
-          {QUICK_PRESETS.map((preset) => (
-            <button key={preset.label} type="button" onClick={() => applyPreset(preset)}>
-              {preset.label}
-            </button>
-          ))}
-        </div>
       </section>
 
-      <section className="ct-v6-panel">
-        <div className="ct-v6-head">
-          <div>
-            <span>Steg 2</span>
-            <h2>Filterfelt</h2>
-          </div>
-          <p>Enkle felt. Tidslinjen under er hovedvalget.</p>
-        </div>
+      <section className="ct-v7-rad-grid">
+        <article className="ct-v7-panel ct-v7-rad">
+          <span>Rad 1 · Nasjonal kobling</span>
+          <h2>Kobles mot</h2>
+          <select value={linkType} onChange={(event) => setLinkType(event.target.value)}>
+            {LINK_TYPES.map((item) => (
+              <option key={item.value} value={item.value}>{item.label}</option>
+            ))}
+          </select>
+          <p>Velger hvilken type relasjon perioden skal kobles mot.</p>
+        </article>
 
-        <div className="ct-v6-fields">
-          <label>
-            <span>Kobles mot</span>
-            <select value={linkType} onChange={(event) => setLinkType(event.target.value)}>
-              {LINK_TYPES.map((item) => (
-                <option key={item.value} value={item.value}>{item.label}</option>
-              ))}
-            </select>
-          </label>
+        <article className="ct-v7-panel ct-v7-rad">
+          <span>Rad 2 · Hovedperiode</span>
+          <h2>Hovedperiode</h2>
+          <select value={mainPeriodKey} onChange={(event) => setMainPeriodKey(event.target.value)}>
+            {visiblePeriods.map((option, index) => (
+              <option key={optionKey(option, index)} value={optionKey(option, index)}>
+                {optionLabel(option)}
+              </option>
+            ))}
+          </select>
+          <p>{selectedMainPeriod ? periodYearText(selectedMainPeriod) : "Ingen periode i valgt årsområde."}</p>
+        </article>
 
-          <label>
-            <span>Hovedperiode</span>
-            <select value={mainPeriodKey} onChange={(event) => setMainPeriodKey(event.target.value)}>
-              {visiblePeriods.map((option, index) => (
-                <option key={optionKey(option, index)} value={optionKey(option, index)}>
-                  {optionLabel(option)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Underperiode</span>
-            <select value={subPeriodKey} onChange={(event) => setSubPeriodKey(event.target.value)}>
-              {visiblePeriods.map((option, index) => (
-                <option key={optionKey(option, index)} value={optionKey(option, index)}>
-                  {optionLabel(option)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <article className="ct-v7-panel ct-v7-rad">
+          <span>Rad 3 · Underperiode / relasjon</span>
+          <h2>Underperiode</h2>
+          <select value={subPeriodKey} onChange={(event) => setSubPeriodKey(event.target.value)}>
+            {visiblePeriods.map((option, index) => (
+              <option key={optionKey(option, index)} value={optionKey(option, index)}>
+                {optionLabel(option)}
+              </option>
+            ))}
+          </select>
+          <p>{selectedSubPeriod ? periodYearText(selectedSubPeriod) : "Ingen periode i valgt årsområde."}</p>
+        </article>
       </section>
 
-      <section className="ct-v6-switches">
+      <section className="ct-v7-switches">
         {SEGMENTS.map((item) => (
           <button key={item} type="button" className={segment === item ? "is-active" : ""} onClick={() => setSegment(item)}>
             {item === "samler" ? "Samler" : item === "historie" ? "Historie" : "Finans"}
@@ -567,16 +500,16 @@ export default function CollectiumPeriodFilterTest() {
         ))}
       </section>
 
-      <section className="ct-v6-panel">
-        <div className="ct-v6-head">
+      <section className="ct-v7-panel">
+        <div className="ct-v7-head">
           <div>
-            <span>Steg 3</span>
-            <h2>Tidslinje</h2>
+            <span>Tidslinje</span>
+            <h2>Velg periode</h2>
           </div>
-          <p>Klikk på en periode for å velge hovedperiode.</p>
+          <p>Kun perioder innenfor {yearFrom}–{yearTo} vises. Klikk på et kort for å sette Rad 2.</p>
         </div>
 
-        <div className="ct-v6-timeline">
+        <div className="ct-v7-timeline">
           {visiblePeriods.map((option, index) => {
             const key = optionKey(option, index);
 
@@ -590,27 +523,27 @@ export default function CollectiumPeriodFilterTest() {
         </div>
       </section>
 
-      <section className="ct-v6-two">
-        <article className="ct-v6-panel">
-          <div className="ct-v6-head">
+      <section className="ct-v7-two">
+        <article className="ct-v7-panel">
+          <div className="ct-v7-head">
             <div>
               <span>Valg</span>
               <h2>{segment === "samler" ? "Samler" : segment === "historie" ? "Historie" : "Finans"}</h2>
             </div>
           </div>
 
-          <div className="ct-v6-info">
-            <FieldValue label="Kobling" value={linkTypeLabel(linkType)} />
-            <FieldValue label="Hovedperiode" value={selectedMainPeriod ? optionLabel(selectedMainPeriod) : "Ikke valgt"} />
-            <FieldValue label="Underperiode" value={selectedSubPeriod ? optionLabel(selectedSubPeriod) : "Ikke valgt"} />
-            <FieldValue label="Objekt" value={objectTypeLabel} />
-            <FieldValue label="År" value={`${yearFrom}–${yearTo}`} />
-            <FieldValue label="Visning" value={view} />
+          <div className="ct-v7-info-grid">
+            <SmallValue label="Rad 1" value={linkTypeLabel(linkType)} />
+            <SmallValue label="Rad 2" value={selectedMainPeriod ? optionLabel(selectedMainPeriod) : "Ikke valgt"} />
+            <SmallValue label="Rad 3" value={selectedSubPeriod ? optionLabel(selectedSubPeriod) : "Ikke valgt"} />
+            <SmallValue label="Objekt" value={objectTypeLabel} />
+            <SmallValue label="År" value={`${yearFrom}–${yearTo}`} />
+            <SmallValue label="Visning" value={view} />
           </div>
         </article>
 
-        <article className="ct-v6-panel">
-          <div className="ct-v6-head">
+        <article className="ct-v7-panel">
+          <div className="ct-v7-head">
             <div>
               <span>Valgt periode</span>
               <h2>{selectedMainPeriod ? optionLabel(selectedMainPeriod) : "Ingen periode"}</h2>
@@ -618,22 +551,22 @@ export default function CollectiumPeriodFilterTest() {
             <p>{selectedMainPeriod ? periodYearText(selectedMainPeriod) : "Velg i tidslinjen."}</p>
           </div>
 
-          <p className="ct-v6-summary">{periodSummary(selectedMainPeriod)}</p>
-          <a className="ct-v6-relation" href={selectedMainPeriod?.relation_href || "#"}>
+          <p className="ct-v7-summary">{periodSummary(selectedMainPeriod)}</p>
+          <a className="ct-v7-link" href={selectedMainPeriod?.relation_href || "#"}>
             {selectedMainPeriod?.relation_href || "Relasjon mangler"}
           </a>
         </article>
       </section>
 
-      <section className="ct-v6-panel">
-        <div className="ct-v6-result-head">
+      <section className="ct-v7-panel">
+        <div className="ct-v7-result-head">
           <div>
-            <span>Steg 4</span>
+            <span>Resultat</span>
             <h2>Katalogresultat</h2>
             <p>{country} · {objectTypeLabel} · {yearFrom}–{yearTo} · {cards.length} treff</p>
           </div>
 
-          <div className="ct-v6-view">
+          <div className="ct-v7-view">
             {VIEW_MODES.map((item) => (
               <button key={item} type="button" className={view === item ? "is-active" : ""} onClick={() => setView(item)}>
                 {item === "liste" ? "Liste" : item === "horisontal" ? "Horisontal" : "Museum"}
@@ -643,24 +576,24 @@ export default function CollectiumPeriodFilterTest() {
         </div>
 
         {catalogState.status === "error" ? (
-          <details className="ct-v6-error">
+          <details className="ct-v7-error">
             <summary>Katalog API feiler. Viser kontrollkort.</summary>
             <code>{catalogState.url}</code>
           </details>
         ) : null}
 
-        <div className={`ct-v6-cards ct-v6-cards-${view}`}>
+        <div className={`ct-v7-cards ct-v7-cards-${view}`}>
           {cards.map((item: any) => (
-            <article className="ct-v6-card" key={String(item.object_id)}>
-              <div className="ct-v6-card-symbol">{String(item.category ?? "C")}</div>
-              <div>
+            <article className="ct-v7-card" key={String(item.object_id)}>
+              <div className="ct-v7-card-symbol">{String(item.category ?? "C")}</div>
+              <div className="ct-v7-card-body">
                 <strong>{String(item.title ?? item.collectium_title_no ?? "Katalogobjekt")}</strong>
                 <span>{String(item.subtitle ?? item.denomination_raw_no ?? "")}</span>
-                <div className="ct-v6-card-fields">
-                  <FieldValue label="Objekttype" value={String(item.object_type_label ?? objectTypeLabel)} />
-                  <FieldValue label="Årstall" value={String(item.year ?? item.object_year_label ?? item.publication_year_label ?? "Mangler")} />
-                  <FieldValue label="Periode" value={String(item.period ?? item.ruler_name_raw_no ?? "Mangler")} />
-                  <FieldValue label="Variant" value={String(item.variant ?? item.variant_type_raw_no ?? "Mangler")} />
+                <div className="ct-v7-card-fields">
+                  <SmallValue label="Objekttype" value={String(item.object_type_label ?? objectTypeLabel)} />
+                  <SmallValue label="Årstall" value={String(item.year ?? item.object_year_label ?? item.publication_year_label ?? "Mangler")} />
+                  <SmallValue label="Periode" value={String(item.period ?? item.ruler_name_raw_no ?? "Mangler")} />
+                  <SmallValue label="Variant" value={String(item.variant ?? item.variant_type_raw_no ?? "Mangler")} />
                 </div>
               </div>
             </article>
@@ -668,7 +601,7 @@ export default function CollectiumPeriodFilterTest() {
         </div>
       </section>
 
-      <section className="ct-v6-debug">
+      <section className="ct-v7-debug">
         <h2>Svar til ChatGPT</h2>
         <pre>{JSON.stringify({
           masterfilter: {
@@ -679,10 +612,10 @@ export default function CollectiumPeriodFilterTest() {
             year_from: yearFrom,
             year_to: yearTo,
           },
-          flow: {
-            link_type: linkType,
-            main_period_key: mainPeriodKey,
-            sub_period_key: subPeriodKey,
+          rows: {
+            rad1_link_type: linkType,
+            rad2_main_period_key: mainPeriodKey,
+            rad3_sub_period_key: subPeriodKey,
           },
           period_options: {
             api_ok: periodOptionsState.ok,
