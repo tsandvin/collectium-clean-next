@@ -23,6 +23,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import styles from "./CollectiumPeriodFilterTest.module.css";
+import { useCollectiumLayout } from "../layout/CollectiumLayoutModeProvider";
+import { CollectiumWorkspaceLanes } from "../layout/CollectiumWorkspaceLanes";
 
 type SegmentKey = "samler" | "historie" | "finans";
 
@@ -514,6 +516,8 @@ function timelineKeyFacts(item: TimelineItem | null): Array<[string, string]> {
 }
 
 export default function CollectiumPeriodFilterTest() {
+  const { activeScreenMode } = useCollectiumLayout();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [data, setData] = useState<PeriodApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -652,6 +656,205 @@ export default function CollectiumPeriodFilterTest() {
     }
   }
 
+  const asideContent = (
+    <aside className={styles.filterColumn}>
+      <div className={styles.filterColumnHeader}>
+        <p className={styles.eyebrow}>Filterfelt</p>
+      </div>
+
+      <SelectBox title="Masterfilter" value={master} onChange={setMaster} items={MASTER_FILTERS} />
+      <SelectBox title="Land / område" value={country} onChange={setCountry} items={COUNTRIES} />
+      <SelectBox title="Objekttype" value={objectType} onChange={setObjectType} items={OBJECT_TYPES} />
+
+      <div className={styles.filterDivider}>Periodefilter</div>
+
+      <SelectBox
+        title="Rad 1 · Hovednivå"
+        value={row1}
+        onChange={(value) => {
+          setRow1(value);
+          setRow4("");
+        }}
+        items={ROW1}
+      />
+
+      <SelectBox
+        title="Rad 2 · Innhold styres av Rad 1"
+        value={row2}
+        onChange={(value) => {
+          setRow2(value);
+          setRow3("");
+          setRow4("");
+        }}
+        items={row2Items}
+      />
+
+      <SelectBox
+        title="Rad 3 · Innhold styres av Rad 2"
+        value={row3}
+        onChange={(value) => {
+          setRow3(value);
+          setRow4("");
+        }}
+        items={row3Items}
+      />
+
+      <SelectBox
+        title="Rad 4 · Forslag fra Rad 1-3"
+        value={row4}
+        onChange={setSelectedPeriod}
+        items={row4Items}
+      />
+
+      <div className={styles.selectedStack}>
+        <strong>Valgt</strong>
+        <span>{selectedMaster?.label}</span>
+        <span>{selectedCountry?.label}</span>
+        <span>{selectedObjectType?.label}</span>
+        <span>{selectedRow1?.label}</span>
+        <span>{selectedRow2?.label}</span>
+        <span>{selectedRow3?.label}</span>
+        <span>{selectedRow4?.label || "Ingen Rad 4 valgt"}</span>
+      </div>
+    </aside>
+  );
+
+  const mainContent = (
+    <section className={styles.mainColumn}>
+      <section className={styles.timelineShell}>
+        <div className={styles.timelineHeader}>
+          <div>
+            <p className={styles.eyebrow}>Sammenlignende tidslinje</p>
+            <h2>{selectedRow1?.label} · {selectedRow2?.label} · {selectedRow3?.label}</h2>
+          </div>
+          <div className={styles.timelineTools}>
+            <button type="button" onClick={() => setZoom((value) => Math.max(0.7, Number((value - 0.2).toFixed(1))))}>−</button>
+            <button type="button" onClick={() => setZoom((value) => Math.min(2.4, Number((value + 0.2).toFixed(1))))}>+</button>
+            <button type="button" data-active={timelineOnly} onClick={() => setTimelineOnly((value) => !value)}>
+              {timelineOnly ? "Lukk tidslinje" : "Kun tidslinje"}
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.yearInputs}>
+          <label>
+            År fra
+            <input type="number" value={fromYear} onChange={(event) => setFromYear(Number(event.target.value) || 0)} />
+          </label>
+          <label>
+            År til
+            <input type="number" value={toYear} onChange={(event) => setToYear(Number(event.target.value) || 2025)} />
+          </label>
+          <span>Zoom {zoom.toFixed(1)}x</span>
+        </div>
+
+        <div className={styles.timelineViewport}>
+          <div className={styles.timelineCanvas} style={{ minWidth: `${1100 * zoom}px` }}>
+            <div className={styles.decadeBand}>
+              {decades.map((year, index) => (
+                <div
+                  className={styles.decadeBlock}
+                  data-even={index % 2 === 0 ? "true" : "false"}
+                  key={year}
+                  style={{
+                    left: `${((year - fromYear) / Math.max(1, toYear - fromYear)) * 100}%`,
+                    width: `${(10 / Math.max(1, toYear - fromYear)) * 100}%`,
+                  }}
+                >
+                  <span>{year}</span>
+                </div>
+              ))}
+            </div>
+
+            {lanes.map((lane) => {
+              const laneItems = timelineItems.filter((item) => item.laneKey === lane.key);
+
+              return (
+                <div className={styles.timelineLane} data-row={lane.key} key={lane.key}>
+                  <div className={styles.laneLabel}>{lane.label}</div>
+                  <div className={styles.laneTrack}>
+                    {laneItems.map((item) => (
+                      <button
+                        type="button"
+                        key={item.id}
+                        className={styles.timelineItem}
+                        data-tone={item.tone}
+                        data-active={selectedTimelineItem?.id === item.id}
+                        style={itemStyle(item, fromYear, toYear)}
+                        onClick={() => setSelectedTimelineItem(item)}
+                      >
+                        <strong>{item.label}</strong>
+                        <span>{item.start}–{item.end}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className={styles.axisLine}>
+              {decades.map((year) => (
+                <span key={year} style={{ left: `${((year - fromYear) / Math.max(1, toYear - fromYear)) * 100}%` }}>
+                  {year}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {selectedTimelineItem ? (
+          <div className={styles.timelineInfo}>
+            <strong>{selectedTimelineItem.label}</strong>
+            <span>{selectedTimelineItem.lane} · {selectedTimelineItem.start}–{selectedTimelineItem.end}</span>
+            <p>{selectedTimelineItem.note}</p>
+          </div>
+        ) : null}
+      </section>
+
+      {!timelineOnly ? (
+        <section className={styles.dynamicArea}>
+          <div className={styles.segmentTabs}>
+            <button type="button" data-active={segment === "samler"} onClick={() => setSegment("samler")}>Samler</button>
+            <button type="button" data-active={segment === "historie"} onClick={() => setSegment("historie")}>Historie</button>
+            <button type="button" data-active={segment === "finans"} onClick={() => setSegment("finans")}>Finans</button>
+          </div>
+
+          <div className={styles.dynamicGrid}>
+            <article className={styles.infoPanel}>
+              <p className={styles.eyebrow}>Gjeldende dynamiske felt</p>
+              <h2>{segment === "samler" ? "Samler" : segment === "historie" ? "Historie" : "Finans"}</h2>
+              <Fact label="Rad 1" value={selectedRow1?.label || "Ikke valgt"} />
+              <Fact label="Rad 2" value={selectedRow2?.label || "Ikke valgt"} />
+              <Fact label="Rad 3" value={selectedRow3?.label || "Ikke valgt"} />
+              <Fact label="Rad 4" value={selectedRow4 ? `${selectedRow4.label} · ${yearText(selectedRow4.startYear, selectedRow4.endYear)}` : "Ikke valgt"} />
+            </article>
+
+            <article className={styles.infoPanel}>
+              <p className={styles.eyebrow}>Periode dynamiske felt</p>
+              <h2>{selectedTimelineItem ? selectedTimelineItem.label : "Velg tidslinjeboks"}</h2>
+              <p className={styles.bioText}>{timelineBio(selectedTimelineItem)}</p>
+              {timelineKeyFacts(selectedTimelineItem).map(([key, value]) => (
+                <Fact key={key} label={key} value={value} />
+              ))}
+            </article>
+          </div>
+        </section>
+      ) : null}
+    </section>
+  );
+
+  const isMobile = activeScreenMode === "mobile";
+  const isTablet = activeScreenMode === "tablet";
+  const isWide = activeScreenMode === "wide" || activeScreenMode === "tv";
+
+  const gridStyle: CSSProperties = useMemo(() => {
+    if (isMobile || isTablet) {
+      return { display: "grid", gridTemplateColumns: "1fr", gap: "18px", minWidth: 0, width: "100%" };
+    }
+    // Desktop layout
+    return { display: "grid", gridTemplateColumns: "280px 1fr", gap: "18px", minWidth: 0, width: "100%" };
+  }, [isMobile, isTablet]);
+
   return (
     <main className={styles.page} data-timeline-only={timelineOnly ? "true" : "false"}>
       <section className={styles.hero}>
@@ -670,190 +873,59 @@ export default function CollectiumPeriodFilterTest() {
 
       {error ? <section className={styles.errorBox}>{error}</section> : null}
 
-      <section className={styles.layout}>
-        <aside className={styles.filterColumn}>
-          <div className={styles.filterColumnHeader}>
-            <p className={styles.eyebrow}>Filterfelt</p>
-          </div>
+      {isMobile && (
+        <div style={{ marginBottom: "16px" }}>
+          <button
+            type="button"
+            className="ct-btn ct-btn-primary"
+            style={{ width: "100%", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", fontWeight: 700 }}
+            onClick={() => setIsFilterOpen(true)}
+          >
+            🔍 Vis filter &amp; filtervalg
+          </button>
 
-          <SelectBox title="Masterfilter" value={master} onChange={setMaster} items={MASTER_FILTERS} />
-          <SelectBox title="Land / område" value={country} onChange={setCountry} items={COUNTRIES} />
-          <SelectBox title="Objekttype" value={objectType} onChange={setObjectType} items={OBJECT_TYPES} />
-
-          <div className={styles.filterDivider}>Periodefilter</div>
-
-          <SelectBox
-            title="Rad 1 · Hovednivå"
-            value={row1}
-            onChange={(value) => {
-              setRow1(value);
-              setRow4("");
-            }}
-            items={ROW1}
-          />
-
-          <SelectBox
-            title="Rad 2 · Innhold styres av Rad 1"
-            value={row2}
-            onChange={(value) => {
-              setRow2(value);
-              setRow3("");
-              setRow4("");
-            }}
-            items={row2Items}
-          />
-
-          <SelectBox
-            title="Rad 3 · Innhold styres av Rad 2"
-            value={row3}
-            onChange={(value) => {
-              setRow3(value);
-              setRow4("");
-            }}
-            items={row3Items}
-          />
-
-          <SelectBox
-            title="Rad 4 · Forslag fra Rad 1-3"
-            value={row4}
-            onChange={setSelectedPeriod}
-            items={row4Items}
-          />
-
-          <div className={styles.selectedStack}>
-            <strong>Valgt</strong>
-            <span>{selectedMaster?.label}</span>
-            <span>{selectedCountry?.label}</span>
-            <span>{selectedObjectType?.label}</span>
-            <span>{selectedRow1?.label}</span>
-            <span>{selectedRow2?.label}</span>
-            <span>{selectedRow3?.label}</span>
-            <span>{selectedRow4?.label || "Ingen Rad 4 valgt"}</span>
-          </div>
-        </aside>
-
-        <section className={styles.mainColumn}>
-          <section className={styles.timelineShell}>
-            <div className={styles.timelineHeader}>
-              <div>
-                <p className={styles.eyebrow}>Sammenlignende tidslinje</p>
-                <h2>{selectedRow1?.label} · {selectedRow2?.label} · {selectedRow3?.label}</h2>
-              </div>
-              <div className={styles.timelineTools}>
-                <button type="button" onClick={() => setZoom((value) => Math.max(0.7, Number((value - 0.2).toFixed(1))))}>−</button>
-                <button type="button" onClick={() => setZoom((value) => Math.min(2.4, Number((value + 0.2).toFixed(1))))}>+</button>
-                <button type="button" data-active={timelineOnly} onClick={() => setTimelineOnly((value) => !value)}>
-                  {timelineOnly ? "Lukk tidslinje" : "Kun tidslinje"}
+          {isFilterOpen && (
+            <div style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 150,
+              background: "var(--ct-app-bg)",
+              padding: "20px",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px"
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--ct-border)", paddingBottom: "12px" }}>
+                <h3 style={{ margin: 0, fontFamily: "var(--ct-font-ui)", fontWeight: 750 }}>Filter og valg</h3>
+                <button
+                  type="button"
+                  className="ct-btn"
+                  onClick={() => setIsFilterOpen(false)}
+                  style={{ padding: "6px 12px", fontSize: "13px", fontWeight: 700 }}
+                >
+                  Lukk ✕
                 </button>
               </div>
-            </div>
-
-            <div className={styles.yearInputs}>
-              <label>
-                År fra
-                <input type="number" value={fromYear} onChange={(event) => setFromYear(Number(event.target.value) || 0)} />
-              </label>
-              <label>
-                År til
-                <input type="number" value={toYear} onChange={(event) => setToYear(Number(event.target.value) || 2025)} />
-              </label>
-              <span>Zoom {zoom.toFixed(1)}x</span>
-            </div>
-
-            <div className={styles.timelineViewport}>
-              <div className={styles.timelineCanvas} style={{ minWidth: `${1100 * zoom}px` }}>
-                <div className={styles.decadeBand}>
-                  {decades.map((year, index) => (
-                    <div
-                      className={styles.decadeBlock}
-                      data-even={index % 2 === 0 ? "true" : "false"}
-                      key={year}
-                      style={{
-                        left: `${((year - fromYear) / Math.max(1, toYear - fromYear)) * 100}%`,
-                        width: `${(10 / Math.max(1, toYear - fromYear)) * 100}%`,
-                      }}
-                    >
-                      <span>{year}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {lanes.map((lane) => {
-                  const laneItems = timelineItems.filter((item) => item.laneKey === lane.key);
-
-                  return (
-                    <div className={styles.timelineLane} data-row={lane.key} key={lane.key}>
-                      <div className={styles.laneLabel}>{lane.label}</div>
-                      <div className={styles.laneTrack}>
-                        {laneItems.map((item) => (
-                          <button
-                            type="button"
-                            key={item.id}
-                            className={styles.timelineItem}
-                            data-tone={item.tone}
-                            data-active={selectedTimelineItem?.id === item.id}
-                            style={itemStyle(item, fromYear, toYear)}
-                            onClick={() => setSelectedTimelineItem(item)}
-                          >
-                            <strong>{item.label}</strong>
-                            <span>{item.start}–{item.end}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                <div className={styles.axisLine}>
-                  {decades.map((year) => (
-                    <span key={year} style={{ left: `${((year - fromYear) / Math.max(1, toYear - fromYear)) * 100}%` }}>
-                      {year}
-                    </span>
-                  ))}
-                </div>
+              <div onClick={() => setIsFilterOpen(false)}>
+                {asideContent}
               </div>
             </div>
+          )}
+        </div>
+      )}
 
-            {selectedTimelineItem ? (
-              <div className={styles.timelineInfo}>
-                <strong>{selectedTimelineItem.label}</strong>
-                <span>{selectedTimelineItem.lane} · {selectedTimelineItem.start}–{selectedTimelineItem.end}</span>
-                <p>{selectedTimelineItem.note}</p>
-              </div>
-            ) : null}
-          </section>
-
-          {!timelineOnly ? (
-            <section className={styles.dynamicArea}>
-              <div className={styles.segmentTabs}>
-                <button type="button" data-active={segment === "samler"} onClick={() => setSegment("samler")}>Samler</button>
-                <button type="button" data-active={segment === "historie"} onClick={() => setSegment("historie")}>Historie</button>
-                <button type="button" data-active={segment === "finans"} onClick={() => setSegment("finans")}>Finans</button>
-              </div>
-
-              <div className={styles.dynamicGrid}>
-                <article className={styles.infoPanel}>
-                  <p className={styles.eyebrow}>Gjeldende dynamiske felt</p>
-                  <h2>{segment === "samler" ? "Samler" : segment === "historie" ? "Historie" : "Finans"}</h2>
-                  <Fact label="Rad 1" value={selectedRow1?.label || "Ikke valgt"} />
-                  <Fact label="Rad 2" value={selectedRow2?.label || "Ikke valgt"} />
-                  <Fact label="Rad 3" value={selectedRow3?.label || "Ikke valgt"} />
-                  <Fact label="Rad 4" value={selectedRow4 ? `${selectedRow4.label} · ${yearText(selectedRow4.startYear, selectedRow4.endYear)}` : "Ikke valgt"} />
-                </article>
-
-                <article className={styles.infoPanel}>
-                  <p className={styles.eyebrow}>Periode dynamiske felt</p>
-                  <h2>{selectedTimelineItem ? selectedTimelineItem.label : "Velg tidslinjeboks"}</h2>
-                  <p className={styles.bioText}>{timelineBio(selectedTimelineItem)}</p>
-                  {timelineKeyFacts(selectedTimelineItem).map(([key, value]) => (
-                    <Fact key={key} label={key} value={value} />
-                  ))}
-                </article>
-              </div>
-            </section>
-          ) : null}
+      {isWide ? (
+        <CollectiumWorkspaceLanes>
+          {asideContent}
+          {mainContent}
+        </CollectiumWorkspaceLanes>
+      ) : (
+        <section className={styles.layout} style={gridStyle}>
+          {!isMobile && asideContent}
+          {mainContent}
         </section>
-      </section>
+      )}
     </main>
   );
 }

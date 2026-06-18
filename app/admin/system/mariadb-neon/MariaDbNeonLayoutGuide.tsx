@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "./MariaDbNeonLayoutGuide.module.css";
+import { useCollectiumLayout } from "../../../../components/layout/CollectiumLayoutModeProvider";
 
 type ScreenMode = "mobile" | "tablet" | "desktop" | "wide" | "tv";
 
@@ -382,22 +383,12 @@ function getLaneGroups(mode: ScreenMode) {
 
 export default function MariaDbNeonLayoutGuide() {
   const [isOpen, setIsOpen] = useState(false);
-  const [screenMode, setScreenMode] = useState<ScreenMode>("desktop");
-  const [viewportWidth, setViewportWidth] = useState<number>(0);
+  const {
+    activeScreenMode: screenMode,
+    setSelectedScreenMode,
+    actualScreenWidth: viewportWidth
+  } = useCollectiumLayout();
   const [laneOnePercent, setLaneOnePercent] = useState<number>(50);
-
-  useEffect(() => {
-    function updateViewportWidth() {
-      setViewportWidth(window.innerWidth);
-    }
-
-    updateViewportWidth();
-    window.addEventListener("resize", updateViewportWidth);
-
-    return () => {
-      window.removeEventListener("resize", updateViewportWidth);
-    };
-  }, []);
 
   const actualViewportLabel = useMemo(() => {
     if (viewportWidth < 720) return "Mobil";
@@ -485,7 +476,7 @@ export default function MariaDbNeonLayoutGuide() {
                       key={mode.key}
                       type="button"
                       className={screenMode === mode.key ? styles.activeScreen : ""}
-                      onClick={() => setScreenMode(mode.key)}
+                      onClick={() => setSelectedScreenMode(mode.key)}
                     >
                       {mode.label}
                     </button>

@@ -1,0 +1,82 @@
+.panelCard {
+  background: var(--ct-panel);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme, 8px);
+  padding: 20px;
+  box-shadow: var(--ct-shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.panelCard:hover {
+  box-shadow: var(--ct-shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.iconIndicator {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.panelTitle {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 750;
+  font-family: var(--ct-font-ui);
+  color: var(--ct-text);
+}
+
+.panelDesc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ct-muted);
+  font-family: var(--ct-font-ui);
+}
+
+.buttonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.ctrlBtn {
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel-soft);
+  color: var(--ct-text);
+  border-radius: var(--ct-radius-sm, 6px);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--ct-font-ui);
+  cursor: pointer;
+  box-shadow: var(--ct-shadow-soft);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.ctrlBtn:hover {
+  background: var(--ct-hover);
+  border-color: var(--ct-border-strong);
+  transform: translateY(-1px);
+}
+
+.ctrlBtn.isActive {
+  background: var(--ct-accent);
+  color: var(--ct-on-accent, #ffffff);
+  border-color: var(--ct-accent);
+  box-shadow: var(--ct-shadow-3d);
+}
+
+@media (max-width: 719px) {
+  .buttonGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

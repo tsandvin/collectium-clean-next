@@ -1,0 +1,40 @@
+.lanesContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  width: 100%;
+  overflow-x: auto;
+  align-items: stretch;
+  padding: 4px 4px 18px 4px;
+  box-sizing: border-box;
+  scroll-snap-type: x mandatory;
+}
+
+.laneItem {
+  flex: 0 0 var(--ct-workspace-lane-width, 1000px);
+  width: var(--ct-workspace-lane-width, 1000px);
+  max-width: calc(100vw - 48px);
+  box-sizing: border-box;
+  scroll-snap-align: start;
+}
+
+.tvContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  width: 100%;
+  align-items: stretch;
+  padding: 4px;
+}
+
+.tvLaneItem {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.singleContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -60,6 +60,8 @@ import NeonRelationDbTree from "../../../../components/system/NeonRelationDbTree
 
 
 import MariaDbNeonTransferMatrix from "./MariaDbNeonTransferMatrix";
+import { CollectiumLayoutControlPanel } from "../../../../components/layout/CollectiumLayoutControlPanel";
+import { CollectiumResponsiveDebugPanel } from "../../../../components/layout/CollectiumResponsiveDebugPanel";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 
@@ -767,6 +769,10 @@ export default function MariaDbNeonControlPage() {
             ],
             "Layout-kontroll mangler."
           )}
+          <div style={{ marginTop: "24px", display: "grid", gap: "16px" }}>
+            <CollectiumLayoutControlPanel />
+            <CollectiumResponsiveDebugPanel />
+          </div>
         </section>
       ) : null}
 

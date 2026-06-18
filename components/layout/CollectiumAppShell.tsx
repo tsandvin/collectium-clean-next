@@ -12,9 +12,12 @@ import {
   Archive,
   Gavel,
   Store,
-  ShieldCheck
+  ShieldCheck,
+  Menu,
+  X
 } from "lucide-react";
 import styles from "./CollectiumAppShell.module.css";
+import { CollectiumLayoutModeProvider, useCollectiumLayout } from "./CollectiumLayoutModeProvider";
 
 type CollectiumSkin = "collectium" | "samler" | "museum" | "finans";
 
@@ -41,9 +44,16 @@ const skins: { value: CollectiumSkin; label: string }[] = [
   { value: "finans", label: "Finans" },
 ];
 
-export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
+function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
   const [skin, setSkin] = useState<CollectiumSkin>("collectium");
   const pathname = usePathname() || "/";
+  const {
+    activeScreenMode,
+    sidebarMode,
+    laneMode,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen
+  } = useCollectiumLayout();
 
   useEffect(() => {
     const stored = window.localStorage.getItem("collectium-active-skin") as CollectiumSkin | null;
@@ -99,16 +109,39 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
   const isDarkSkin = skin === "museum" || skin === "finans";
 
   return (
-    <div className={styles.shell}>
+    <div
+      className={styles.shell}
+      data-screen-mode={activeScreenMode}
+      data-sidebar-mode={sidebarMode}
+      data-lane-mode={laneMode}
+      data-mobile-menu-open={isMobileMenuOpen}
+    >
+      {/* Mobile drawer backdrop */}
+      {isMobileMenuOpen && (sidebarMode === "hidden" || sidebarMode === "compact") && (
+        <div className={styles.backdrop} onClick={() => setIsMobileMenuOpen(false)} aria-hidden="true" />
+      )}
+
       <aside className={styles.sidebar} aria-label="Collectium navigasjon">
-        <Link href="/" className={styles.brand} aria-label="Collectium startside">
-          <img
-            src={isDarkSkin ? "/collectium-logo-white.png" : "/collectium-logo-black.png"}
-            alt="Collectium"
-            className={styles.brandLogo}
-          />
-          <span className={styles.brandBeta}>Beta 8.5</span>
-        </Link>
+        <div className={styles.sidebarHeader}>
+          <Link href="/" className={styles.brand} onClick={() => setIsMobileMenuOpen(false)} aria-label="Collectium startside">
+            <img
+              src={isDarkSkin ? "/collectium-logo-white.png" : "/collectium-logo-black.png"}
+              alt="Collectium"
+              className={styles.brandLogo}
+            />
+            <span className={styles.brandBeta}>Beta 8.5</span>
+          </Link>
+          
+          {(sidebarMode === "hidden" || sidebarMode === "compact") && (
+            <button
+              className={styles.closeMenuButton}
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Lukk meny"
+            >
+              <X size={22} />
+            </button>
+          )}
+        </div>
 
         <nav className={styles.nav}>
           {navItems.map((item) => {
@@ -119,7 +152,13 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
                 key={item.href}
                 href={item.disabled ? "#" : item.href}
                 className={`${styles.navItem} ${isActive && !item.disabled ? styles.isActive : ""} ${item.disabled ? styles.disabled : ""}`}
-                onClick={item.disabled ? (e) => e.preventDefault() : undefined}
+                onClick={(e) => {
+                  if (item.disabled) {
+                    e.preventDefault();
+                  } else {
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
                 aria-current={isActive && !item.disabled ? "page" : undefined}
               >
                 <span className={styles.navIcon}>
@@ -134,8 +173,19 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
 
       <div className={styles.mainColumn}>
         <header className={styles.topbar}>
-          <div className={styles.searchWrap}>
-            <input className={styles.search} placeholder="Sok i Collectium / bruker..." aria-label="Sok" />
+          <div className={styles.topbarLeft}>
+            {(sidebarMode === "hidden" || sidebarMode === "compact") && (
+              <button
+                className={styles.menuButton}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Apne meny"
+              >
+                <Menu size={22} />
+              </button>
+            )}
+            <div className={styles.searchWrap}>
+              <input className={styles.search} placeholder="Søk i Collectium / bruker..." aria-label="Søk" />
+            </div>
           </div>
           <div className={styles.topActions}>
             <label className={styles.skinLabel}>
@@ -155,3 +205,12 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </div>
   );
 }
+
+export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
+  return (
+    <CollectiumLayoutModeProvider>
+      <CollectiumAppShellInner>{children}</CollectiumAppShellInner>
+    </CollectiumLayoutModeProvider>
+  );
+}
+
