@@ -4,21 +4,21 @@
  * Overskrift:
  * Collectium UI85 Object Preview
  *
- * Definering / formal:
- * Laast UI85 objektkortstandard med flere layoutvisninger. Skin bytter kun
- * tokens/farger. Layout bytter mellom horisontal, staende, liste og museum.
+ * Definering / formål:
+ * Låst UI85 objektkortstandard med flere layoutvisninger. Skin bytter kun
+ * tokens/farger. Layout bytter mellom horisontal, stående, liste og museum.
  *
- * Bruksomrade:
+ * Bruksområde:
  * - /design/ui85
  * - components/templates/ui85
  *
- * Berorte DB-brytere / feature_keys:
+ * Berørte DB-brytere / feature_keys:
  * - template.ui85.preview.view
  * - object.card.horizontal.view
  * - object.card.standing.view
  * - object.card.museum.view
  *
- * Berorte API-ruter:
+ * Berørte API-ruter:
  * - Ingen i preview. Produksjonsdata kobles senere via API/backend.
  *
  * Dataretning:
@@ -32,19 +32,20 @@
  * UI85-DESIGN-STANDARD-V21
  */
 
+import Link from "next/link";
 import { HeartIcon, PlusIcon, ShareIcon, StarIcon } from "./CollectiumUi85Icons";
 import type { CollectiumUi85Action, CollectiumUi85Layout, CollectiumUi85Skin } from "./collectium-ui85-types";
 import styles from "./CollectiumUi85ObjectPreview.module.css";
 
 const actions: CollectiumUi85Action[] = [
-  { label: "Hjerte", meta: "Onskeliste", count: "0", icon: "heart" },
+  { label: "Hjerte", meta: "Ønskeliste", count: "0", icon: "heart" },
   { label: "Stjerne", meta: "Favoritt", count: "0", icon: "star" },
   { label: "Auksjon", meta: "Aktive treff", count: "3", icon: "share" },
   { label: "Nettbutikk", meta: "Aktive salg", count: "1", icon: "plus" },
 ];
 
 const facts = [
-  { label: "Valorutgave", value: "100 kroner" },
+  { label: "Valørutgave", value: "100 kroner" },
   { label: "Utgave", value: "1. utgave" },
   { label: "Variant", value: "Standardutgave" },
   { label: "Sjeldenhet", value: "Sjelden" },
@@ -54,7 +55,7 @@ const facts = [
 
 const history = [
   { label: "Regent / konge", value: "Oscar II" },
-  { label: "Motiv / person", value: "Riksvapen" },
+  { label: "Motiv / person", value: "Riksvåpen" },
   { label: "Periode", value: "1872-1905" },
   { label: "Historisk kontekst", value: "Unionstid, norsk seddelhistorie" },
   { label: "Signatur", value: "Winge / Getz" },
@@ -64,7 +65,7 @@ const history = [
 const layoutMeta: Record<CollectiumUi85Layout, { marker: string; label: string; hint: string }> = {
   all: { marker: "A", label: "Horisontal", hint: "grid 300-1fr-248" },
   horizontal: { marker: "A", label: "Horisontal", hint: "grid 300-1fr-248" },
-  standing: { marker: "B", label: "Staende", hint: "maks 380px - vertikal" },
+  standing: { marker: "B", label: "Stående", hint: "maks 380px - vertikal" },
   list: { marker: "C", label: "Liste", hint: "rad - kompakt" },
   museum: { marker: "D", label: "Museum", hint: "galleri - 1.05fr-1fr" },
 };
@@ -91,8 +92,8 @@ function Banknote({ museum = false }: { museum?: boolean }) {
 function PrimaryActions() {
   return (
     <div className={styles.primaryActions} aria-label="Kortkommandoer">
-      <a href="/katalog">Apne objekt</a>
-      <a href="/katalog/kontroll">Se relasjon</a>
+      <Link href="/katalog">Åpne objekt</Link>
+      <Link href="/katalog/kontroll">Se relasjon</Link>
     </div>
   );
 }
@@ -100,7 +101,7 @@ function PrimaryActions() {
 function AddActions() {
   return (
     <div className={styles.addActions} aria-label="Samling">
-      <a href="/min-side">Legg i samling</a>
+      <Link href="/min-side">Legg i samling</Link>
       <button type="button" aria-label="Flere valg">...</button>
     </div>
   );

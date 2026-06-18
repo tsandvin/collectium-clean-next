@@ -13,10 +13,10 @@ export default function WorkspacePage() {
       <section className="collectium-hero">
         <div className="collectium-section-label">03 PageHeader / HeroPanel</div>
         <h1 style={{ fontSize: "1.8rem", fontWeight: 700, marginTop: "4px" }}>
-          System- og kjerneovervÃƒÂ¥king
+          System- og kjerneovervåking
         </h1>
         <p className="collectium-soft" style={{ marginTop: "4px", fontSize: "0.95rem" }}>
-          Dataretning: DB/API Ã¢â€ â€™ Next.js Ã¢â€ â€™ React Ã¢â€ â€™ UI
+          Dataretning: DB/API → Next.js → React → UI
         </p>
       </section>
 
@@ -73,19 +73,19 @@ export default function WorkspacePage() {
         <div className="collectium-section-label">07 To felt</div>
         <div className="collectium-grid-2">
           <CollectiumCard title="07A Venstre panel">
-            <p className="collectium-soft">PrimÃƒÂ¦re dataparametere lastet direkte inn i React-skallet.</p>
+            <p className="collectium-soft">Primære dataparametere lastet direkte inn i React-skallet.</p>
           </CollectiumCard>
-          <CollectiumCard title="07B HÃƒÂ¸yre panel">
-            <p className="collectium-soft">Test UU: Klikk her for ÃƒÂ¥ validere fokusomrÃƒÂ¥det ditt.</p>
+          <CollectiumCard title="07B Høyre panel">
+            <p className="collectium-soft">Test UU: Klikk her for å validere fokusområdet ditt.</p>
           </CollectiumCard>
         </div>
       </section>
 
       <section>
-        <div className="collectium-section-label">08 Lang venstre + liten hÃƒÂ¸yre</div>
+        <div className="collectium-section-label">08 Lang venstre + liten høyre</div>
         <div className="collectium-grid-3-1 collectium-full-width">
           <CollectiumCard title="08A Hovedmatrise / rapport">
-            <p>Hovedrapportgenerering kjÃƒÂ¸rer asynkront via Next.js api-pipelines.</p>
+            <p>Hovedrapportgenerering kjører asynkront via Next.js api-pipelines.</p>
           </CollectiumCard>
           <CollectiumCard title="08B Status">
             <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--ct-accent)", textAlign: "center" }}>
@@ -96,7 +96,7 @@ export default function WorkspacePage() {
       </section>
 
       <section>
-        <div className="collectium-section-label">09 Liten venstre + lang hÃƒÂ¸yre</div>
+        <div className="collectium-section-label">09 Liten venstre + lang høyre</div>
         <div className="collectium-grid-1-3 collectium-full-width">
           <CollectiumCard title="09A Filter">
             <label style={{ display: "block", fontSize: "0.9rem" }}>

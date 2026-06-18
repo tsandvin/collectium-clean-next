@@ -4,18 +4,20 @@
  * Overskrift:
  * Collectium Sidebar UI 8.5
  *
- * Definering / formÃ¥l:
+ * Definering / formål:
  * Global sidemeny med SVG-ikoner, temaavhengig visuell stil, aktivt menypanel, statuskort og Collectium-identitet.
  *
- * BruksomrÃ¥de:
+ * Bruksområde:
  * Brukes av global app/layout eller AppShell.
  *
- * BerÃ¸rte DB-brytere / feature_keys:
+ * Berørte DB-brytere / feature_keys:
  * - Ingen. Ren global navigasjon/visning.
  *
  * Dataretning:
  * DB/API -> Next.js -> React -> UI
  */
+
+import Link from "next/link";
 
 type NavItem = {
   href: string;
@@ -102,7 +104,7 @@ export default function Sidebar() {
 
       <nav className="ct-sidebar-nav" aria-label="Hovednavigasjon">
         {navItems.map((item, index) => (
-          <a
+          <Link
             key={item.href}
             className={`ct-sidebar-link ${index === 0 ? "is-active" : ""}`}
             href={item.href}
@@ -113,7 +115,7 @@ export default function Sidebar() {
             </span>
             <span className="ct-sidebar-label">{item.label}</span>
             <span className="ct-sidebar-count">{item.count}</span>
-          </a>
+          </Link>
         ))}
       </nav>
 
@@ -133,13 +135,13 @@ export default function Sidebar() {
       </div>
 
       <div className="ct-sidebar-progress">
-        <span>Profil fullfÃ¸rt</span>
+        <span>Profil fullført</span>
         <strong>82%</strong>
         <div className="ct-sidebar-meter">
           <span style={{ width: "82%" }} />
         </div>
         <p>
-          01 Sidemeny Â· Global layout. Aktiv knapp, SVG-ikon og statusfelt fÃ¸lger valgt tema.
+          01 Sidemeny · Global layout. Aktiv knapp, SVG-ikon og statusfelt følger valgt tema.
         </p>
       </div>
     </aside>
