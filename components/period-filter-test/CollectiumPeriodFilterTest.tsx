@@ -740,11 +740,6 @@ export default function CollectiumPeriodFilterTest() {
             object_group: objectGroup,
             year_from: yearFrom || null,
             year_to: yearTo || null,
-            country_scope: countryScope,
-            source_key: sourceKey,
-            object_group: objectGroup,
-            year_from: yearFrom || null,
-            year_to: yearTo || null,
           },
         }, null, 2)}</pre>
       </section>
