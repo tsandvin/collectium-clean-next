@@ -516,11 +516,11 @@
 /* ============================================================
    CT PATCH - Periodefilter 3x3 over tidslinje
    Endring:
-   - Filterfeltet ligger over tidslinjen, ikke som smal hÃƒÆ’Ã‚Â¸yreboks.
-   - Master/Land/Objekttype pÃƒÆ’Ã‚Â¥ fÃƒÆ’Ã‚Â¸rste rekke.
-   - Rad 1/Rad 2/Rad 3 pÃƒÆ’Ã‚Â¥ andre rekke.
-   - Rad 4/Valgt pÃƒÆ’Ã‚Â¥ tredje rekke.
-   - Mobil/popup fÃƒÆ’Ã‚Â¥r mer tabellaktig tidslinjevisning.
+   - Filterfeltet ligger over tidslinjen, ikke som smal hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yreboks.
+   - Master/Land/Objekttype pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ fÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸rste rekke.
+   - Rad 1/Rad 2/Rad 3 pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ andre rekke.
+   - Rad 4/Valgt pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ tredje rekke.
+   - Mobil/popup fÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥r mer tabellaktig tidslinjevisning.
    ============================================================ */
 
 .layout {
@@ -664,7 +664,7 @@
   margin-top: 0 !important;
 }
 
-/* ÃƒÆ’Ã¢â‚¬Â¦r fra/til kan ligge kompakt oppe til hÃƒÆ’Ã‚Â¸yre i tidslinjen */
+/* ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦r fra/til kan ligge kompakt oppe til hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yre i tidslinjen */
 .yearInputs {
   display: flex !important;
   justify-content: flex-end !important;
@@ -706,7 +706,7 @@
   }
 }
 
-/* Mobil: ÃƒÆ’Ã‚Â©n kolonne, men popup/tidslinje fÃƒÆ’Ã‚Â¥r tabellaktig hÃƒÆ’Ã‚Â¸ykantvisning */
+/* Mobil: ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©n kolonne, men popup/tidslinje fÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥r tabellaktig hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸ykantvisning */
 @media (max-width: 760px) {
   .filterColumn {
     grid-template-columns: 1fr !important;
@@ -779,7 +779,7 @@
   }
 }
 
-/* Popup pÃƒÆ’Ã‚Â¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
+/* Popup pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
 @media (max-width: 760px) {
   .page[data-timeline-only="true"] .timelineShell {
     position: fixed !important;
@@ -804,7 +804,7 @@
    CT PATCH - skinfarger Rad 1-4 + lavere filter + fikset tidslinjebredde
    ============================================================ */
 
-/* Hele filterfeltet krympes i hÃƒÂ¸yden */
+/* Hele filterfeltet krympes i hÃƒÆ’Ã‚Â¸yden */
 .filterColumn {
   gap: 5px !important;
   padding: 7px 8px !important;
@@ -862,7 +862,7 @@
   text-overflow: ellipsis !important;
 }
 
-/* Skinfarger pÃƒÂ¥ Rad 1-4, basert pÃƒÂ¥ rekkefÃƒÂ¸lge i filterboksen:
+/* Skinfarger pÃƒÆ’Ã‚Â¥ Rad 1-4, basert pÃƒÆ’Ã‚Â¥ rekkefÃƒÆ’Ã‚Â¸lge i filterboksen:
    1 Masterfilter
    2 Land
    3 Objekttype
@@ -915,7 +915,7 @@
   color: #59338f !important;
 }
 
-/* Master/Land/Objekttype mer nÃƒÂ¸ytrale og lavere */
+/* Master/Land/Objekttype mer nÃƒÆ’Ã‚Â¸ytrale og lavere */
 .filterColumn > .selectBox:nth-of-type(1),
 .filterColumn > .selectBox:nth-of-type(2),
 .filterColumn > .selectBox:nth-of-type(3) {
@@ -923,7 +923,7 @@
   border-color: #d8e6f6 !important;
 }
 
-/* Valgt-boksen skal ikke bli hÃƒÂ¸y og dominerende */
+/* Valgt-boksen skal ikke bli hÃƒÆ’Ã‚Â¸y og dominerende */
 .selectedStack {
   padding: 6px !important;
   gap: 4px !important;
@@ -943,7 +943,7 @@
   line-height: 1.1 !important;
 }
 
-/* Tidslinje: fjern rar hÃƒÂ¸yremarg / fyll til hÃƒÂ¸yre */
+/* Tidslinje: fjern rar hÃƒÆ’Ã‚Â¸yremarg / fyll til hÃƒÆ’Ã‚Â¸yre */
 .timelineShell {
   padding: 10px !important;
 }
@@ -960,7 +960,7 @@
   padding-right: 16px !important;
 }
 
-/* Viktig: grid og akse skal bruke samme hÃƒÂ¸yre/venstre */
+/* Viktig: grid og akse skal bruke samme hÃƒÆ’Ã‚Â¸yre/venstre */
 .decadeBand {
   left: 140px !important;
   right: 16px !important;
@@ -971,7 +971,7 @@
   right: 16px !important;
 }
 
-/* Lane-label litt smalere sÃƒÂ¥ tidslinjen fÃƒÂ¥r mer plass */
+/* Lane-label litt smalere sÃƒÆ’Ã‚Â¥ tidslinjen fÃƒÆ’Ã‚Â¥r mer plass */
 .timelineLane {
   grid-template-columns: 120px minmax(0, 1fr) !important;
 }
@@ -995,7 +995,7 @@
   font-size: 9px !important;
 }
 
-/* VerktÃƒÂ¸y og ÃƒÂ¥rfelter lavere */
+/* VerktÃƒÆ’Ã‚Â¸y og ÃƒÆ’Ã‚Â¥rfelter lavere */
 .timelineHeader {
   margin-bottom: 6px !important;
 }
@@ -1019,7 +1019,7 @@
   line-height: 1 !important;
 }
 
-/* StÃƒÂ¸rre skjermer: tving 3 per rad og behold kompakt hÃƒÂ¸yde */
+/* StÃƒÆ’Ã‚Â¸rre skjermer: tving 3 per rad og behold kompakt hÃƒÆ’Ã‚Â¸yde */
 @media (min-width: 1201px) {
   .filterColumn {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -1065,7 +1065,7 @@
 
 
 /* ============================================================
-   CT PATCH - Fjern "Master + Rad 1-4", flytt Ã¥r-label inn i bokser,
+   CT PATCH - Fjern "Master + Rad 1-4", flytt ÃƒÂ¥r-label inn i bokser,
    og fjern tomt venstrefelt i tidslinjen
    ============================================================ */
 
@@ -1088,7 +1088,7 @@
 }
 
 /* ------------------------------------------------------------
-   2) Ã…r fra / Ã…r til inn i selve Ã¥rboksene
+   2) Ãƒâ€¦r fra / Ãƒâ€¦r til inn i selve ÃƒÂ¥rboksene
    ------------------------------------------------------------ */
 .yearInputs {
   display: flex !important;
@@ -1178,7 +1178,7 @@
   grid-template-columns: 118px minmax(0, 1fr) !important;
 }
 
-/* Label-feltet skal stÃ¥ helt til venstre */
+/* Label-feltet skal stÃƒÂ¥ helt til venstre */
 .laneLabel {
   margin-left: 0 !important;
   padding: 8px 8px !important;
@@ -1186,7 +1186,7 @@
   align-self: center !important;
 }
 
-/* Tidsakse og 10-Ã¥rsfelter skal starte rett etter labelkolonnen */
+/* Tidsakse og 10-ÃƒÂ¥rsfelter skal starte rett etter labelkolonnen */
 .decadeBand {
   left: 118px !important;
   right: 12px !important;
@@ -1224,7 +1224,7 @@
 }
 
 /* ------------------------------------------------------------
-   4) Litt mer kompakt filterhÃ¸yde generelt
+   4) Litt mer kompakt filterhÃƒÂ¸yde generelt
    ------------------------------------------------------------ */
 .filterColumn {
   gap: 5px !important;
@@ -1341,12 +1341,12 @@
   border-color: #c4a3e9 !important;
 }
 
-/* Tidslinjeradene får samme fargefamilier som filter-radene.
-   1 Konge/regent = Rad 1 blå
+/* Tidslinjeradene fÃ¥r samme fargefamilier som filter-radene.
+   1 Konge/regent = Rad 1 blÃ¥
    2 Nasjonal periode = Rad 2 gull
-   3 Krig/konflikt = Rad 3 grønn
-   4 Finans/økonomi = Rad 4 lilla
-   resterende beholdes nøytralt/relasjon.
+   3 Krig/konflikt = Rad 3 grÃ¸nn
+   4 Finans/Ã¸konomi = Rad 4 lilla
+   resterende beholdes nÃ¸ytralt/relasjon.
 */
 
 .timelineLane:nth-of-type(1) .laneLabel {
@@ -1385,7 +1385,7 @@
   border: 1px solid #d8e6f6 !important;
 }
 
-/* Radspor får svak bakgrunnsfarge som matcher label */
+/* Radspor fÃ¥r svak bakgrunnsfarge som matcher label */
 .timelineLane:nth-of-type(1) .laneTrack {
   background: linear-gradient(90deg, rgba(159,197,236,.14), transparent) !important;
 }
@@ -1403,7 +1403,7 @@
 }
 
 /* Mobil popup tilbake til standard horisontal tidslinje.
-   Fjerner tidligere vertikal/høykant label-oppsett.
+   Fjerner tidligere vertikal/hÃ¸ykant label-oppsett.
 */
 @media (max-width: 760px) {
   .page[data-timeline-only="true"] .timelineShell {
@@ -1452,5 +1452,141 @@
   .axisLine {
     left: 108px !important;
     right: 12px !important;
+  }
+}
+
+
+/* ============================================================
+   CT PATCH - selvstendige dynamiske felt + svak kildefarge fra tidslinje
+   ============================================================ */
+
+/* Fjern felles tung bakgrunn rundt dynamisk område */
+.dynamicArea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: 10px !important;
+}
+
+/* Segmentknappene kan ligge rent over kortene */
+.segmentTabs {
+  margin-bottom: 8px !important;
+}
+
+/* De to dynamiske feltene skal stå selvstendig */
+.infoPanel {
+  background: rgba(255,255,255,.98) !important;
+  border: 1px solid rgba(213,229,247,.95) !important;
+  border-radius: 16px !important;
+  padding: 12px !important;
+  box-shadow: 0 14px 28px rgba(7, 53, 110, .12) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Fjern inntrykk av farget panelbakgrunn */
+.infoPanel::before {
+  content: none !important;
+}
+
+/* Bio-boksen får svak kildefarge, men bare i selve tekstfeltet */
+.bioText {
+  border-radius: 13px !important;
+  border: 1px solid rgba(213,229,247,.9) !important;
+  padding: 10px 12px !important;
+  margin: 6px 0 10px !important;
+  color: #244f7f !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  font-weight: 650 !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.6) !important;
+}
+
+/* Standard svak tidslinjefarge */
+.infoPanel .bioText {
+  background: linear-gradient(180deg, rgba(234,244,255,.85), rgba(255,255,255,.92)) !important;
+}
+
+/* Faktaradene skal være hvite og selvstendige, ikke på farget bakgrunn */
+.fact {
+  background: #fff !important;
+  border: 1px solid #edf3fa !important;
+  border-radius: 11px !important;
+  padding: 8px 10px !important;
+  margin-top: 6px !important;
+  box-shadow: 0 4px 10px rgba(7, 53, 110, .045) !important;
+}
+
+.fact:first-of-type {
+  margin-top: 0 !important;
+}
+
+.fact span {
+  color: #627d9c !important;
+}
+
+.fact strong {
+  color: #07356e !important;
+}
+
+/* Svak kildefarge per valgt tidslinje-type.
+   Dette baserer seg på tekst/kategori i infofeltet via eksisterende timeline lane-farger visuelt:
+   blå = konge/regent
+   gull = nasjonal periode
+   grønn = krig/konflikt
+   lilla = finans/økonomi
+   nøytral = person/objekt
+*/
+
+/* Når kortet ligger som andre dynamiske panel, gi det en diskret venstremarkør */
+.dynamicGrid .infoPanel:nth-child(2) {
+  border-left-width: 4px !important;
+  border-left-color: #9fc5ec !important;
+}
+
+/* Fargetone for nøkkelinfofeltet inne i Periode dynamiske felt */
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(1) {
+  background: linear-gradient(90deg, rgba(234,244,255,.9), #fff) !important;
+}
+
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(2) {
+  background: linear-gradient(90deg, rgba(255,247,228,.82), #fff) !important;
+}
+
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(3) {
+  background: linear-gradient(90deg, rgba(235,251,243,.86), #fff) !important;
+}
+
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(4) {
+  background: linear-gradient(90deg, rgba(246,239,255,.9), #fff) !important;
+}
+
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(5),
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(6),
+.dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(7) {
+  background: linear-gradient(90deg, rgba(243,247,251,.9), #fff) !important;
+}
+
+/* Fjern dobbel skygge/ramme hvis gamle regler finnes */
+.dynamicGrid {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Litt mer luft mellom de to selvstendige kortene */
+.dynamicGrid {
+  gap: 12px !important;
+}
+
+/* Mobil: kortene skal fortsatt være egne kort */
+@media (max-width: 900px) {
+  .dynamicGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .infoPanel {
+    box-shadow: 0 12px 22px rgba(7, 53, 110, .11) !important;
   }
 }
