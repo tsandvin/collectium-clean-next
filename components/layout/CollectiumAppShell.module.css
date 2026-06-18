@@ -854,7 +854,7 @@
 }
 
 /* ============================================================
-   Collectium UI 8.6 Ã¢â‚¬â€ Breakpoint and Layout Rules
+   Collectium UI 8.6 â€” Breakpoint and Layout Rules
    ============================================================ */
 
 /* --- 1. Desktop Mode (1101px - 1899px) --- */
@@ -1097,48 +1097,5 @@
 @media (max-width: 1100px) {
   .designSliderGroup {
     grid-template-columns: 1fr;
-  }
-}
-/* --- Collectium UI 8.6 Typography Weight Step Control --- */
-.designWeightControl {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.designWeightSteps {
-  display: grid;
-  grid-template-columns: repeat(13, minmax(22px, 1fr));
-  gap: 3px;
-}
-
-.designWeightStep {
-  min-width: 0;
-  min-height: 26px;
-  padding: 3px 2px;
-  border: 1px solid var(--ct-border);
-  border-radius: 7px;
-  background: var(--ct-input-bg);
-  color: var(--ct-muted);
-  font-size: 10px;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.designWeightStep:hover {
-  border-color: var(--ct-border-strong);
-  background: var(--ct-hover);
-  color: var(--ct-text);
-}
-
-.designWeightStepActive {
-  border-color: var(--ct-accent);
-  background: var(--ct-accent);
-  color: var(--ct-on-accent, #ffffff);
-}
-
-@media (max-width: 719px) {
-  .designWeightSteps {
-    grid-template-columns: repeat(7, minmax(26px, 1fr));
   }
 }
