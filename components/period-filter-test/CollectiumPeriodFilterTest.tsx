@@ -1,638 +1,400 @@
-﻿"use client";
+"use client";
 
 /**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * CollectiumPeriodFilterTest
+ * CollectiumPeriodFilterTest UI/UX 8.6
  *
- * Formål:
- * Lesbar periodefilter-test med riktig skall, Rad 1/Rad 2/Rad 3,
- * år fra/til og én enkel klikkbar tidslinje.
+ * Definering / formål:
+ * React-komponent for periodefilter-test. Bruker API-data og viser tre radnivåer samt Bio og Samler/Historie/Finans.
  *
- * Route:
+ * Bruksområde:
+ * Brukes av /test/periodefilter.
+ *
+ * Berørte sider / routes:
  * - /test/periodefilter
  *
- * API:
- * - /api/filter/period/options
- * - /api/test/period-catalog
+ * Berørte DB-brytere / feature_keys:
+ * - filter.period.simple.view
+ * - filter.period.advanced.view
+ * - filter.master.resolve
+ *
+ * Berørte API-ruter:
+ * - GET /api/filter/period/options
+ *
+ * Berørte tabeller / views:
+ * - ct_v_period_filter_options
+ * - ct_v_object_relations_resolved
+ *
+ * Dataretning:
+ * Neon → API/backend → Next.js → React → UI
+ *
+ * Logging:
+ * log_category: filter
+ * log_action: period_test_component_view
+ *
+ * Versjon:
+ * CT-FILE-PERIOD-UI86-0003 / CHANGE-2026-06-18-0001
  */
 
 import { useEffect, useMemo, useState } from "react";
+import styles from "./CollectiumPeriodFilterTest.module.css";
 
-type Segment = "samler" | "historie" | "finans";
-type ViewMode = "liste" | "horisontal" | "museum";
-type ObjectType = "banknote" | "coin" | "security" | "document" | "find";
-
-type ApiState = {
-  ok: boolean;
-  status: "idle" | "loading" | "ok" | "error";
-  url: string;
-  data: any | null;
-  error: string | null;
-};
+type SegmentKey = "samler" | "historie" | "finans";
 
 type PeriodOption = {
-  period_slug?: string;
-  option_key?: string;
-  display_name_no?: string;
-  option_label_no?: string;
-  start_year?: number | string | null;
-  end_year?: number | string | null;
-  start_year_label?: string | null;
-  end_year_label?: string | null;
-  timeline_start_year?: number | string | null;
-  timeline_end_year?: number | string | null;
-  timeline_sort_year?: number | string | null;
-  relation_href?: string | null;
-  summary_short_no?: string | null;
-  collectium_relevance_no?: string | null;
+  period_slug: string;
+  display_name_no: string | null;
+  period_type_key: string | null;
+  period_type_label_no: string | null;
+  period_level: number | null;
+  parent_period_slug: string | null;
+  start_year: number | null;
+  end_year: number | null;
+  summary_short_no: string | null;
+  collectium_relevance_no: string | null;
+  relation_href: string | null;
 };
 
-type PreviewObject = {
-  object_id: string;
-  source_key: string;
-  object_group: string;
-  title: string;
-  subtitle: string;
-  object_type_label: string;
-  year: string;
-  period: string;
-  variant: string;
+type RelationSummary = {
+  relation_type: string;
+  relation_count: number;
 };
 
-const SEGMENTS: Segment[] = ["samler", "historie", "finans"];
-const VIEW_MODES: ViewMode[] = ["liste", "horisontal", "museum"];
+type PeriodApiResponse = {
+  ok: boolean;
+  message?: string;
+  rows: PeriodOption[];
+  relationSummary?: RelationSummary[];
+  updatedAt?: string;
+};
 
-const COUNTRY_OPTIONS = [
-  { value: "NO", label: "Norge" },
-  { value: "SN", label: "Skandinavia" },
-  { value: "SV", label: "Sverige" },
-  { value: "DM", label: "Danmark" },
-  { value: "EU", label: "Europa" },
-  { value: "GL", label: "Global" },
-];
-
-const OBJECT_TYPE_OPTIONS: Array<{ value: ObjectType; label: string; sourceKey: string }> = [
-  { value: "banknote", label: "Sedler", sourceKey: "norske_sedler" },
-  { value: "coin", label: "Mynter", sourceKey: "norske_mynter" },
-  { value: "security", label: "Verdibrev", sourceKey: "verdibrev" },
-  { value: "document", label: "Dokumenter", sourceKey: "dokument" },
-  { value: "find", label: "Funn", sourceKey: "norark" },
-];
-
-const LINK_TYPES = [
-  { value: "ruler", label: "Konge / regent" },
-  { value: "signature_person", label: "Signatur / person" },
-  { value: "motif_symbol", label: "Motiv / symbol" },
-  { value: "issue_period", label: "Utgave / serie" },
-  { value: "variant", label: "Variant / type" },
-  { value: "denomination", label: "Valør" },
-  { value: "producer", label: "Produsent / utsteder" },
-  { value: "find_provenance", label: "Funn / proveniens" },
-  { value: "market_index", label: "Marked / index" },
-];
-
-function makeState(url: string): ApiState {
-  return {
-    ok: false,
-    status: "idle",
-    url,
-    data: null,
-    error: null,
-  };
+function label(row: PeriodOption | null | undefined): string {
+  if (!row) return "Ikke valgt";
+  return row.display_name_no || row.period_slug;
 }
 
-async function fetchJson(url: string): Promise<ApiState> {
-  try {
-    const response = await fetch(url, { cache: "no-store" });
-    const text = await response.text();
-
-    let data: any = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = { raw: text };
-    }
-
-    if (!response.ok) {
-      return {
-        ok: false,
-        status: "error",
-        url,
-        data,
-        error: `HTTP ${response.status}`,
-      };
-    }
-
-    return {
-      ok: data?.ok !== false,
-      status: data?.ok === false ? "error" : "ok",
-      url,
-      data,
-      error: data?.ok === false ? data?.error || data?.message || "API returnerte ok:false" : null,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      status: "error",
-      url,
-      data: null,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
+function yearRange(row: PeriodOption | null | undefined): string {
+  if (!row) return "";
+  if (row.start_year === null && row.end_year === null) return "Tidsrom mangler";
+  if (row.start_year !== null && row.end_year !== null) return `${row.start_year}–${row.end_year}`;
+  if (row.start_year !== null) return `${row.start_year} →`;
+  return `→ ${row.end_year}`;
 }
 
-function arrayFrom(value: unknown): any[] {
-  return Array.isArray(value) ? value : [];
+function overlaps(parent: PeriodOption | null, child: PeriodOption): boolean {
+  if (!parent) return true;
+  if (child.parent_period_slug === parent.period_slug) return true;
+  if (parent.start_year === null || child.start_year === null) return false;
+
+  const parentEnd = parent.end_year ?? 999999;
+  const childEnd = child.end_year ?? 999999;
+  return child.start_year <= parentEnd && childEnd >= parent.start_year;
 }
 
-function periodOptionsFrom(data: any): PeriodOption[] {
-  const options = arrayFrom(data?.options);
-  if (options.length) return options as PeriodOption[];
-
-  const rows = arrayFrom(data?.rows);
-  return rows as PeriodOption[];
-}
-
-function optionKey(option: PeriodOption, index: number): string {
-  return String(option.option_key || option.period_slug || option.display_name_no || index);
-}
-
-function optionLabel(option: PeriodOption): string {
-  return String(option.option_label_no || option.display_name_no || option.period_slug || "Uten periode");
-}
-
-function optionStart(option: PeriodOption): number | null {
-  const raw = option.timeline_start_year ?? option.start_year ?? option.start_year_label;
-  const match = String(raw ?? "").match(/-?\d+/);
-  return match ? Number(match[0]) : null;
-}
-
-function optionEnd(option: PeriodOption): number | null {
-  const raw = option.timeline_end_year ?? option.end_year ?? option.end_year_label ?? option.timeline_start_year ?? option.start_year;
-  const match = String(raw ?? "").match(/-?\d+/);
-  return match ? Number(match[0]) : optionStart(option);
-}
-
-function inYearRange(option: PeriodOption, yearFrom: string, yearTo: string): boolean {
-  const start = optionStart(option);
-  const end = optionEnd(option);
-  const from = Number(yearFrom || "-99999");
-  const to = Number(yearTo || "99999");
-
-  if (start === null && end === null) return true;
-  return (end ?? start ?? to) >= from && (start ?? end ?? from) <= to;
-}
-
-function periodYearText(option: PeriodOption): string {
-  const start = option.start_year_label ?? option.timeline_start_year ?? "?";
-  const end = option.end_year_label ?? option.timeline_end_year ?? "nå";
-  return `${start}–${end}`;
-}
-
-function periodSummary(option: PeriodOption | null): string {
-  if (!option) return "Velg en periode i tidslinjen.";
-  return String(option.summary_short_no || option.collectium_relevance_no || "Periode fra Collectium perioderegister.");
-}
-
-function sourceForObjectType(value: ObjectType): string {
-  return OBJECT_TYPE_OPTIONS.find((option) => option.value === value)?.sourceKey ?? "norske_sedler";
-}
-
-function labelForObjectType(value: ObjectType): string {
-  return OBJECT_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? value;
-}
-
-function linkTypeLabel(value: string): string {
-  return LINK_TYPES.find((item) => item.value === value)?.label ?? value;
-}
-
-function fallbackObjects(objectType: ObjectType, objectTypeLabel: string, yearFrom: string, yearTo: string): PreviewObject[] {
-  const from = Number(yearFrom || "0");
-  const to = Number(yearTo || "9999");
-
-  const all: PreviewObject[] =
-    objectType === "coin"
-      ? [
-          {
-            object_id: "coin-preview-1875",
-            source_key: "norske_mynter",
-            object_group: "coin",
-            title: "MYNT · Oscar II · 1875",
-            subtitle: "Krone- og øreperioden · 1875",
-            object_type_label: objectTypeLabel,
-            year: "1875",
-            period: "Oscar II",
-            variant: "Krone",
-          },
-          {
-            object_id: "coin-preview-1905",
-            source_key: "norske_mynter",
-            object_group: "coin",
-            title: "MYNT · Haakon VII · 1905",
-            subtitle: "Selvstendig Norge · 1905",
-            object_type_label: objectTypeLabel,
-            year: "1905",
-            period: "Haakon VII",
-            variant: "Krone",
-          },
-        ]
-      : objectType === "security"
-        ? [
-            {
-              object_id: "security-preview-1898",
-              source_key: "verdibrev",
-              object_group: "security",
-              title: "VERDIBREV · Oscar II · 1898",
-              subtitle: "Aksjebrev · industri · 1898",
-              object_type_label: objectTypeLabel,
-              year: "1898",
-              period: "Oscar II",
-              variant: "Papir",
-            },
-            {
-              object_id: "security-preview-1942",
-              source_key: "verdibrev",
-              object_group: "security",
-              title: "VERDIBREV · Andre verdenskrig · 1942",
-              subtitle: "Krigsobligasjon · 1942",
-              object_type_label: objectTypeLabel,
-              year: "1942",
-              period: "Andre verdenskrig",
-              variant: "Obligasjon",
-            },
-          ]
-        : [
-            {
-              object_id: "banknote-preview-1898",
-              source_key: "norske_sedler",
-              object_group: "banknote",
-              title: "SEDDEL · Oscar II · 1898",
-              subtitle: "Norges Bank · utgave I · 1898",
-              object_type_label: objectTypeLabel,
-              year: "1898",
-              period: "Oscar II",
-              variant: "Utgave I",
-            },
-            {
-              object_id: "banknote-preview-1942",
-              source_key: "norske_sedler",
-              object_group: "banknote",
-              title: "SEDDEL · Andre verdenskrig · 1942",
-              subtitle: "Krigsøkonomi · okkupasjonstid",
-              object_type_label: objectTypeLabel,
-              year: "1942",
-              period: "Andre verdenskrig",
-              variant: "Krigsperiode",
-            },
-          ];
-
-  return all.filter((item) => {
-    const year = Number(item.year);
-    return year >= from && year <= to;
+function uniqueBySlug(rows: PeriodOption[]): PeriodOption[] {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    if (seen.has(row.period_slug)) return false;
+    seen.add(row.period_slug);
+    return true;
   });
 }
 
-function SmallValue({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="ct-v7-small-value">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
+function hasMeaningfulText(value: string | null | undefined): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function segmentRows(segment: SegmentKey, selected: PeriodOption | null, relationSummary: RelationSummary[]) {
+  const baseName = label(selected);
+  if (segment === "samler") {
+    return [
+      ["Objektantall", relationSummary.length ? `${relationSummary.reduce((sum, row) => sum + row.relation_count, 0).toLocaleString("nb-NO")} relasjonskoblinger kontrollert` : "Hentes fra katalog/resultat-API"],
+      ["Valør / utgave / variant", "Skal komme fra objekt- og relasjonsdata, ikke som egen hovedperiode"],
+      ["Signatur / person", "Vises som relasjon når valgt node eller objekt har personkobling"],
+      ["Kvalitet / sjeldenhet", "Vises når kilde- eller objektpresentasjonsview har verdier"],
+      ["Samlingsrelevans", selected?.collectium_relevance_no || `Vurderes ut fra ${baseName}`],
+      ["Relaterte objekter", selected?.relation_href ? `Kan åpne ${selected.relation_href}` : "Venter på relation_href eller objektliste"],
+    ];
+  }
+
+  if (segment === "historie") {
+    return [
+      ["Periode", yearRange(selected) || "Tidsrom ikke valgt"],
+      ["Regent / personer", "Skal vises som relasjonschips fra relasjons-API"],
+      ["Historiske hendelser", "Hentes fra periode-/historie-views når koblet"],
+      ["Kriger / sykdommer", "Overlappende relasjonsperioder, ikke egne Rad 1-hovedperioder"],
+      ["Funn / proveniens", "Skal kunne være Rad 3-undernode eller relasjon"],
+      ["Relasjonskart", selected?.relation_href || "Relasjonsside mangler/ikke koblet"],
+    ];
+  }
+
+  return [
+    ["Markedsverdi", "Vises bare når API har reell verdi. 0 kr skal ikke tolkes som verdi."],
+    ["Prisobservasjoner", "Hentes fra markeds-/auksjons-/nettbutikkdata når tilgjengelig"],
+    ["Trend", "Krever valgt trendperiode og prisgrunnlag"],
+    ["Likviditet", "Beregnes fra observasjoner/transaksjoner når datagrunnlag finnes"],
+    ["Valutakontekst / inflasjon", "Kobles mot index/finanshistorisk datagrunnlag"],
+    ["Finanshistorisk kontekst", selected?.collectium_relevance_no || `Ikke beregnet for ${baseName}`],
+  ];
 }
 
 export default function CollectiumPeriodFilterTest() {
-  const [country, setCountry] = useState("NO");
-  const [objectType, setObjectType] = useState<ObjectType>("banknote");
-  const [yearFrom, setYearFrom] = useState("1814");
-  const [yearTo, setYearTo] = useState("2024");
-  const [segment, setSegment] = useState<Segment>("historie");
-  const [view, setView] = useState<ViewMode>("horisontal");
-
-  const [linkType, setLinkType] = useState("ruler");
-  const [mainPeriodKey, setMainPeriodKey] = useState("");
-  const [subPeriodKey, setSubPeriodKey] = useState("");
-
-  const [periodOptionsState, setPeriodOptionsState] = useState<ApiState>(makeState("/api/filter/period/options"));
-  const [catalogState, setCatalogState] = useState<ApiState>(makeState("/api/test/period-catalog"));
-
-  const sourceKey = sourceForObjectType(objectType);
-  const objectTypeLabel = labelForObjectType(objectType);
+  const [data, setData] = useState<PeriodApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedRow1Slug, setSelectedRow1Slug] = useState<string | null>(null);
+  const [selectedRow2Slug, setSelectedRow2Slug] = useState<string | null>(null);
+  const [selectedRow3Slug, setSelectedRow3Slug] = useState<string | null>(null);
+  const [segment, setSegment] = useState<SegmentKey>("samler");
 
   useEffect(() => {
-    async function loadPeriods() {
-      setPeriodOptionsState({ ...makeState("/api/filter/period/options"), status: "loading" });
-      const result = await fetchJson("/api/filter/period/options");
-      setPeriodOptionsState(result);
+    let mounted = true;
+
+    async function load() {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/filter/period/options", { cache: "no-store" });
+        const json = (await response.json()) as PeriodApiResponse;
+        if (!mounted) return;
+        if (!response.ok || !json.ok) {
+          setError(json.message || "Periodefilter-API svarte med feil.");
+          setData(json);
+          return;
+        }
+        setData(json);
+        setError(null);
+      } catch (err) {
+        if (!mounted) return;
+        setError(err instanceof Error ? err.message : "Ukjent feil ved lasting av periodefilter.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
 
-    loadPeriods();
+    load();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const allPeriods = useMemo(() => periodOptionsFrom(periodOptionsState.data), [periodOptionsState.data]);
+  const rows = data?.rows || [];
+  const relationSummary = data?.relationSummary || [];
 
-  const visiblePeriods = useMemo(() => {
-    return allPeriods
-      .filter((option) => inYearRange(option, yearFrom, yearTo))
-      .sort((a, b) => {
-        const aSort = Number(a.timeline_sort_year ?? optionStart(a) ?? 0);
-        const bSort = Number(b.timeline_sort_year ?? optionStart(b) ?? 0);
-        return aSort - bSort || optionLabel(a).localeCompare(optionLabel(b), "nb");
-      });
-  }, [allPeriods, yearFrom, yearTo]);
+  const row1Options = useMemo(() => uniqueBySlug(rows.filter((row) => row.period_level === 1)), [rows]);
+  const selectedRow1 = row1Options.find((row) => row.period_slug === selectedRow1Slug) || null;
 
-  useEffect(() => {
-    if (!visiblePeriods.length) {
-      setMainPeriodKey("");
-      setSubPeriodKey("");
-      return;
-    }
+  const row2Options = useMemo(() => {
+    return uniqueBySlug(
+      rows
+        .filter((row) => row.period_level === 2)
+        .filter((row) => row.period_slug !== selectedRow1Slug)
+        .filter((row) => overlaps(selectedRow1, row)),
+    );
+  }, [rows, selectedRow1, selectedRow1Slug]);
 
-    const visibleKeys = new Set(visiblePeriods.map((option, index) => optionKey(option, index)));
+  const selectedRow2 = row2Options.find((row) => row.period_slug === selectedRow2Slug) || null;
 
-    if (!mainPeriodKey || !visibleKeys.has(mainPeriodKey)) {
-      setMainPeriodKey(optionKey(visiblePeriods[0], 0));
-    }
+  const row3Options = useMemo(() => {
+    const parent = selectedRow2 || selectedRow1;
+    return uniqueBySlug(
+      rows
+        .filter((row) => row.period_level === 3)
+        .filter((row) => row.period_slug !== selectedRow1Slug)
+        .filter((row) => row.period_slug !== selectedRow2Slug)
+        .filter((row) => overlaps(parent, row)),
+    );
+  }, [rows, selectedRow1, selectedRow2, selectedRow1Slug, selectedRow2Slug]);
 
-    if (!subPeriodKey || !visibleKeys.has(subPeriodKey)) {
-      const secondIndex = Math.min(1, visiblePeriods.length - 1);
-      setSubPeriodKey(optionKey(visiblePeriods[secondIndex], secondIndex));
-    }
-  }, [visiblePeriods, mainPeriodKey, subPeriodKey]);
+  const selectedRow3 = row3Options.find((row) => row.period_slug === selectedRow3Slug) || null;
+  const selectedNode = selectedRow3 || selectedRow2 || selectedRow1;
+  const bioNode = selectedNode || null;
+  const dynamicRows = segmentRows(segment, bioNode, relationSummary);
 
-  const selectedMainPeriod = visiblePeriods.find((option, index) => optionKey(option, index) === mainPeriodKey) ?? null;
-  const selectedSubPeriod = visiblePeriods.find((option, index) => optionKey(option, index) === subPeriodKey) ?? null;
+  function chooseRow1(slug: string) {
+    setSelectedRow1Slug(slug);
+    setSelectedRow2Slug(null);
+    setSelectedRow3Slug(null);
+  }
 
-  useEffect(() => {
-    async function loadCatalog() {
-      const params = new URLSearchParams({
-        source_key: sourceKey,
-        object_group: objectType,
-        segment,
-        view,
-        limit: "25",
-        country_scope: country,
-        year_from: yearFrom,
-        year_to: yearTo,
-        row1_link_type: linkType,
-        row2_main_period_key: mainPeriodKey,
-        row3_sub_period_key: subPeriodKey,
-      });
+  function chooseRow2(slug: string) {
+    setSelectedRow2Slug(slug);
+    setSelectedRow3Slug(null);
+  }
 
-      const url = `/api/test/period-catalog?${params.toString()}`;
-      setCatalogState({ ...makeState(url), status: "loading" });
-
-      const result = await fetchJson(url);
-      setCatalogState(result);
-    }
-
-    loadCatalog();
-  }, [country, objectType, sourceKey, segment, view, yearFrom, yearTo, linkType, mainPeriodKey, subPeriodKey]);
-
-  const apiObjects = useMemo(() => {
-    const rows = arrayFrom(catalogState.data?.rows);
-    const objects = arrayFrom(catalogState.data?.objects);
-    return rows.length ? rows : objects;
-  }, [catalogState.data]);
-
-  const cards = apiObjects.length ? apiObjects : fallbackObjects(objectType, objectTypeLabel, yearFrom, yearTo);
+  function chooseRow3(slug: string) {
+    setSelectedRow3Slug(slug);
+  }
 
   return (
-    <main className="ct-v7-shell">
-      <section className="ct-v7-hero">
-        <p>Periodefilter · DB-test</p>
-        <h1>Periodefilter</h1>
-        <span>Masterfilter → Rad 1 → Rad 2 → Rad 3 → tidslinje → resultat</span>
+    <main className={styles.page}>
+      <section className={styles.hero}>
+        <div>
+          <p className={styles.eyebrow}>Periodefilter · DB-test · UI/UX 8.6</p>
+          <h1>Periodefilter</h1>
+          <p>
+            Testen bruker tre radnivåer: <strong>Nasjonal hovedperiode</strong>, <strong>Hovedperiode</strong> og <strong>Underperiode / relasjon</strong>. Valgt verdi fjernes fra lavere rader slik at samme node ikke kan velges flere ganger.
+          </p>
+        </div>
+        <aside className={styles.statusBox}>
+          <span className={loading ? styles.statusWarn : error ? styles.statusError : styles.statusOk}>
+            {loading ? "Henter" : error ? "Feil" : "OK"}
+          </span>
+          <small>{data?.updatedAt ? `Oppdatert ${new Date(data.updatedAt).toLocaleString("nb-NO")}` : "Ingen tidsstempel"}</small>
+        </aside>
       </section>
 
-      <section className="ct-v7-status">
-        <SmallValue label="Periodevalg" value={periodOptionsState.status === "ok" ? "OK" : periodOptionsState.status === "error" ? "Feil" : "Laster"} />
-        <SmallValue label="Katalog" value={catalogState.status === "ok" ? "OK" : catalogState.status === "error" ? "Feil" : "Laster"} />
-        <SmallValue label="Modell" value={`${country} · ${objectTypeLabel} · ${yearFrom}–${yearTo}`} />
+      {error ? <div className={styles.errorBox}>{error}</div> : null}
+
+      <section className={styles.grid}>
+        <FilterRow
+          title="Rad 1"
+          subtitle="Nasjonal / overordnet hovedperiode"
+          rows={row1Options}
+          selectedSlug={selectedRow1Slug}
+          onSelect={chooseRow1}
+        />
+        <FilterRow
+          title="Rad 2"
+          subtitle="Hovedperiode innenfor valgt Rad 1"
+          rows={row2Options}
+          selectedSlug={selectedRow2Slug}
+          onSelect={chooseRow2}
+          disabled={!selectedRow1}
+          disabledText="Velg Rad 1 først"
+        />
+        <FilterRow
+          title="Rad 3"
+          subtitle="Underperiode / relasjon / objektperiode"
+          rows={row3Options}
+          selectedSlug={selectedRow3Slug}
+          onSelect={chooseRow3}
+          disabled={!selectedRow1 && !selectedRow2}
+          disabledText="Velg Rad 1 eller Rad 2 først"
+        />
       </section>
 
-      <section className="ct-v7-panel">
-        <div className="ct-v7-head">
-          <div>
-            <span>Masterfilter</span>
-            <h2>Grunnvalg</h2>
+      <section className={styles.selectionPanel}>
+        <div className={styles.pathBox}>
+          <span>{label(selectedRow1)}</span>
+          <span>→</span>
+          <span>{label(selectedRow2)}</span>
+          <span>→</span>
+          <span>{label(selectedRow3)}</span>
+        </div>
+      </section>
+
+      <section className={styles.dynamicGrid}>
+        <article className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <p className={styles.eyebrow}>Dynamisk område 1</p>
+            <h2>Bio / definisjon</h2>
           </div>
-          <p>År fra og år til styrer hvilke perioder som kan velges i Rad 2, Rad 3 og tidslinjen.</p>
-        </div>
 
-        <div className="ct-v7-master-grid">
-          <label>
-            <span>Land</span>
-            <select value={country} onChange={(event) => setCountry(event.target.value)}>
-              {COUNTRY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Type objekt</span>
-            <select value={objectType} onChange={(event) => setObjectType(event.target.value as ObjectType)}>
-              {OBJECT_TYPE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>År fra</span>
-            <input value={yearFrom} onChange={(event) => setYearFrom(event.target.value)} inputMode="numeric" />
-          </label>
-
-          <label>
-            <span>År til</span>
-            <input value={yearTo} onChange={(event) => setYearTo(event.target.value)} inputMode="numeric" />
-          </label>
-        </div>
-      </section>
-
-      <section className="ct-v7-rad-grid">
-        <article className="ct-v7-panel ct-v7-rad">
-          <span>Rad 1 · Nasjonal kobling</span>
-          <h2>Kobles mot</h2>
-          <select value={linkType} onChange={(event) => setLinkType(event.target.value)}>
-            {LINK_TYPES.map((item) => (
-              <option key={item.value} value={item.value}>{item.label}</option>
-            ))}
-          </select>
-          <p>Velger hvilken type relasjon perioden skal kobles mot.</p>
-        </article>
-
-        <article className="ct-v7-panel ct-v7-rad">
-          <span>Rad 2 · Hovedperiode</span>
-          <h2>Hovedperiode</h2>
-          <select value={mainPeriodKey} onChange={(event) => setMainPeriodKey(event.target.value)}>
-            {visiblePeriods.map((option, index) => (
-              <option key={optionKey(option, index)} value={optionKey(option, index)}>
-                {optionLabel(option)}
-              </option>
-            ))}
-          </select>
-          <p>{selectedMainPeriod ? periodYearText(selectedMainPeriod) : "Ingen periode i valgt årsområde."}</p>
-        </article>
-
-        <article className="ct-v7-panel ct-v7-rad">
-          <span>Rad 3 · Underperiode / relasjon</span>
-          <h2>Underperiode</h2>
-          <select value={subPeriodKey} onChange={(event) => setSubPeriodKey(event.target.value)}>
-            {visiblePeriods.map((option, index) => (
-              <option key={optionKey(option, index)} value={optionKey(option, index)}>
-                {optionLabel(option)}
-              </option>
-            ))}
-          </select>
-          <p>{selectedSubPeriod ? periodYearText(selectedSubPeriod) : "Ingen periode i valgt årsområde."}</p>
-        </article>
-      </section>
-
-      <section className="ct-v7-switches">
-        {SEGMENTS.map((item) => (
-          <button key={item} type="button" className={segment === item ? "is-active" : ""} onClick={() => setSegment(item)}>
-            {item === "samler" ? "Samler" : item === "historie" ? "Historie" : "Finans"}
-          </button>
-        ))}
-      </section>
-
-      <section className="ct-v7-panel">
-        <div className="ct-v7-head">
-          <div>
-            <span>Tidslinje</span>
-            <h2>Velg periode</h2>
-          </div>
-          <p>Kun perioder innenfor {yearFrom}–{yearTo} vises. Klikk på et kort for å sette Rad 2.</p>
-        </div>
-
-        <div className="ct-v7-timeline">
-          {visiblePeriods.map((option, index) => {
-            const key = optionKey(option, index);
-
-            return (
-              <button key={key} type="button" className={mainPeriodKey === key ? "is-active" : ""} onClick={() => setMainPeriodKey(key)}>
-                <strong>{optionLabel(option)}</strong>
-                <span>{periodYearText(option)}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="ct-v7-two">
-        <article className="ct-v7-panel">
-          <div className="ct-v7-head">
-            <div>
-              <span>Valg</span>
-              <h2>{segment === "samler" ? "Samler" : segment === "historie" ? "Historie" : "Finans"}</h2>
+          {bioNode ? (
+            <div className={styles.bioContent}>
+              <h3>{label(bioNode)}</h3>
+              <p className={styles.metaLine}>{bioNode.period_type_label_no || bioNode.period_type_key || "Periodetype mangler"} · {yearRange(bioNode)}</p>
+              <BioQuestion title="Hva er dette?" value={bioNode.summary_short_no || "Kort definisjon mangler i periodedata."} />
+              <BioQuestion title="Hvorfor er det viktig?" value={bioNode.collectium_relevance_no || "Collectium-relevans mangler i periodedata."} />
+              <BioQuestion title="Når eksisterte det?" value={yearRange(bioNode)} />
+              <BioQuestion title="Hvilke objekter er relatert?" value="Hentes via katalog-, objekt- og relasjons-API når perioden/relasjonen brukes i katalogen." />
+              <BioQuestion title="Hva betyr det for samlere, historie og finans?" value="Se segmentpanelet til høyre. Innholdet skifter etter Samler, Historie og Finans." />
+              {hasMeaningfulText(bioNode.relation_href) ? (
+                <a className={styles.relationLink} href={bioNode.relation_href}>Åpne relasjon: {bioNode.relation_href}</a>
+              ) : (
+                <p className={styles.missing}>Relation_href mangler for valgt node.</p>
+              )}
             </div>
-          </div>
-
-          <div className="ct-v7-info-grid">
-            <SmallValue label="Rad 1" value={linkTypeLabel(linkType)} />
-            <SmallValue label="Rad 2" value={selectedMainPeriod ? optionLabel(selectedMainPeriod) : "Ikke valgt"} />
-            <SmallValue label="Rad 3" value={selectedSubPeriod ? optionLabel(selectedSubPeriod) : "Ikke valgt"} />
-            <SmallValue label="Objekt" value={objectTypeLabel} />
-            <SmallValue label="År" value={`${yearFrom}–${yearTo}`} />
-            <SmallValue label="Visning" value={view} />
-          </div>
+          ) : (
+            <p className={styles.empty}>Velg en node i Rad 1, Rad 2 eller Rad 3 for å vise Bio.</p>
+          )}
         </article>
 
-        <article className="ct-v7-panel">
-          <div className="ct-v7-head">
-            <div>
-              <span>Valgt periode</span>
-              <h2>{selectedMainPeriod ? optionLabel(selectedMainPeriod) : "Ingen periode"}</h2>
-            </div>
-            <p>{selectedMainPeriod ? periodYearText(selectedMainPeriod) : "Velg i tidslinjen."}</p>
+        <article className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <p className={styles.eyebrow}>Dynamisk område 2</p>
+            <h2>Samler · Historie · Finans</h2>
+          </div>
+          <div className={styles.segmentSwitch} role="tablist" aria-label="Segment">
+            <button type="button" data-active={segment === "samler"} onClick={() => setSegment("samler")}>Samler</button>
+            <button type="button" data-active={segment === "historie"} onClick={() => setSegment("historie")}>Historie</button>
+            <button type="button" data-active={segment === "finans"} onClick={() => setSegment("finans")}>Finans</button>
           </div>
 
-          <p className="ct-v7-summary">{periodSummary(selectedMainPeriod)}</p>
-          <a className="ct-v7-link" href={selectedMainPeriod?.relation_href || "#"}>
-            {selectedMainPeriod?.relation_href || "Relasjon mangler"}
-          </a>
-        </article>
-      </section>
-
-      <section className="ct-v7-panel">
-        <div className="ct-v7-result-head">
-          <div>
-            <span>Resultat</span>
-            <h2>Katalogresultat</h2>
-            <p>{country} · {objectTypeLabel} · {yearFrom}–{yearTo} · {cards.length} treff</p>
-          </div>
-
-          <div className="ct-v7-view">
-            {VIEW_MODES.map((item) => (
-              <button key={item} type="button" className={view === item ? "is-active" : ""} onClick={() => setView(item)}>
-                {item === "liste" ? "Liste" : item === "horisontal" ? "Horisontal" : "Museum"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {catalogState.status === "error" ? (
-          <details className="ct-v7-error">
-            <summary>Katalog API feiler. Viser kontrollkort.</summary>
-            <code>{catalogState.url}</code>
-          </details>
-        ) : null}
-
-        <div className={`ct-v7-cards ct-v7-cards-${view}`}>
-          {cards.map((item: any) => (
-            <article className="ct-v7-card" key={String(item.object_id)}>
-              <div className="ct-v7-card-symbol">{String(item.category ?? "C")}</div>
-              <div className="ct-v7-card-body">
-                <strong>{String(item.title ?? item.collectium_title_no ?? "Katalogobjekt")}</strong>
-                <span>{String(item.subtitle ?? item.denomination_raw_no ?? "")}</span>
-                <div className="ct-v7-card-fields">
-                  <SmallValue label="Objekttype" value={String(item.object_type_label ?? objectTypeLabel)} />
-                  <SmallValue label="Årstall" value={String(item.year ?? item.object_year_label ?? item.publication_year_label ?? "Mangler")} />
-                  <SmallValue label="Periode" value={String(item.period ?? item.ruler_name_raw_no ?? "Mangler")} />
-                  <SmallValue label="Variant" value={String(item.variant ?? item.variant_type_raw_no ?? "Mangler")} />
-                </div>
+          <div className={styles.factList}>
+            {dynamicRows.map(([key, value]) => (
+              <div className={styles.factRow} key={key}>
+                <span>{key}</span>
+                <strong>{value}</strong>
               </div>
-            </article>
-          ))}
-        </div>
+            ))}
+          </div>
+        </article>
       </section>
 
-      <section className="ct-v7-debug">
-        <h2>Svar til ChatGPT</h2>
-        <pre>{JSON.stringify({
-          masterfilter: {
-            country,
-            source_key: sourceKey,
-            object_group: objectType,
-            object_type_label: objectTypeLabel,
-            year_from: yearFrom,
-            year_to: yearTo,
-          },
-          rows: {
-            rad1_link_type: linkType,
-            rad2_main_period_key: mainPeriodKey,
-            rad3_sub_period_key: subPeriodKey,
-          },
-          period_options: {
-            api_ok: periodOptionsState.ok,
-            total: allPeriods.length,
-            visible: visiblePeriods.length,
-          },
-          segment,
-          view,
-          catalog: {
-            ok: catalogState.ok,
-            error: catalogState.error,
-            url: catalogState.url,
-            api_rows: apiObjects.length,
-            using_fallback_preview: !apiObjects.length,
-          },
-        }, null, 2)}</pre>
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <p className={styles.eyebrow}>Kontroll</p>
+          <h2>Relasjonstyper fra Norske sedler</h2>
+        </div>
+        {relationSummary.length ? (
+          <div className={styles.relationGrid}>
+            {relationSummary.map((row) => (
+              <div className={styles.relationPill} key={row.relation_type}>
+                <span>{row.relation_type}</span>
+                <strong>{row.relation_count.toLocaleString("nb-NO")}</strong>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.empty}>Relasjonsoppsummering er ikke tilgjengelig fra API-et.</p>
+        )}
       </section>
     </main>
+  );
+}
+
+function FilterRow(props: {
+  title: string;
+  subtitle: string;
+  rows: PeriodOption[];
+  selectedSlug: string | null;
+  onSelect: (slug: string) => void;
+  disabled?: boolean;
+  disabledText?: string;
+}) {
+  return (
+    <article className={styles.panel} data-disabled={props.disabled ? "true" : "false"}>
+      <div className={styles.panelHeader}>
+        <p className={styles.eyebrow}>{props.title}</p>
+        <h2>{props.subtitle}</h2>
+      </div>
+      {props.disabled ? <p className={styles.empty}>{props.disabledText}</p> : null}
+      {!props.disabled && props.rows.length === 0 ? <p className={styles.empty}>Ingen tilgjengelige valg for denne raden.</p> : null}
+      <div className={styles.optionList}>
+        {props.rows.map((row) => (
+          <button
+            type="button"
+            key={row.period_slug}
+            data-active={props.selectedSlug === row.period_slug}
+            onClick={() => props.onSelect(row.period_slug)}
+          >
+            <span>{label(row)}</span>
+            <small>{row.period_type_label_no || row.period_type_key || "Ukjent type"} · {yearRange(row)}</small>
+          </button>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function BioQuestion(props: { title: string; value: string }) {
+  return (
+    <div className={styles.bioQuestion}>
+      <span>{props.title}</span>
+      <p>{props.value}</p>
+    </div>
   );
 }

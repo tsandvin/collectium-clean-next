@@ -2,180 +2,178 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Period Filter Options API
+ * Periodefilter options API UI/UX 8.6
  *
  * Definering / formål:
- * Leser faktiske periodefiltervalg fra Neon view ct_v_period_filter_options.
+ * Leser periodefilter-noder fra Neon og returnerer datagrunnlag for testside /test/periodefilter.
+ * API-et støtter Rad 1 Nasjonal hovedperiode, Rad 2 Hovedperiode og Rad 3 Underperiode / relasjon.
  *
  * Bruksområde:
- * Brukes av /test/periodefilter for tidslinjeverdier.
- *
- * Berørte DB-brytere / feature_keys:
- * - filter.period.options.view
- * - filter.period.timeline.view
+ * Brukes av components/period-filter-test/CollectiumPeriodFilterTest.tsx.
  *
  * Berørte sider / routes:
  * - /test/periodefilter
  *
+ * Berørte DB-brytere / feature_keys:
+ * - filter.period.simple.view
+ * - filter.period.advanced.view
+ * - filter.master.resolve
+ *
  * Berørte API-ruter:
  * - GET /api/filter/period/options
  *
- * Leser fra:
- * - public.ct_v_period_filter_options
+ * Berørte tabeller / views:
+ * - ct_v_period_filter_options
+ * - ct_v_object_relations_resolved
  *
- * Skriver til:
- * - Ingen. Read-only.
+ * Dataretning:
+ * Neon → API/backend → Next.js → React → UI
+ *
+ * Logging:
+ * log_category: filter
+ * log_action: period_options_view
+ *
+ * Versjon:
+ * CT-FILE-PERIOD-UI86-0001 / CHANGE-2026-06-18-0001
+ *
+ * Endringsregel:
+ * Denne filen erstatter kun periodefilter-testens options route. Den skriver ikke data.
  */
 
 import { NextResponse } from "next/server";
-import { neonQuery } from "@/lib/db/neon";
+import { neon } from "@neondatabase/serverless";
 
 export const dynamic = "force-dynamic";
 
-type DbRow = Record<string, unknown>;
+type PeriodOptionRow = {
+  period_slug: string;
+  display_name_no: string | null;
+  period_type_key: string | null;
+  period_type_label_no: string | null;
+  period_level: number | null;
+  parent_period_slug: string | null;
+  start_year: number | null;
+  end_year: number | null;
+  summary_short_no: string | null;
+  collectium_relevance_no: string | null;
+  relation_href: string | null;
+  object_count?: number;
+};
 
-function asText(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "";
-  }
+type RelationSummaryRow = {
+  relation_type: string;
+  relation_count: number;
+};
 
-  return String(value).trim();
+function asNumber(value: unknown): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "bigint") return Number(value);
+  if (typeof value === "string") return Number(value);
+  return 0;
 }
 
-function firstText(row: DbRow, keys: string[]): string {
-  for (const key of keys) {
-    const value = asText(row[key]);
-    if (value.length > 0) {
-      return value;
-    }
-  }
-
-  return "";
-}
-
-function firstNumber(row: DbRow, keys: string[]): number | null {
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-
-    const text = asText(value);
-    const match = text.match(/-?\d{1,4}/);
-
-    if (match) {
-      const numberValue = Number(match[0]);
-      if (Number.isFinite(numberValue)) {
-        return numberValue;
-      }
-    }
-  }
-
-  return null;
-}
-
-function normalizeOption(row: DbRow, index: number): DbRow {
-  const optionKey =
-    firstText(row, [
-      "period_option_key",
-      "period_filter_option_key",
-      "option_key",
-      "period_key",
-      "relation_key",
-      "period_relation_key",
-      "period_slug",
-      "relation_slug",
-      "slug",
-      "id",
-    ]) || `period-option-${index + 1}`;
-
-  const label =
-    firstText(row, [
-      "period_option_label_no",
-      "period_filter_option_label_no",
-      "option_label_no",
-      "period_label_no",
-      "relation_label_no",
-      "display_name_no",
-      "label_no",
-      "title_no",
-      "name_no",
-      "period_name_no",
-    ]) || optionKey;
-
-  const filterKey =
-    firstText(row, [
-      "period_filter_key",
-      "filter_key",
-      "period_type_key",
-      "period_type",
-      "relation_type",
-      "option_type",
-    ]) || "period.option";
-
-  const startYear = firstNumber(row, [
-    "start_year",
-    "year_from",
-    "period_start_year",
-    "from_year",
-    "object_year_from",
-    "publication_year_from",
-    "year",
-    "object_year",
-    "publication_year",
-  ]);
-
-  const endYear = firstNumber(row, [
-    "end_year",
-    "year_to",
-    "period_end_year",
-    "to_year",
-    "object_year_to",
-    "publication_year_to",
-    "year",
-    "object_year",
-    "publication_year",
-  ]);
-
-  return {
-    ...row,
-    option_key: optionKey,
-    option_label_no: label,
-    period_filter_key: filterKey,
-    timeline_start_year: startYear,
-    timeline_end_year: endYear ?? startYear,
-    timeline_sort_year: startYear ?? 999999,
-  };
+function errorResponse(message: string, status = 500) {
+  return NextResponse.json(
+    {
+      ok: false,
+      source: "neon",
+      message,
+      rows: [],
+      levels: { row1: [], row2: [], row3: [] },
+      relationSummary: [],
+      updatedAt: new Date().toISOString(),
+    },
+    { status },
+  );
 }
 
 export async function GET() {
-  try {
-    const rows = await neonQuery<DbRow>(`
-      select *
-      from public.ct_v_period_filter_options
-      order by 1
-      limit 500
-    `);
+  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.NEON_DATABASE_URL;
 
-    const options = rows.map((row, index) => normalizeOption(row, index));
+  if (!databaseUrl) {
+    return errorResponse(
+      "Mangler DATABASE_URL / POSTGRES_URL / NEON_DATABASE_URL. Periodefilter-testen kan ikke lese Neon.",
+      500,
+    );
+  }
+
+  try {
+    const sql = neon(databaseUrl);
+
+    const rows = (await sql`
+      select
+        period_slug,
+        display_name_no,
+        period_type_key,
+        period_type_label_no,
+        period_level,
+        parent_period_slug,
+        start_year,
+        end_year,
+        summary_short_no,
+        collectium_relevance_no,
+        relation_href
+      from public.ct_v_period_filter_options
+      where period_slug is not null
+      order by
+        coalesce(period_level, 99),
+        coalesce(start_year, 999999),
+        display_name_no nulls last,
+        period_slug
+    `) as PeriodOptionRow[];
+
+    let relationSummary: RelationSummaryRow[] = [];
+    try {
+      const relationRows = (await sql`
+        select
+          relation_type,
+          count(*)::int as relation_count
+        from public.ct_v_object_relations_resolved
+        where source_key = 'norske_sedler'
+          and object_group = 'banknote'
+        group by relation_type
+        order by relation_type
+      `) as RelationSummaryRow[];
+
+      relationSummary = relationRows.map((row) => ({
+        relation_type: row.relation_type,
+        relation_count: asNumber(row.relation_count),
+      }));
+    } catch {
+      relationSummary = [];
+    }
+
+    const normalizedRows = rows.map((row) => ({
+      ...row,
+      period_level: row.period_level === null ? null : asNumber(row.period_level),
+      start_year: row.start_year === null ? null : asNumber(row.start_year),
+      end_year: row.end_year === null ? null : asNumber(row.end_year),
+    }));
 
     return NextResponse.json({
       ok: true,
-      source: "ct_v_period_filter_options",
-      count: options.length,
-      options,
-      rows: options,
-      rule: "Dette er faktiske periodefiltervalg/tidslinjeverdier. Filtertype-registeret ligger separat i ct_v_period_filter_registry_active.",
+      source: "neon",
+      model: "ui86_period_filter_three_rows",
+      rows: normalizedRows,
+      levels: {
+        row1: normalizedRows.filter((row) => row.period_level === 1),
+        row2: normalizedRows.filter((row) => row.period_level === 2),
+        row3: normalizedRows.filter((row) => row.period_level === 3),
+      },
+      relationSummary,
+      rules: {
+        row1: "Nasjonal hovedperiode",
+        row2: "Hovedperiode",
+        row3: "Underperiode / relasjon",
+        noDuplicateSelection: true,
+        selectedNodeHasBio: true,
+        dynamicSegments: ["samler", "historie", "finans"],
+        frontendTruth: "API/Neon determines values; frontend only displays and filters returned rows.",
+      },
+      updatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        ok: false,
-        source: "ct_v_period_filter_options",
-        error: error instanceof Error ? error.message : "Unknown period options error",
-      },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Ukjent feil ved lesing av periodefilter fra Neon.";
+    return errorResponse(message, 500);
   }
 }
