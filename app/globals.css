@@ -737,3 +737,278 @@ main {
     display: grid;
   }
 }
+
+/* Collectium readable period filter v6 */
+.ct-v6-page {
+  display: grid;
+  gap: 18px;
+}
+
+.ct-v6-hero,
+.ct-v6-panel,
+.ct-v6-status > div,
+.ct-v6-debug {
+  border: 1px solid rgba(35, 75, 120, 0.18);
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 18px;
+  box-shadow: 0 16px 50px rgba(20, 45, 80, 0.08);
+}
+
+.ct-v6-hero,
+.ct-v6-panel,
+.ct-v6-debug {
+  padding: 18px;
+}
+
+.ct-v6-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ct-v6-value {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+}
+
+.ct-v6-value span,
+.ct-v6-head span,
+.ct-v6-master span,
+.ct-v6-fields span {
+  font-size: 12px;
+  opacity: 0.68;
+}
+
+.ct-v6-value strong {
+  font-size: 14px;
+}
+
+.ct-v6-head,
+.ct-v6-result-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.ct-v6-head h2,
+.ct-v6-result-head h2 {
+  margin: 2px 0 0;
+}
+
+.ct-v6-head p,
+.ct-v6-result-head p {
+  margin: 0;
+  max-width: 430px;
+  font-size: 13px;
+  opacity: 0.72;
+}
+
+.ct-v6-master {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px 120px;
+  gap: 12px;
+}
+
+.ct-v6-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ct-v6-master label,
+.ct-v6-fields label {
+  display: grid;
+  gap: 5px;
+}
+
+.ct-v6-master select,
+.ct-v6-master input,
+.ct-v6-fields select {
+  border: 1px solid rgba(35, 75, 120, 0.22);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+  font: inherit;
+  min-width: 0;
+}
+
+.ct-v6-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.ct-v6-presets span {
+  font-size: 12px;
+  opacity: 0.68;
+  font-weight: 700;
+}
+
+.ct-v6-presets button,
+.ct-v6-switches button,
+.ct-v6-view button {
+  border: 1px solid rgba(35, 75, 120, 0.2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.ct-v6-switches,
+.ct-v6-view {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ct-v6-switches button.is-active,
+.ct-v6-view button.is-active,
+.ct-v6-timeline button.is-active {
+  background: #173d68;
+  color: #fff;
+}
+
+.ct-v6-timeline {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+
+.ct-v6-timeline button {
+  min-width: 190px;
+  border: 1px solid rgba(35, 75, 120, 0.2);
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.ct-v6-timeline button span {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.ct-v6-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ct-v6-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ct-v6-summary {
+  border: 1px solid rgba(35, 75, 120, 0.12);
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px;
+}
+
+.ct-v6-relation {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.ct-v6-error {
+  border: 1px solid rgba(163, 38, 38, 0.22);
+  background: rgba(163, 38, 38, 0.06);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin: 10px 0 14px;
+}
+
+.ct-v6-error code {
+  display: block;
+  margin-top: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ct-v6-cards {
+  display: grid;
+  gap: 12px;
+}
+
+.ct-v6-cards-liste,
+.ct-v6-cards-horisontal {
+  grid-template-columns: 1fr;
+}
+
+.ct-v6-cards-museum {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ct-v6-card {
+  border: 1px solid rgba(35, 75, 120, 0.16);
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+}
+
+.ct-v6-card-symbol {
+  border-radius: 12px;
+  background: rgba(23, 61, 104, 0.08);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+
+.ct-v6-card > div:last-child {
+  display: grid;
+  gap: 8px;
+}
+
+.ct-v6-card > div:last-child > span {
+  opacity: 0.72;
+  font-size: 13px;
+}
+
+.ct-v6-card-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ct-v6-debug pre {
+  overflow: auto;
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(10, 25, 45, 0.05);
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  .ct-v6-status,
+  .ct-v6-master,
+  .ct-v6-fields,
+  .ct-v6-two,
+  .ct-v6-cards-museum,
+  .ct-v6-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ct-v6-card-fields,
+  .ct-v6-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ct-v6-head,
+  .ct-v6-result-head {
+    display: grid;
+  }
+}
