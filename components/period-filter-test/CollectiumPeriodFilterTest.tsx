@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * COLLECTIUM FILE HEADER
@@ -296,8 +296,8 @@ function segmentRows(segment: SegmentKey, selected: UiNode | null, relationSumma
   if (segment === "samler") {
     return [
       ["Objektantall", countText],
-      ["Valør / utgave / variant", "Vises som relasjonschips eller objektfelt, ikke som tvungen Rad 1-periode"],
-      ["Signatur / person", "Vises som relasjon når valgt anker eller objekt har personkobling"],
+      ["ValÃ¸r / utgave / variant", "Vises som relasjonschips eller objektfelt, ikke som tvungen Rad 1-periode"],
+      ["Signatur / person", "Vises som relasjon nÃ¥r valgt anker eller objekt har personkobling"],
       ["Kvalitet / sjeldenhet", "Hentes fra objektpresentasjonsview og samlerrelevante felt"],
       ["Samlingsrelevans", selected?.relevance || `Vurderes ut fra ${baseName}`],
       ["Relaterte objekter", selected?.href ? `Kan apnes ${selected.href}` : "Hentes i objekt-/relasjonslisten"],
@@ -407,7 +407,7 @@ export default function CollectiumPeriodFilterTest() {
     <main className={styles.page}>
       <section className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>Periodefilter · DB-test · UI/UX 8.6</p>
+          <p className={styles.eyebrow}>Periodefilter Â· DB-test Â· UI/UX 8.6</p>
           <h1>Periodefilter</h1>
           <p>
             Testen bruker en ankerbasert modell. <strong>Rad 1</strong> kan vaere periode, konge/regent, person, ar, kilde, utgave, valor eller variant. <strong>Rad 2</strong> viser kontekst for valgt anker. <strong>Rad 3</strong> vises bare nar det finnes konkrete undernoder; ellers skal informasjonen fylles i Bio og Samler/Historie/Finans.
@@ -453,7 +453,7 @@ export default function CollectiumPeriodFilterTest() {
           selectedKey={selectedRow2Key}
           onSelect={chooseRow2}
           disabled={!selectedRow1}
-          disabledText="Velg Rad 1 først"
+          disabledText="Velg Rad 1 fÃ¸rst"
         />
         <FilterRow
           title="Rad 3"
@@ -462,7 +462,7 @@ export default function CollectiumPeriodFilterTest() {
           selectedKey={selectedRow3Key}
           onSelect={chooseRow3}
           disabled={!selectedRow1 || !selectedRow2}
-          disabledText="Velg Rad 1 og Rad 2 først"
+          disabledText="Velg Rad 1 og Rad 2 fÃ¸rst"
           emptyText="Ingen konkret Rad 3-node. Bruk Bio og segmentfeltet under."
         />
       </section>
@@ -470,9 +470,9 @@ export default function CollectiumPeriodFilterTest() {
       <section className={styles.selectionPanel}>
         <div className={styles.pathBox}>
           <span>{label(selectedRow1)}</span>
-          <span>-></span>
+          <span>{"→"}</span>
           <span>{label(selectedRow2)}</span>
-          <span>-></span>
+          <span>{"→"}</span>
           <span>{label(selectedRow3)}</span>
         </div>
       </section>
@@ -487,12 +487,12 @@ export default function CollectiumPeriodFilterTest() {
           {selectedNode ? (
             <div className={styles.bioContent}>
               <h3>{label(selectedNode)}</h3>
-              <p className={styles.metaLine}>{selectedNode.typeLabel} · {selectedNode.count ? `${selectedNode.count.toLocaleString("nb-NO")} objektkoblinger` : yearRange(selectedNode)}</p>
+              <p className={styles.metaLine}>{selectedNode.typeLabel} Â· {selectedNode.count ? `${selectedNode.count.toLocaleString("nb-NO")} objektkoblinger` : yearRange(selectedNode)}</p>
               <BioQuestion title="Hva er dette?" value={selectedNode.summary || "Kort definisjon mangler i periodedata/relasjonsdata."} />
               <BioQuestion title="Hvorfor er det viktig?" value={selectedNode.relevance || "Collectium-relevans mangler for valgt node."} />
               <BioQuestion title="Nar eksisterte det?" value={yearRange(selectedNode)} />
               <BioQuestion title="Hvilke objekter er relatert?" value={selectedNode.count ? `${selectedNode.count.toLocaleString("nb-NO")} objektkoblinger i Norske sedler.` : "Hentes via katalog-, objekt- og relasjons-API."} />
-              <BioQuestion title="Hva betyr det for samlere, historie og finans?" value="Se segmentpanelet til høyre. Innholdet skifter etter Samler, Historie og Finans." />
+              <BioQuestion title="Hva betyr det for samlere, historie og finans?" value="Se segmentpanelet til hÃ¸yre. Innholdet skifter etter Samler, Historie og Finans." />
               {hasMeaningfulText(selectedNode.href) ? (
                 <a className={styles.relationLink} href={selectedNode.href}>Apne relasjon: {selectedNode.href}</a>
               ) : (
@@ -507,7 +507,7 @@ export default function CollectiumPeriodFilterTest() {
         <article className={styles.panel}>
           <div className={styles.panelHeader}>
             <p className={styles.eyebrow}>Dynamisk omrade 2</p>
-            <h2>Samler · Historie · Finans</h2>
+            <h2>Samler Â· Historie Â· Finans</h2>
           </div>
           <div className={styles.segmentSwitch} role="tablist" aria-label="Segment">
             <button type="button" data-active={segment === "samler"} onClick={() => setSegment("samler")}>Samler</button>
@@ -575,7 +575,7 @@ function FilterRow(props: {
             onClick={() => props.onSelect(row.key)}
           >
             <span>{label(row)}</span>
-            <small>{row.typeLabel} · {row.count ? `${row.count.toLocaleString("nb-NO")} objektkoblinger` : yearRange(row)}</small>
+            <small>{row.typeLabel} Â· {row.count ? `${row.count.toLocaleString("nb-NO")} objektkoblinger` : yearRange(row)}</small>
           </button>
         ))}
       </div>
@@ -591,3 +591,4 @@ function BioQuestion(props: { title: string; value: string }) {
     </div>
   );
 }
+
