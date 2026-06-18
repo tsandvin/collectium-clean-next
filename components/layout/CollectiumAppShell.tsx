@@ -2,6 +2,17 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  Home,
+  Search,
+  CalendarDays,
+  Box,
+  Network,
+  Archive,
+  Gavel,
+  Store,
+  ShieldCheck
+} from "lucide-react";
 import styles from "./CollectiumAppShell.module.css";
 
 type CollectiumSkin = "collectium" | "samler" | "museum" | "finans";
@@ -11,82 +22,78 @@ type CollectiumAppShellProps = {
 };
 
 const navItems = [
-  { href: "/", label: "Index", icon: "I" },
-  { href: "/katalog", label: "Katalog", icon: "K" },
-  { href: "/test/periodefilter", label: "Periodefilter test", icon: "P" },
-  { href: "/objekt/norske_sedler/banknote/1459", label: "Objekt", icon: "O" },
-  { href: "/relasjon/regent/oscar-ii", label: "Relasjoner", icon: "R" },
-  { href: "/min-side", label: "Min samling", icon: "M" },
-  { href: "/auksjon", label: "Auksjon", icon: "A" },
-  { href: "/forhandler", label: "Forhandler", icon: "F" },
-  { href: "/admin", label: "Admin", icon: "S" },
+  { href: "/", label: "Index", icon: Home },
+  { href: "/katalog", label: "Katalog", icon: Search },
+  { href: "/test/periodefilter", label: "Periodefilter test", icon: CalendarDays },
+  { href: "/objekt/norske_sedler/banknote/1459", label: "Objekt", icon: Box },
+  { href: "/relasjon/regent/oscar-ii", label: "Relasjoner", icon: Network },
+  { href: "/min-side", label: "Min samling", icon: Archive },
+  { href: "/auksjon", label: "Auksjon", icon: Gavel },
+  { href: "/forhandler", label: "Forhandler", icon: Store },
+  { href: "/admin", label: "Admin", icon: ShieldCheck },
 ];
 
 const skins: { value: CollectiumSkin; label: string }[] = [
   { value: "collectium", label: "Collectium" },
-  { value: "samler", label: "Samler" },
+  { value: "samler", label: "Enkel" },
   { value: "museum", label: "Museum" },
   { value: "finans", label: "Finans" },
 ];
-
-const skinAliases: Record<string, CollectiumSkin> = {
-  "signature-light": "collectium",
-  "signature-dark": "museum",
-  finance: "finans",
-};
-
-function normalizeSkin(value: string | null): CollectiumSkin {
-  const aliased = value ? skinAliases[value] ?? value : "collectium";
-  return skins.some((item) => item.value === aliased) ? (aliased as CollectiumSkin) : "collectium";
-}
 
 export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
   const [skin, setSkin] = useState<CollectiumSkin>("collectium");
 
   useEffect(() => {
-    const nextSkin = normalizeSkin(window.localStorage.getItem("collectium-active-skin"));
+    const stored = window.localStorage.getItem("collectium-active-skin") as CollectiumSkin | null;
+    const nextSkin = stored && skins.some((item) => item.value === stored) ? stored : "collectium";
     setSkin(nextSkin);
-    window.localStorage.setItem("collectium-active-skin", nextSkin);
     document.documentElement.dataset.skin = nextSkin;
-    document.documentElement.dataset.theme = nextSkin;
-    document.documentElement.dataset.ctSkin = nextSkin;
+    document.documentElement.setAttribute("data-ct-skin", nextSkin);
     document.documentElement.dataset.template = "collectium";
     document.documentElement.dataset.vp = "pc";
   }, []);
 
   function changeSkin(value: string) {
-    const nextSkin = normalizeSkin(value);
+    const nextSkin = skins.some((item) => item.value === value) ? (value as CollectiumSkin) : "collectium";
     setSkin(nextSkin);
     window.localStorage.setItem("collectium-active-skin", nextSkin);
     document.documentElement.dataset.skin = nextSkin;
-    document.documentElement.dataset.theme = nextSkin;
-    document.documentElement.dataset.ctSkin = nextSkin;
+    document.documentElement.setAttribute("data-ct-skin", nextSkin);
   }
 
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar} aria-label="Collectium navigasjon">
-        <Link href="/" className={styles.brand}>
-          <span className={styles.brandMark}>C</span>
-          <span className={styles.brandText}>
-            <strong>Collectium</strong>
-            <small>UI/UX 8.6</small>
-          </span>
+        <Link href="/" className={styles.brand} style={{ paddingLeft: "4px" }}>
+          <img
+            src={
+              skin === "museum" || skin === "finans"
+                ? "/collectium-logo-white.png"
+                : "/collectium-logo-black.png"
+            }
+            alt="Collectium"
+            style={{
+              height: "38px",
+              width: "auto",
+              display: "block",
+              mixBlendMode: skin === "museum" || skin === "finans" ? "screen" : "multiply",
+            }}
+          />
         </Link>
 
         <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className={styles.navItem}>
-              <span className={styles.navIcon}>{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Link key={item.href} href={item.href} className={styles.navItem}>
+                <span className={styles.navIcon}>
+                  <IconComponent size={22} />
+                </span>
+                <span className={styles.navLabel}>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
-
-        <div className={styles.statusPill}>
-          <span className={styles.statusDot} />
-          Global layout aktiv
-        </div>
       </aside>
 
       <div className={styles.mainColumn}>
