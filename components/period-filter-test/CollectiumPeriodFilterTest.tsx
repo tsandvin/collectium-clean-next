@@ -40,7 +40,7 @@
  * log_action: period_compare_timeline_test_view
  *
  * Versjon:
- * CT-FILE-PERIOD-UI86-0006 / CHANGE-2026-06-18-0004
+ * CT-FILE-PERIOD-UI86-0007 / CHANGE-2026-06-18-0005
  */
 
 import { useMemo, useState } from "react";
@@ -48,6 +48,7 @@ import styles from "./CollectiumPeriodFilterTest.module.css";
 
 type SegmentKey = "samler" | "historie" | "finans";
 type TimelineMode = "timeline" | "table";
+type TimelineZoom = 0 | 1 | 2;
 type LaneKey = "ruler" | "national" | "war" | "finance" | "person" | "object";
 
 type TimelineItem = {
@@ -478,6 +479,12 @@ function getLaneItems(items: TimelineItem[], lanes: LaneKey[], startYear: number
   return items.filter((item) => lanes.includes(item.lane) && item.start <= endYear && item.end >= startYear);
 }
 
+function timelineWidthForZoom(zoom: TimelineZoom) {
+  if (zoom === 0) return 980;
+  if (zoom === 2) return 1750;
+  return 1300;
+}
+
 function selectedText(item: TimelineItem | null, segment: SegmentKey) {
   if (!item) return "Trykk på en tidslinjeboks for å vise valgt node med bio, nøkkellinje og referanse.";
   if (segment === "samler") return item.collectorNote;
@@ -495,6 +502,8 @@ export default function CollectiumPeriodFilterTest() {
   const [axis3, setAxis3] = useState("finance_economy");
   const [segment, setSegment] = useState<SegmentKey>("historie");
   const [mode, setMode] = useState<TimelineMode>("timeline");
+  const [timelineZoom, setTimelineZoom] = useState<TimelineZoom>(1);
+  const [timelineOnly, setTimelineOnly] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   const visibleLanes = useMemo(() => getVisibleLanes(axis1, axis2, axis3), [axis1, axis2, axis3]);
@@ -520,6 +529,15 @@ export default function CollectiumPeriodFilterTest() {
   }, [startYear, endYear]);
 
   const compareSummary = `${getAxis(axis1).label} sammenlignes med ${getAxis(axis2).label} og ${getAxis(axis3).label}`;
+  const timelineWidth = timelineWidthForZoom(timelineZoom);
+
+  function zoomOut() {
+    setTimelineZoom((current) => (current === 2 ? 1 : 0));
+  }
+
+  function zoomIn() {
+    setTimelineZoom((current) => (current === 0 ? 1 : 2));
+  }
 
   return (
     <main className={styles.page}>
@@ -584,23 +602,28 @@ export default function CollectiumPeriodFilterTest() {
         <AxisSelect title="Rad 3 · sammenlign med" value={axis3} onChange={setAxis3} />
       </section>
 
-      <section className={styles.segmentPanel}>
-        <button type="button" data-active={segment === "samler"} onClick={() => setSegment("samler")}>Samler</button>
-        <button type="button" data-active={segment === "historie"} onClick={() => setSegment("historie")}>Historie</button>
-        <button type="button" data-active={segment === "finans"} onClick={() => setSegment("finans")}>Finans</button>
-      </section>
-
-      <section className={styles.timelinePanel}>
+      <section className={timelineOnly ? styles.timelineOverlay : styles.timelinePanel}>
         <div className={styles.panelTitle}>
           <div>
             <p className={styles.eyebrow}>Sammenlignende periodetidslinje</p>
             <h2>Hva skjedde samtidig?</h2>
           </div>
+          <div className={styles.timelineTools} aria-label="Tidslinjeverktøy">
+            <button type="button" onClick={zoomOut} title="Minske tidslinjeperspektiv">−</button>
+            <button type="button" onClick={zoomIn} title="Forstørre tidslinjeperspektiv">+</button>
+            <button type="button" data-active={timelineOnly} onClick={() => setTimelineOnly((value) => !value)}>
+              {timelineOnly ? "Lukk popup" : "Tidslinje popup"}
+            </button>
+          </div>
           <strong>{country} · {objectType} · {startYear}-{endYear}</strong>
         </div>
 
+        {timelineOnly ? (
+          <div className={styles.timelineOnlyHint}>Tidslinjen ligger øverst som eget lag. Klikk på perioder for kort info; full Bio/Samler/Historie/Finans ligger under tidslinjen når popup lukkes.</div>
+        ) : null}
+
         {mode === "timeline" ? (
-          <div className={styles.timelineShell}>
+          <div className={styles.timelineShell} style={{ ["--timeline-width" as string]: `${timelineWidth}px` }}>
             <div className={styles.timelineHeader}>
               <div className={styles.laneHeader}>Lag</div>
               <div className={styles.scale}>
@@ -685,8 +708,30 @@ export default function CollectiumPeriodFilterTest() {
             </table>
           </div>
         )}
+
+        <div className={styles.timelineClickInfo}>
+          <span>{selectedItem ? LANE_LABELS[selectedItem.lane] : "Ingen tidslinjenode valgt"}</span>
+          <strong>{selectedItem?.label || "Klikk på en periodeboks"}</strong>
+          <small>{selectedText(selectedItem, segment)}</small>
+        </div>
       </section>
 
+      {!timelineOnly ? (
+        <section className={styles.segmentArea}>
+          <div className={styles.segmentIntro}>
+            <p className={styles.eyebrow}>Dynamiske felt</p>
+            <h2>Samler · Historie · Finans</h2>
+            <small>Disse feltene ligger under tidslinjen. Tidslinjen viser overlapp; segmentet forklarer valgt node og valgt periode.</small>
+          </div>
+          <div className={styles.segmentPanel}>
+            <button type="button" data-active={segment === "samler"} onClick={() => setSegment("samler")}>Samler</button>
+            <button type="button" data-active={segment === "historie"} onClick={() => setSegment("historie")}>Historie</button>
+            <button type="button" data-active={segment === "finans"} onClick={() => setSegment("finans")}>Finans</button>
+          </div>
+        </section>
+      ) : null}
+
+      {!timelineOnly ? (
       <section className={styles.detailGrid}>
         <article className={styles.infoPanel}>
           <div className={styles.panelTitle}>
@@ -701,6 +746,8 @@ export default function CollectiumPeriodFilterTest() {
             <InfoCell title="Hovedregel" value="Radene skal ikke låse hverandre som trestruktur. De legger ulike periodetyper oppå samme tidsakse." />
             <InfoCell title="Overlapp" value="Konge kan være utgiver/regent samtidig som krig, finanskrise, signatur og objektperiode skjer." />
             <InfoCell title="DB-mål" value="Senere bør dette komme fra en resolved timeline-view med relation_type, start_year, end_year, lane og relation_href." />
+            <InfoCell title="Periodefelt" value={`${startYear}-${endYear}: dynamisk periodefelt skal vise valgt tidsrom, overlappende lag og relevante relasjoner.`} />
+            <InfoCell title="Valgte lag" value={visibleLanes.map((lane) => LANE_LABELS[lane]).join(" · ")} />
           </div>
         </article>
 
@@ -723,6 +770,7 @@ export default function CollectiumPeriodFilterTest() {
           </div>
         </article>
       </section>
+      ) : null}
     </main>
   );
 }
