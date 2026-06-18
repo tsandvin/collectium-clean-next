@@ -79,16 +79,20 @@
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 330px minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
 .filterColumn {
-  padding: 12px;
-  align-self: start;
-  position: sticky;
-  top: 10px;
+  width: min(520px, 100%);
+  align-self: flex-end;
+  padding: 10px;
+  position: static;
+  border: 1px solid #d5e5f7;
+  border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 30px rgba(7, 53, 110, .08);
 }
 
 .filterColumnHeader h2,
@@ -102,16 +106,16 @@
 .selectBox {
   display: block;
   border: 1px solid #d8e6f6;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #f9fcff;
-  padding: 10px;
-  margin-top: 9px;
+  padding: 7px 8px;
+  margin-top: 6px;
 }
 
 .selectBox span {
   display: block;
-  margin-bottom: 5px;
-  font-size: 10px;
+  margin-bottom: 3px;
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .08em;
   font-weight: 900;
@@ -121,21 +125,22 @@
 .selectBox select {
   width: 100%;
   border: 1px solid #cfe0f4;
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 8px;
+  padding: 8px 9px;
   background: #fff;
   color: #07356e;
   font-weight: 900;
+  font-size: 13px;
 }
 
 .selectBox small {
   display: block;
-  min-height: 30px;
-  margin-top: 7px;
+  min-height: 18px;
+  margin-top: 4px;
   color: #5a7493;
-  font-size: 11px;
+  font-size: 10px;
   font-style: italic;
-  line-height: 1.35;
+  line-height: 1.25;
 }
 
 .filterDivider {
@@ -175,6 +180,7 @@
 }
 
 .mainColumn {
+  width: 100%;
   min-width: 0;
 }
 
@@ -216,13 +222,14 @@
 
 .yearInputs {
   display: flex;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 8px;
   align-items: end;
   margin-bottom: 10px;
 }
 
 .yearInputs label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
   text-transform: uppercase;
   color: #56749a;
@@ -230,10 +237,10 @@
 
 .yearInputs input {
   display: block;
-  width: 120px;
+  width: 96px;
   border: 1px solid #cfe0f4;
-  border-radius: 10px;
-  padding: 9px;
+  border-radius: 9px;
+  padding: 8px;
   font-weight: 900;
   color: #07356e;
 }
@@ -466,7 +473,9 @@
 }
 
 .page[data-timeline-only="true"] .layout {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 @media (max-width: 1100px) {
@@ -476,12 +485,30 @@
   }
 
   .filterColumn {
-    position: static;
-  }
+  width: min(520px, 100%);
+  align-self: flex-end;
+  padding: 10px;
+  position: static;
+  border: 1px solid #d5e5f7;
+  border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 30px rgba(7, 53, 110, .08);
+}
 
   .hero,
   .timelineHeader {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+@media (max-width: 800px) {
+  .filterColumn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .yearInputs {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }
