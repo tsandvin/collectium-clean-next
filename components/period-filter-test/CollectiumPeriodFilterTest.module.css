@@ -516,11 +516,11 @@
 /* ============================================================
    CT PATCH - Periodefilter 3x3 over tidslinje
    Endring:
-   - Filterfeltet ligger over tidslinjen, ikke som smal høyreboks.
-   - Master/Land/Objekttype på første rekke.
-   - Rad 1/Rad 2/Rad 3 på andre rekke.
-   - Rad 4/Valgt på tredje rekke.
-   - Mobil/popup får mer tabellaktig tidslinjevisning.
+   - Filterfeltet ligger over tidslinjen, ikke som smal hÃ¸yreboks.
+   - Master/Land/Objekttype pÃ¥ fÃ¸rste rekke.
+   - Rad 1/Rad 2/Rad 3 pÃ¥ andre rekke.
+   - Rad 4/Valgt pÃ¥ tredje rekke.
+   - Mobil/popup fÃ¥r mer tabellaktig tidslinjevisning.
    ============================================================ */
 
 .layout {
@@ -664,7 +664,7 @@
   margin-top: 0 !important;
 }
 
-/* År fra/til kan ligge kompakt oppe til høyre i tidslinjen */
+/* Ã…r fra/til kan ligge kompakt oppe til hÃ¸yre i tidslinjen */
 .yearInputs {
   display: flex !important;
   justify-content: flex-end !important;
@@ -706,7 +706,7 @@
   }
 }
 
-/* Mobil: én kolonne, men popup/tidslinje får tabellaktig høykantvisning */
+/* Mobil: Ã©n kolonne, men popup/tidslinje fÃ¥r tabellaktig hÃ¸ykantvisning */
 @media (max-width: 760px) {
   .filterColumn {
     grid-template-columns: 1fr !important;
@@ -779,7 +779,7 @@
   }
 }
 
-/* Popup på mobil: tidslinjen tar hele laget og tabellen kan scrolles */
+/* Popup pÃ¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
 @media (max-width: 760px) {
   .page[data-timeline-only="true"] .timelineShell {
     position: fixed !important;
@@ -796,5 +796,269 @@
 
   .page[data-timeline-only="true"] .timelineCanvas {
     min-width: 820px !important;
+  }
+}
+
+
+/* ============================================================
+   CT PATCH - skinfarger Rad 1-4 + lavere filter + fikset tidslinjebredde
+   ============================================================ */
+
+/* Hele filterfeltet krympes i høyden */
+.filterColumn {
+  gap: 5px !important;
+  padding: 7px 8px !important;
+  align-items: stretch !important;
+}
+
+.filterColumnHeader {
+  padding-bottom: 3px !important;
+  min-height: 0 !important;
+}
+
+.filterColumnHeader h2 {
+  font-size: clamp(18px, 1.8vw, 25px) !important;
+  line-height: 1 !important;
+}
+
+.filterDivider {
+  margin: 0 !important;
+  padding-top: 4px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+/* Alle select-bokser lavere */
+.selectBox {
+  padding: 5px 6px !important;
+  margin: 0 !important;
+  border-radius: 10px !important;
+  min-height: 0 !important;
+}
+
+.selectBox span {
+  margin-bottom: 2px !important;
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+}
+
+.selectBox select {
+  min-height: 31px !important;
+  height: 31px !important;
+  padding: 5px 8px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.selectBox small {
+  min-height: 13px !important;
+  max-height: 14px !important;
+  margin-top: 3px !important;
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Skinfarger på Rad 1-4, basert på rekkefølge i filterboksen:
+   1 Masterfilter
+   2 Land
+   3 Objekttype
+   4 Rad 1
+   5 Rad 2
+   6 Rad 3
+   7 Rad 4
+*/
+.filterColumn > .selectBox:nth-of-type(4) {
+  background: linear-gradient(180deg, #eaf4ff 0%, #dceeff 100%) !important;
+  border-color: #9fc5ec !important;
+  box-shadow: inset 0 0 0 1px rgba(13, 67, 136, .05) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(4) span,
+.filterColumn > .selectBox:nth-of-type(4) select {
+  color: #073f82 !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(5) {
+  background: linear-gradient(180deg, #fff7e4 0%, #f4e2ad 100%) !important;
+  border-color: #d6af51 !important;
+  box-shadow: inset 0 0 0 1px rgba(160, 116, 31, .06) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(5) span,
+.filterColumn > .selectBox:nth-of-type(5) select {
+  color: #6f4c00 !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(6) {
+  background: linear-gradient(180deg, #ebfbf3 0%, #d9f1e5 100%) !important;
+  border-color: #9ccdb4 !important;
+  box-shadow: inset 0 0 0 1px rgba(25, 115, 77, .06) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(6) span,
+.filterColumn > .selectBox:nth-of-type(6) select {
+  color: #0d5d3a !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(7) {
+  background: linear-gradient(180deg, #f6efff 0%, #eadbff 100%) !important;
+  border-color: #c4a3e9 !important;
+  box-shadow: inset 0 0 0 1px rgba(93, 56, 151, .06) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(7) span,
+.filterColumn > .selectBox:nth-of-type(7) select {
+  color: #59338f !important;
+}
+
+/* Master/Land/Objekttype mer nøytrale og lavere */
+.filterColumn > .selectBox:nth-of-type(1),
+.filterColumn > .selectBox:nth-of-type(2),
+.filterColumn > .selectBox:nth-of-type(3) {
+  background: #fbfdff !important;
+  border-color: #d8e6f6 !important;
+}
+
+/* Valgt-boksen skal ikke bli høy og dominerende */
+.selectedStack {
+  padding: 6px !important;
+  gap: 4px !important;
+  align-content: start !important;
+  min-height: 0 !important;
+}
+
+.selectedStack strong {
+  font-size: 10px !important;
+  margin-bottom: 0 !important;
+  line-height: 1 !important;
+}
+
+.selectedStack span {
+  padding: 3px 7px !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+}
+
+/* Tidslinje: fjern rar høyremarg / fyll til høyre */
+.timelineShell {
+  padding: 10px !important;
+}
+
+.timelineViewport {
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.timelineCanvas {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding-left: 140px !important;
+  padding-right: 16px !important;
+}
+
+/* Viktig: grid og akse skal bruke samme høyre/venstre */
+.decadeBand {
+  left: 140px !important;
+  right: 16px !important;
+}
+
+.axisLine {
+  left: 140px !important;
+  right: 16px !important;
+}
+
+/* Lane-label litt smalere så tidslinjen får mer plass */
+.timelineLane {
+  grid-template-columns: 120px minmax(0, 1fr) !important;
+}
+
+.laneLabel {
+  padding: 8px !important;
+  font-size: 11px !important;
+}
+
+.timelineItem {
+  height: 28px !important;
+  top: 5px !important;
+  padding: 3px 6px !important;
+}
+
+.timelineItem strong {
+  font-size: 10px !important;
+}
+
+.timelineItem span {
+  font-size: 9px !important;
+}
+
+/* Verktøy og årfelter lavere */
+.timelineHeader {
+  margin-bottom: 6px !important;
+}
+
+.timelineTools button {
+  padding: 7px 11px !important;
+  min-height: 32px !important;
+}
+
+.yearInputs {
+  margin-bottom: 7px !important;
+}
+
+.yearInputs input {
+  height: 31px !important;
+  padding: 5px 8px !important;
+}
+
+.yearInputs span {
+  padding: 7px 10px !important;
+  line-height: 1 !important;
+}
+
+/* Større skjermer: tving 3 per rad og behold kompakt høyde */
+@media (min-width: 1201px) {
+  .filterColumn {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .selectedStack {
+    grid-column: 2 / -1 !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Mobil/popup: behold fargekodene, men mindre luft */
+@media (max-width: 760px) {
+  .filterColumn {
+    gap: 5px !important;
+    padding: 7px !important;
+  }
+
+  .selectBox select {
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .timelineCanvas {
+    padding-left: 108px !important;
+    padding-right: 18px !important;
+  }
+
+  .timelineLane {
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+  }
+
+  .decadeBand {
+    left: 108px !important;
+    right: 18px !important;
+  }
+
+  .axisLine {
+    left: 108px !important;
+    right: 18px !important;
   }
 }
