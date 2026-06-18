@@ -6,6 +6,7 @@
 }
 
 .hero,
+.anchorPanel,
 .selectionPanel,
 .panel {
   background: rgba(255, 255, 255, 0.92);
@@ -152,9 +153,45 @@
   line-height: 1.35;
 }
 
+.anchorPanel,
 .selectionPanel {
-  padding: 14px 18px;
+  padding: 18px;
   margin-bottom: 20px;
+}
+
+.anchorSwitch {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.anchorSwitch button {
+  appearance: none;
+  border: 1px solid rgba(50, 88, 128, 0.18);
+  background: #f8fbff;
+  border-radius: 14px;
+  text-align: left;
+  padding: 13px 14px;
+  cursor: pointer;
+  color: #132238;
+}
+
+.anchorSwitch button[data-active="true"] {
+  background: #123f73;
+  color: #fff;
+  border-color: #123f73;
+}
+
+.anchorSwitch span {
+  display: block;
+  font-weight: 850;
+}
+
+.anchorSwitch small {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.76;
+  line-height: 1.35;
 }
 
 .pathBox {
@@ -292,6 +329,7 @@
   }
 
   .hero,
+  .anchorPanel,
   .panel {
     padding: 18px;
     border-radius: 14px;

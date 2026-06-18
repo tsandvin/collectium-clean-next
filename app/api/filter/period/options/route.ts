@@ -2,42 +2,43 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Periodefilter options API UI/UX 8.6
+ * Periodefilter options API UI/UX 8.6 - relation anchor model
  *
- * Definering / formål:
- * Leser periodefilter-noder fra Neon og returnerer datagrunnlag for testside /test/periodefilter.
- * API-et støtter Rad 1 Nasjonal hovedperiode, Rad 2 Hovedperiode og Rad 3 Underperiode / relasjon.
+ * Definering / formal:
+ * Leser periodenoder og relasjonsnoder fra Neon og returnerer datagrunnlag for /test/periodefilter.
+ * API-et stotter at Rad 1 er anker: periode, konge/regent, person, ar, kilde, utgave, valor eller variant.
  *
- * Bruksområde:
+ * Bruksomrade:
  * Brukes av components/period-filter-test/CollectiumPeriodFilterTest.tsx.
  *
- * Berørte sider / routes:
+ * Berorte sider / routes:
  * - /test/periodefilter
  *
- * Berørte DB-brytere / feature_keys:
+ * Berorte DB-brytere / feature_keys:
  * - filter.period.simple.view
  * - filter.period.advanced.view
  * - filter.master.resolve
+ * - object.relations.view
  *
- * Berørte API-ruter:
+ * Berorte API-ruter:
  * - GET /api/filter/period/options
  *
- * Berørte tabeller / views:
+ * Berorte tabeller / views:
  * - ct_v_period_filter_options
  * - ct_v_object_relations_resolved
  *
  * Dataretning:
- * Neon → API/backend → Next.js → React → UI
+ * Neon -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
  * log_category: filter
  * log_action: period_options_view
  *
  * Versjon:
- * CT-FILE-PERIOD-UI86-0001 / CHANGE-2026-06-18-0001
+ * CT-FILE-PERIOD-UI86-0004 / CHANGE-2026-06-18-0002
  *
  * Endringsregel:
- * Denne filen erstatter kun periodefilter-testens options route. Den skriver ikke data.
+ * Denne filen skriver ikke data. Den utvider test-API-et med relasjonsanker.
  */
 
 import { NextResponse } from "next/server";
@@ -57,11 +58,18 @@ type PeriodOptionRow = {
   summary_short_no: string | null;
   collectium_relevance_no: string | null;
   relation_href: string | null;
-  object_count?: number;
 };
 
 type RelationSummaryRow = {
   relation_type: string;
+  relation_count: number;
+};
+
+type RelationNodeRow = {
+  relation_type: string;
+  relation_label_no: string | null;
+  relation_slug: string;
+  relation_href: string | null;
   relation_count: number;
 };
 
@@ -79,7 +87,7 @@ function errorResponse(message: string, status = 500) {
       source: "neon",
       message,
       rows: [],
-      levels: { row1: [], row2: [], row3: [] },
+      relationNodes: [],
       relationSummary: [],
       updatedAt: new Date().toISOString(),
     },
@@ -123,6 +131,8 @@ export async function GET() {
     `) as PeriodOptionRow[];
 
     let relationSummary: RelationSummaryRow[] = [];
+    let relationNodes: RelationNodeRow[] = [];
+
     try {
       const relationRows = (await sql`
         select
@@ -139,8 +149,47 @@ export async function GET() {
         relation_type: row.relation_type,
         relation_count: asNumber(row.relation_count),
       }));
+
+      const nodeRows = (await sql`
+        select
+          relation_type,
+          max(relation_label_no) as relation_label_no,
+          relation_slug,
+          max(relation_href) as relation_href,
+          count(*)::int as relation_count
+        from public.ct_v_object_relations_resolved
+        where source_key = 'norske_sedler'
+          and object_group = 'banknote'
+          and relation_type in ('ar', 'publiseringsar', 'regent', 'person', 'kilde', 'utgave', 'valor', 'variant')
+          and relation_slug is not null
+        group by relation_type, relation_slug
+        order by
+          case relation_type
+            when 'regent' then 1
+            when 'person' then 2
+            when 'ar' then 3
+            when 'publiseringsar' then 4
+            when 'kilde' then 5
+            when 'utgave' then 6
+            when 'valor' then 7
+            when 'variant' then 8
+            else 99
+          end,
+          relation_count desc,
+          relation_slug
+        limit 300
+      `) as RelationNodeRow[];
+
+      relationNodes = nodeRows.map((row) => ({
+        relation_type: row.relation_type,
+        relation_label_no: row.relation_label_no,
+        relation_slug: row.relation_slug,
+        relation_href: row.relation_href,
+        relation_count: asNumber(row.relation_count),
+      }));
     } catch {
       relationSummary = [];
+      relationNodes = [];
     }
 
     const normalizedRows = rows.map((row) => ({
@@ -153,18 +202,14 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       source: "neon",
-      model: "ui86_period_filter_three_rows",
+      model: "ui86_period_filter_anchor_rows",
       rows: normalizedRows,
-      levels: {
-        row1: normalizedRows.filter((row) => row.period_level === 1),
-        row2: normalizedRows.filter((row) => row.period_level === 2),
-        row3: normalizedRows.filter((row) => row.period_level === 3),
-      },
+      relationNodes,
       relationSummary,
       rules: {
-        row1: "Nasjonal hovedperiode",
-        row2: "Hovedperiode",
-        row3: "Underperiode / relasjon",
+        row1: "Anker: periode, konge/regent, person, ar, kilde, utgave, valor eller variant",
+        row2: "Kontekst innenfor valgt anker",
+        row3: "Bare konkrete undernoder dersom API har reelle valg",
         noDuplicateSelection: true,
         selectedNodeHasBio: true,
         dynamicSegments: ["samler", "historie", "finans"],
