@@ -47,16 +47,22 @@ const mobileBottomItems = [
 
 const skins: { value: CollectiumSkin; label: string }[] = [
   { value: "collectium", label: "Collectium" },
-  { value: "samler", label: "Enkel" },
+  { value: "samler", label: "Samler" },
   { value: "museum", label: "Museum" },
   { value: "finans", label: "Finans" },
 ];
 
 function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
   const [skin, setSkin] = useState<CollectiumSkin>("collectium");
+  const [bodyScale, setBodyScale] = useState<number>(0);
+  const [headlineScale, setHeadlineScale] = useState<number>(0);
+  const [isDesignMenuOpen, setIsDesignMenuOpen] = useState<boolean>(false);
   const pathname = usePathname() || "/";
   const {
+    selectedScreenMode,
+    setSelectedScreenMode,
     activeScreenMode,
+    actualScreenWidth,
     sidebarMode,
     laneMode,
     isMobileMenuOpen,
@@ -64,14 +70,28 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
   } = useCollectiumLayout();
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("collectium-active-skin") as CollectiumSkin | null;
-    const nextSkin = stored && skins.some((item) => item.value === stored) ? stored : "collectium";
+    // Skin
+    const storedSkin = window.localStorage.getItem("collectium-active-skin") as CollectiumSkin | null;
+    const nextSkin = storedSkin && skins.some((item) => item.value === storedSkin) ? storedSkin : "collectium";
     setSkin(nextSkin);
     document.documentElement.dataset.skin = nextSkin;
     document.documentElement.dataset.theme = nextSkin;
     document.documentElement.setAttribute("data-ct-skin", nextSkin);
     document.documentElement.dataset.template = "collectium";
     document.documentElement.dataset.vp = "pc";
+
+    // Body text scale
+    const storedBodyScale = window.localStorage.getItem("collectium-body-text-scale");
+    const nextBodyScale = storedBodyScale ? parseInt(storedBodyScale, 10) : 0;
+    setBodyScale(nextBodyScale);
+    document.documentElement.style.setProperty("--ct-user-body-scale", `${nextBodyScale}px`);
+
+    // Headline scale
+    const storedHeadlineScale = window.localStorage.getItem("collectium-headline-scale");
+    const nextHeadlineScale = storedHeadlineScale ? parseInt(storedHeadlineScale, 10) : 0;
+    setHeadlineScale(nextHeadlineScale);
+    document.documentElement.style.setProperty("--ct-user-headline-scale", `${nextHeadlineScale}px`);
+    document.documentElement.style.setProperty("--ct-user-subheadline-scale", `${nextHeadlineScale * 0.6}px`);
   }, []);
 
   function changeSkin(value: string) {
@@ -82,6 +102,51 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     document.documentElement.dataset.theme = nextSkin;
     document.documentElement.setAttribute("data-ct-skin", nextSkin);
   }
+
+  function updateBodyScale(val: number) {
+    setBodyScale(val);
+    window.localStorage.setItem("collectium-body-text-scale", val.toString());
+    document.documentElement.style.setProperty("--ct-user-body-scale", `${val}px`);
+  }
+
+  function updateHeadlineScale(val: number) {
+    setHeadlineScale(val);
+    window.localStorage.setItem("collectium-headline-scale", val.toString());
+    document.documentElement.style.setProperty("--ct-user-headline-scale", `${val}px`);
+    document.documentElement.style.setProperty("--ct-user-subheadline-scale", `${val * 0.6}px`);
+  }
+
+  function resetDesign() {
+    setSelectedScreenMode("auto");
+    changeSkin("collectium");
+    updateBodyScale(0);
+    updateHeadlineScale(0);
+  }
+
+  // Close design menu on Escape
+  useEffect(() => {
+    if (!isDesignMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsDesignMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isDesignMenuOpen]);
+
+  // Close design menu on click outside
+  useEffect(() => {
+    if (!isDesignMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("#collectium-design-menu") && !target.closest("#design-menu-toggle-btn")) {
+        setIsDesignMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDesignMenuOpen]);
 
   function checkActive(href: string): boolean {
     if (href === "/") {
@@ -204,14 +269,137 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
             </div>
           </div>
           <div className={styles.topActions}>
-            <label className={styles.skinLabel}>
-              <span>Skin</span>
-              <select className={styles.skinSelect} value={skin} onChange={(event) => changeSkin(event.target.value)} aria-label="Velg skin">
-                {skins.map((item) => (
-                  <option key={item.value} value={item.value}>{item.label}</option>
-                ))}
-              </select>
-            </label>
+            <div style={{ position: "relative" }}>
+              <button
+                id="design-menu-toggle-btn"
+                type="button"
+                className={`${styles.designMenuButton} ${isDesignMenuOpen ? styles.designMenuButtonActive : ""}`}
+                onClick={() => setIsDesignMenuOpen(!isDesignMenuOpen)}
+                aria-expanded={isDesignMenuOpen}
+                aria-controls="collectium-design-menu"
+              >
+                Skjerm / Design
+              </button>
+
+              {isDesignMenuOpen && (
+                <section
+                  id="collectium-design-menu"
+                  className={styles.designMegaMenu}
+                  aria-label="Design og layout meny"
+                >
+                  <header className={styles.designMenuHeader}>
+                    <h3>Skjerm &amp; Design</h3>
+                    <button
+                      type="button"
+                      className={styles.closeMenuButton}
+                      onClick={() => setIsDesignMenuOpen(false)}
+                      aria-label="Lukk designmeny"
+                    >
+                      <X size={18} />
+                    </button>
+                  </header>
+
+                  <div className={styles.designMenuGrid}>
+                    {/* SECTION A: Screen Selection */}
+                    <div className={styles.designMenuSection}>
+                      <h4>Skjermvalg</h4>
+                      <div className={styles.designMenuOptionGrid}>
+                        {[
+                          { key: "auto", label: "Auto" },
+                          { key: "mobile", label: "Mobil" },
+                          { key: "tablet", label: "Tablet" },
+                          { key: "desktop", label: "Desktop" },
+                          { key: "wide", label: "Bredskjerm" },
+                          { key: "tv", label: "TV" },
+                        ].map((mode) => (
+                          <button
+                            key={mode.key}
+                            type="button"
+                            className={`${styles.designMenuOption} ${
+                              selectedScreenMode === mode.key ? styles.designMenuOptionActive : ""
+                            }`}
+                            onClick={() => setSelectedScreenMode(mode.key as any)}
+                          >
+                            {mode.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className={styles.designMenuStatus}>
+                        <span>Faktisk bredde: <strong>{actualScreenWidth}px</strong></span>
+                        <span>Aktiv modus: <strong>{activeScreenMode}</strong></span>
+                        <span>Lane mode: <strong>{laneMode}</strong></span>
+                      </div>
+                    </div>
+
+                    {/* SECTION B: Skin Selection */}
+                    <div className={styles.designMenuSection}>
+                      <h4>Skin-valg</h4>
+                      <div className={styles.designMenuOptionGrid}>
+                        {skins.map((item) => (
+                          <button
+                            key={item.value}
+                            type="button"
+                            className={`${styles.designMenuOption} ${
+                              skin === item.value ? styles.designMenuOptionActive : ""
+                            }`}
+                            onClick={() => changeSkin(item.value)}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* SECTION C & D: Scale Sliders */}
+                    <div className={styles.designMenuSection}>
+                      <h4>Tekststørrelse</h4>
+                      
+                      <div className={styles.designSliderRow}>
+                        <div className={styles.designSliderLabel}>
+                          <span>Hovedtekst</span>
+                          <strong>{bodyScale > 0 ? `+${bodyScale}` : bodyScale}</strong>
+                        </div>
+                        <input
+                          type="range"
+                          min="-2"
+                          max="4"
+                          step="1"
+                          value={bodyScale}
+                          onChange={(e) => updateBodyScale(parseInt(e.target.value, 10))}
+                          aria-label="Juster hovedtekst"
+                        />
+                      </div>
+
+                      <div className={styles.designSliderRow}>
+                        <div className={styles.designSliderLabel}>
+                          <span>Overskrifter</span>
+                          <strong>{headlineScale > 0 ? `+${headlineScale}` : headlineScale}</strong>
+                        </div>
+                        <input
+                          type="range"
+                          min="-2"
+                          max="6"
+                          step="1"
+                          value={headlineScale}
+                          onChange={(e) => updateHeadlineScale(parseInt(e.target.value, 10))}
+                          aria-label="Juster overskrifter"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <footer className={styles.designMenuFooter}>
+                    <button
+                      type="button"
+                      className={styles.designResetButton}
+                      onClick={resetDesign}
+                    >
+                      Tilbakestill designvalg
+                    </button>
+                  </footer>
+                </section>
+              )}
+            </div>
             <Link className={styles.loginButton} href="/login">Login</Link>
           </div>
         </header>

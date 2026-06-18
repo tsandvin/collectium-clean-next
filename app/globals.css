@@ -6,6 +6,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   font-family: var(--ct-font-body);
   background: var(--ct-app-bg);
@@ -14,6 +15,7 @@ body {
 
 body {
   min-height: 100dvh;
+  min-width: 0;
 }
 
 a {
@@ -26,6 +28,24 @@ h3 {
   font-family: var(--ct-font-display);
 }
 
+h1,
+.collectium-headline,
+.ct-page-title {
+  font-size: calc(var(--ct-headline-base, 1.8rem) + var(--ct-user-headline-scale));
+}
+
+h2,
+.collectium-subheadline,
+.ct-section-title {
+  font-size: calc(var(--ct-subheadline-base, 1.25rem) + var(--ct-user-subheadline-scale));
+}
+
+body,
+.collectium-content,
+main {
+  font-size: calc(var(--ct-body-base, 1rem) + var(--ct-user-body-scale));
+}
+
 button,
 input,
 select,
@@ -36,6 +56,10 @@ textarea {
 :root,
 html[data-skin="collectium"],
 html[data-theme="collectium"] {
+  --ct-body-base: 1rem;
+  --ct-user-body-scale: 0px;
+  --ct-user-headline-scale: 0px;
+  --ct-user-subheadline-scale: 0px;
   color-scheme: light;
   --ct-theme-name: "Collectium";
   --ct-bg: #fffaf2;
@@ -326,11 +350,14 @@ html[data-theme="finans"] {
   justify-content: center;
 }
 
-.ct-page-lock,
 .collectium-page,
 .collectium-content,
-main {
+main,
+.ct-v7-shell,
+.ct-page-lock {
   min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* Collectium 3D depth and layering effects */
@@ -1827,5 +1854,22 @@ main {
 
   .ct-v7-shell {
     padding: 10px !important;
+  }
+}
+
+@media (max-width: 719px) {
+  :root {
+    --ct-body-base: 17px;
+  }
+
+  body {
+    font-size: calc(var(--ct-body-base) + var(--ct-user-body-scale));
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
