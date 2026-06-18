@@ -1341,3 +1341,93 @@ main {
     display: grid;
   }
 }
+
+/* Collectium period filter v7.1 - parent shell width fix */
+.ct-v7-shell {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: clamp(12px, 1.4vw, 22px) !important;
+  box-sizing: border-box !important;
+  overflow-x: clip !important;
+}
+
+.ct-v7-shell,
+.ct-v7-shell * {
+  max-width: 100%;
+}
+
+.ct-v7-panel,
+.ct-v7-hero,
+.ct-v7-debug,
+.ct-v7-status,
+.ct-v7-rad-grid,
+.ct-v7-two,
+.ct-v7-cards,
+.ct-v7-master-grid,
+.ct-v7-timeline {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.ct-v7-master-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(96px, 130px) minmax(96px, 130px) !important;
+}
+
+.ct-v7-master-grid label,
+.ct-v7-master-grid select,
+.ct-v7-master-grid input,
+.ct-v7-rad select {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.ct-v7-timeline {
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)) !important;
+  overflow: visible !important;
+}
+
+.ct-v7-timeline button {
+  min-width: 0 !important;
+}
+
+.ct-v7-debug {
+  overflow: hidden !important;
+}
+
+.ct-v7-debug pre {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+@media (max-width: 1500px) {
+  .ct-v7-master-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .ct-v7-status,
+  .ct-v7-rad-grid,
+  .ct-v7-two {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ct-v7-card-fields,
+  .ct-v7-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .ct-v7-master-grid,
+  .ct-v7-card-fields,
+  .ct-v7-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ct-v7-shell {
+    padding: 10px !important;
+  }
+}
