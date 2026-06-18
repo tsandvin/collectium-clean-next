@@ -512,3 +512,289 @@
     flex-wrap: wrap;
   }
 }
+
+/* ============================================================
+   CT PATCH - Periodefilter 3x3 over tidslinje
+   Endring:
+   - Filterfeltet ligger over tidslinjen, ikke som smal høyreboks.
+   - Master/Land/Objekttype på første rekke.
+   - Rad 1/Rad 2/Rad 3 på andre rekke.
+   - Rad 4/Valgt på tredje rekke.
+   - Mobil/popup får mer tabellaktig tidslinjevisning.
+   ============================================================ */
+
+.layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.mainColumn {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.filterColumn {
+  width: 100% !important;
+  max-width: none !important;
+  align-self: stretch !important;
+  position: static !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  padding: 10px !important;
+  border: 1px solid #d5e5f7 !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, .96) !important;
+  box-shadow: 0 10px 30px rgba(7, 53, 110, .08) !important;
+}
+
+.filterColumnHeader {
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: end !important;
+  border-bottom: 1px solid #e3eef9 !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 0 !important;
+}
+
+.filterColumnHeader h2 {
+  margin: 0 !important;
+  font-size: clamp(20px, 2.2vw, 30px) !important;
+  line-height: 1 !important;
+}
+
+.filterDivider {
+  grid-column: 1 / -1 !important;
+  margin: 2px 0 0 !important;
+  border-top: 1px solid #d8e6f6 !important;
+  padding-top: 8px !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: .08em !important;
+  font-weight: 900 !important;
+  color: #0b4387 !important;
+}
+
+.selectBox {
+  min-width: 0 !important;
+  display: block !important;
+  border: 1px solid #d8e6f6 !important;
+  border-radius: 12px !important;
+  background: #f9fcff !important;
+  padding: 8px !important;
+  margin-top: 0 !important;
+}
+
+.selectBox span {
+  display: block !important;
+  margin-bottom: 4px !important;
+  font-size: 9px !important;
+  text-transform: uppercase !important;
+  letter-spacing: .08em !important;
+  font-weight: 900 !important;
+  color: #56749a !important;
+}
+
+.selectBox select {
+  width: 100% !important;
+  min-height: 38px !important;
+  border: 1px solid #cfe0f4 !important;
+  border-radius: 9px !important;
+  padding: 8px 9px !important;
+  background: #fff !important;
+  color: #07356e !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+}
+
+.selectBox small {
+  display: block !important;
+  min-height: 22px !important;
+  margin-top: 5px !important;
+  color: #5a7493 !important;
+  font-size: 10px !important;
+  font-style: italic !important;
+  line-height: 1.25 !important;
+}
+
+.selectedStack {
+  grid-column: 2 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  align-content: start !important;
+  margin-top: 0 !important;
+  border: 1px solid #d8e6f6 !important;
+  border-radius: 12px !important;
+  padding: 8px !important;
+  background: #fff !important;
+}
+
+.selectedStack strong {
+  grid-column: 1 / -1 !important;
+  display: block !important;
+  margin: 0 0 2px !important;
+  color: #0b4387 !important;
+  font-size: 12px !important;
+}
+
+.selectedStack span {
+  display: block !important;
+  border: 1px solid #e2edf9 !important;
+  border-radius: 999px !important;
+  background: #f8fbff !important;
+  padding: 5px 8px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Rad 4 tar venstre plass i tredje rekke */
+.filterColumn > .selectBox:nth-of-type(7) {
+  grid-column: 1 / 2 !important;
+}
+
+/* Tidslinjen skal begynne under filterfeltet og bruke hele bredden */
+.timelineShell {
+  width: 100% !important;
+  margin-top: 0 !important;
+}
+
+/* År fra/til kan ligge kompakt oppe til høyre i tidslinjen */
+.yearInputs {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  align-items: end !important;
+  margin-bottom: 10px !important;
+}
+
+.yearInputs label {
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  color: #56749a !important;
+}
+
+.yearInputs input {
+  display: block !important;
+  width: 95px !important;
+  border: 1px solid #cfe0f4 !important;
+  border-radius: 9px !important;
+  padding: 8px !important;
+  font-weight: 900 !important;
+  color: #07356e !important;
+}
+
+/* Tablet: 2 kolonner */
+@media (max-width: 1200px) {
+  .filterColumn {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .selectedStack {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .filterColumn > .selectBox:nth-of-type(7) {
+    grid-column: auto !important;
+  }
+}
+
+/* Mobil: én kolonne, men popup/tidslinje får tabellaktig høykantvisning */
+@media (max-width: 760px) {
+  .filterColumn {
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+  }
+
+  .selectedStack {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .yearInputs {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  .timelineHeader {
+    gap: 8px !important;
+  }
+
+  .timelineTools {
+    flex-wrap: wrap !important;
+  }
+
+  .timelineViewport {
+    max-height: 78vh !important;
+    overflow: auto !important;
+  }
+
+  .timelineCanvas {
+    min-width: 760px !important;
+    padding: 34px 80px 62px 120px !important;
+  }
+
+  .timelineLane {
+    grid-template-columns: 105px 1fr !important;
+    min-height: 58px !important;
+  }
+
+  .laneLabel {
+    writing-mode: vertical-rl !important;
+    transform: rotate(180deg) !important;
+    min-height: 48px !important;
+    text-align: center !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .timelineItem {
+    height: 38px !important;
+  }
+
+  .timelineItem strong {
+    font-size: 10px !important;
+  }
+
+  .timelineItem span {
+    font-size: 9px !important;
+  }
+
+  .axisLine {
+    left: 120px !important;
+    right: 80px !important;
+  }
+
+  .decadeBand {
+    left: 120px !important;
+    right: 80px !important;
+  }
+}
+
+/* Popup på mobil: tidslinjen tar hele laget og tabellen kan scrolles */
+@media (max-width: 760px) {
+  .page[data-timeline-only="true"] .timelineShell {
+    position: fixed !important;
+    inset: 8px !important;
+    z-index: 999 !important;
+    overflow: auto !important;
+    padding: 10px !important;
+  }
+
+  .page[data-timeline-only="true"] .timelineViewport {
+    height: calc(100vh - 180px) !important;
+    max-height: none !important;
+  }
+
+  .page[data-timeline-only="true"] .timelineCanvas {
+    min-width: 820px !important;
+  }
+}
