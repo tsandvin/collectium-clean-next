@@ -1,656 +1,752 @@
 "use client";
 
-/**
- * COLLECTIUM FILE HEADER
- *
- * Overskrift:
- * CollectiumPeriodFilterTest
- *
- * Definering / formål:
- * Testside for periodefilter med filtertyper, faktiske periodevalg fra
- * ct_v_period_filter_options og katalogresultater under tidslinjen.
- *
- * Routes:
- * - /test/periodefilter
- *
- * API:
- * - /api/filter/period
- * - /api/filter/period/options
- * - /api/test/period-catalog
- * - /api/object/presentation
- * - /api/object/relations
- * - /api/object/market
- */
+import React, { useEffect, useMemo, useState } from "react";
 
-import { useEffect, useMemo, useState } from "react";
-
-type Segment = "samler" | "historie" | "finans";
-type LoadState = "loading" | "ready";
-
-type ApiResult<T> = {
+type ApiState<T> = {
   ok: boolean;
-  status: number;
+  status: "idle" | "loading" | "ok" | "error";
   url: string;
   data: T | null;
   error: string | null;
-  raw: string;
 };
 
 type ApiEnvelope = {
   ok?: boolean;
   source?: string;
   count?: number;
+  rows?: any[];
+  options?: any[];
+  filters?: any[];
+  filterTypes?: any[];
+  data?: any;
   error?: string;
-  period_filters?: PeriodFilterType[];
-  filters?: PeriodFilterType[];
-  options?: PeriodOption[];
-  rows?: unknown[];
-  objects?: CatalogObject[];
-  data?: unknown[];
-  [key: string]: unknown;
+  message?: string;
+  [key: string]: any;
 };
 
-type PeriodFilterType = {
-  period_filter_key?: string;
-  period_filter_label_no?: string;
-  period_filter_level?: string;
-  sort_order?: number | string | null;
-  [key: string]: unknown;
-};
+type Segment = "samler" | "historie" | "finans";
+type ViewMode = "liste" | "horisontal" | "kort";
 
-type PeriodOption = {
-  option_key?: string;
-  option_label_no?: string;
-  period_filter_key?: string;
-  timeline_start_year?: number | string | null;
-  timeline_end_year?: number | string | null;
-  timeline_sort_year?: number | string | null;
-  relation_type?: string | null;
-  relation_slug?: string | null;
-  relation_href?: string | null;
-  period_label_no?: string | null;
-  relation_label_no?: string | null;
-  display_name_no?: string | null;
-  start_year?: number | string | null;
-  end_year?: number | string | null;
-  year_from?: number | string | null;
-  year_to?: number | string | null;
-  [key: string]: unknown;
-};
+const SEGMENTS: Segment[] = ["samler", "historie", "finans"];
+const VIEWS: ViewMode[] = ["liste", "horisontal", "kort"];
 
-type CatalogObject = {
-  source_key: string;
-  object_group: string;
-  object_id: number | string;
-  title?: string;
-  title_no?: string;
-  object_href?: string;
-  denomination_raw_no?: string | null;
-  object_year_label?: string | null;
-  publication_year_label?: string | null;
-  denomination_issue_raw_no?: string | null;
-  variant_type_raw_no?: string | null;
-  signature_raw_no?: string | null;
-  ruler_name_raw_no?: string | null;
-  alias_ruler_name_raw_no?: string | null;
-  relations?: RelationRow[];
-  [key: string]: unknown;
-};
-
-type RelationRow = {
-  relation_type?: string | null;
-  relation_label_no?: string | null;
-  relation_slug?: string | null;
-  relation_href?: string | null;
-  display_name_no?: string | null;
-  href?: string | null;
-  [key: string]: unknown;
-};
-
-type ObjectPresentationResponse = ApiEnvelope & {
-  found?: boolean;
-  row?: CatalogObject;
-};
-
-type ObjectRelationsResponse = ApiEnvelope & {
-  count?: number;
-  rows?: RelationRow[];
-};
-
-type ObjectMarketResponse = ApiEnvelope & {
-  found?: boolean;
-  row?: {
-    market_value_raw_no?: string | null;
-    value_raw_no?: string | null;
-    trend_raw_no?: string | null;
-    auction_status_raw_no?: string | null;
-    shop_status_raw_no?: string | null;
-    market_value_status_no?: string | null;
-    [key: string]: unknown;
+function makeState<T>(url: string): ApiState<T> {
+  return {
+    ok: false,
+    status: "idle",
+    url,
+    data: null,
+    error: null,
   };
-};
-
-type PageData = {
-  filterTypes: PeriodFilterType[];
-  periodOptions: PeriodOption[];
-  objects: CatalogObject[];
-  selectedObject: CatalogObject | null;
-  periodApi: ApiResult<ApiEnvelope> | null;
-  optionsApi: ApiResult<ApiEnvelope> | null;
-  catalogApi: ApiResult<ApiEnvelope> | null;
-  presentation: ApiResult<ObjectPresentationResponse> | null;
-  relations: ApiResult<ObjectRelationsResponse> | null;
-  market: ApiResult<ObjectMarketResponse> | null;
-};
-
-function asText(value: unknown, fallback = "Mangler"): string {
-  if (value === null || value === undefined) return fallback;
-  const text = String(value).trim();
-  return text.length > 0 ? text : fallback;
 }
 
-function asYear(value: unknown): number | null {
-  if (value === null || value === undefined) return null;
-  const match = String(value).match(/-?\d{1,4}/);
-  if (!match) return null;
-  const numberValue = Number(match[0]);
-  return Number.isFinite(numberValue) ? numberValue : null;
-}
-
-function optionKey(option: PeriodOption, index: number): string {
-  return asText(option.option_key ?? option.relation_slug ?? `period-option-${index}`, `period-option-${index}`);
-}
-
-function optionLabel(option: PeriodOption): string {
-  return asText(
-    option.option_label_no ??
-      option.period_label_no ??
-      option.relation_label_no ??
-      option.display_name_no ??
-      option.relation_slug ??
-      option.option_key,
-    "Uten periode"
-  );
-}
-
-function optionStart(option: PeriodOption): number | null {
-  return (
-    asYear(option.timeline_start_year) ??
-    asYear(option.start_year) ??
-    asYear(option.year_from) ??
-    asYear(option.option_label_no) ??
-    asYear(option.period_label_no) ??
-    asYear(option.relation_label_no)
-  );
-}
-
-function optionEnd(option: PeriodOption): number | null {
-  return asYear(option.timeline_end_year) ?? asYear(option.end_year) ?? asYear(option.year_to) ?? optionStart(option);
-}
-
-function getFilterTypes(payload: ApiEnvelope | null): PeriodFilterType[] {
-  if (!payload) return [];
-  for (const candidate of [payload.period_filters, payload.filters, payload.rows, payload.data]) {
-    if (Array.isArray(candidate)) return candidate as PeriodFilterType[];
-  }
-  return [];
-}
-
-function getPeriodOptions(payload: ApiEnvelope | null): PeriodOption[] {
-  if (!payload) return [];
-  for (const candidate of [payload.options, payload.rows, payload.data]) {
-    if (Array.isArray(candidate)) return candidate as PeriodOption[];
-  }
-  return [];
-}
-
-function getCatalogObjects(payload: ApiEnvelope | null): CatalogObject[] {
-  if (!payload) return [];
-  for (const candidate of [payload.objects, payload.rows, payload.data]) {
-    if (Array.isArray(candidate)) return candidate as CatalogObject[];
-  }
-  return [];
-}
-
-function objectTitle(object: CatalogObject | null): string {
-  if (!object) return "Ingen objekt valgt";
-
-  return asText(
-    object.title ??
-      object.title_no ??
-      [
-        object.denomination_raw_no,
-        object.object_year_label ?? object.publication_year_label,
-        object.denomination_issue_raw_no,
-        object.variant_type_raw_no,
-      ]
-        .filter(Boolean)
-        .join(" - "),
-    "Uten tittel"
-  );
-}
-
-function objectQuery(object: CatalogObject): string {
-  return [
-    `source_key=${encodeURIComponent(asText(object.source_key, "norske_sedler"))}`,
-    `object_group=${encodeURIComponent(asText(object.object_group, "banknote"))}`,
-    `object_id=${encodeURIComponent(String(object.object_id))}`,
-  ].join("&");
-}
-
-async function fetchApi<T extends ApiEnvelope>(url: string): Promise<ApiResult<T>> {
+async function fetchJson<T>(url: string): Promise<ApiState<T>> {
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    });
+    const res = await fetch(url, { cache: "no-store" });
+    const text = await res.text();
 
-    const raw = await response.text();
-
-    if (!raw || raw.trim().length === 0) {
-      return { ok: false, status: response.status, url, data: null, error: `Tomt API-svar fra ${url}`, raw };
+    let data: any = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = { raw: text };
     }
 
-    try {
-      const data = JSON.parse(raw) as T;
-      const ok = response.ok && data.ok !== false;
-      return {
-        ok,
-        status: response.status,
-        url,
-        data,
-        error: ok ? null : asText(data.error, `HTTP ${response.status}`),
-        raw,
-      };
-    } catch {
+    if (!res.ok) {
       return {
         ok: false,
-        status: response.status,
+        status: "error",
         url,
-        data: null,
-        error: `API svarte ikke med gyldig JSON fra ${url}`,
-        raw: raw.slice(0, 1000),
+        data,
+        error: `HTTP ${res.status}: ${data?.error || data?.message || text || res.statusText}`,
       };
     }
-  } catch (error) {
+
+    return {
+      ok: data?.ok !== false,
+      status: data?.ok === false ? "error" : "ok",
+      url,
+      data,
+      error: data?.ok === false ? data?.error || data?.message || "API returnerte ok:false" : null,
+    };
+  } catch (err) {
     return {
       ok: false,
-      status: 0,
+      status: "error",
       url,
       data: null,
-      error: error instanceof Error ? error.message : "Ukjent nettverksfeil",
-      raw: "",
+      error: err instanceof Error ? err.message : String(err),
     };
   }
 }
 
-function FilterTypeBar({
-  filters,
-  selected,
-  onSelect,
-}: {
-  filters: PeriodFilterType[];
-  selected: string | null;
-  onSelect: (value: string | null) => void;
-}) {
-  return (
-    <div className="ct-inline-actions" aria-label="Periodefiltertype">
-      <button type="button" className={selected === null ? "is-active" : ""} onClick={() => onSelect(null)}>
-        Alle filtertyper
-      </button>
+function arr(value: any): any[] {
+  if (Array.isArray(value)) return value;
+  return [];
+}
 
-      {filters.map((filter, index) => {
-        const key = asText(filter.period_filter_key, `filter-${index}`);
-        return (
-          <button key={key} type="button" className={selected === key ? "is-active" : ""} onClick={() => onSelect(key)}>
-            {asText(filter.period_filter_label_no ?? filter.period_filter_key, key)}
-          </button>
-        );
-      })}
+function rowsFrom(payload: ApiEnvelope | null): any[] {
+  if (!payload) return [];
+  return (
+    arr(payload.rows) ||
+    arr(payload.options) ||
+    arr(payload.filters) ||
+    arr(payload.filterTypes)
+  );
+}
+
+function getPeriodOptions(payload: ApiEnvelope | null): any[] {
+  if (!payload) return [];
+  return arr(payload.options).length ? arr(payload.options) : arr(payload.rows);
+}
+
+function getFilterTypes(payload: ApiEnvelope | null): any[] {
+  if (!payload) return [];
+  return arr(payload.rows).length ? arr(payload.rows) : arr(payload.filterTypes);
+}
+
+function getMasterRows(payload: ApiEnvelope | null): any[] {
+  if (!payload) return [];
+  const candidates = [
+    payload.rows,
+    payload.filters,
+    payload.data?.rows,
+    payload.data?.filters,
+    payload.master,
+    payload.data?.master,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate) && candidate.length) return candidate;
+  }
+
+  return [];
+}
+
+function label(row: any): string {
+  return (
+    row?.label_no ||
+    row?.filter_label_no ||
+    row?.display_name_no ||
+    row?.option_label_no ||
+    row?.name_no ||
+    row?.title_no ||
+    row?.filter_value ||
+    row?.source_key ||
+    row?.object_group ||
+    row?.period_slug ||
+    row?.filter_key ||
+    row?.key ||
+    "Uten navn"
+  );
+}
+
+function keyOf(row: any, index: number): string {
+  return String(
+    row?.option_key ||
+    row?.period_slug ||
+    row?.filter_key ||
+    row?.filter_value ||
+    row?.source_key ||
+    row?.object_group ||
+    row?.id ||
+    index
+  );
+}
+
+function firstValue(...values: any[]): string {
+  for (const value of values) {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return String(value);
+    }
+  }
+  return "Mangler";
+}
+
+function ApiBadge({ state, title }: { state: ApiState<ApiEnvelope>; title: string }) {
+  return (
+    <div className={`ct-api-badge ct-api-${state.status}`}>
+      <strong>{title}</strong>
+      <span>{state.status === "ok" ? "OK" : state.status === "loading" ? "Laster" : state.status === "error" ? "Feil" : "Ikke kjørt"}</span>
+      {state.error ? <small>{state.error}</small> : null}
     </div>
   );
 }
 
-function Timeline({
-  options,
-  selected,
-  onSelect,
+function DynamicSegmentPanel({
+  segment,
+  selectedObject,
 }: {
-  options: PeriodOption[];
-  selected: string | null;
-  onSelect: (value: string | null) => void;
+  segment: Segment;
+  selectedObject: any | null;
 }) {
-  const rows = useMemo(() => {
-    return options
-      .map((option, index) => ({
-        option,
-        key: optionKey(option, index),
-        label: optionLabel(option),
-        start: optionStart(option),
-        end: optionEnd(option),
-        sort: asYear(option.timeline_sort_year) ?? optionStart(option) ?? index,
-      }))
-      .sort((a, b) => a.sort - b.sort || a.label.localeCompare(b.label, "nb"));
-  }, [options]);
+  if (!selectedObject) {
+    return (
+      <section className="ct-dynamic-panel">
+        <h3>Dynamisk felt A · {segment}</h3>
+        <p>Ingen valgt katalograd ennå.</p>
+      </section>
+    );
+  }
 
-  if (rows.length === 0) {
-    return <p>Ingen periodevalg returnert fra ct_v_period_filter_options.</p>;
+  const relations = arr(selectedObject.relations);
+
+  if (segment === "samler") {
+    return (
+      <section className="ct-dynamic-panel">
+        <h3>Dynamisk felt A · Samler</h3>
+        <dl>
+          <div><dt>Tittel</dt><dd>{firstValue(selectedObject.title, selectedObject.title_no)}</dd></div>
+          <div><dt>Katalognummer</dt><dd>{firstValue(selectedObject.source_catalog_number)}</dd></div>
+          <div><dt>Valør</dt><dd>{firstValue(selectedObject.denomination_raw_no, selectedObject.valor_raw_no)}</dd></div>
+          <div><dt>År</dt><dd>{firstValue(selectedObject.object_year_label, selectedObject.publication_year_label)}</dd></div>
+          <div><dt>Variant</dt><dd>{firstValue(selectedObject.variant_type_raw_no)}</dd></div>
+          <div><dt>Sjeldenhet</dt><dd>{firstValue(selectedObject.rarity_raw_no, selectedObject.rarity_label_no)}</dd></div>
+        </dl>
+      </section>
+    );
+  }
+
+  if (segment === "historie") {
+    return (
+      <section className="ct-dynamic-panel">
+        <h3>Dynamisk felt A · Historie</h3>
+        <dl>
+          <div><dt>Regent</dt><dd>{firstValue(selectedObject.ruler_name_raw_no, selectedObject.historical_ruler_raw_no)}</dd></div>
+          <div><dt>Utgave</dt><dd>{firstValue(selectedObject.denomination_issue_raw_no)}</dd></div>
+          <div><dt>Publiseringsår</dt><dd>{firstValue(selectedObject.publication_year_label)}</dd></div>
+          <div><dt>Relasjoner</dt><dd>{relations.length}</dd></div>
+        </dl>
+        <div className="ct-relation-chip-row">
+          {relations.slice(0, 8).map((relation: any, index: number) => (
+            <a key={`${relation.relation_type}-${index}`} href={relation.relation_href || "#"} className="ct-relation-chip">
+              {firstValue(relation.relation_label_no, relation.relation_type)} · {firstValue(relation.relation_slug)}
+            </a>
+          ))}
+        </div>
+      </section>
+    );
   }
 
   return (
-    <div className="ct-period-timeline" aria-label="Periodevalg tidslinje">
-      <button type="button" className={selected === null ? "is-active" : ""} onClick={() => onSelect(null)}>
-        Alle perioder
-        <span>{rows.length} valg</span>
+    <section className="ct-dynamic-panel">
+      <h3>Dynamisk felt A · Finans</h3>
+      <dl>
+        <div><dt>Markedsverdi</dt><dd>{firstValue(selectedObject.market_value_raw_no, selectedObject.value_raw_no, "Mangler markedsverdi")}</dd></div>
+        <div><dt>Trend</dt><dd>{firstValue(selectedObject.trend_raw_no, "Ikke beregnet trend")}</dd></div>
+        <div><dt>Auksjon</dt><dd>{firstValue(selectedObject.auction_status_raw_no, "Ikke registrert på auksjon")}</dd></div>
+        <div><dt>Nettbutikk</dt><dd>{firstValue(selectedObject.shop_status_raw_no, "Ikke registrert i nettbutikk")}</dd></div>
+      </dl>
+    </section>
+  );
+}
+
+function DynamicSelectionPanel({
+  selectedFilterType,
+  selectedPeriod,
+  selectedMaster,
+}: {
+  selectedFilterType: any | null;
+  selectedPeriod: any | null;
+  selectedMaster: any | null;
+}) {
+  return (
+    <section className="ct-dynamic-panel">
+      <h3>Dynamisk felt B · Direkte valgt filter</h3>
+      <dl>
+        <div><dt>Masterfilter</dt><dd>{selectedMaster ? label(selectedMaster) : "Ikke valgt"}</dd></div>
+        <div><dt>Filtertype</dt><dd>{selectedFilterType ? label(selectedFilterType) : "Ikke valgt"}</dd></div>
+        <div><dt>Periodevalg</dt><dd>{selectedPeriod ? label(selectedPeriod) : "Ikke valgt"}</dd></div>
+        <div><dt>Periode-key</dt><dd>{selectedPeriod ? firstValue(selectedPeriod.option_key, selectedPeriod.period_slug) : "Mangler"}</dd></div>
+        <div><dt>Filter-key</dt><dd>{selectedPeriod ? firstValue(selectedPeriod.period_filter_key, selectedPeriod.period_type_key) : "Mangler"}</dd></div>
+        <div><dt>År</dt><dd>{selectedPeriod ? `${firstValue(selectedPeriod.start_year_label, selectedPeriod.timeline_start_year)} – ${firstValue(selectedPeriod.end_year_label, selectedPeriod.timeline_end_year, "nå")}` : "Mangler"}</dd></div>
+        <div><dt>Relasjonsbane</dt><dd>{selectedPeriod?.relation_href ? <a href={selectedPeriod.relation_href}>{selectedPeriod.relation_href}</a> : "Mangler"}</dd></div>
+      </dl>
+    </section>
+  );
+}
+
+function ResultCard({
+  object,
+  view,
+  segment,
+  selected,
+  onSelect,
+}: {
+  object: any;
+  view: ViewMode;
+  segment: Segment;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const title = firstValue(object.title, object.title_no, object.collectium_title_no);
+  const href = `/objekt/${firstValue(object.source_key, "norske_sedler")}/${firstValue(object.object_group, "banknote")}/${firstValue(object.object_id)}`;
+
+  return (
+    <article className={`ct-result-card ct-view-${view} ${selected ? "is-selected" : ""}`}>
+      <button type="button" onClick={onSelect} className="ct-card-select">
+        <span className="ct-card-title">{title}</span>
+        <span className="ct-card-meta">
+          {firstValue(object.source_catalog_number)} · {firstValue(object.denomination_raw_no)} · {firstValue(object.object_year_label, object.publication_year_label)}
+        </span>
       </button>
 
-      {rows.map((row) => (
-        <button key={row.key} type="button" className={selected === row.key ? "is-active" : ""} onClick={() => onSelect(row.key)}>
-          <strong>{row.label}</strong>
-          <span>
-            {row.start ? row.start : "Udatert"}
-            {row.end && row.start && row.end !== row.start ? `-${row.end}` : ""}
-          </span>
-        </button>
-      ))}
-    </div>
+      <div className="ct-card-segment">
+        {segment === "samler" ? (
+          <>
+            <span>Variant: {firstValue(object.variant_type_raw_no)}</span>
+            <span>Sjeldenhet: {firstValue(object.rarity_raw_no, object.rarity_label_no)}</span>
+          </>
+        ) : segment === "historie" ? (
+          <>
+            <span>Regent: {firstValue(object.ruler_name_raw_no, object.historical_ruler_raw_no)}</span>
+            <span>Relasjoner: {arr(object.relations).length}</span>
+          </>
+        ) : (
+          <>
+            <span>Verdi: {firstValue(object.market_value_raw_no, object.value_raw_no, "Mangler markedsverdi")}</span>
+            <span>Trend: {firstValue(object.trend_raw_no, "Ikke beregnet")}</span>
+          </>
+        )}
+      </div>
+
+      <div className="ct-card-actions">
+        <a href={href}>Objekt info</a>
+        {arr(object.relations)[0]?.relation_href ? <a href={arr(object.relations)[0].relation_href}>Se relasjon</a> : null}
+      </div>
+    </article>
   );
 }
 
 export default function CollectiumPeriodFilterTest() {
-  const [state, setState] = useState<LoadState>("loading");
   const [segment, setSegment] = useState<Segment>("historie");
-  const [selectedFilterType, setSelectedFilterType] = useState<string | null>(null);
-  const [selectedPeriodOption, setSelectedPeriodOption] = useState<string | null>(null);
-  const [data, setData] = useState<PageData>({
-    filterTypes: [],
-    periodOptions: [],
-    objects: [],
-    selectedObject: null,
-    periodApi: null,
-    optionsApi: null,
-    catalogApi: null,
-    presentation: null,
-    relations: null,
-    market: null,
-  });
+  const [view, setView] = useState<ViewMode>("liste");
+
+  const [masterState, setMasterState] = useState<ApiState<ApiEnvelope>>(makeState("/api/filter/master"));
+  const [periodState, setPeriodState] = useState<ApiState<ApiEnvelope>>(makeState("/api/filter/period"));
+  const [optionsState, setOptionsState] = useState<ApiState<ApiEnvelope>>(makeState("/api/filter/period/options"));
+  const [catalogState, setCatalogState] = useState<ApiState<ApiEnvelope>>(makeState("/api/test/period-catalog"));
+
+  const [selectedMasterKey, setSelectedMasterKey] = useState<string>("");
+  const [selectedFilterTypeKey, setSelectedFilterTypeKey] = useState<string>("");
+  const [selectedPeriodKey, setSelectedPeriodKey] = useState<string>("");
+  const [selectedObjectKey, setSelectedObjectKey] = useState<string>("");
+
+  const [countryScope, setCountryScope] = useState<string>("NO");
+  const [sourceKey, setSourceKey] = useState<string>("norske_sedler");
+  const [objectGroup, setObjectGroup] = useState<string>("banknote");
+  const [yearFrom, setYearFrom] = useState<string>("");
+  const [yearTo, setYearTo] = useState<string>("");
+
+
+  async function loadAll(activeSegment: Segment) {
+    setMasterState({ ...makeState("/api/filter/master"), status: "loading" });
+    setPeriodState({ ...makeState("/api/filter/period"), status: "loading" });
+    setOptionsState({ ...makeState("/api/filter/period/options"), status: "loading" });
+
+    const [master, period, options] = await Promise.all([
+      fetchJson<ApiEnvelope>("/api/filter/master"),
+      fetchJson<ApiEnvelope>("/api/filter/period"),
+      fetchJson<ApiEnvelope>("/api/filter/period/options"),
+    ]);
+
+    setMasterState(master);
+    setPeriodState(period);
+    setOptionsState(options);
+
+    await loadCatalog(activeSegment);
+  }
+
+  async function loadCatalog(activeSegment: Segment) {
+    const params = new URLSearchParams({
+      source_key: sourceKey,
+      object_group: objectGroup,
+      segment: activeSegment,
+      view: "liste",
+      limit: "25",
+    });
+
+    if (countryScope) params.set("country_scope", countryScope);
+    if (yearFrom.trim()) params.set("year_from", yearFrom.trim());
+    if (yearTo.trim()) params.set("year_to", yearTo.trim());
+
+    const url = `/api/test/period-catalog?${params.toString()}`;
+
+    setCatalogState({ ...makeState(url), status: "loading" });
+    const catalog = await fetchJson<ApiEnvelope>(url);
+    setCatalogState(catalog);
+
+    const objects = rowsFrom(catalog.data);
+    if (objects[0]) {
+      setSelectedObjectKey(String(objects[0].object_id ?? ""));
+    }
+  }
 
   useEffect(() => {
-    let cancelled = false;
+    loadAll(segment);
+  }, []);
 
-    async function load() {
-      setState("loading");
+  useEffect(() => {
+    loadCatalog(segment);
+  }, [segment, countryScope, sourceKey, objectGroup, yearFrom, yearTo]);
 
-      const periodApi = await fetchApi<ApiEnvelope>("/api/filter/period");
-      const optionsApi = await fetchApi<ApiEnvelope>("/api/filter/period/options");
-      const catalogApi = await fetchApi<ApiEnvelope>(
-        `/api/test/period-catalog?source_key=norske_sedler&object_group=banknote&segment=${segment}&view=liste&limit=25`
-      );
+  const masterRows = useMemo(() => getMasterRows(masterState.data), [masterState.data]);
+  const filterTypes = useMemo(() => getFilterTypes(periodState.data), [periodState.data]);
+  const periodOptions = useMemo(() => getPeriodOptions(optionsState.data), [optionsState.data]);
+  const objects = useMemo(() => rowsFrom(catalogState.data), [catalogState.data]);
 
-      const filterTypes = getFilterTypes(periodApi.data);
-      const periodOptions = getPeriodOptions(optionsApi.data);
-      const objects = getCatalogObjects(catalogApi.data);
-      const selectedObject = objects[0] ?? null;
+  const selectedMaster = useMemo(
+    () => masterRows.find((row, index) => keyOf(row, index) === selectedMasterKey) || masterRows[0] || null,
+    [masterRows, selectedMasterKey]
+  );
 
-      let presentation: ApiResult<ObjectPresentationResponse> | null = null;
-      let relations: ApiResult<ObjectRelationsResponse> | null = null;
-      let market: ApiResult<ObjectMarketResponse> | null = null;
+  const selectedFilterType = useMemo(
+    () => filterTypes.find((row, index) => keyOf(row, index) === selectedFilterTypeKey) || null,
+    [filterTypes, selectedFilterTypeKey]
+  );
 
-      if (selectedObject) {
-        const query = objectQuery(selectedObject);
-        const [presentationResult, relationsResult, marketResult] = await Promise.all([
-          fetchApi<ObjectPresentationResponse>(`/api/object/presentation?${query}`),
-          fetchApi<ObjectRelationsResponse>(`/api/object/relations?${query}`),
-          fetchApi<ObjectMarketResponse>(`/api/object/market?${query}`),
-        ]);
+  const visiblePeriodOptions = useMemo(() => {
+    if (!selectedFilterType) return periodOptions;
+    const typeKey = firstValue(selectedFilterType.period_filter_key, selectedFilterType.filter_key, selectedFilterType.period_type_key, "");
+    return periodOptions.filter((option) =>
+      [option.period_filter_key, option.period_type_key].map((value) => String(value || "")).includes(typeKey)
+    );
+  }, [periodOptions, selectedFilterType]);
 
-        presentation = presentationResult;
-        relations = relationsResult;
-        market = marketResult;
-      }
+  const selectedPeriod = useMemo(
+    () => visiblePeriodOptions.find((row, index) => keyOf(row, index) === selectedPeriodKey) || visiblePeriodOptions[0] || null,
+    [visiblePeriodOptions, selectedPeriodKey]
+  );
 
-      if (!cancelled) {
-        setData({
-          filterTypes,
-          periodOptions,
-          objects,
-          selectedObject,
-          periodApi,
-          optionsApi,
-          catalogApi,
-          presentation,
-          relations,
-          market,
-        });
-        setState("ready");
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [segment]);
-
-  const visibleOptions = useMemo(() => {
-    if (!selectedFilterType) return data.periodOptions;
-
-    return data.periodOptions.filter((option) => {
-      return asText(option.period_filter_key ?? option.relation_type, "") === selectedFilterType;
-    });
-  }, [data.periodOptions, selectedFilterType]);
-
-  const visibleObjects = useMemo(() => {
-    if (!selectedPeriodOption) return data.objects;
-
-    const selected = data.periodOptions.find((option, index) => optionKey(option, index) === selectedPeriodOption);
-    if (!selected) return data.objects;
-
-    const start = optionStart(selected);
-    const end = optionEnd(selected);
-    if (!start) return data.objects;
-
-    return data.objects.filter((object) => {
-      const objectYear = asYear(object.object_year_label ?? object.publication_year_label);
-      if (!objectYear) return false;
-      return objectYear >= start && objectYear <= (end ?? start);
-    });
-  }, [data.objects, data.periodOptions, selectedPeriodOption]);
-
-  const relationRows = useMemo(() => {
-    if (data.relations?.data?.rows && Array.isArray(data.relations.data.rows)) {
-      return data.relations.data.rows as RelationRow[];
-    }
-
-    if (data.selectedObject?.relations && Array.isArray(data.selectedObject.relations)) {
-      return data.selectedObject.relations;
-    }
-
-    return [];
-  }, [data.relations, data.selectedObject]);
-
-  const presentationRow = data.presentation?.data?.row ?? data.selectedObject;
-  const marketRow = data.market?.data?.row ?? null;
-
-  const apiWarnings = [
-    data.periodApi?.ok === false ? `Filtertyper: ${data.periodApi.error}` : null,
-    data.optionsApi?.ok === false ? `Periodevalg: ${data.optionsApi.error}` : null,
-    data.catalogApi?.ok === false ? `Katalog: ${data.catalogApi.error}` : null,
-    data.presentation?.ok === false ? `Objektpresentasjon: ${data.presentation.error}` : null,
-    data.relations?.ok === false ? `Relasjoner: ${data.relations.error}` : null,
-    data.market?.ok === false ? `Marked: ${data.market.error}` : null,
-  ].filter(Boolean);
+  const selectedObject = useMemo(
+    () => objects.find((object) => String(object.object_id ?? "") === selectedObjectKey) || objects[0] || null,
+    [objects, selectedObjectKey]
+  );
 
   return (
-    <main className="ct-period-test-page">
-      <section className="ct-section">
-        <p className="ct-eyebrow">Periodefilter - DB-test</p>
-        <h1>Periodefilter med tidslinje</h1>
+    <main className="ct-period-test">
+      <header className="ct-test-hero">
+        <p className="ct-eyebrow">Periodefilter · DB-test</p>
+        <h1>Filter Master, periodefilter og søkeresultat</h1>
         <p>
-          Filtertypene kommer fra periodefilter-registeret. Tidslinjeverdiene kommer fra
-          ct_v_period_filter_options. Under tidslinjen vises katalogresultater fra Neon/API.
+          Denne siden tester om Filter Master, periodevalg, Samler/Historie/Finans,
+          dynamiske felt og katalogresultater henger sammen.
         </p>
+      </header>
 
-        <div className="ct-inline-actions" aria-label="Segmentvalg">
-          {(["samler", "historie", "finans"] as const).map((item) => (
-            <button key={item} type="button" className={segment === item ? "is-active" : ""} onClick={() => setSegment(item)}>
-              {item === "samler" ? "Samler" : item === "historie" ? "Historie" : "Finans"}
+      <section className="ct-status-grid">
+        <ApiBadge title="Filter Master" state={masterState} />
+        <ApiBadge title="Filtertyper" state={periodState} />
+        <ApiBadge title="Periodevalg" state={optionsState} />
+        <ApiBadge title="Katalogresultat" state={catalogState} />
+      </section>
+
+      <section className="ct-control-panel">
+        <div>
+          <h2>Rad 1 · Masterfilter</h2>
+          <div className="ct-button-row">
+            {masterRows.slice(0, 12).map((row, index) => (
+              <button
+                key={keyOf(row, index)}
+                type="button"
+                className={keyOf(row, index) === selectedMasterKey ? "is-active" : ""}
+                onClick={() => setSelectedMasterKey(keyOf(row, index))}
+              >
+                {label(row)}
+              </button>
+            ))}
+            {!masterRows.length ? <span>Ingen masterfilter-rader returnert.</span> : null}
+          </div>
+        </div>
+        <div>
+          <h2>Rad 1B · Land, kilde og objekttype</h2>
+          <div className="ct-filter-grid">
+            <label>
+              <span>Land</span>
+              <select value={countryScope} onChange={(event) => setCountryScope(event.target.value)}>
+                <option value="NO">Norge</option>
+                <option value="SN">Skandinavia</option>
+                <option value="SV">Sverige</option>
+                <option value="DM">Danmark</option>
+                <option value="EU">Europa</option>
+                <option value="GL">Global</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Kilde</span>
+              <select value={sourceKey} onChange={(event) => setSourceKey(event.target.value)}>
+                <option value="norske_sedler">Norske sedler</option>
+                <option value="norske_mynter">Norske mynter</option>
+                <option value="verdibrev">Verdibrev</option>
+                <option value="norark">Funn / Norark</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Objekttype</span>
+              <select value={objectGroup} onChange={(event) => setObjectGroup(event.target.value)}>
+                <option value="banknote">Seddel</option>
+                <option value="coin">Mynt</option>
+                <option value="document">Dokument</option>
+                <option value="security">Verdibrev</option>
+                <option value="find">Funn</option>
+                <option value="medal">Medalje</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h2>Rad 1C · Årstall fra / til</h2>
+          <div className="ct-filter-grid">
+            <label>
+              <span>År fra</span>
+              <input
+                value={yearFrom}
+                onChange={(event) => setYearFrom(event.target.value)}
+                inputMode="numeric"
+                placeholder="f.eks. 1814"
+              />
+            </label>
+
+            <label>
+              <span>År til</span>
+              <input
+                value={yearTo}
+                onChange={(event) => setYearTo(event.target.value)}
+                inputMode="numeric"
+                placeholder="f.eks. 1905"
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={() => {
+                setYearFrom("");
+                setYearTo("");
+              }}
+            >
+              Nullstill år
             </button>
+          </div>
+        </div>
+        <div>
+          <h2>Rad 1B · Land, kilde og objekttype</h2>
+          <div className="ct-filter-grid">
+            <label>
+              <span>Land</span>
+              <select value={countryScope} onChange={(event) => setCountryScope(event.target.value)}>
+                <option value="NO">Norge</option>
+                <option value="SN">Skandinavia</option>
+                <option value="SV">Sverige</option>
+                <option value="DM">Danmark</option>
+                <option value="EU">Europa</option>
+                <option value="GL">Global</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Kilde</span>
+              <select value={sourceKey} onChange={(event) => setSourceKey(event.target.value)}>
+                <option value="norske_sedler">Norske sedler</option>
+                <option value="norske_mynter">Norske mynter</option>
+                <option value="verdibrev">Verdibrev</option>
+                <option value="norark">Funn / Norark</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Objekttype</span>
+              <select value={objectGroup} onChange={(event) => setObjectGroup(event.target.value)}>
+                <option value="banknote">Seddel</option>
+                <option value="coin">Mynt</option>
+                <option value="document">Dokument</option>
+                <option value="security">Verdibrev</option>
+                <option value="find">Funn</option>
+                <option value="medal">Medalje</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h2>Rad 1C · Årstall fra / til</h2>
+          <div className="ct-filter-grid">
+            <label>
+              <span>År fra</span>
+              <input
+                value={yearFrom}
+                onChange={(event) => setYearFrom(event.target.value)}
+                inputMode="numeric"
+                placeholder="f.eks. 1814"
+              />
+            </label>
+
+            <label>
+              <span>År til</span>
+              <input
+                value={yearTo}
+                onChange={(event) => setYearTo(event.target.value)}
+                inputMode="numeric"
+                placeholder="f.eks. 1905"
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={() => {
+                setYearFrom("");
+                setYearTo("");
+              }}
+            >
+              Nullstill år
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h2>Rad 2 · Filtertype</h2>
+          <div className="ct-button-row">
+            <button type="button" className={!selectedFilterTypeKey ? "is-active" : ""} onClick={() => setSelectedFilterTypeKey("")}>
+              Alle periodetyper
+            </button>
+            {filterTypes.slice(0, 18).map((row, index) => (
+              <button
+                key={keyOf(row, index)}
+                type="button"
+                className={keyOf(row, index) === selectedFilterTypeKey ? "is-active" : ""}
+                onClick={() => setSelectedFilterTypeKey(keyOf(row, index))}
+              >
+                {label(row)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2>Rad 3 · Periodevalg</h2>
+          <div className="ct-timeline-row">
+            {visiblePeriodOptions.map((row, index) => (
+              <button
+                key={keyOf(row, index)}
+                type="button"
+                className={keyOf(row, index) === selectedPeriodKey ? "is-active" : ""}
+                onClick={() => setSelectedPeriodKey(keyOf(row, index))}
+              >
+                <strong>{label(row)}</strong>
+                <span>{firstValue(row.start_year_label, row.timeline_start_year)} – {firstValue(row.end_year_label, row.timeline_end_year, "nå")}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2>Segment</h2>
+          <div className="ct-button-row">
+            {SEGMENTS.map((item) => (
+              <button key={item} type="button" className={segment === item ? "is-active" : ""} onClick={() => setSegment(item)}>
+                {item === "samler" ? "Samler" : item === "historie" ? "Historie" : "Finans"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2>Visning</h2>
+          <div className="ct-button-row">
+            {VIEWS.map((item) => (
+              <button key={item} type="button" className={view === item ? "is-active" : ""} onClick={() => setView(item)}>
+                {item === "liste" ? "Liste" : item === "horisontal" ? "Horisontal" : "Kort"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="ct-dynamic-grid">
+        <DynamicSegmentPanel segment={segment} selectedObject={selectedObject} />
+        <DynamicSelectionPanel selectedMaster={selectedMaster} selectedFilterType={selectedFilterType} selectedPeriod={selectedPeriod} />
+      </section>
+
+      <section className="ct-result-section">
+        <div className="ct-result-header">
+          <h2>Søkeresultat</h2>
+          <p>
+            Viser {objects.length} objekter · segment {segment} · visning {view}
+          </p>
+        </div>
+
+        {catalogState.status === "error" ? (
+          <div className="ct-error-box">
+            <strong>Katalog API feiler</strong>
+            <p>{catalogState.error}</p>
+            <code>{catalogState.url}</code>
+          </div>
+        ) : null}
+
+        {!objects.length && catalogState.status !== "error" ? (
+          <div className="ct-empty-box">Ingen katalogobjekter returnert.</div>
+        ) : null}
+
+        <div className={`ct-results ct-results-${view}`}>
+          {objects.map((object: any) => (
+            <ResultCard
+              key={String(object.object_id)}
+              object={object}
+              view={view}
+              segment={segment}
+              selected={String(object.object_id) === selectedObjectKey}
+              onSelect={() => setSelectedObjectKey(String(object.object_id ?? ""))}
+            />
           ))}
         </div>
       </section>
 
-      <section className="ct-section">
-        <h2>Filtertype</h2>
-        {state === "loading" ? (
-          <p>Henter filtertyper...</p>
-        ) : (
-          <FilterTypeBar
-            filters={data.filterTypes}
-            selected={selectedFilterType}
-            onSelect={(value) => {
-              setSelectedFilterType(value);
-              setSelectedPeriodOption(null);
-            }}
-          />
-        )}
-      </section>
-
-      <section className="ct-section">
-        <h2>Tidslinje / periodevalg</h2>
-        {state === "loading" ? (
-          <p>Henter periodevalg...</p>
-        ) : (
-          <Timeline options={visibleOptions} selected={selectedPeriodOption} onSelect={setSelectedPeriodOption} />
-        )}
-      </section>
-
-      <section className="ct-section">
-        <h2>Status</h2>
-
-        {state === "loading" ? (
-          <p>Venter på API...</p>
-        ) : (
-          <div className="ct-status-grid">
-            <div>
-              <strong>Filtertyper</strong>
-              <span>{data.filterTypes.length} rader</span>
-            </div>
-            <div>
-              <strong>Periodevalg</strong>
-              <span>{visibleOptions.length} av {data.periodOptions.length}</span>
-            </div>
-            <div>
-              <strong>Katalogresultater</strong>
-              <span>{visibleObjects.length} av {data.objects.length}</span>
-            </div>
-            <div>
-              <strong>Objektpresentasjon</strong>
-              <span>{data.presentation?.ok ? "OK" : "Ikke klar"}</span>
-            </div>
-            <div>
-              <strong>Relasjoner</strong>
-              <span>{relationRows.length} rader</span>
-            </div>
-            <div>
-              <strong>Marked</strong>
-              <span>{data.market?.ok ? "OK" : "Ikke klar"}</span>
-            </div>
-          </div>
-        )}
-
-        {state === "ready" && apiWarnings.length > 0 ? (
-          <div className="ct-status-box ct-status-error">
-            <strong>API-varsel</strong>
-            <ul>
-              {apiWarnings.map((warning) => (
-                <li key={warning}>{warning}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="ct-section">
-        <h2>Katalogresultater</h2>
-
-        {state === "loading" ? (
-          <p>Laster katalogresultater...</p>
-        ) : visibleObjects.length === 0 ? (
-          <p>Ingen katalogobjekter for valgt periode.</p>
-        ) : (
-          <div className="ct-object-list">
-            {visibleObjects.map((object) => (
-              <article key={`${object.source_key}-${object.object_group}-${object.object_id}`} className="ct-object-row">
-                <div>
-                  <strong>{objectTitle(object)}</strong>
-                  <p>
-                    {asText(object.denomination_raw_no)} · {asText(object.object_year_label ?? object.publication_year_label)} ·{" "}
-                    {asText(object.denomination_issue_raw_no)}
-                  </p>
-                </div>
-                <div>
-                  <span>{asText(object.alias_ruler_name_raw_no ?? object.ruler_name_raw_no, "Mangler regent")}</span>
-                  <span>{asText(object.signature_raw_no, "Mangler signatur")}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="ct-section">
-        <h2>Valgt objekt</h2>
-
-        {presentationRow ? (
-          <div className="ct-detail-grid">
-            <div><span>Tittel</span><strong>{objectTitle(presentationRow)}</strong></div>
-            <div><span>Kilde</span><strong>{asText(presentationRow.source_key)}</strong></div>
-            <div><span>Objektgruppe</span><strong>{asText(presentationRow.object_group)}</strong></div>
-            <div><span>Object ID</span><strong>{String(presentationRow.object_id)}</strong></div>
-            <div><span>Valør</span><strong>{asText(presentationRow.denomination_raw_no)}</strong></div>
-            <div><span>År</span><strong>{asText(presentationRow.object_year_label ?? presentationRow.publication_year_label)}</strong></div>
-            <div><span>Utgave</span><strong>{asText(presentationRow.denomination_issue_raw_no)}</strong></div>
-            <div><span>Variant</span><strong>{asText(presentationRow.variant_type_raw_no)}</strong></div>
-          </div>
-        ) : (
-          <p>Ingen valgt objektpresentasjon.</p>
-        )}
-      </section>
-
-      <section className="ct-section">
-        <h2>Relasjoner for valgt objekt</h2>
-
-        {relationRows.length === 0 ? (
-          <p>Ingen relasjoner returnert.</p>
-        ) : (
-          <div className="ct-list-grid">
-            {relationRows.map((relation, index) => (
-              <article key={`${relation.relation_type ?? "relation"}-${relation.relation_slug ?? index}`} className="ct-mini-card">
-                <strong>{asText(relation.relation_label_no ?? relation.display_name_no, "Uten navn")}</strong>
-                <span>{asText(relation.relation_type, "Mangler type")}</span>
-                <p>{asText(relation.relation_href ?? relation.href, "Mangler href")}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="ct-section">
-        <h2>Marked / finans for valgt objekt</h2>
-
-        {marketRow ? (
-          <div className="ct-detail-grid">
-            <div><span>Markedsverdi</span><strong>{asText(marketRow.market_value_raw_no ?? marketRow.value_raw_no, "Mangler markedsverdi")}</strong></div>
-            <div><span>Status</span><strong>{asText(marketRow.market_value_status_no, "Mangler status")}</strong></div>
-            <div><span>Trend</span><strong>{asText(marketRow.trend_raw_no, "Mangler trend")}</strong></div>
-            <div><span>Auksjon</span><strong>{asText(marketRow.auction_status_raw_no, "Ingen auksjonsstatus")}</strong></div>
-          </div>
-        ) : (
-          <p>Marked svarer ikke for valgt objekt, eller objektet mangler markedsdata.</p>
-        )}
+      <section className="ct-debug-box">
+        <h2>Svar til ChatGPT</h2>
+        <pre>{JSON.stringify({
+          filter_master: {
+            ok: masterState.ok,
+            count: masterRows.length,
+            error: masterState.error,
+          },
+          filter_types: {
+            ok: periodState.ok,
+            count: filterTypes.length,
+            error: periodState.error,
+          },
+          period_options: {
+            ok: optionsState.ok,
+            count: periodOptions.length,
+            visible: visiblePeriodOptions.length,
+            error: optionsState.error,
+          },
+          catalog: {
+            ok: catalogState.ok,
+            count: objects.length,
+            error: catalogState.error,
+            url: catalogState.url,
+          },
+          selected: {
+            segment,
+            view,
+            master: selectedMaster ? label(selectedMaster) : null,
+            filter_type: selectedFilterType ? label(selectedFilterType) : null,
+            period: selectedPeriod ? label(selectedPeriod) : null,
+            object_id: selectedObject?.object_id ?? null,
+            country_scope: countryScope,
+            source_key: sourceKey,
+            object_group: objectGroup,
+            year_from: yearFrom || null,
+            year_to: yearTo || null,
+            country_scope: countryScope,
+            source_key: sourceKey,
+            object_group: objectGroup,
+            year_from: yearFrom || null,
+            year_to: yearTo || null,
+          },
+        }, null, 2)}</pre>
       </section>
     </main>
   );
