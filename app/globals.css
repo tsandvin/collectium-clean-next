@@ -432,3 +432,308 @@ main {
     grid-template-columns: 1fr;
   }
 }
+
+/* Collectium readable period presentation v5 */
+.ct-readable-page {
+  display: grid;
+  gap: 18px;
+}
+
+.ct-readable-hero,
+.ct-readable-panel,
+.ct-readable-status > div,
+.ct-readable-debug {
+  border: 1px solid rgba(35, 75, 120, 0.18);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
+  box-shadow: 0 16px 50px rgba(20, 45, 80, 0.08);
+}
+
+.ct-readable-hero,
+.ct-readable-panel,
+.ct-readable-debug {
+  padding: 18px;
+}
+
+.ct-readable-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ct-readable-mini {
+  padding: 10px 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.ct-readable-mini span,
+.ct-readable-section-head span,
+.ct-readable-master-grid span,
+.ct-readable-field-grid span {
+  font-size: 12px;
+  opacity: 0.68;
+}
+
+.ct-readable-mini strong {
+  font-size: 14px;
+}
+
+.ct-readable-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.ct-readable-section-head h2 {
+  margin: 2px 0 0;
+}
+
+.ct-readable-section-head p {
+  margin: 0;
+  max-width: 420px;
+  font-size: 13px;
+  opacity: 0.72;
+}
+
+.ct-readable-master-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px 120px;
+  gap: 12px;
+}
+
+.ct-readable-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ct-readable-master-grid label,
+.ct-readable-field-grid label {
+  display: grid;
+  gap: 5px;
+}
+
+.ct-readable-master-grid select,
+.ct-readable-master-grid input,
+.ct-readable-field-grid select {
+  border: 1px solid rgba(35, 75, 120, 0.22);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+  font: inherit;
+  min-width: 0;
+}
+
+.ct-readable-switches,
+.ct-readable-view-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ct-readable-switches button,
+.ct-readable-view-buttons button {
+  border: 1px solid rgba(35, 75, 120, 0.2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.ct-readable-switches button.is-active,
+.ct-readable-view-buttons button.is-active {
+  background: #173d68;
+  color: #fff;
+}
+
+.ct-readable-timeline-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+
+.ct-readable-timeline-row button {
+  min-width: 190px;
+  border: 1px solid rgba(35, 75, 120, 0.2);
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.ct-readable-timeline-row button.is-active {
+  background: #173d68;
+  color: #fff;
+}
+
+.ct-readable-timeline-row button span {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.ct-readable-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ct-readable-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ct-readable-period-text {
+  border: 1px solid rgba(35, 75, 120, 0.12);
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.ct-readable-period-text p {
+  margin: 0;
+}
+
+.ct-readable-period-text a {
+  overflow-wrap: anywhere;
+}
+
+.ct-readable-result-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.ct-readable-result-head p {
+  margin: 4px 0;
+}
+
+.ct-readable-result-head small {
+  opacity: 0.72;
+}
+
+.ct-readable-api-error {
+  border: 1px solid rgba(163, 38, 38, 0.22);
+  background: rgba(163, 38, 38, 0.06);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin: 10px 0 14px;
+}
+
+.ct-readable-api-error code {
+  display: block;
+  margin-top: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ct-readable-card-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ct-readable-card-grid-liste,
+.ct-readable-card-grid-horisontal {
+  grid-template-columns: 1fr;
+}
+
+.ct-readable-card-grid-museum {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ct-readable-card {
+  border: 1px solid rgba(35, 75, 120, 0.16);
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 54px 1fr 110px;
+  gap: 12px;
+}
+
+.ct-readable-card-symbol {
+  border-radius: 12px;
+  background: rgba(23, 61, 104, 0.08);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+
+.ct-readable-card-main {
+  display: grid;
+  gap: 8px;
+}
+
+.ct-readable-card-main > span,
+.ct-readable-card-main p {
+  opacity: 0.72;
+  font-size: 13px;
+}
+
+.ct-readable-card-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ct-readable-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ct-readable-card-actions a,
+.ct-readable-card-actions button {
+  border: 1px solid rgba(35, 75, 120, 0.16);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 9px;
+  text-decoration: none;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ct-readable-card-status {
+  display: grid;
+  gap: 6px;
+}
+
+.ct-readable-debug pre {
+  overflow: auto;
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(10, 25, 45, 0.05);
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  .ct-readable-status,
+  .ct-readable-master-grid,
+  .ct-readable-field-grid,
+  .ct-readable-two,
+  .ct-readable-card-grid-museum,
+  .ct-readable-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ct-readable-card-fields,
+  .ct-readable-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ct-readable-section-head,
+  .ct-readable-result-head {
+    display: grid;
+  }
+}
