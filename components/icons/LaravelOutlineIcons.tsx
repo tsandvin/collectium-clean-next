@@ -183,7 +183,7 @@ export function SwatchIcon({ className = "", size = 24 }: IconProps) {
 
 export interface SwitchIconOption {
   index: number;
-  icon: React.ReactNode;
+  icon: React.ComponentType<IconProps>;
 }
 
 const switchIcons: SwitchIconOption[] = [
@@ -199,6 +199,6 @@ const switchIcons: SwitchIconOption[] = [
 
 export function getSwitchIcon(index: number): React.ReactNode {
   const option = switchIcons[index % switchIcons.length];
-  const IconComponent = option.icon as React.ComponentType<IconProps>;
+  const IconComponent = option.icon;
   return <IconComponent size={20} />;
 }
