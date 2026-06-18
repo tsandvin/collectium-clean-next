@@ -92,12 +92,12 @@ export default function Sidebar() {
   return (
     <aside className="ct-sidebar-enhanced" aria-label="Collectium hovedmeny">
       <div className="ct-sidebar-logo-card">
-        <div className="ct-logo-mark">C</div>
-        <div className="ct-logo-copy">
-          <span className="ct-logo-kicker">Collectium</span>
-          <strong>Beta UI/UX 8.5</strong>
-          <span className="ct-logo-pill">Collectium</span>
-        </div>
+        <img 
+          src="/collectium-logo.svg" 
+          alt="Collectium" 
+          className="ct-logo-image"
+          style={{ height: "60px", width: "auto" }}
+        />
       </div>
 
       <nav className="ct-sidebar-nav" aria-label="Hovednavigasjon">

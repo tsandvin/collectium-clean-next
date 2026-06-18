@@ -131,6 +131,8 @@
   font-size: 15px;
   font-weight: 950;
   color: var(--ct-accent, #007a4d);
+  width: 20px;
+  height: 20px;
 }
 
 .variant-line .ct-demo-switch.is-active {

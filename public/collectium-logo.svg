@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid meet">
+  <!-- Collectium logo mark - stylized C with ring design -->
+  <g id="logo-mark">
+    <!-- Outer ring -->
+    <circle cx="45" cy="60" r="38" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+    <!-- Inner arc C shape -->
+    <path d="M 75 25 A 38 38 0 0 0 20 60" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+    <!-- Accent dots -->
+    <circle cx="75" cy="20" r="3.5" fill="currentColor" opacity="0.7"/>
+    <circle cx="20" cy="100" r="3.5" fill="currentColor" opacity="0.7"/>
+  </g>
+  
+  <!-- Text: Collectium -->
+  <text x="105" y="75" font-family="Inter, system-ui, sans-serif" font-size="56" font-weight="900" letter-spacing="-1" fill="currentColor">
+    Collectium
+  </text>
+</svg>

@@ -19,6 +19,7 @@
  */
 
 import "./page.css";
+import { getSwitchIcon } from "@/components/icons/LaravelOutlineIcons";
 
 const switchVariants = [
   ["Ren venstrestrek", "En enkel aktiv markering uten ekstra hjÃ¸rne.", "variant-line"],
@@ -81,7 +82,7 @@ export default function DesignvalgPage() {
           {switchVariants.map(([title, text, className], index) => (
             <article className={`ct-switch-card ${className}`} key={title}>
               <button type="button" className="ct-demo-switch is-active">
-                <span className="ct-demo-icon">{index + 1}</span>
+                <span className="ct-demo-icon">{getSwitchIcon(index)}</span>
                 <span>
                   <strong>{title}</strong>
                   <small>Aktiv bryter</small>
@@ -90,7 +91,18 @@ export default function DesignvalgPage() {
               </button>
 
               <button type="button" className="ct-demo-switch">
-                <span className="ct-demo-icon">â—‡</span>
+                <span className="ct-demo-icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    style={{ width: "20px", height: "20px" }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </span>
                 <span>
                   <strong>Katalog</strong>
                   <small>Standardvalg</small>

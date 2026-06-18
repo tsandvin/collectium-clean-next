@@ -171,6 +171,7 @@ body:has(.ct-sidebar-enhanced) [data-nextjs-root] {
   min-height: 96px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
   padding: 18px;
   margin-bottom: 18px;
@@ -183,28 +184,16 @@ body:has(.ct-sidebar-enhanced) [data-nextjs-root] {
 }
 
 .ct-logo-mark {
-  width: 55px;
-  height: 55px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: #fff7df;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255,255,255,.32), transparent 28px),
-    linear-gradient(135deg, var(--ct-sidebar-accent), color-mix(in srgb, var(--ct-sidebar-accent) 62%, #203d34));
-  box-shadow:
-    0 12px 25px rgba(0, 0, 0, .23),
-    inset 0 1px 0 rgba(255,255,255,.28);
-  font-family: Georgia, serif;
-  font-size: 30px;
-  font-weight: 800;
+  display: none;
 }
 
 .ct-logo-copy {
-  display: grid;
-  gap: 4px;
-  line-height: 1;
-  min-width: 0;
+  display: none;
+}
+
+.ct-logo-image {
+  color: var(--ct-sidebar-accent);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
 .ct-logo-kicker {
