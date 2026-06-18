@@ -854,7 +854,7 @@
 }
 
 /* ============================================================
-   Collectium UI 8.6 — Breakpoint and Layout Rules
+   Collectium UI 8.6 â€” Breakpoint and Layout Rules
    ============================================================ */
 
 /* --- 1. Desktop Mode (1101px - 1899px) --- */
@@ -1066,3 +1066,36 @@
 }
 
 
+
+/* --- Collectium UI 8.6 Typography Menu Controls --- */
+.designSliderGroup {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.designSliderSubSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme);
+  background: color-mix(in srgb, var(--ct-panel) 82%, transparent);
+}
+
+.designSliderSubSection h5 {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ct-text);
+}
+
+@media (max-width: 1100px) {
+  .designSliderGroup {
+    grid-template-columns: 1fr;
+  }
+}

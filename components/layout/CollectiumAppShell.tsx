@@ -41,7 +41,7 @@ const navItems = [
 const mobileBottomItems = [
   { href: "/min-side", label: "Min side", icon: UserRound, key: "minside" },
   { href: "/", label: "Index", icon: Home, key: "index" },
-  { href: "/katalog", label: "Katalog søk", icon: Search, key: "katalog" },
+  { href: "/katalog", label: "Katalog sÃ¸k", icon: Search, key: "katalog" },
   { href: "/min-side", label: "Min samling", icon: Archive, key: "samling" }, // TODO: change to /samling when collection page is active.
 ];
 
@@ -55,7 +55,18 @@ const skins: { value: CollectiumSkin; label: string }[] = [
 function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
   const [skin, setSkin] = useState<CollectiumSkin>("collectium");
   const [bodyScale, setBodyScale] = useState<number>(0);
+  const [headingScale, setHeadingScale] = useState<number>(0);
   const [headlineScale, setHeadlineScale] = useState<number>(0);
+
+  const [bodyBoldLevel, setBodyBoldLevel] = useState<number>(0);
+  const [bodyLightLevel, setBodyLightLevel] = useState<number>(0);
+
+  const [headingBoldLevel, setHeadingBoldLevel] = useState<number>(0);
+  const [headingLightLevel, setHeadingLightLevel] = useState<number>(0);
+
+  const [headlineBoldLevel, setHeadlineBoldLevel] = useState<number>(0);
+  const [headlineLightLevel, setHeadlineLightLevel] = useState<number>(0);
+
   const [isDesignMenuOpen, setIsDesignMenuOpen] = useState<boolean>(false);
   const pathname = usePathname() || "/";
   const {
@@ -69,6 +80,23 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     setIsMobileMenuOpen
   } = useCollectiumLayout();
 
+  // Helper function to map bold and light levels to weight values
+  function getFontWeight(base: number, boldLevel: number, lightLevel: number): number {
+    if (boldLevel > 0) {
+      if (boldLevel === 1) return 500;
+      if (boldLevel === 2) return 600;
+      if (boldLevel === 3) return 700;
+      return 800; // level 4
+    }
+    if (lightLevel > 0) {
+      if (lightLevel === 1) return 350;
+      if (lightLevel === 2) return 300;
+      if (lightLevel === 3) return 250;
+      return 200; // level 4
+    }
+    return base;
+  }
+
   useEffect(() => {
     // Skin
     const storedSkin = window.localStorage.getItem("collectium-active-skin") as CollectiumSkin | null;
@@ -80,18 +108,47 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     document.documentElement.dataset.template = "collectium";
     document.documentElement.dataset.vp = "pc";
 
-    // Body text scale
+    // Hovedskrift
     const storedBodyScale = window.localStorage.getItem("collectium-body-text-scale");
     const nextBodyScale = storedBodyScale ? parseInt(storedBodyScale, 10) : 0;
     setBodyScale(nextBodyScale);
     document.documentElement.style.setProperty("--ct-user-body-scale", `${nextBodyScale}px`);
 
-    // Headline scale
+    const storedBodyBold = window.localStorage.getItem("collectium-body-bold-level");
+    const nextBodyBold = storedBodyBold ? parseInt(storedBodyBold, 10) : 0;
+    const storedBodyLight = window.localStorage.getItem("collectium-body-light-level");
+    const nextBodyLight = storedBodyLight ? parseInt(storedBodyLight, 10) : 0;
+    setBodyBoldLevel(nextBodyBold);
+    setBodyLightLevel(nextBodyLight);
+    document.documentElement.style.setProperty("--ct-user-body-weight", getFontWeight(400, nextBodyBold, nextBodyLight).toString());
+
+    // Overskrift
+    const storedHeadingScale = window.localStorage.getItem("collectium-heading-text-scale");
+    const nextHeadingScale = storedHeadingScale ? parseInt(storedHeadingScale, 10) : 0;
+    setHeadingScale(nextHeadingScale);
+    document.documentElement.style.setProperty("--ct-user-heading-scale", `${nextHeadingScale}px`);
+
+    const storedHeadingBold = window.localStorage.getItem("collectium-heading-bold-level");
+    const nextHeadingBold = storedHeadingBold ? parseInt(storedHeadingBold, 10) : 0;
+    const storedHeadingLight = window.localStorage.getItem("collectium-heading-light-level");
+    const nextHeadingLight = storedHeadingLight ? parseInt(storedHeadingLight, 10) : 0;
+    setHeadingBoldLevel(nextHeadingBold);
+    setHeadingLightLevel(nextHeadingLight);
+    document.documentElement.style.setProperty("--ct-user-heading-weight", getFontWeight(500, nextHeadingBold, nextHeadingLight).toString());
+
+    // Headline
     const storedHeadlineScale = window.localStorage.getItem("collectium-headline-scale");
     const nextHeadlineScale = storedHeadlineScale ? parseInt(storedHeadlineScale, 10) : 0;
     setHeadlineScale(nextHeadlineScale);
     document.documentElement.style.setProperty("--ct-user-headline-scale", `${nextHeadlineScale}px`);
-    document.documentElement.style.setProperty("--ct-user-subheadline-scale", `${nextHeadlineScale * 0.6}px`);
+
+    const storedHeadlineBold = window.localStorage.getItem("collectium-headline-bold-level");
+    const nextHeadlineBold = storedHeadlineBold ? parseInt(storedHeadlineBold, 10) : 0;
+    const storedHeadlineLight = window.localStorage.getItem("collectium-headline-light-level");
+    const nextHeadlineLight = storedHeadlineLight ? parseInt(storedHeadlineLight, 10) : 0;
+    setHeadlineBoldLevel(nextHeadlineBold);
+    setHeadlineLightLevel(nextHeadlineLight);
+    document.documentElement.style.setProperty("--ct-user-headline-weight", getFontWeight(600, nextHeadlineBold, nextHeadlineLight).toString());
   }, []);
 
   function changeSkin(value: string) {
@@ -109,18 +166,114 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     document.documentElement.style.setProperty("--ct-user-body-scale", `${val}px`);
   }
 
+  function updateBodyBoldLevel(val: number) {
+    setBodyBoldLevel(val);
+    window.localStorage.setItem("collectium-body-bold-level", val.toString());
+    if (val > 0) {
+      setBodyLightLevel(0);
+      window.localStorage.setItem("collectium-body-light-level", "0");
+      document.documentElement.style.setProperty("--ct-user-body-weight", getFontWeight(400, val, 0).toString());
+    } else {
+      document.documentElement.style.setProperty("--ct-user-body-weight", getFontWeight(400, 0, bodyLightLevel).toString());
+    }
+  }
+
+  function updateBodyLightLevel(val: number) {
+    setBodyLightLevel(val);
+    window.localStorage.setItem("collectium-body-light-level", val.toString());
+    if (val > 0) {
+      setBodyBoldLevel(0);
+      window.localStorage.setItem("collectium-body-bold-level", "0");
+      document.documentElement.style.setProperty("--ct-user-body-weight", getFontWeight(400, 0, val).toString());
+    } else {
+      document.documentElement.style.setProperty("--ct-user-body-weight", getFontWeight(400, bodyBoldLevel, 0).toString());
+    }
+  }
+
+  function updateHeadingScale(val: number) {
+    setHeadingScale(val);
+    window.localStorage.setItem("collectium-heading-text-scale", val.toString());
+    document.documentElement.style.setProperty("--ct-user-heading-scale", `${val}px`);
+  }
+
+  function updateHeadingBoldLevel(val: number) {
+    setHeadingBoldLevel(val);
+    window.localStorage.setItem("collectium-heading-bold-level", val.toString());
+    if (val > 0) {
+      setHeadingLightLevel(0);
+      window.localStorage.setItem("collectium-heading-light-level", "0");
+      document.documentElement.style.setProperty("--ct-user-heading-weight", getFontWeight(500, val, 0).toString());
+    } else {
+      document.documentElement.style.setProperty("--ct-user-heading-weight", getFontWeight(500, 0, headingLightLevel).toString());
+    }
+  }
+
+  function updateHeadingLightLevel(val: number) {
+    setHeadingLightLevel(val);
+    window.localStorage.setItem("collectium-heading-light-level", val.toString());
+    if (val > 0) {
+      setHeadingBoldLevel(0);
+      window.localStorage.setItem("collectium-heading-bold-level", "0");
+      document.documentElement.style.setProperty("--ct-user-heading-weight", getFontWeight(500, 0, val).toString());
+    } else {
+      document.documentElement.style.setProperty("--ct-user-heading-weight", getFontWeight(500, headingBoldLevel, 0).toString());
+    }
+  }
+
   function updateHeadlineScale(val: number) {
     setHeadlineScale(val);
     window.localStorage.setItem("collectium-headline-scale", val.toString());
     document.documentElement.style.setProperty("--ct-user-headline-scale", `${val}px`);
-    document.documentElement.style.setProperty("--ct-user-subheadline-scale", `${val * 0.6}px`);
+  }
+
+  function updateHeadlineBoldLevel(val: number) {
+    setHeadlineBoldLevel(val);
+    window.localStorage.setItem("collectium-headline-bold-level", val.toString());
+    if (val > 0) {
+      setHeadlineLightLevel(0);
+      window.localStorage.setItem("collectium-headline-light-level", "0");
+      document.documentElement.style.setProperty("--ct-user-headline-weight", getFontWeight(600, val, 0).toString());
+    } else {
+      document.documentElement.style.setProperty("--ct-user-headline-weight", getFontWeight(600, 0, headlineLightLevel).toString());
+    }
+  }
+
+  function updateHeadlineLightLevel(val: number) {
+    setHeadlineLightLevel(val);
+    window.localStorage.setItem("collectium-headline-light-level", val.toString());
+    if (val > 0) {
+      setHeadlineBoldLevel(0);
+      window.localStorage.setItem("collectium-headline-bold-level", "0");
+      document.documentElement.style.setProperty("--ct-user-headline-weight", getFontWeight(600, 0, val).toString());
+    } else {
+      document.documentElement.style.setProperty("--ct-user-headline-weight", getFontWeight(600, headlineBoldLevel, 0).toString());
+    }
   }
 
   function resetDesign() {
     setSelectedScreenMode("auto");
     changeSkin("collectium");
+    
     updateBodyScale(0);
+    setBodyBoldLevel(0);
+    setBodyLightLevel(0);
+    window.localStorage.setItem("collectium-body-bold-level", "0");
+    window.localStorage.setItem("collectium-body-light-level", "0");
+    document.documentElement.style.setProperty("--ct-user-body-weight", "400");
+
+    updateHeadingScale(0);
+    setHeadingBoldLevel(0);
+    setHeadingLightLevel(0);
+    window.localStorage.setItem("collectium-heading-bold-level", "0");
+    window.localStorage.setItem("collectium-heading-light-level", "0");
+    document.documentElement.style.setProperty("--ct-user-heading-weight", "500");
+
     updateHeadlineScale(0);
+    setHeadlineBoldLevel(0);
+    setHeadlineLightLevel(0);
+    window.localStorage.setItem("collectium-headline-bold-level", "0");
+    window.localStorage.setItem("collectium-headline-light-level", "0");
+    document.documentElement.style.setProperty("--ct-user-headline-weight", "600");
   }
 
   // Close design menu on Escape
@@ -268,7 +421,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
               </button>
             )}
             <div className={styles.searchWrap}>
-              <input className={styles.search} placeholder="Søk i Collectium / bruker..." aria-label="Søk" />
+              <input className={styles.search} placeholder="SÃ¸k i Collectium / bruker..." aria-label="SÃ¸k" />
             </div>
           </div>
           <div className={styles.topActions}>
@@ -353,42 +506,171 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                       </div>
                     </div>
 
-                    {/* SECTION C & D: Scale Sliders */}
-                    <div className={styles.designMenuSection}>
-                      <h4>Tekststørrelse</h4>
+                    {/* SECTION C: Typography Scales and Weights */}
+                    <div className={styles.designMenuSection} style={{ gridColumn: "span 2" }}>
+                      <h4>Typografi</h4>
                       
-                      <div className={styles.designSliderRow}>
-                        <div className={styles.designSliderLabel}>
-                          <span>Hovedtekst</span>
-                          <strong>{bodyScale > 0 ? `+${bodyScale}` : bodyScale}</strong>
-                        </div>
-                        <input
-                          type="range"
-                          min="-2"
-                          max="4"
-                          step="1"
-                          value={bodyScale}
-                          onChange={(e) => updateBodyScale(parseInt(e.target.value, 10))}
-                          aria-label="Juster hovedtekst"
-                        />
-                      </div>
+                      <div className={styles.designSliderGroup}>
+                        {/* HOVEDSKRIFT */}
+                        <div className={styles.designSliderSubSection}>
+                          <h5>Hovedskrift</h5>
+                          
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>StÃ¸rrelse</span>
+                              <strong>{bodyScale > 0 ? `+${bodyScale}` : bodyScale}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="-2"
+                              max="4"
+                              step="1"
+                              value={bodyScale}
+                              onChange={(e) => updateBodyScale(parseInt(e.target.value, 10))}
+                              aria-label="Juster hovedskrift stÃ¸rrelse"
+                            />
+                          </div>
 
-                      <div className={styles.designSliderRow}>
-                        <div className={styles.designSliderLabel}>
-                          <span>Overskrifter</span>
-                          <strong>{headlineScale > 0 ? `+${headlineScale}` : headlineScale}</strong>
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>Fet skrift</span>
+                              <strong>NivÃ¥ {bodyBoldLevel}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="4"
+                              step="1"
+                              value={bodyBoldLevel}
+                              onChange={(e) => updateBodyBoldLevel(parseInt(e.target.value, 10))}
+                              aria-label="Juster hovedskrift fet nivÃ¥"
+                            />
+                          </div>
+
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>Slank skrift</span>
+                              <strong>NivÃ¥ {bodyLightLevel}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="4"
+                              step="1"
+                              value={bodyLightLevel}
+                              onChange={(e) => updateBodyLightLevel(parseInt(e.target.value, 10))}
+                              aria-label="Juster hovedskrift slank nivÃ¥"
+                            />
+                          </div>
                         </div>
-                        <input
-                          type="range"
-                          min="-2"
-                          max="6"
-                          step="1"
-                          value={headlineScale}
-                          onChange={(e) => updateHeadlineScale(parseInt(e.target.value, 10))}
-                          aria-label="Juster overskrifter"
-                        />
+
+                        {/* OVERSKRIFT */}
+                        <div className={styles.designSliderSubSection}>
+                          <h5>Overskrift</h5>
+                          
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>StÃ¸rrelse</span>
+                              <strong>{headingScale > 0 ? `+${headingScale}` : headingScale}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="-2"
+                              max="4"
+                              step="1"
+                              value={headingScale}
+                              onChange={(e) => updateHeadingScale(parseInt(e.target.value, 10))}
+                              aria-label="Juster overskrift stÃ¸rrelse"
+                            />
+                          </div>
+
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>Fet skrift</span>
+                              <strong>NivÃ¥ {headingBoldLevel}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="4"
+                              step="1"
+                              value={headingBoldLevel}
+                              onChange={(e) => updateHeadingBoldLevel(parseInt(e.target.value, 10))}
+                              aria-label="Juster overskrift fet nivÃ¥"
+                            />
+                          </div>
+
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>Slank skrift</span>
+                              <strong>NivÃ¥ {headingLightLevel}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="4"
+                              step="1"
+                              value={headingLightLevel}
+                              onChange={(e) => updateHeadingLightLevel(parseInt(e.target.value, 10))}
+                              aria-label="Juster overskrift slank nivÃ¥"
+                            />
+                          </div>
+                        </div>
+
+                        {/* HEADLINE */}
+                        <div className={styles.designSliderSubSection}>
+                          <h5>Headline</h5>
+                          
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>StÃ¸rrelse</span>
+                              <strong>{headlineScale > 0 ? `+${headlineScale}` : headlineScale}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="-2"
+                              max="6"
+                              step="1"
+                              value={headlineScale}
+                              onChange={(e) => updateHeadlineScale(parseInt(e.target.value, 10))}
+                              aria-label="Juster headline stÃ¸rrelse"
+                            />
+                          </div>
+
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>Fet skrift</span>
+                              <strong>NivÃ¥ {headlineBoldLevel}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="4"
+                              step="1"
+                              value={headlineBoldLevel}
+                              onChange={(e) => updateHeadlineBoldLevel(parseInt(e.target.value, 10))}
+                              aria-label="Juster headline fet nivÃ¥"
+                            />
+                          </div>
+
+                          <div className={styles.designSliderRow}>
+                            <div className={styles.designSliderLabel}>
+                              <span>Slank skrift</span>
+                              <strong>NivÃ¥ {headlineLightLevel}</strong>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="4"
+                              step="1"
+                              value={headlineLightLevel}
+                              onChange={(e) => updateHeadlineLightLevel(parseInt(e.target.value, 10))}
+                              aria-label="Juster headline slank nivÃ¥"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </div>div>
                   </div>
 
                   <footer className={styles.designMenuFooter}>

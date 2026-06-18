@@ -1897,3 +1897,61 @@ main,
 [data-screen-mode="tv"] .ct-section-title {
   font-size: calc(var(--ct-subheadline-base) + var(--ct-user-subheadline-scale)) !important;
 }
+
+/* --- Collectium UI 8.6 Typography Control: Hovedskrift / Overskrift / Headline --- */
+:root {
+  --ct-heading-base: 1.25rem;
+  --ct-user-heading-scale: 0px;
+
+  --ct-user-body-weight: 400;
+  --ct-user-heading-weight: 500;
+  --ct-user-headline-weight: 600;
+}
+
+body,
+.collectium-content,
+main {
+  font-size: calc(var(--ct-body-base, 1rem) + var(--ct-user-body-scale, 0px));
+  font-weight: var(--ct-user-body-weight, 400);
+}
+
+h2,
+h3,
+.collectium-heading,
+.collectium-subheadline,
+.ct-section-title,
+.ct-panel-title,
+.ct-card-title {
+  font-size: calc(var(--ct-heading-base, 1.25rem) + var(--ct-user-heading-scale, 0px));
+  font-weight: var(--ct-user-heading-weight, 500);
+}
+
+h1,
+.collectium-headline,
+.ct-page-title,
+.ct-hero-title {
+  font-size: calc(var(--ct-headline-base, 1.8rem) + var(--ct-user-headline-scale, 0px));
+  font-weight: var(--ct-user-headline-weight, 600);
+}
+
+[data-screen-mode="tv"] {
+  --ct-heading-base: 1.6rem !important;
+}
+
+[data-screen-mode="tv"] h2,
+[data-screen-mode="tv"] h3,
+[data-screen-mode="tv"] .collectium-heading,
+[data-screen-mode="tv"] .collectium-subheadline,
+[data-screen-mode="tv"] .ct-section-title,
+[data-screen-mode="tv"] .ct-panel-title,
+[data-screen-mode="tv"] .ct-card-title {
+  font-size: calc(var(--ct-heading-base, 1.6rem) + var(--ct-user-heading-scale, 0px)) !important;
+  font-weight: var(--ct-user-heading-weight, 500);
+}
+
+[data-screen-mode="tv"] h1,
+[data-screen-mode="tv"] .collectium-headline,
+[data-screen-mode="tv"] .ct-page-title,
+[data-screen-mode="tv"] .ct-hero-title {
+  font-weight: var(--ct-user-headline-weight, 600);
+}
