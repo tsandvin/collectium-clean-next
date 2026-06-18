@@ -44,137 +44,88 @@
 }
 
 .brand {
-  min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ct-text);
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 14px 18px;
   text-decoration: none;
 }
 
-.brandMark {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--ct-radius-theme);
-  background: var(--ct-panel);
-  border: 1px solid var(--ct-border);
-  box-shadow: var(--ct-shadow-3d), 0 4px 12px rgba(0, 0, 0, 0.12);
-  color: var(--ct-accent);
-  font-family: var(--ct-font-display);
-  font-size: 24px;
-  font-weight: 900;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
+.brandLogo {
+  width: auto;
+  height: 46px;
+  max-width: 190px;
+  object-fit: contain;
+  mix-blend-mode: normal;
 }
 
-.brandMark::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: var(--ct-radius-theme);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.brand:hover .brandMark {
-  transform: translateY(-2px);
-  box-shadow: var(--ct-shadow-3d), 0 8px 24px rgba(0, 0, 0, 0.16);
-}
-
-.brand:hover .brandMark::after {
-  opacity: 1;
-}
-
-.brandText {
-  min-width: 0;
-  display: grid;
-  line-height: 1.05;
-}
-
-.brandText strong {
-  font-family: var(--ct-font-ui);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.brandText small {
-  margin-top: 4px;
-  color: var(--ct-muted);
-  font-family: var(--ct-font-ui);
+.brandBeta {
+  margin-top: 6px;
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ct-sidebar-muted, var(--ct-muted));
 }
 
 .nav {
+  margin-top: 28px;
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
 .navItem {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
+  display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 50px;
-  padding: 8px 10px;
-  border-radius: var(--ct-radius-theme);
-  color: var(--ct-text);
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 10px;
   text-decoration: none;
-  font-family: var(--ct-font-ui);
-  font-size: 15px;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  background: linear-gradient(135deg, var(--ct-panel-soft) 0%, var(--ct-panel) 100%);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.navItem::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--ct-radius-theme);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.04) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  color: var(--ct-sidebar-text, var(--ct-text));
+  font-weight: 520;
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all 0.2s ease;
 }
 
 .navItem:hover {
-  background: linear-gradient(135deg, var(--ct-accent) 0%, var(--ct-accent) 100%);
-  color: #fff;
-  transform: translateY(-3px);
-  box-shadow: var(--ct-shadow-3d), 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: color-mix(in srgb, var(--ct-accent) 8%, transparent);
 }
 
-.navItem:hover::before {
-  opacity: 1;
+.navItem[aria-current="page"],
+.navItem.isActive {
+  background: color-mix(in srgb, var(--ct-accent) 13%, transparent);
+  color: var(--ct-sidebar-active, var(--ct-accent));
+  font-weight: 600;
 }
 
-.navItem:active {
-  transform: translateY(-1px);
+.navItem.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .navIcon {
   width: 22px;
+  min-width: 22px;
   height: 22px;
-  display: grid;
+  display: inline-grid;
   place-items: center;
   color: currentColor;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0.9;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
-.navItem:hover {
-  background: var(--ct-hover);
+.navIcon svg {
+  display: block;
+}
+
+.navLabel {
+  line-height: 1.1;
 }
 
 .statusPill {
@@ -372,6 +323,7 @@
   }
 
   .nav {
+    margin-top: 0;
     grid-auto-flow: column;
     grid-auto-columns: max-content;
     overflow-x: auto;
@@ -379,9 +331,9 @@
   }
 
   .navItem {
-    grid-template-columns: 26px max-content;
     min-height: 34px;
     font-size: 12px;
+    padding: 6px 10px;
   }
 
   .statusPill {

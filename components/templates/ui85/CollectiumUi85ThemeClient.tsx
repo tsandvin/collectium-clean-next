@@ -59,6 +59,8 @@ function SkinDot({ skin }: { skin: CollectiumUi85Skin }) {
 function applyGlobalSkin(skin: CollectiumUi85Skin) {
   document.documentElement.dataset.skin = skin;
   document.body.dataset.skin = skin;
+  document.documentElement.dataset.theme = skin;
+  document.body.dataset.theme = skin;
   document.documentElement.setAttribute("data-ct-skin", skin);
   document.body.setAttribute("data-ct-skin", skin);
 

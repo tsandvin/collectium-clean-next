@@ -13,7 +13,7 @@ export default function Topbar() {
   const [theme, setTheme] = useState("collectium");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("collectium-workspace-theme");
+    const saved = window.localStorage.getItem("collectium-active-skin") || window.localStorage.getItem("collectium-workspace-theme");
     const allowed = ["collectium", "samler", "museum", "finans"];
     const nextTheme = saved && allowed.includes(saved) ? saved : "collectium";
 
@@ -22,6 +22,7 @@ export default function Topbar() {
     document.documentElement.setAttribute("data-skin", nextTheme);
     document.documentElement.setAttribute("data-ct-skin", nextTheme);
     window.localStorage.setItem("collectium-active-skin", nextTheme);
+    window.localStorage.setItem("collectium-workspace-theme", nextTheme);
   }, []);
 
   function updateTheme(nextTheme: string) {

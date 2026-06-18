@@ -39,6 +39,9 @@ html[data-theme="collectium"] {
   color-scheme: light;
   --ct-theme-name: "Collectium";
   --ct-bg: #fffaf2;
+  --ct-sidebar-text: #143327;
+  --ct-sidebar-muted: #53665f;
+  --ct-sidebar-active: #145c38;
   --ct-app-bg: #fffaf2;
   --ct-page-bg: #fffaf2;
   --ct-sidebar-bg: linear-gradient(135deg, #f8f5f0 0%, #ffffff 25%, #fffaf2 50%, #f5f2ed 100%);
@@ -88,6 +91,9 @@ html[data-theme="samler"] {
   color-scheme: light;
   --ct-theme-name: "Samler";
   --ct-bg: #ffffff;
+  --ct-sidebar-text: #0b2a4a;
+  --ct-sidebar-muted: #536f8f;
+  --ct-sidebar-active: #1e5a9a;
   --ct-app-bg: #ffffff;
   --ct-page-bg: #ffffff;
   --ct-sidebar-bg: linear-gradient(135deg, #eef3f9 0%, #f4f8fc 25%, #ffffff 50%, #f1f6fb 100%);
@@ -137,6 +143,9 @@ html[data-theme="museum"] {
   color-scheme: dark;
   --ct-theme-name: "Museum";
   --ct-bg: #0d0d0e;
+  --ct-sidebar-text: #e8e3d6;
+  --ct-sidebar-muted: #a39c8c;
+  --ct-sidebar-active: #d6c082;
   --ct-app-bg: #0d0d0e;
   --ct-page-bg: #0d0d0e;
   --ct-sidebar-bg: linear-gradient(135deg, #1a1a1c 0%, #1c1c1f 25%, #151516 50%, #131314 100%);
@@ -186,6 +195,9 @@ html[data-theme="finans"] {
   color-scheme: dark;
   --ct-theme-name: "Finans";
   --ct-bg: #111a21;
+  --ct-sidebar-text: #dde6ed;
+  --ct-sidebar-muted: #aebfcb;
+  --ct-sidebar-active: #27a777;
   --ct-app-bg: #111a21;
   --ct-page-bg: #111a21;
   --ct-sidebar-bg: linear-gradient(135deg, #0f1517 0%, #172c38 25%, #1a2f3a 50%, #131f26 100%);

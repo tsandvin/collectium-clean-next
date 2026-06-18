@@ -39,7 +39,8 @@ import { useEffect, useMemo, useState } from "react";
 
 export type CollectiumSkin = "collectium" | "samler" | "museum" | "finans";
 
-const STORAGE_KEY = "collectium-ui85-skin-preview";
+const STORAGE_KEY = "collectium-active-skin";
+const ALLOWED_SKINS: CollectiumSkin[] = ["collectium", "samler", "museum", "finans"];
 
 const SKINS: Array<{ key: CollectiumSkin; label: string; description: string }> = [
   { key: "collectium", label: "Collectium", description: "Blå/hvit standard og plattformdesign." },
@@ -49,7 +50,7 @@ const SKINS: Array<{ key: CollectiumSkin; label: string; description: string }> 
 ];
 
 function isSkin(value: string | null): value is CollectiumSkin {
-  return value === "collectium" || value === "samler" || value === "museum" || value === "finans";
+  return value !== null && ALLOWED_SKINS.includes(value as CollectiumSkin);
 }
 
 export function CollectiumSkinProvider({ children }: { children: React.ReactNode }) {
@@ -57,16 +58,17 @@ export function CollectiumSkinProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (isSkin(stored)) {
-      setSkin(stored);
-      document.documentElement.dataset.ctSkin = stored;
-      return;
-    }
-    document.documentElement.dataset.ctSkin = "collectium";
+    const nextSkin = isSkin(stored) ? stored : "collectium";
+    setSkin(nextSkin);
+    document.documentElement.dataset.skin = nextSkin;
+    document.documentElement.dataset.theme = nextSkin;
+    document.documentElement.setAttribute("data-ct-skin", nextSkin);
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.ctSkin = skin;
+    document.documentElement.dataset.skin = skin;
+    document.documentElement.dataset.theme = skin;
+    document.documentElement.setAttribute("data-ct-skin", skin);
     window.localStorage.setItem(STORAGE_KEY, skin);
   }, [skin]);
 
