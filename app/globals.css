@@ -1873,3 +1873,27 @@ main,
     font-size: 16px;
   }
 }
+
+/* --- TV Presentasjon Mode Global Scales --- */
+[data-screen-mode="tv"] {
+  --ct-body-base: 1.25rem !important;
+  --ct-headline-base: 2.25rem !important;
+  --ct-subheadline-base: 1.6rem !important;
+}
+
+[data-screen-mode="tv"] body,
+[data-screen-mode="tv"] main {
+  font-size: calc(var(--ct-body-base) + var(--ct-user-body-scale)) !important;
+}
+
+[data-screen-mode="tv"] h1,
+[data-screen-mode="tv"] .collectium-headline,
+[data-screen-mode="tv"] .ct-page-title {
+  font-size: calc(var(--ct-headline-base) + var(--ct-user-headline-scale)) !important;
+}
+
+[data-screen-mode="tv"] h2,
+[data-screen-mode="tv"] .collectium-subheadline,
+[data-screen-mode="tv"] .ct-section-title {
+  font-size: calc(var(--ct-subheadline-base) + var(--ct-user-subheadline-scale)) !important;
+}

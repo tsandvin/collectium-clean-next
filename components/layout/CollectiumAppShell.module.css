@@ -853,3 +853,216 @@
   }
 }
 
+/* ============================================================
+   Collectium UI 8.6 — Breakpoint and Layout Rules
+   ============================================================ */
+
+/* --- 1. Desktop Mode (1101px - 1899px) --- */
+.shell[data-screen-mode="desktop"] .content {
+  max-width: 1500px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+}
+
+/* --- 2. Wide / Bredskjerm Mode (1900px - 2899px) --- */
+.shell[data-screen-mode="wide"] .content {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 24px !important;
+}
+
+/* Wide mode: general workspace lanes layout override */
+.shell[data-lane-mode="lanes"] [class*="lanesContainer"] {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0 !important; /* using borders/splitters instead of gaps */
+  width: 100% !important;
+  overflow-x: auto !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+  padding-bottom: 24px !important;
+}
+
+.shell[data-lane-mode="lanes"] [class*="laneItem"] {
+  flex: 1 1 780px !important;
+  width: auto !important;
+  min-width: 780px !important;
+  max-width: 1800px !important;
+  box-sizing: border-box !important;
+  padding: 0 24px !important;
+}
+
+/* Visible vertical splitter between lanes */
+.shell[data-lane-mode="lanes"] [class*="laneItem"]:not(:last-child) {
+  border-right: 1px solid var(--ct-border) !important;
+  position: relative !important;
+}
+
+/* Hover effect and mouse cursor for drag resize preparation */
+.shell[data-lane-mode="lanes"] [class*="laneItem"]:not(:last-child)::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: -4px !important;
+  width: 8px !important;
+  cursor: col-resize !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  transition: background 0.2s ease !important;
+}
+
+.shell[data-lane-mode="lanes"] [class*="laneItem"]:not(:last-child):hover::after {
+  background: var(--ct-accent) !important;
+  opacity: 0.3 !important;
+}
+
+/* --- 3. TV / Presentasjon Mode (2900px+) --- */
+.shell[data-screen-mode="tv"] {
+  --ct-body-base: 1.25rem !important;
+  --ct-headline-base: 2.2rem !important;
+  --ct-subheadline-base: 1.6rem !important;
+  font-size: 20px !important;
+}
+
+.shell[data-screen-mode="tv"] .content {
+  padding: 60px !important;
+  max-width: 2200px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Larger panels, typography, spacing, headings for TV Mode */
+.shell[data-screen-mode="tv"] .ct-card,
+.shell[data-screen-mode="tv"] [class*="infoPanel"],
+.shell[data-screen-mode="tv"] [class*="filterColumn"],
+.shell[data-screen-mode="tv"] [class*="timelineShell"],
+.shell[data-screen-mode="tv"] [class*="dynamicArea"] {
+  padding: 32px !important;
+  gap: 24px !important;
+  border-radius: 24px !important;
+  box-shadow: var(--ct-shadow-lg) !important;
+}
+
+.shell[data-screen-mode="tv"] .ct-page-title,
+.shell[data-screen-mode="tv"] h1 {
+  font-size: 2.8rem !important;
+  margin-bottom: 24px !important;
+}
+
+.shell[data-screen-mode="tv"] .ct-section-title,
+.shell[data-screen-mode="tv"] h2 {
+  font-size: 2rem !important;
+  margin-bottom: 18px !important;
+}
+
+/* TV should not squeeze elements into narrow lanes; layout in stacked blocks */
+.shell[data-screen-mode="tv"] [class*="lanesContainer"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 32px !important;
+  width: 100% !important;
+  overflow-x: visible !important;
+}
+
+.shell[data-screen-mode="tv"] [class*="laneItem"],
+.shell[data-screen-mode="tv"] [class*="filterColumn"],
+.shell[data-screen-mode="tv"] [class*="mainColumn"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* --- 4. /test/periodefilter Page-Specific Wide Layout Grid Contents Trick --- */
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] .content {
+  padding: 16px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="lanesContainer"] {
+  display: grid !important;
+  grid-template-columns: minmax(780px, 1.2fr) minmax(780px, 1fr) !important;
+  gap: 24px !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  align-items: stretch !important;
+  position: relative !important;
+}
+
+/* Bypass intermediate structural wrappers to let grandchildren align directly to the grid */
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="lanesContainer"] > div,
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="mainColumn"],
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="dynamicArea"] {
+  display: contents !important;
+}
+
+/* Lane 1 (Column 1) Content */
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="filterColumn"] {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-self: start !important;
+}
+
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="timelineShell"] {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  margin-top: 16px !important;
+}
+
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="segmentTabs"] {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+  margin-top: 16px !important;
+}
+
+/* Lane 2 (Column 2) Content */
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="dynamicGrid"] {
+  grid-column: 2 !important;
+  grid-row: 1 / span 3 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  align-self: start !important;
+  width: 100% !important;
+}
+
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="infoPanel"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Splitter boundary between columns */
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="lanesContainer"]::after {
+  content: "" !important;
+  grid-column: 1 !important;
+  grid-row: 1 / span 3 !important;
+  justify-self: end !important;
+  width: 1px !important;
+  background: var(--ct-border) !important;
+  margin-right: -12px !important; /* Exactly middle of the 24px gap */
+  pointer-events: none !important;
+}
+
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="lanesContainer"]::before {
+  content: "" !important;
+  grid-column: 1 !important;
+  grid-row: 1 / span 3 !important;
+  justify-self: end !important;
+  width: 8px !important;
+  margin-right: -16px !important;
+  cursor: col-resize !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  transition: background 0.2s ease !important;
+}
+
+.shell[data-page-periodfilter="true"][data-lane-mode="lanes"] [class*="lanesContainer"]:hover::before {
+  background: var(--ct-accent) !important;
+  opacity: 0.15 !important;
+}
+
+

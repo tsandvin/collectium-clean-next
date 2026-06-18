@@ -189,6 +189,8 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
 
   const isDarkSkin = skin === "museum" || skin === "finans";
 
+  const isPeriodFilterTest = pathname === "/test/periodefilter" || pathname === "/periodefilter";
+
   return (
     <div
       className={styles.shell}
@@ -196,6 +198,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
       data-sidebar-mode={sidebarMode}
       data-lane-mode={laneMode}
       data-mobile-menu-open={isMobileMenuOpen}
+      data-page-periodfilter={isPeriodFilterTest}
     >
       {/* Mobile drawer backdrop */}
       {isMobileMenuOpen && (sidebarMode === "hidden" || sidebarMode === "compact") && (
@@ -310,7 +313,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                           { key: "tablet", label: "Tablet" },
                           { key: "desktop", label: "Desktop" },
                           { key: "wide", label: "Bredskjerm" },
-                          { key: "tv", label: "TV" },
+                          { key: "tv", label: "TV / Presentasjon" },
                         ].map((mode) => (
                           <button
                             key={mode.key}
@@ -326,7 +329,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                       </div>
                       <div className={styles.designMenuStatus}>
                         <span>Faktisk bredde: <strong>{actualScreenWidth}px</strong></span>
-                        <span>Aktiv modus: <strong>{activeScreenMode}</strong></span>
+                        <span>Aktiv modus: <strong>{activeScreenMode === "tv" ? "TV / Presentasjon" : activeScreenMode}</strong></span>
                         <span>Lane mode: <strong>{laneMode}</strong></span>
                       </div>
                     </div>
