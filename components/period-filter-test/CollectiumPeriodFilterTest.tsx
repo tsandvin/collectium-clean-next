@@ -4,21 +4,20 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Periodefilter test UI/UX 8.6 - stÃƒÂ¥ende masterfilter + Rad 1-4
+ * Periodefilter UI/UX 8.6 - dynamisk Rad 1-4 + tidslinje
  *
- * Definering / formÃƒÂ¥l:
- * Testside for periodefilter der Masterfilter og Rad 1-4 vises som kompakte
- * rullegardin-lister. Rad 1-3 fÃƒÂ¸lger tidligere periodemodell, mens Rad 4
- * viser alle perioder / konkrete periodeverdier fra API.
+ * Definering / formål:
+ * Testside for periodefilter der Rad 1 styrer Rad 2, Rad 2 styrer Rad 3,
+ * Rad 3 styrer Rad 4, og tidslinjen bygges dynamisk etter valgene.
  *
- * BruksomrÃƒÂ¥de:
+ * Bruksområde:
  * Brukes av /test/periodefilter.
  *
- * BerÃƒÂ¸rte API-ruter:
+ * Berørte API-ruter:
  * - GET /api/filter/period/options
  *
- * Retning:
- * Neon -> API -> React testvisning.
+ * Dataretning:
+ * Neon/API -> React -> UI
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -49,17 +48,11 @@ type RelationNode = {
   relation_count: number;
 };
 
-type RelationSummary = {
-  relation_type: string;
-  relation_count: number;
-};
-
 type PeriodApiResponse = {
   ok: boolean;
   message?: string;
   rows: PeriodOption[];
   relationNodes?: RelationNode[];
-  relationSummary?: RelationSummary[];
   updatedAt?: string;
 };
 
@@ -70,28 +63,27 @@ type SelectItem = {
   description: string;
   startYear?: number | null;
   endYear?: number | null;
-  rangeType?: "period" | "century" | "decade" | "era" | "relation" | "other";
 };
+
+type TimelineTone = "blue" | "gold" | "green" | "red" | "purple" | "steel";
 
 type TimelineItem = {
   id: string;
+  laneKey: "row1" | "row2" | "row3" | "row4" | "object";
   lane: string;
   label: string;
   start: number;
   end: number;
-  tone: "blue" | "gold" | "green" | "red" | "purple" | "steel";
+  tone: TimelineTone;
   note: string;
-  bio?: string;
-  keyFacts?: Array<[string, string]>;
 };
 
 const MASTER_FILTERS: SelectItem[] = [
-  { key: "filter_master", label: "Filter Master", group: "Master", description: "Alle hovedfiltre styres herfra." },
-  { key: "catalog", label: "Katalog", group: "Master", description: "Objekter, kilde, produsent, utgave, valÃƒÂ¸r og variant." },
   { key: "period", label: "Periode", group: "Master", description: "Historiske perioder, regent, krig, finans og hendelser." },
+  { key: "catalog", label: "Katalog", group: "Master", description: "Objekter, kilde, produsent, utgave, valør og variant." },
   { key: "relation", label: "Relasjon", group: "Master", description: "Konge, person, motiv, funn, produsent, utgave og objektkoblinger." },
-  { key: "collection", label: "Samling", group: "Master", description: "Min samling, ÃƒÂ¸nskeliste, favoritt og brukerstatus." },
   { key: "market", label: "Marked / finans", group: "Master", description: "Verdi, trend, prisobservasjoner, auksjon og nettbutikk." },
+  { key: "collection", label: "Samling", group: "Master", description: "Min samling, ønskeliste, favoritt og brukerstatus." },
 ];
 
 const COUNTRIES: SelectItem[] = [
@@ -109,61 +101,137 @@ const OBJECT_TYPES: SelectItem[] = [
   { key: "medal", label: "Medalje", group: "Objekt", description: "Medaljer og hederstegn." },
 ];
 
-const ROW1_MAIN_PERIODS: SelectItem[] = [
-  { key: "national_period", label: "Nasjonal / overordnet hovedperiode", group: "Rad 1", description: "Overordnet historisk/nasjonal hovedperiode." },
-  { key: "regent_period", label: "Konge / regentperiode", group: "Rad 1", description: "Regent som tidsramme, ikke bare undernode." },
-  { key: "financial_period", label: "Finans / pengehistorisk hovedperiode", group: "Rad 1", description: "ÃƒËœkonomisk og pengepolitisk hovedperiode." },
-  { key: "collector_period", label: "Samler-/katalogperiode", group: "Rad 1", description: "Periode styrt av objekt, katalog, utgave eller samlermarked." },
+const ROW1: SelectItem[] = [
+  { key: "national_period", label: "Nasjonal hovedperiode", group: "Rad 1", description: "Overordnet historisk/nasjonal periode." },
+  { key: "regent_period", label: "Konge / regentperiode", group: "Rad 1", description: "Regent, konge, styreperiode og utgiverkontekst." },
+  { key: "financial_period", label: "Finans / pengehistorie", group: "Rad 1", description: "Økonomi, valuta, inflasjon, marked og pengehistorie." },
+  { key: "collector_period", label: "Samler / katalogperiode", group: "Rad 1", description: "Objekt, kilde, utgave, variant og samlerkontekst." },
 ];
 
-const ROW2_CONTEXTS: SelectItem[] = [
-  { key: "historical_main", label: "Historisk hovedperiode", group: "Rad 2", description: "Hovedperiode innenfor valgt Rad 1." },
-  { key: "union", label: "Union / statlig periode", group: "Rad 2", description: "Union, selvstendighet, statsform." },
-  { key: "war", label: "Krig / konflikt", group: "Rad 2", description: "Krig, okkupasjon eller politisk konflikt." },
-  { key: "economy", label: "ÃƒËœkonomisk periode", group: "Rad 2", description: "Inflasjon, krise, valuta, pengepolitikk." },
-  { key: "disease_crisis", label: "Sykdom / krise", group: "Rad 2", description: "Krise, sykdom, samfunnsendring." },
-  { key: "money_history", label: "Pengehistorie", group: "Rad 2", description: "Seddelreform, valuta, betalingssystem og pengehistorie." },
-];
+const ROW2_BY_ROW1: Record<string, SelectItem[]> = {
+  national_period: [
+    { key: "historical_main", label: "Historisk hovedperiode", group: "Rad 2", description: "Hovedperiode innenfor valgt nasjonal tidsramme." },
+    { key: "union", label: "Union / statsperiode", group: "Rad 2", description: "Union, selvstendighet eller statlig overgang." },
+    { key: "war", label: "Krig / konflikt", group: "Rad 2", description: "Krig, okkupasjon eller politisk konflikt." },
+    { key: "crisis", label: "Krise / samfunnsendring", group: "Rad 2", description: "Sykdom, krise eller stor samfunnsendring." },
+  ],
+  regent_period: [
+    { key: "regent_rule", label: "Regent / konge", group: "Rad 2", description: "Hvem styrte i perioden?" },
+    { key: "dynasty", label: "Dynasti / maktstruktur", group: "Rad 2", description: "Dynasti, kongehus, union og maktstruktur." },
+    { key: "issuer_authority", label: "Utgiver / autoritet", group: "Rad 2", description: "Hvem stod bak objektets autoritet eller utgiverrolle?" },
+    { key: "regent_war", label: "Regent under krig", group: "Rad 2", description: "Regentperioder som overlapper konflikt." },
+  ],
+  financial_period: [
+    { key: "economy", label: "Økonomisk periode", group: "Rad 2", description: "Økonomisk hovedperiode." },
+    { key: "money_history", label: "Pengehistorie", group: "Rad 2", description: "Valuta, sedler, reformer og pengepolitikk." },
+    { key: "market", label: "Marked / verdi", group: "Rad 2", description: "Marked, verdi, trend og prisobservasjoner." },
+    { key: "index", label: "Index / sammenligning", group: "Rad 2", description: "Sammenligning mot finansielle indekser." },
+  ],
+  collector_period: [
+    { key: "source", label: "Kilde / katalog", group: "Rad 2", description: "Katalogkilde og objekttype." },
+    { key: "edition", label: "Utgave / serie", group: "Rad 2", description: "Utgave, serie og valørutgave." },
+    { key: "variant", label: "Variant / type", group: "Rad 2", description: "Variant, litra, signatur og motiv." },
+    { key: "material", label: "Materiale / kvalitet", group: "Rad 2", description: "Papir, metall, kvalitet og sjeldenhet." },
+  ],
+};
 
-const ROW3_RELATIONS: SelectItem[] = [
-  { key: "regent", label: "Konge / regent", group: "Historie", description: "Regent/person som historisk relasjon." },
-  { key: "person", label: "Signatur / person", group: "Relasjon", description: "Signatur, person eller rolle." },
-  { key: "producer", label: "Produsent / trykkeri", group: "Objekt", description: "Trykkeri, myntverk, produsent eller utsteder." },
-  { key: "issuer", label: "Utgiver / autoritet", group: "Objekt", description: "Norges Bank, stat, konge, institusjon." },
-  { key: "edition", label: "Utgave / serie", group: "Objekt", description: "Utgave, serie, emisjon, katalogutgave." },
-  { key: "denomination_issue", label: "ValÃƒÂ¸rutgave / serie", group: "Objekt", description: "ValÃƒÂ¸r + utgave/serie." },
-  { key: "variant", label: "Variant / type", group: "Objekt", description: "Variant, type, litra, detaljavvik." },
-  { key: "signature", label: "Signaturgruppe", group: "Objekt", description: "Signaturkombinasjon." },
-  { key: "motif", label: "Motiv / symbol", group: "Objekt", description: "Motiv, portrett, riksvÃƒÂ¥pen, symbol." },
-  { key: "material", label: "Materiale", group: "Objekt", description: "Papir, metall, legering, sikkerhetspapir." },
-  { key: "provenance", label: "Funn / proveniens", group: "Historie", description: "Funn, eierhistorikk, proveniensperiode." },
-  { key: "market", label: "Marked / verdi", group: "Finans", description: "Verdi, trend, prisobservasjoner." },
-];
+const ROW3_BY_ROW2: Record<string, SelectItem[]> = {
+  historical_main: [
+    { key: "period", label: "Periode", group: "Rad 3", description: "Velg konkret historisk periode." },
+    { key: "event", label: "Historisk hendelse", group: "Rad 3", description: "Hendelse knyttet til perioden." },
+    { key: "year", label: "År / århundre", group: "Rad 3", description: "År, tiår eller århundre." },
+  ],
+  union: [
+    { key: "union_period", label: "Union / statsform", group: "Rad 3", description: "Union, selvstendighet eller statsform." },
+    { key: "regent", label: "Konge / regent", group: "Rad 3", description: "Regent i valgt statsperiode." },
+    { key: "country", label: "Land / område", group: "Rad 3", description: "Land eller område." },
+  ],
+  war: [
+    { key: "war", label: "Krig / konflikt", group: "Rad 3", description: "Krig eller konflikt." },
+    { key: "regent", label: "Regent under konflikt", group: "Rad 3", description: "Regent som overlapper konflikten." },
+    { key: "finance", label: "Krigsøkonomi", group: "Rad 3", description: "Finans og pengepolitikk under konflikt." },
+  ],
+  crisis: [
+    { key: "crisis", label: "Krise", group: "Rad 3", description: "Sykdom, krise eller samfunnsendring." },
+    { key: "finance", label: "Kriseøkonomi", group: "Rad 3", description: "Finansiell effekt av krise." },
+  ],
+  regent_rule: [
+    { key: "regent", label: "Konge / regent", group: "Rad 3", description: "Regent/person som historisk relasjon." },
+    { key: "period", label: "Styreperiode", group: "Rad 3", description: "Regentens styreperiode." },
+    { key: "object", label: "Objekter i regentperioden", group: "Rad 3", description: "Objekter som faller innenfor regentens periode." },
+  ],
+  dynasty: [
+    { key: "dynasty", label: "Dynasti / kongehus", group: "Rad 3", description: "Dynasti, kongehus eller maktstruktur." },
+    { key: "regent", label: "Regenter i dynasti", group: "Rad 3", description: "Regenter knyttet til valgt dynasti." },
+  ],
+  issuer_authority: [
+    { key: "issuer", label: "Utgiver / autoritet", group: "Rad 3", description: "Utgiver, autoritet, bank eller stat." },
+    { key: "producer", label: "Produsent / trykkeri", group: "Rad 3", description: "Produsent, trykkeri eller myntverk." },
+  ],
+  regent_war: [
+    { key: "regent", label: "Regent", group: "Rad 3", description: "Regent som overlapper krig." },
+    { key: "war", label: "Krig", group: "Rad 3", description: "Krig som overlapper regent." },
+  ],
+  economy: [
+    { key: "finance", label: "Finansperiode", group: "Rad 3", description: "Finansiell periode." },
+    { key: "inflation", label: "Inflasjon / kjøpekraft", group: "Rad 3", description: "Inflasjon, lønn og kjøpekraft." },
+  ],
+  money_history: [
+    { key: "currency", label: "Valuta / pengehistorie", group: "Rad 3", description: "Valuta, seddelserie, pengepolitikk." },
+    { key: "issuer", label: "Utgiver / bank", group: "Rad 3", description: "Norges Bank, stat eller utsteder." },
+    { key: "edition", label: "Seddelutgave", group: "Rad 3", description: "Utgave eller serie." },
+  ],
+  market: [
+    { key: "market", label: "Marked", group: "Rad 3", description: "Verdi, trend, auksjon og nettbutikk." },
+    { key: "trend", label: "Trend", group: "Rad 3", description: "Trend og verdiutvikling." },
+  ],
+  index: [
+    { key: "index", label: "Index", group: "Rad 3", description: "Index, sammenligning og utvikling." },
+    { key: "finance", label: "Finansiell kontekst", group: "Rad 3", description: "Finansdata i valgt tidsrom." },
+  ],
+  source: [
+    { key: "source_key", label: "Kilde", group: "Rad 3", description: "Katalogkilde." },
+    { key: "object_group", label: "Objekttype", group: "Rad 3", description: "Seddel, mynt, verdibrev osv." },
+    { key: "producer", label: "Produsent / utsteder", group: "Rad 3", description: "Produsent, trykkeri, bank eller utsteder." },
+  ],
+  edition: [
+    { key: "edition", label: "Utgave / serie", group: "Rad 3", description: "Utgave eller serie." },
+    { key: "denomination_issue", label: "Valørutgave / serie", group: "Rad 3", description: "Valør + utgave/serie." },
+    { key: "year", label: "Publiseringsår / objektår", group: "Rad 3", description: "År som objektspesifikasjon." },
+  ],
+  variant: [
+    { key: "variant", label: "Variant / type", group: "Rad 3", description: "Variant eller type." },
+    { key: "signature", label: "Signatur / person", group: "Rad 3", description: "Signaturgruppe eller person." },
+    { key: "motif", label: "Motiv / symbol", group: "Rad 3", description: "Motiv eller symbol." },
+  ],
+  material: [
+    { key: "material", label: "Materiale", group: "Rad 3", description: "Papir, metall eller materiale." },
+    { key: "grade", label: "Kvalitet", group: "Rad 3", description: "Kvalitet og tilstand." },
+    { key: "rarity", label: "Sjeldenhet", group: "Rad 3", description: "Sjeldenhet og katalogvurdering." },
+  ],
+};
 
-const STATIC_TIMELINE: TimelineItem[] = [
-  { id: "karl-johan", lane: "Konge/regent", label: "Karl XIV Johan", start: 1814, end: 1844, tone: "gold", note: "Tidlig unionstid." },
-  { id: "oscar-i", lane: "Konge/regent", label: "Oscar I", start: 1844, end: 1859, tone: "gold", note: "Svensk-norsk union." },
-  { id: "oscar-ii", lane: "Konge/regent", label: "Oscar II", start: 1872, end: 1905, tone: "gold", note: "Siste unionskonge." },
-  { id: "haakon-vii", lane: "Konge/regent", label: "Haakon VII", start: 1905, end: 1957, tone: "gold", note: "Selvstendig Norge, krig og etterkrigstid." },
-  { id: "olav-v", lane: "Konge/regent", label: "Olav V", start: 1957, end: 1991, tone: "blue", note: "Etterkrigstid og oljeperiode." },
-  { id: "harald-v", lane: "Konge/regent", label: "Harald V", start: 1991, end: 2024, tone: "purple", note: "Moderne periode." },
+const BASE_TIMELINE: TimelineItem[] = [
+  { id: "union", laneKey: "row1", lane: "Nasjonal hovedperiode", label: "Union med Sverige", start: 1814, end: 1905, tone: "blue", note: "Norge i union med Sverige." },
+  { id: "selvstendig", laneKey: "row1", lane: "Nasjonal hovedperiode", label: "Selvstendig Norge", start: 1905, end: 1940, tone: "blue", note: "Selvstendig stat før krig." },
+  { id: "etterkrig", laneKey: "row1", lane: "Nasjonal hovedperiode", label: "Etterkrigstiden", start: 1945, end: 1990, tone: "blue", note: "Gjenoppbygging og moderne økonomi." },
 
-  { id: "union", lane: "Nasjonal periode", label: "Union med Sverige", start: 1814, end: 1905, tone: "gold", note: "Norge i union med Sverige." },
-  { id: "selvstendig", lane: "Nasjonal periode", label: "Selvstendig Norge", start: 1905, end: 1940, tone: "blue", note: "Selvstendig stat fÃƒÂ¸r krig." },
-  { id: "etterkrig", lane: "Nasjonal periode", label: "Etterkrigstiden", start: 1945, end: 1990, tone: "blue", note: "Gjenoppbygging og moderne ÃƒÂ¸konomi." },
+  { id: "oscar-ii", laneKey: "row2", lane: "Konge / regent", label: "Oscar II", start: 1872, end: 1905, tone: "gold", note: "Siste unionskonge." },
+  { id: "haakon-vii", laneKey: "row2", lane: "Konge / regent", label: "Haakon VII", start: 1905, end: 1957, tone: "gold", note: "Selvstendig Norge, krig og etterkrigstid." },
+  { id: "olav-v", laneKey: "row2", lane: "Konge / regent", label: "Olav V", start: 1957, end: 1991, tone: "gold", note: "Etterkrigstid og oljeperiode." },
+  { id: "harald-v", laneKey: "row2", lane: "Konge / regent", label: "Harald V", start: 1991, end: 2024, tone: "gold", note: "Moderne periode." },
 
-  { id: "ww1", lane: "Krig/konflikt", label: "1. verdenskrig", start: 1914, end: 1918, tone: "red", note: "Internasjonal krig og ÃƒÂ¸konomisk uro." },
-  { id: "ww2", lane: "Krig/konflikt", label: "2. verdenskrig / okkupasjon", start: 1940, end: 1945, tone: "red", note: "Direkte relevant for seddel-, valuta- og krigshistorie." },
+  { id: "ww1", laneKey: "row3", lane: "Krig / konflikt", label: "1. verdenskrig", start: 1914, end: 1918, tone: "green", note: "Internasjonal krig og økonomisk uro." },
+  { id: "ww2", laneKey: "row3", lane: "Krig / konflikt", label: "2. verdenskrig / okkupasjon", start: 1940, end: 1945, tone: "green", note: "Direkte relevant for seddel-, valuta- og krigshistorie." },
 
-  { id: "krigsokonomi", lane: "Finans/ÃƒÂ¸konomi", label: "KrigsÃƒÂ¸konomi", start: 1940, end: 1945, tone: "steel", note: "Regulering, knapphet og pengepolitisk press." },
-  { id: "oljeinflasjon", lane: "Finans/ÃƒÂ¸konomi", label: "Olje / inflasjon", start: 1970, end: 1990, tone: "green", note: "OljeÃƒÂ¸konomi, inflasjon og endret kjÃƒÂ¸pekraft." },
-  { id: "finanskrise", lane: "Finans/ÃƒÂ¸konomi", label: "Finanskrise", start: 2008, end: 2011, tone: "green", note: "Marked og likviditet." },
+  { id: "krigsokonomi", laneKey: "row4", lane: "Finans / økonomi", label: "Krigsøkonomi", start: 1940, end: 1945, tone: "purple", note: "Regulering, knapphet og pengepolitisk press." },
+  { id: "oljeinflasjon", laneKey: "row4", lane: "Finans / økonomi", label: "Olje / inflasjon", start: 1970, end: 1990, tone: "purple", note: "Oljeøkonomi, inflasjon og endret kjøpekraft." },
+  { id: "finanskrise", laneKey: "row4", lane: "Finans / økonomi", label: "Finanskrise", start: 2008, end: 2011, tone: "purple", note: "Marked og likviditet." },
 
-  { id: "hambro", lane: "Signatur/person", label: "C. J. Hambro", start: 1924, end: 1945, tone: "purple", note: "Person/signatur overlapper krigsperioden." },
-  { id: "liestoel", lane: "Signatur/person", label: "Knut LiestÃƒÂ¸l", start: 1953, end: 1985, tone: "purple", note: "Etterkrigstid og seddelkontekst." },
-
-  { id: "norges-bank", lane: "Produsent/utgiver/objekt", label: "Norges Bank", start: 1816, end: 2024, tone: "steel", note: "Utgiverrelasjon for norske sedler." },
-  { id: "femte-utgave", lane: "Produsent/utgiver/objekt", label: "5. utgave sedler", start: 1966, end: 1983, tone: "steel", note: "Eksempel pÃƒÂ¥ utgaveperiode." },
+  { id: "hambro", laneKey: "object", lane: "Signatur / person", label: "C. J. Hambro", start: 1924, end: 1945, tone: "steel", note: "Person/signatur overlapper krigsperioden." },
+  { id: "liestoel", laneKey: "object", lane: "Signatur / person", label: "Knut Liestøl", start: 1953, end: 1985, tone: "steel", note: "Etterkrigstid og seddelkontekst." },
+  { id: "norges-bank", laneKey: "object", lane: "Produsent / utgiver / objekt", label: "Norges Bank", start: 1816, end: 2024, tone: "steel", note: "Utgiverrelasjon for norske sedler." },
+  { id: "femte-utgave", laneKey: "object", lane: "Produsent / utgiver / objekt", label: "5. utgave sedler", start: 1966, end: 1983, tone: "steel", note: "Eksempel på utgaveperiode." },
 ];
 
 function labelFromKey(value: string): string {
@@ -172,16 +240,13 @@ function labelFromKey(value: string): string {
 
 function yearText(start?: number | null, end?: number | null): string {
   if (start == null && end == null) return "Tidsrom mangler";
-  if (start != null && end != null) return `${start}Ã¢â‚¬â€œ${end}`;
-  if (start != null) return `${start}Ã¢â‚¬â€œ`;
-  return `Ã¢â‚¬â€œ${end}`;
+  if (start != null && end != null) return `${start}–${end}`;
+  if (start != null) return `${start}–`;
+  return `–${end}`;
 }
 
-function decadeYears(fromYear: number, toYear: number): number[] {
-  const first = Math.ceil(fromYear / 10) * 10;
-  const years: number[] = [];
-  for (let year = first; year <= toYear; year += 10) years.push(year);
-  return years;
+function yearsOverlap(start: number, end: number, fromYear: number, toYear: number): boolean {
+  return start <= toYear && end >= fromYear;
 }
 
 function itemStyle(item: TimelineItem, fromYear: number, toYear: number): CSSProperties {
@@ -189,212 +254,15 @@ function itemStyle(item: TimelineItem, fromYear: number, toYear: number): CSSPro
   const start = Math.max(fromYear, item.start);
   const end = Math.min(toYear, item.end);
   const left = ((start - fromYear) / span) * 100;
-  const width = Math.max(1.4, ((end - start) / span) * 100);
+  const width = Math.max(1.6, ((end - start) / span) * 100);
   return { left: `${left}%`, width: `${width}%` };
 }
 
-function periodRowsToItems(rows: PeriodOption[]): SelectItem[] {
-  return rows
-    .filter((row) => row.period_slug)
-    .sort((a, b) => {
-      const ay = a.start_year ?? 999999;
-      const by = b.start_year ?? 999999;
-      return ay - by || String(a.display_name_no || a.period_slug).localeCompare(String(b.display_name_no || b.period_slug), "nb");
-    })
-    .map((row) => ({
-      key: row.period_slug,
-      label: row.display_name_no || labelFromKey(row.period_slug),
-      group: row.period_type_label_no || row.period_type_key || "Periode",
-      description: row.collectium_relevance_no || row.summary_short_no || "Periode fra API.",
-      startYear: row.start_year,
-      endYear: row.end_year,
-    }));
-}
-
-function relationRowsToItems(nodes: RelationNode[], wanted: string): SelectItem[] {
-  return nodes
-    .filter((node) => node.relation_type === wanted)
-    .slice(0, 120)
-    .map((node) => ({
-      key: `${node.relation_type}:${node.relation_slug}`,
-      label: node.relation_label_no || labelFromKey(node.relation_slug),
-      group: node.relation_type,
-      description: `${node.relation_count.toLocaleString("nb-NO")} objektkoblinger`,
-      startYear: null,
-      endYear: null,
-    }));
-}
-
-
-function yearsOverlap(
-  itemStart: number | null | undefined,
-  itemEnd: number | null | undefined,
-  fromYear: number,
-  toYear: number,
-): boolean {
-  if (itemStart == null && itemEnd == null) return false;
-  const start = itemStart ?? itemEnd ?? fromYear;
-  const end = itemEnd ?? itemStart ?? toYear;
-  return start <= toYear && end >= fromYear;
-}
-
-function centuryLabel(year: number): string {
-  if (year < 0) {
-    const century = Math.ceil(Math.abs(year) / 100);
-    return `${century}. Ã¥rhundre f.Kr.`;
-  }
-
-  const centuryStart = Math.floor(year / 100) * 100;
-  return `${centuryStart}-tallet`;
-}
-
-function decadeLabel(year: number): string {
-  const start = Math.floor(year / 10) * 10;
-  const end = start + 9;
-  if (end < 0) return `${Math.abs(end)}â€“${Math.abs(start)} f.Kr.`;
-  if (start < 0 && end >= 0) return `${Math.abs(start)} f.Kr.â€“${end} e.Kr.`;
-  return `${start}â€“${end}`;
-}
-
-function makeRangeSuggestions(fromYear: number, toYear: number): SelectItem[] {
-  const items: SelectItem[] = [];
-
-  if (fromYear < 0) {
-    items.push({
-      key: "era:bc",
-      label: "f.Kr.",
-      group: "Tidsregning",
-      description: "Perioder fÃ¸r Ã¥r 0.",
-      startYear: fromYear,
-      endYear: Math.min(toYear, -1),
-      rangeType: "era",
-    });
-  }
-
-  if (toYear >= 0) {
-    items.push({
-      key: "era:ad",
-      label: "e.Kr.",
-      group: "Tidsregning",
-      description: "Perioder etter Ã¥r 0.",
-      startYear: Math.max(fromYear, 0),
-      endYear: toYear,
-      rangeType: "era",
-    });
-  }
-
-  const firstCentury = Math.floor(fromYear / 100) * 100;
-  const lastCentury = Math.floor(toYear / 100) * 100;
-
-  for (let year = firstCentury; year <= lastCentury; year += 100) {
-    const start = year;
-    const end = year + 99;
-
-    if (end < fromYear || start > toYear) continue;
-
-    items.push({
-      key: `century:${start}`,
-      label: centuryLabel(start),
-      group: "Ã…rhundre innenfor valgt periode",
-      description: `${Math.max(start, fromYear)}â€“${Math.min(end, toYear)}`,
-      startYear: Math.max(start, fromYear),
-      endYear: Math.min(end, toYear),
-      rangeType: "century",
-    });
-  }
-
-  const firstDecade = Math.floor(fromYear / 10) * 10;
-  const lastDecade = Math.floor(toYear / 10) * 10;
-
-  for (let year = firstDecade; year <= lastDecade; year += 10) {
-    const start = year;
-    const end = year + 9;
-
-    if (end < fromYear || start > toYear) continue;
-
-    items.push({
-      key: `decade:${start}`,
-      label: decadeLabel(start),
-      group: "TiÃ¥r innenfor valgt periode",
-      description: `${Math.max(start, fromYear)}â€“${Math.min(end, toYear)}`,
-      startYear: Math.max(start, fromYear),
-      endYear: Math.min(end, toYear),
-      rangeType: "decade",
-    });
-  }
-
-  return items;
-}
-
-function periodRowsToGroupedRad4Items(
-  rows: PeriodOption[],
-  fromYear: number,
-  toYear: number,
-): SelectItem[] {
-  const current: SelectItem[] = [];
-  const other: SelectItem[] = [];
-
-  for (const row of rows) {
-    if (!row.period_slug) continue;
-
-    const item: SelectItem = {
-      key: row.period_slug,
-      label: row.display_name_no || labelFromKey(row.period_slug),
-      group: yearsOverlap(row.start_year, row.end_year, fromYear, toYear)
-        ? "Gjeldende periode"
-        : "Andre perioder",
-      description: row.collectium_relevance_no || row.summary_short_no || "Periode fra API.",
-      startYear: row.start_year,
-      endYear: row.end_year,
-      rangeType: yearsOverlap(row.start_year, row.end_year, fromYear, toYear) ? "period" : "other",
-    };
-
-    if (item.group === "Gjeldende periode") current.push(item);
-    else other.push(item);
-  }
-
-  current.sort((a, b) => {
-    const ay = a.startYear ?? 999999;
-    const by = b.startYear ?? 999999;
-    return ay - by || a.label.localeCompare(b.label, "nb");
-  });
-
-  other.sort((a, b) => {
-    const ay = a.startYear ?? 999999;
-    const by = b.startYear ?? 999999;
-    return ay - by || a.label.localeCompare(b.label, "nb");
-  });
-
-  return [...current, ...makeRangeSuggestions(fromYear, toYear), ...other.slice(0, 80)];
-}
-
-function relationTypesForRad4(row3: string): string[] {
-  if (row3 === "regent") return ["regent"];
-  if (row3 === "person" || row3 === "signature") return ["person"];
-  if (row3 === "edition") return ["utgave"];
-  if (row3 === "variant") return ["variant"];
-  if (row3 === "denomination_issue") return ["valor"];
-  if (row3 === "issuer" || row3 === "producer") return ["kilde"];
-  return [];
-}
-
-function relationRowsToGroupedRad4Items(nodes: RelationNode[], row3: string): SelectItem[] {
-  const wanted = relationTypesForRad4(row3);
-
-  if (!wanted.length) return [];
-
-  return nodes
-    .filter((node) => wanted.includes(node.relation_type))
-    .slice(0, 120)
-    .map((node) => ({
-      key: `${node.relation_type}:${node.relation_slug}`,
-      label: node.relation_label_no || labelFromKey(node.relation_slug),
-      group: "Relevante relasjoner",
-      description: `${node.relation_count.toLocaleString("nb-NO")} objektkoblinger`,
-      startYear: null,
-      endYear: null,
-      rangeType: "relation" as const,
-    }));
+function decadeYears(fromYear: number, toYear: number): number[] {
+  const first = Math.ceil(fromYear / 10) * 10;
+  const years: number[] = [];
+  for (let year = first; year <= toYear; year += 10) years.push(year);
+  return years;
 }
 
 function groupSelectItems(items: SelectItem[]): Array<[string, SelectItem[]]> {
@@ -405,55 +273,225 @@ function groupSelectItems(items: SelectItem[]): Array<[string, SelectItem[]]> {
     groups[item.group].push(item);
   }
 
-  const order = [
-    "Gjeldende periode",
-    "Tidsregning",
-    "Ã…rhundre innenfor valgt periode",
-    "TiÃ¥r innenfor valgt periode",
-    "Relevante relasjoner",
-    "Andre perioder",
-  ];
+  return Object.entries(groups);
+}
 
-  return Object.entries(groups).sort(([a], [b]) => {
-    const ai = order.indexOf(a);
-    const bi = order.indexOf(b);
+function row4GroupForPeriod(period: PeriodOption, fromYear: number, toYear: number): string {
+  const start = period.start_year;
+  const end = period.end_year;
 
-    if (ai === -1 && bi === -1) return a.localeCompare(b, "nb");
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
+  if (start != null && end != null && yearsOverlap(start, end, fromYear, toYear)) {
+    return "Gjeldende periode";
+  }
 
-    return ai - bi;
+  if (period.period_level === 1) return "Overordnede perioder";
+  if (period.period_level === 2) return "Hovedperioder";
+  if (period.period_level === 3) return "Underperioder / relasjoner";
+
+  return "Andre perioder";
+}
+
+function relationTypesForRow3(row3: string): string[] {
+  if (row3 === "regent") return ["regent"];
+  if (row3 === "signature" || row3 === "person") return ["person"];
+  if (row3 === "edition" || row3 === "denomination_issue") return ["utgave", "valor"];
+  if (row3 === "variant") return ["variant"];
+  if (row3 === "source_key" || row3 === "issuer" || row3 === "producer") return ["kilde"];
+  if (row3 === "year") return ["ar", "publiseringsar"];
+  return [];
+}
+
+function makeRow4Items(
+  periods: PeriodOption[],
+  relations: RelationNode[],
+  row1: string,
+  row2: string,
+  row3: string,
+  fromYear: number,
+  toYear: number,
+): SelectItem[] {
+  const items: SelectItem[] = [];
+
+  const relevantWords = [row1, row2, row3]
+    .join(" ")
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  for (const period of periods) {
+    if (!period.period_slug) continue;
+
+    const text = `${period.display_name_no || ""} ${period.period_type_key || ""} ${period.period_type_label_no || ""} ${period.summary_short_no || ""} ${period.collectium_relevance_no || ""}`.toLowerCase();
+
+    const overlap = period.start_year != null && period.end_year != null && yearsOverlap(period.start_year, period.end_year, fromYear, toYear);
+    const wordMatch = relevantWords.some((word) => word.length > 3 && text.includes(word));
+
+    if (overlap || wordMatch || items.length < 60) {
+      items.push({
+        key: period.period_slug,
+        label: period.display_name_no || labelFromKey(period.period_slug),
+        group: row4GroupForPeriod(period, fromYear, toYear),
+        description: period.collectium_relevance_no || period.summary_short_no || "Periode fra API.",
+        startYear: period.start_year,
+        endYear: period.end_year,
+      });
+    }
+  }
+
+  const wantedRelations = relationTypesForRow3(row3);
+
+  for (const relation of relations) {
+    if (!wantedRelations.includes(relation.relation_type)) continue;
+
+    items.push({
+      key: `${relation.relation_type}:${relation.relation_slug}`,
+      label: relation.relation_label_no || labelFromKey(relation.relation_slug),
+      group: "Relevante relasjoner",
+      description: `${relation.relation_count.toLocaleString("nb-NO")} objektkoblinger`,
+      startYear: null,
+      endYear: null,
+    });
+  }
+
+  items.push(
+    { key: `century:${Math.floor(fromYear / 100) * 100}`, label: `${Math.floor(fromYear / 100) * 100}-tallet`, group: "Århundre innenfor valgt periode", description: "Århundre fra valgt tidsrom.", startYear: Math.floor(fromYear / 100) * 100, endYear: Math.floor(fromYear / 100) * 100 + 99 },
+    { key: `decade:${Math.floor(fromYear / 10) * 10}`, label: `${Math.floor(fromYear / 10) * 10}–${Math.floor(fromYear / 10) * 10 + 9}`, group: "Tiår innenfor valgt periode", description: "Tiår fra valgt tidsrom.", startYear: Math.floor(fromYear / 10) * 10, endYear: Math.floor(fromYear / 10) * 10 + 9 },
+  );
+
+  const seen = new Set<string>();
+  return items
+    .filter((item) => {
+      if (seen.has(item.key)) return false;
+      seen.add(item.key);
+      return true;
+    })
+    .slice(0, 160);
+}
+
+function makeDynamicTimeline(
+  base: TimelineItem[],
+  periods: PeriodOption[],
+  selectedRow1: SelectItem | undefined,
+  selectedRow2: SelectItem | undefined,
+  selectedRow3: SelectItem | undefined,
+  selectedRow4: SelectItem | undefined,
+  row1: string,
+  row2: string,
+  row3: string,
+  fromYear: number,
+  toYear: number,
+): TimelineItem[] {
+  const items: TimelineItem[] = [];
+
+  const row1Filter = row1 === "national_period"
+    ? ["Nasjonal hovedperiode"]
+    : row1 === "regent_period"
+      ? ["Konge / regent"]
+      : row1 === "financial_period"
+        ? ["Finans / økonomi"]
+        : ["Produsent / utgiver / objekt", "Signatur / person"];
+
+  const row2Filter = row2.includes("war")
+    ? ["Krig / konflikt"]
+    : row2.includes("regent") || row2.includes("dynasty") || row2.includes("issuer")
+      ? ["Konge / regent", "Produsent / utgiver / objekt"]
+      : row2.includes("economy") || row2.includes("money") || row2.includes("market") || row2.includes("index")
+        ? ["Finans / økonomi"]
+        : ["Nasjonal hovedperiode", "Krig / konflikt"];
+
+  const row3Filter = row3 === "regent"
+    ? ["Konge / regent"]
+    : row3 === "war"
+      ? ["Krig / konflikt"]
+      : row3 === "finance" || row3 === "market" || row3 === "currency"
+        ? ["Finans / økonomi"]
+        : row3 === "signature" || row3 === "person"
+          ? ["Signatur / person"]
+          : row3 === "edition" || row3 === "variant" || row3 === "producer" || row3 === "issuer" || row3 === "source_key"
+            ? ["Produsent / utgiver / objekt"]
+            : ["Nasjonal hovedperiode", "Konge / regent"];
+
+  for (const item of base) {
+    if (!yearsOverlap(item.start, item.end, fromYear, toYear)) continue;
+
+    if (row1Filter.includes(item.lane)) {
+      items.push({ ...item, id: `r1-${item.id}`, laneKey: "row1", lane: selectedRow1?.label || "Rad 1", tone: "blue" });
+    }
+
+    if (row2Filter.includes(item.lane)) {
+      items.push({ ...item, id: `r2-${item.id}`, laneKey: "row2", lane: selectedRow2?.label || "Rad 2", tone: "gold" });
+    }
+
+    if (row3Filter.includes(item.lane)) {
+      items.push({ ...item, id: `r3-${item.id}`, laneKey: "row3", lane: selectedRow3?.label || "Rad 3", tone: "green" });
+    }
+  }
+
+  for (const period of periods) {
+    if (period.start_year == null || period.end_year == null) continue;
+    if (!yearsOverlap(period.start_year, period.end_year, fromYear, toYear)) continue;
+
+    const label = period.display_name_no || labelFromKey(period.period_slug);
+    const type = `${period.period_type_key || ""} ${period.period_type_label_no || ""}`.toLowerCase();
+
+    let laneKey: TimelineItem["laneKey"] = "row4";
+    let tone: TimelineTone = "purple";
+    let lane = selectedRow4?.label || "Rad 4";
+
+    if (type.includes("regent") || type.includes("konge")) {
+      laneKey = "row2";
+      tone = "gold";
+      lane = selectedRow2?.label || "Rad 2";
+    }
+
+    if (type.includes("krig") || type.includes("konflikt")) {
+      laneKey = "row3";
+      tone = "green";
+      lane = selectedRow3?.label || "Rad 3";
+    }
+
+    items.push({
+      id: `api-${period.period_slug}`,
+      laneKey,
+      lane,
+      label,
+      start: period.start_year,
+      end: period.end_year,
+      tone,
+      note: period.collectium_relevance_no || period.summary_short_no || "Periode fra API.",
+    });
+  }
+
+  if (selectedRow4?.startYear != null && selectedRow4?.endYear != null) {
+    items.push({
+      id: `selected-row4-${selectedRow4.key}`,
+      laneKey: "row4",
+      lane: selectedRow4.label,
+      label: selectedRow4.label,
+      start: selectedRow4.startYear,
+      end: selectedRow4.endYear,
+      tone: "purple",
+      note: selectedRow4.description,
+    });
+  }
+
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = `${item.laneKey}-${item.label}-${item.start}-${item.end}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
 }
 
-
 function timelineBio(item: TimelineItem | null): string {
   if (!item) return "Velg en boks i tidslinjen for å vise kort bio og nøkkelinformasjon.";
-  if (item.bio) return item.bio;
 
-  if (item.lane === "Konge/regent") {
-    return `${item.label} er valgt som regentperiode. Feltet skal vise hvordan regenten overlapper nasjonal periode, krig, finans, signatur/person og objekt-/utgiverperiode.`;
-  }
-
-  if (item.lane === "Nasjonal periode") {
-    return `${item.label} er valgt som nasjonal periode. Feltet skal forklare historisk ramme, statlig kontekst og hvilke objekter/utgaver som faller innenfor perioden.`;
-  }
-
-  if (item.lane === "Krig/konflikt") {
-    return `${item.label} er valgt som konfliktperiode. Feltet skal forklare krigens betydning for valuta, produksjon, utgiver, marked og samlerrelevans.`;
-  }
-
-  if (item.lane === "Finans/økonomi") {
-    return `${item.label} er valgt som finansiell periode. Feltet skal vise pengepolitikk, inflasjon, likviditet, verdiutvikling og markedsforklaring.`;
-  }
-
-  if (item.lane === "Signatur/person") {
-    return `${item.label} er valgt som person-/signaturperiode. Feltet skal vise rolle, aktiv periode, koblede objekter, signaturer og historisk relevans.`;
-  }
-
-  if (item.lane === "Produsent/utgiver/objekt") {
-    return `${item.label} er valgt som objekt-/utgiverperiode. Feltet skal vise produsent, utgiver, utgave, variant, motiv, materiale og objektkoblinger.`;
-  }
+  if (item.laneKey === "row1") return `${item.label} viser hovedrammen for perioden. Denne raden skal forklare den overordnede perioden som de andre radene må forstås innenfor.`;
+  if (item.laneKey === "row2") return `${item.label} viser valgt hovedtema under Rad 1. Denne raden skal forklare hvordan regent, statsperiode, krig eller finans henger sammen med hovedperioden.`;
+  if (item.laneKey === "row3") return `${item.label} viser valgt underperiode, relasjon eller objektspesifikasjon. Denne raden gir mer presis forklaring enn Rad 1 og Rad 2.`;
+  if (item.laneKey === "row4") return `${item.label} er konkret valgt periode/verdi. Denne skal styre detaljert forklaring, relasjon og filtrert innhold.`;
 
   return item.note;
 }
@@ -466,56 +504,13 @@ function timelineKeyFacts(item: TimelineItem | null): Array<[string, string]> {
     ];
   }
 
-  const base: Array<[string, string]> = [
+  return [
     ["Navn", item.label],
     ["Kategori", item.lane],
+    ["Rad", item.laneKey.toUpperCase()],
     ["Periode", `${item.start}–${item.end}`],
     ["Kort forklaring", item.note],
   ];
-
-  if (item.keyFacts?.length) return [...base, ...item.keyFacts];
-
-  if (item.lane === "Konge/regent") {
-    return [
-      ...base,
-      ["Historisk bruk", "Sammenlignes mot krig, nasjonal periode og finans."],
-      ["Objektbruk", "Kan kobles til utgiver, motiv, årstall og katalogobjekter."],
-    ];
-  }
-
-  if (item.lane === "Krig/konflikt") {
-    return [
-      ...base,
-      ["Historisk bruk", "Viser konfliktens overlapp med regent og nasjonal periode."],
-      ["Finansbruk", "Kan forklare krigsøkonomi, valutaendringer og knapphet."],
-    ];
-  }
-
-  if (item.lane === "Finans/økonomi") {
-    return [
-      ...base,
-      ["Finansbruk", "Brukes til verdi, trend, inflasjon og markedsforklaring."],
-      ["Samlerbruk", "Kan forklare hvorfor enkelte objektperioder får høyere/lavere relevans."],
-    ];
-  }
-
-  if (item.lane === "Signatur/person") {
-    return [
-      ...base,
-      ["Relasjon", "Person/signatur kobles til objekt og periode."],
-      ["Samlerbruk", "Kan forklare signaturvariant og sjeldenhet."],
-    ];
-  }
-
-  if (item.lane === "Produsent/utgiver/objekt") {
-    return [
-      ...base,
-      ["Objektbruk", "Kobles til produsent, utgave, variant, motiv og materiale."],
-      ["Katalogbruk", "Brukes i objektpresentasjon og katalogfilter."],
-    ];
-  }
-
-  return base;
 }
 
 export default function CollectiumPeriodFilterTest() {
@@ -529,15 +524,15 @@ export default function CollectiumPeriodFilterTest() {
 
   const [row1, setRow1] = useState("national_period");
   const [row2, setRow2] = useState("historical_main");
-  const [row3, setRow3] = useState("regent");
+  const [row3, setRow3] = useState("period");
   const [row4, setRow4] = useState("");
 
-  const [fromYear, setFromYear] = useState(1814);
-  const [toYear, setToYear] = useState(2024);
+  const [fromYear, setFromYear] = useState(1899);
+  const [toYear, setToYear] = useState(2025);
   const [zoom, setZoom] = useState(1);
   const [timelineOnly, setTimelineOnly] = useState(false);
   const [segment, setSegment] = useState<SegmentKey>("historie");
-  const [selectedTimelineItem, setSelectedTimelineItem] = useState<TimelineItem | null>(STATIC_TIMELINE.find((item) => item.id === "ww2") || null);
+  const [selectedTimelineItem, setSelectedTimelineItem] = useState<TimelineItem | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -558,9 +553,6 @@ export default function CollectiumPeriodFilterTest() {
 
         setData(json);
         setError(null);
-
-        const firstPeriod = json.rows?.find((period) => period.period_slug);
-        if (firstPeriod) setRow4(firstPeriod.period_slug);
       } catch (err) {
         if (!mounted) return;
         setError(err instanceof Error ? err.message : "Ukjent feil ved lasting av periodefilter.");
@@ -576,51 +568,98 @@ export default function CollectiumPeriodFilterTest() {
     };
   }, []);
 
-  const periodItems = useMemo(() => periodRowsToItems(data?.rows || []), [data?.rows]);
-  const relationNodes = data?.relationNodes || [];
+  const row2Items = useMemo(() => ROW2_BY_ROW1[row1] || [], [row1]);
+  const row3Items = useMemo(() => ROW3_BY_ROW2[row2] || [], [row2]);
+
+  useEffect(() => {
+    const firstRow2 = row2Items[0]?.key || "";
+    if (firstRow2 && !row2Items.some((item) => item.key === row2)) {
+      setRow2(firstRow2);
+      setRow3("");
+      setRow4("");
+    }
+  }, [row1, row2, row2Items]);
+
+  useEffect(() => {
+    const firstRow3 = row3Items[0]?.key || "";
+    if (firstRow3 && !row3Items.some((item) => item.key === row3)) {
+      setRow3(firstRow3);
+      setRow4("");
+    }
+  }, [row2, row3, row3Items]);
 
   const row4Items = useMemo(() => {
-    const periodSuggestions = periodRowsToGroupedRad4Items(data?.rows || [], fromYear, toYear);
-    const relationSuggestions = relationRowsToGroupedRad4Items(data?.relationNodes || [], row3);
+    return makeRow4Items(data?.rows || [], data?.relationNodes || [], row1, row2, row3, fromYear, toYear);
+  }, [data?.rows, data?.relationNodes, row1, row2, row3, fromYear, toYear]);
 
-    const combined = [...periodSuggestions, ...relationSuggestions];
-
-    const seen = new Set<string>();
-    return combined.filter((item) => {
-      if (seen.has(item.key)) return false;
-      seen.add(item.key);
-      return true;
-    });
-  }, [data?.rows, data?.relationNodes, fromYear, toYear, row3]);
+  useEffect(() => {
+    if (!row4Items.length) return;
+    if (!row4Items.some((item) => item.key === row4)) {
+      setRow4(row4Items[0].key);
+    }
+  }, [row4Items, row4]);
 
   const selectedMaster = MASTER_FILTERS.find((item) => item.key === master);
   const selectedCountry = COUNTRIES.find((item) => item.key === country);
   const selectedObjectType = OBJECT_TYPES.find((item) => item.key === objectType);
-  const selectedRow1 = ROW1_MAIN_PERIODS.find((item) => item.key === row1);
-  const selectedRow2 = ROW2_CONTEXTS.find((item) => item.key === row2);
-  const selectedRow3 = ROW3_RELATIONS.find((item) => item.key === row3);
+  const selectedRow1 = ROW1.find((item) => item.key === row1);
+  const selectedRow2 = row2Items.find((item) => item.key === row2);
+  const selectedRow3 = row3Items.find((item) => item.key === row3);
   const selectedRow4 = row4Items.find((item) => item.key === row4);
 
+  const timelineItems = useMemo(() => {
+    return makeDynamicTimeline(
+      BASE_TIMELINE,
+      data?.rows || [],
+      selectedRow1,
+      selectedRow2,
+      selectedRow3,
+      selectedRow4,
+      row1,
+      row2,
+      row3,
+      fromYear,
+      toYear,
+    );
+  }, [data?.rows, selectedRow1, selectedRow2, selectedRow3, selectedRow4, row1, row2, row3, fromYear, toYear]);
+
+  useEffect(() => {
+    if (!timelineItems.length) {
+      setSelectedTimelineItem(null);
+      return;
+    }
+
+    if (!selectedTimelineItem || !timelineItems.some((item) => item.id === selectedTimelineItem.id)) {
+      setSelectedTimelineItem(timelineItems[0]);
+    }
+  }, [timelineItems, selectedTimelineItem]);
+
   const decades = decadeYears(fromYear, toYear);
-  const visibleTimelineItems = STATIC_TIMELINE.filter((item) => item.end >= fromYear && item.start <= toYear);
-  const lanes = Array.from(new Set(visibleTimelineItems.map((item) => item.lane)));
+  const lanes: Array<{ key: TimelineItem["laneKey"]; label: string }> = [
+    { key: "row1", label: selectedRow1?.label || "Rad 1" },
+    { key: "row2", label: selectedRow2?.label || "Rad 2" },
+    { key: "row3", label: selectedRow3?.label || "Rad 3" },
+    { key: "row4", label: selectedRow4?.label || "Rad 4" },
+    { key: "object", label: "Objekt / relasjon" },
+  ];
 
   function setSelectedPeriod(key: string) {
     setRow4(key);
     const item = row4Items.find((entry) => entry.key === key);
-    if (item?.startYear != null) setFromYear(Math.max(0, item.startYear - 20));
-    if (item?.endYear != null) setToYear(Math.min(2100, item.endYear + 20));
+    if (item?.startYear != null && item?.endYear != null) {
+      setFromYear(Math.max(-3000, item.startYear - 10));
+      setToYear(Math.min(2100, item.endYear + 10));
+    }
   }
 
   return (
     <main className={styles.page} data-timeline-only={timelineOnly ? "true" : "false"}>
       <section className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>Periodefilter Ã‚Â· Masterfilter Ã‚Â· Rad 1-4</p>
+          <p className={styles.eyebrow}>Periodefilter · Dynamisk Rad 1-4</p>
           <h1>Periodefilter</h1>
           <p>
-            Masterfilteret er nÃƒÂ¥ kompakt og stÃƒÂ¥ende. Rad 1-3 fÃƒÂ¸lger periodemodellen,
-            mens Rad 4 viser alle perioder og konkrete verdier fra API.
+            Rad 1 styrer Rad 2, Rad 2 styrer Rad 3, Rad 3 styrer Rad 4, og tidslinjen bygges dynamisk etter valgene.
           </p>
         </div>
         <aside className={styles.statusBox}>
@@ -634,23 +673,55 @@ export default function CollectiumPeriodFilterTest() {
       <section className={styles.layout}>
         <aside className={styles.filterColumn}>
           <div className={styles.filterColumnHeader}>
-            <p className={styles.eyebrow}>StÃƒÂ¥ende filterfelt</p>
-            <h2>Master + Rad 1-4</h2>
+            <p className={styles.eyebrow}>Filterfelt</p>
           </div>
 
           <SelectBox title="Masterfilter" value={master} onChange={setMaster} items={MASTER_FILTERS} />
-          <SelectBox title="Land / omrÃƒÂ¥de" value={country} onChange={setCountry} items={COUNTRIES} />
+          <SelectBox title="Land / område" value={country} onChange={setCountry} items={COUNTRIES} />
           <SelectBox title="Objekttype" value={objectType} onChange={setObjectType} items={OBJECT_TYPES} />
 
           <div className={styles.filterDivider}>Periodefilter</div>
 
-          <SelectBox title="Rad 1 Ã‚Â· HovednivÃƒÂ¥" value={row1} onChange={setRow1} items={ROW1_MAIN_PERIODS} />
-          <SelectBox title="Rad 2 Ã‚Â· Hovedperiode / tema" value={row2} onChange={setRow2} items={ROW2_CONTEXTS} />
-          <SelectBox title="Rad 3 Ã‚Â· Underperiode / relasjon" value={row3} onChange={setRow3} items={ROW3_RELATIONS} />
-          <SelectBox title="Rad 4 Ã‚Â· Alle perioder / verdi" value={row4} onChange={setSelectedPeriod} items={row4Items} />
+          <SelectBox
+            title="Rad 1 · Hovednivå"
+            value={row1}
+            onChange={(value) => {
+              setRow1(value);
+              setRow4("");
+            }}
+            items={ROW1}
+          />
+
+          <SelectBox
+            title="Rad 2 · Innhold styres av Rad 1"
+            value={row2}
+            onChange={(value) => {
+              setRow2(value);
+              setRow3("");
+              setRow4("");
+            }}
+            items={row2Items}
+          />
+
+          <SelectBox
+            title="Rad 3 · Innhold styres av Rad 2"
+            value={row3}
+            onChange={(value) => {
+              setRow3(value);
+              setRow4("");
+            }}
+            items={row3Items}
+          />
+
+          <SelectBox
+            title="Rad 4 · Forslag fra Rad 1-3"
+            value={row4}
+            onChange={setSelectedPeriod}
+            items={row4Items}
+          />
 
           <div className={styles.selectedStack}>
-            <strong>Valgt:</strong>
+            <strong>Valgt</strong>
             <span>{selectedMaster?.label}</span>
             <span>{selectedCountry?.label}</span>
             <span>{selectedObjectType?.label}</span>
@@ -666,10 +737,10 @@ export default function CollectiumPeriodFilterTest() {
             <div className={styles.timelineHeader}>
               <div>
                 <p className={styles.eyebrow}>Sammenlignende tidslinje</p>
-                <h2>Konge Ã‚Â· periode Ã‚Â· krig Ã‚Â· finans Ã‚Â· signatur Ã‚Â· objekt</h2>
+                <h2>{selectedRow1?.label} · {selectedRow2?.label} · {selectedRow3?.label}</h2>
               </div>
               <div className={styles.timelineTools}>
-                <button type="button" onClick={() => setZoom((value) => Math.max(0.7, Number((value - 0.2).toFixed(1))))}>Ã¢Ë†â€™</button>
+                <button type="button" onClick={() => setZoom((value) => Math.max(0.7, Number((value - 0.2).toFixed(1))))}>−</button>
                 <button type="button" onClick={() => setZoom((value) => Math.min(2.4, Number((value + 0.2).toFixed(1))))}>+</button>
                 <button type="button" data-active={timelineOnly} onClick={() => setTimelineOnly((value) => !value)}>
                   {timelineOnly ? "Lukk tidslinje" : "Kun tidslinje"}
@@ -679,12 +750,12 @@ export default function CollectiumPeriodFilterTest() {
 
             <div className={styles.yearInputs}>
               <label>
-                Ãƒâ€¦r fra
-                <input type="number" value={fromYear} onChange={(event) => setFromYear(Number(event.target.value) || 1814)} />
+                År fra
+                <input type="number" value={fromYear} onChange={(event) => setFromYear(Number(event.target.value) || 0)} />
               </label>
               <label>
-                Ãƒâ€¦r til
-                <input type="number" value={toYear} onChange={(event) => setToYear(Number(event.target.value) || 2024)} />
+                År til
+                <input type="number" value={toYear} onChange={(event) => setToYear(Number(event.target.value) || 2025)} />
               </label>
               <span>Zoom {zoom.toFixed(1)}x</span>
             </div>
@@ -697,20 +768,24 @@ export default function CollectiumPeriodFilterTest() {
                       className={styles.decadeBlock}
                       data-even={index % 2 === 0 ? "true" : "false"}
                       key={year}
-                      style={itemStyle({ id: String(year), lane: "decade", label: String(year), start: year, end: year + 10, tone: "steel", note: "" }, fromYear, toYear)}
+                      style={{
+                        left: `${((year - fromYear) / Math.max(1, toYear - fromYear)) * 100}%`,
+                        width: `${(10 / Math.max(1, toYear - fromYear)) * 100}%`,
+                      }}
                     >
                       <span>{year}</span>
                     </div>
                   ))}
                 </div>
 
-                {lanes.map((lane) => (
-                  <div className={styles.timelineLane} key={lane}>
-                    <div className={styles.laneLabel}>{lane}</div>
-                    <div className={styles.laneTrack}>
-                      {visibleTimelineItems
-                        .filter((item) => item.lane === lane)
-                        .map((item) => (
+                {lanes.map((lane) => {
+                  const laneItems = timelineItems.filter((item) => item.laneKey === lane.key);
+
+                  return (
+                    <div className={styles.timelineLane} data-row={lane.key} key={lane.key}>
+                      <div className={styles.laneLabel}>{lane.label}</div>
+                      <div className={styles.laneTrack}>
+                        {laneItems.map((item) => (
                           <button
                             type="button"
                             key={item.id}
@@ -721,12 +796,13 @@ export default function CollectiumPeriodFilterTest() {
                             onClick={() => setSelectedTimelineItem(item)}
                           >
                             <strong>{item.label}</strong>
-                            <span>{item.start}Ã¢â‚¬â€œ{item.end}</span>
+                            <span>{item.start}–{item.end}</span>
                           </button>
                         ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 <div className={styles.axisLine}>
                   {decades.map((year) => (
@@ -741,7 +817,7 @@ export default function CollectiumPeriodFilterTest() {
             {selectedTimelineItem ? (
               <div className={styles.timelineInfo}>
                 <strong>{selectedTimelineItem.label}</strong>
-                <span>{selectedTimelineItem.lane} Ã‚Â· {selectedTimelineItem.start}Ã¢â‚¬â€œ{selectedTimelineItem.end}</span>
+                <span>{selectedTimelineItem.lane} · {selectedTimelineItem.start}–{selectedTimelineItem.end}</span>
                 <p>{selectedTimelineItem.note}</p>
               </div>
             ) : null}
@@ -762,7 +838,7 @@ export default function CollectiumPeriodFilterTest() {
                   <Fact label="Rad 1" value={selectedRow1?.label || "Ikke valgt"} />
                   <Fact label="Rad 2" value={selectedRow2?.label || "Ikke valgt"} />
                   <Fact label="Rad 3" value={selectedRow3?.label || "Ikke valgt"} />
-                  <Fact label="Rad 4" value={selectedRow4 ? `${selectedRow4.label} Ã‚Â· ${yearText(selectedRow4.startYear, selectedRow4.endYear)}` : "Ikke valgt"} />
+                  <Fact label="Rad 4" value={selectedRow4 ? `${selectedRow4.label} · ${yearText(selectedRow4.startYear, selectedRow4.endYear)}` : "Ikke valgt"} />
                 </article>
 
                 <article className={styles.infoPanel}>
@@ -795,14 +871,14 @@ function SelectBox(props: {
       <span>{props.title}</span>
       <select value={props.value} onChange={(event) => props.onChange(event.target.value)}>
         {groupSelectItems(props.items).map(([group, items]) => (
-            <optgroup label={group} key={group}>
-              {items.map((item) => (
-                <option value={item.key} key={item.key}>
-                  {item.label}
-                </option>
-              ))}
-            </optgroup>
-          ))}
+          <optgroup label={group} key={group}>
+            {items.map((item) => (
+              <option value={item.key} key={item.key}>
+                {item.label}
+              </option>
+            ))}
+          </optgroup>
+        ))}
       </select>
       <small>{selected?.description || "Velg verdi."}</small>
     </label>
