@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "./CollectiumAppShell.module.css";
 
-type CollectiumSkin = "signature-light" | "signature-dark" | "museum" | "finance";
+type CollectiumSkin = "collectium" | "samler" | "museum" | "finans";
 
 type CollectiumAppShellProps = {
   children: React.ReactNode;
@@ -23,29 +23,44 @@ const navItems = [
 ];
 
 const skins: { value: CollectiumSkin; label: string }[] = [
-  { value: "signature-light", label: "Collectium" },
-  { value: "signature-dark", label: "Dark" },
+  { value: "collectium", label: "Collectium" },
+  { value: "samler", label: "Samler" },
   { value: "museum", label: "Museum" },
-  { value: "finance", label: "Finans" },
+  { value: "finans", label: "Finans" },
 ];
 
+const skinAliases: Record<string, CollectiumSkin> = {
+  "signature-light": "collectium",
+  "signature-dark": "museum",
+  finance: "finans",
+};
+
+function normalizeSkin(value: string | null): CollectiumSkin {
+  const aliased = value ? skinAliases[value] ?? value : "collectium";
+  return skins.some((item) => item.value === aliased) ? (aliased as CollectiumSkin) : "collectium";
+}
+
 export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
-  const [skin, setSkin] = useState<CollectiumSkin>("signature-light");
+  const [skin, setSkin] = useState<CollectiumSkin>("collectium");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("collectium-active-skin") as CollectiumSkin | null;
-    const nextSkin = stored && skins.some((item) => item.value === stored) ? stored : "signature-light";
+    const nextSkin = normalizeSkin(window.localStorage.getItem("collectium-active-skin"));
     setSkin(nextSkin);
+    window.localStorage.setItem("collectium-active-skin", nextSkin);
     document.documentElement.dataset.skin = nextSkin;
+    document.documentElement.dataset.theme = nextSkin;
+    document.documentElement.dataset.ctSkin = nextSkin;
     document.documentElement.dataset.template = "collectium";
     document.documentElement.dataset.vp = "pc";
   }, []);
 
   function changeSkin(value: string) {
-    const nextSkin = skins.some((item) => item.value === value) ? (value as CollectiumSkin) : "signature-light";
+    const nextSkin = normalizeSkin(value);
     setSkin(nextSkin);
     window.localStorage.setItem("collectium-active-skin", nextSkin);
     document.documentElement.dataset.skin = nextSkin;
+    document.documentElement.dataset.theme = nextSkin;
+    document.documentElement.dataset.ctSkin = nextSkin;
   }
 
   return (

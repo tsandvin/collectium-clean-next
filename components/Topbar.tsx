@@ -19,12 +19,18 @@ export default function Topbar() {
 
     setTheme(nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
+    document.documentElement.setAttribute("data-skin", nextTheme);
+    document.documentElement.setAttribute("data-ct-skin", nextTheme);
+    window.localStorage.setItem("collectium-active-skin", nextTheme);
   }, []);
 
   function updateTheme(nextTheme: string) {
     setTheme(nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
+    document.documentElement.setAttribute("data-skin", nextTheme);
+    document.documentElement.setAttribute("data-ct-skin", nextTheme);
     window.localStorage.setItem("collectium-workspace-theme", nextTheme);
+    window.localStorage.setItem("collectium-active-skin", nextTheme);
   }
 
   return (

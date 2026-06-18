@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap");
-
 * {
   box-sizing: border-box;
 }
@@ -9,7 +7,7 @@ body {
   margin: 0;
   min-height: 100%;
   overflow-x: hidden;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--ct-font-body);
   background: var(--ct-app-bg);
   color: var(--ct-text);
 }
@@ -22,6 +20,12 @@ a {
   color: inherit;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--ct-font-display);
+}
+
 button,
 input,
 select,
@@ -30,21 +34,32 @@ textarea {
 }
 
 :root,
-html[data-skin="collectium"] {
+html[data-skin="collectium"],
+html[data-theme="collectium"] {
   color-scheme: light;
+  --ct-theme-name: "Collectium";
+  --ct-bg: #fffaf2;
   --ct-app-bg: #fffaf2;
   --ct-page-bg: #fffaf2;
   --ct-sidebar-bg: linear-gradient(135deg, #f8f5f0 0%, #ffffff 25%, #fffaf2 50%, #f5f2ed 100%);
   --ct-topbar-bg: rgba(255, 250, 242, 0.95);
   --ct-panel: #ffffff;
+  --ct-panel-solid: #ffffff;
+  --ct-panel-bg: rgba(255, 255, 255, 0.88);
   --ct-panel-soft: #fffdf9;
+  --ct-card-bg: #fffdf9;
   --ct-input-bg: #fffdf9;
   --ct-text: #143327;
   --ct-muted: #4a685b;
+  --ct-text-muted: #4a685b;
+  --ct-text-soft: #4a685b;
   --ct-border: #e2d7c5;
+  --ct-panel-border: #e2d7c5;
+  --ct-line: #e2d7c5;
   --ct-border-strong: #cfa861;
   --ct-accent: #145c38;
   --ct-accent-2: #d6a641;
+  --ct-soft-gold: #d6a641;
   --ct-shadow-soft: 0 4px 8px rgb(20 51 39 / 5%);
   --ct-shadow-card: 0 8px 16px rgb(20 51 39 / 10%);
   --ct-shadow-lg: 0 16px 32px rgb(20 51 39 / 16%);
@@ -53,29 +68,47 @@ html[data-skin="collectium"] {
   --ct-shadow-3d: 0 1px 0 rgb(255 255 255 / 100%) inset, 0 -2px 0 rgb(20 51 39 / 8%), 0 8px 16px rgb(20 51 39 / 12%);
   --ct-hover: rgba(20, 92, 56, 0.08);
   
-  --ct-font-display: Georgia, "Times New Roman", serif;
-  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
-  --ct-font-mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-radius: 16px;
-  --ct-radius-card: 12px;
+  --ct-font-display: var(--font-collectium-display), Georgia, "Times New Roman", serif;
+  --ct-font-body: var(--font-historic-text), Georgia, "Times New Roman", serif;
+  --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --ct-font-head: var(--ct-font-display);
+  --ct-font-serif: var(--ct-font-display);
+  --ct-font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --ct-radius-theme: 8px;
+  --ct-radius: var(--ct-radius-theme);
+  --ct-radius-card: var(--ct-radius-theme);
+  --ct-radius-sm: calc(var(--ct-radius-theme) - 2px);
+  --ct-radius-md: var(--ct-radius-theme);
+  --ct-radius-lg: calc(var(--ct-radius-theme) + 6px);
   --ct-radius-pill: 99px;
 }
 
-html[data-skin="samler"] {
+html[data-skin="samler"],
+html[data-theme="samler"] {
   color-scheme: light;
+  --ct-theme-name: "Samler";
+  --ct-bg: #ffffff;
   --ct-app-bg: #ffffff;
   --ct-page-bg: #ffffff;
   --ct-sidebar-bg: linear-gradient(135deg, #eef3f9 0%, #f4f8fc 25%, #ffffff 50%, #f1f6fb 100%);
   --ct-topbar-bg: rgba(255, 255, 255, 0.95);
   --ct-panel: #ffffff;
+  --ct-panel-solid: #ffffff;
+  --ct-panel-bg: rgba(255, 255, 255, 0.9);
   --ct-panel-soft: #f4f8fc;
+  --ct-card-bg: #f4f8fc;
   --ct-input-bg: #f4f8fc;
   --ct-text: #0b2a4a;
   --ct-muted: #536f8f;
+  --ct-text-muted: #536f8f;
+  --ct-text-soft: #536f8f;
   --ct-border: #d2e1f2;
+  --ct-panel-border: #d2e1f2;
+  --ct-line: #d2e1f2;
   --ct-border-strong: #9fc6ea;
   --ct-accent: #1e5a9a;
   --ct-accent-2: #9fc6ea;
+  --ct-soft-gold: #9fc6ea;
   --ct-shadow-soft: 0 4px 8px rgb(11 42 74 / 6%);
   --ct-shadow-card: 0 8px 16px rgb(11 42 74 / 12%);
   --ct-shadow-lg: 0 16px 32px rgb(11 42 74 / 18%);
@@ -84,29 +117,47 @@ html[data-skin="samler"] {
   --ct-shadow-3d: 0 1px 0 rgb(255 255 255 / 100%) inset, 0 -2px 0 rgb(11 42 74 / 8%), 0 8px 16px rgb(11 42 74 / 14%);
   --ct-hover: rgba(30, 90, 154, 0.08);
   
-  --ct-font-display: comfortaa, "Comfortaa", serif;
-  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
-  --ct-font-mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-radius: 16px;
-  --ct-radius-card: 12px;
+  --ct-font-display: var(--font-samler-display), "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  --ct-font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --ct-font-head: var(--ct-font-display);
+  --ct-font-serif: var(--ct-font-display);
+  --ct-font-ui: var(--ct-font-body);
+  --ct-radius-theme: 12px;
+  --ct-radius: var(--ct-radius-theme);
+  --ct-radius-card: var(--ct-radius-theme);
+  --ct-radius-sm: calc(var(--ct-radius-theme) - 4px);
+  --ct-radius-md: var(--ct-radius-theme);
+  --ct-radius-lg: calc(var(--ct-radius-theme) + 6px);
   --ct-radius-pill: 99px;
 }
 
-html[data-skin="museum"] {
+html[data-skin="museum"],
+html[data-theme="museum"] {
   color-scheme: dark;
+  --ct-theme-name: "Museum";
+  --ct-bg: #0d0d0e;
   --ct-app-bg: #0d0d0e;
   --ct-page-bg: #0d0d0e;
-  --ct-sidebar-bg: linear-gradient(135deg, #1a1a1c 0%, #1c1c1f 25%, #15151626 50%, #131314 100%);
+  --ct-sidebar-bg: linear-gradient(135deg, #1a1a1c 0%, #1c1c1f 25%, #151516 50%, #131314 100%);
   --ct-topbar-bg: rgba(13, 13, 14, 0.92);
   --ct-panel: #151516;
+  --ct-panel-solid: #151516;
+  --ct-panel-bg: rgba(21, 21, 22, 0.92);
   --ct-panel-soft: #202022;
+  --ct-card-bg: #202022;
   --ct-input-bg: #202022;
   --ct-text: #e8e3d6;
   --ct-muted: #a39c8c;
+  --ct-text-muted: #a39c8c;
+  --ct-text-soft: #c7beab;
   --ct-border: #363430;
+  --ct-panel-border: #363430;
+  --ct-line: #363430;
   --ct-border-strong: #b99a55;
   --ct-accent: #b99a55;
   --ct-accent-2: #d6c082;
+  --ct-soft-gold: #d6c082;
   --ct-shadow-soft: 0 8px 24px rgb(0 0 0 / 50%);
   --ct-shadow-card: 0 12px 32px rgb(0 0 0 / 60%);
   --ct-shadow-lg: 0 20px 48px rgb(0 0 0 / 70%);
@@ -115,29 +166,47 @@ html[data-skin="museum"] {
   --ct-shadow-3d: 0 1px 0 rgb(255 255 255 / 8%) inset, 0 -2px 4px rgb(0 0 0 / 60%), 0 12px 32px rgb(0 0 0 / 50%);
   --ct-hover: rgba(185, 154, 85, 0.12);
   
-  --ct-font-display: Georgia, "Times New Roman", serif;
-  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
-  --ct-font-mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-radius: 16px;
-  --ct-radius-card: 12px;
+  --ct-font-display: var(--font-museum-display), Georgia, "Times New Roman", serif;
+  --ct-font-body: var(--font-historic-text), Georgia, "Times New Roman", serif;
+  --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --ct-font-head: var(--ct-font-display);
+  --ct-font-serif: var(--ct-font-display);
+  --ct-font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --ct-radius-theme: 4px;
+  --ct-radius: var(--ct-radius-theme);
+  --ct-radius-card: var(--ct-radius-theme);
+  --ct-radius-sm: var(--ct-radius-theme);
+  --ct-radius-md: var(--ct-radius-theme);
+  --ct-radius-lg: calc(var(--ct-radius-theme) + 6px);
   --ct-radius-pill: 99px;
 }
 
-html[data-skin="finans"] {
+html[data-skin="finans"],
+html[data-theme="finans"] {
   color-scheme: dark;
+  --ct-theme-name: "Finans";
+  --ct-bg: #111a21;
   --ct-app-bg: #111a21;
   --ct-page-bg: #111a21;
   --ct-sidebar-bg: linear-gradient(135deg, #0f1517 0%, #172c38 25%, #1a2f3a 50%, #131f26 100%);
   --ct-topbar-bg: rgba(17, 26, 33, 0.92);
   --ct-panel: #17242e;
+  --ct-panel-solid: #17242e;
+  --ct-panel-bg: rgba(23, 36, 46, 0.92);
   --ct-panel-soft: #20313f;
+  --ct-card-bg: #20313f;
   --ct-input-bg: #20313f;
   --ct-text: #dde6ed;
   --ct-muted: #8194a5;
+  --ct-text-muted: #8194a5;
+  --ct-text-soft: #aebfcb;
   --ct-border: #2c3f4e;
+  --ct-panel-border: #2c3f4e;
+  --ct-line: #2c3f4e;
   --ct-border-strong: #27a777;
   --ct-accent: #27a777;
   --ct-accent-2: #b08a3e;
+  --ct-soft-gold: #b08a3e;
   --ct-shadow-soft: 0 8px 24px rgb(0 0 0 / 45%);
   --ct-shadow-card: 0 12px 32px rgb(0 0 0 / 55%);
   --ct-shadow-lg: 0 20px 48px rgb(0 0 0 / 65%);
@@ -146,11 +215,18 @@ html[data-skin="finans"] {
   --ct-shadow-3d: 0 1px 0 rgb(255 255 255 / 8%) inset, 0 -2px 4px rgb(0 0 0 / 50%), 0 12px 32px rgb(0 0 0 / 45%);
   --ct-hover: rgba(39, 167, 119, 0.12);
   
-  --ct-font-display: Inter, ui-sans-serif, system-ui, sans-serif;
-  --ct-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
-  --ct-font-mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-radius: 16px;
-  --ct-radius-card: 12px;
+  --ct-font-display: var(--font-finance-sans), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-body: var(--font-finance-sans), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --ct-font-head: var(--ct-font-display);
+  --ct-font-serif: var(--ct-font-display);
+  --ct-font-ui: var(--ct-font-body);
+  --ct-radius-theme: 2px;
+  --ct-radius: var(--ct-radius-theme);
+  --ct-radius-card: var(--ct-radius-theme);
+  --ct-radius-sm: var(--ct-radius-theme);
+  --ct-radius-md: var(--ct-radius-theme);
+  --ct-radius-lg: calc(var(--ct-radius-theme) + 4px);
   --ct-radius-pill: 99px;
 }
 
@@ -1251,9 +1327,10 @@ main {
 .ct-v7-panel,
 .ct-v7-status > div,
 .ct-v7-debug {
-  border: 1px solid rgba(35, 75, 120, 0.18);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.94) 100%);
-  border-radius: 18px;
+  border: 1px solid var(--ct-panel-border);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel) 96%, transparent) 0%, color-mix(in srgb, var(--ct-panel-soft) 94%, transparent) 100%);
+  border-radius: var(--ct-radius-theme);
+  color: var(--ct-text);
   box-shadow: var(--ct-shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -1349,10 +1426,11 @@ main {
 .ct-v7-rad select {
   width: 100%;
   min-width: 0;
-  border: 1px solid rgba(35, 75, 120, 0.22);
-  border-radius: 12px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme);
   padding: 10px;
-  background: #fff;
+  background: var(--ct-input-bg);
+  color: var(--ct-text);
   font: inherit;
 }
 
@@ -1388,8 +1466,9 @@ main {
 
 .ct-v7-switches button,
 .ct-v7-view button {
-  border: 1px solid rgba(35, 75, 120, 0.2);
-  background: #fff;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel);
+  color: var(--ct-text);
   border-radius: 999px;
   padding: 8px 12px;
   cursor: pointer;
@@ -1398,7 +1477,7 @@ main {
 .ct-v7-switches button.is-active,
 .ct-v7-view button.is-active,
 .ct-v7-timeline button.is-active {
-  background: #173d68;
+  background: var(--ct-accent);
   color: #fff;
 }
 
@@ -1414,9 +1493,10 @@ main {
 .ct-v7-timeline button {
   min-width: 0;
   width: 100%;
-  border: 1px solid rgba(35, 75, 120, 0.2);
-  background: #fff;
-  border-radius: 16px;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel);
+  color: var(--ct-text);
+  border-radius: var(--ct-radius-theme);
   padding: 12px;
   cursor: pointer;
   text-align: left;
@@ -1448,9 +1528,10 @@ main {
 }
 
 .ct-v7-summary {
-  border: 1px solid rgba(35, 75, 120, 0.12);
-  border-radius: 14px;
-  background: #fff;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme);
+  background: var(--ct-panel);
+  color: var(--ct-text);
   padding: 14px;
   overflow-wrap: anywhere;
 }
@@ -1491,9 +1572,10 @@ main {
 }
 
 .ct-v7-card {
-  border: 1px solid rgba(35, 75, 120, 0.16);
-  border-radius: 16px;
-  background: linear-gradient(135deg, #fff 0%, #fafbfc 100%);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme);
+  background: linear-gradient(135deg, var(--ct-panel) 0%, var(--ct-panel-soft) 100%);
+  color: var(--ct-text);
   padding: 12px;
   display: grid;
   grid-template-columns: 54px minmax(0, 1fr);
@@ -1509,8 +1591,9 @@ main {
 }
 
 .ct-v7-card-symbol {
-  border-radius: 12px;
-  background: rgba(23, 61, 104, 0.08);
+  border-radius: var(--ct-radius-theme);
+  background: color-mix(in srgb, var(--ct-accent) 12%, transparent);
+  color: var(--ct-accent);
   display: grid;
   place-items: center;
   font-weight: 900;
@@ -1540,9 +1623,9 @@ main {
 
 .ct-v7-debug pre {
   overflow: auto;
-  border-radius: 12px;
+  border-radius: var(--ct-radius-theme);
   padding: 12px;
-  background: rgba(10, 25, 45, 0.05);
+  background: color-mix(in srgb, var(--ct-text) 7%, transparent);
   font-size: 12px;
   max-width: 100%;
 }

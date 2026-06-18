@@ -134,7 +134,7 @@ export async function POST(request: Request) {
           $3,
           null,
           'no',
-          'signature-light',
+          'collectium',
           'active',
           'unverified',
           'pending',
