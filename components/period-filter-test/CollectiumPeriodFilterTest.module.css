@@ -516,11 +516,11 @@
 /* ============================================================
    CT PATCH - Periodefilter 3x3 over tidslinje
    Endring:
-   - Filterfeltet ligger over tidslinjen, ikke som smal hÃ¸yreboks.
-   - Master/Land/Objekttype pÃ¥ fÃ¸rste rekke.
-   - Rad 1/Rad 2/Rad 3 pÃ¥ andre rekke.
-   - Rad 4/Valgt pÃ¥ tredje rekke.
-   - Mobil/popup fÃ¥r mer tabellaktig tidslinjevisning.
+   - Filterfeltet ligger over tidslinjen, ikke som smal hÃƒÂ¸yreboks.
+   - Master/Land/Objekttype pÃƒÂ¥ fÃƒÂ¸rste rekke.
+   - Rad 1/Rad 2/Rad 3 pÃƒÂ¥ andre rekke.
+   - Rad 4/Valgt pÃƒÂ¥ tredje rekke.
+   - Mobil/popup fÃƒÂ¥r mer tabellaktig tidslinjevisning.
    ============================================================ */
 
 .layout {
@@ -664,7 +664,7 @@
   margin-top: 0 !important;
 }
 
-/* Ã…r fra/til kan ligge kompakt oppe til hÃ¸yre i tidslinjen */
+/* Ãƒâ€¦r fra/til kan ligge kompakt oppe til hÃƒÂ¸yre i tidslinjen */
 .yearInputs {
   display: flex !important;
   justify-content: flex-end !important;
@@ -706,7 +706,7 @@
   }
 }
 
-/* Mobil: Ã©n kolonne, men popup/tidslinje fÃ¥r tabellaktig hÃ¸ykantvisning */
+/* Mobil: ÃƒÂ©n kolonne, men popup/tidslinje fÃƒÂ¥r tabellaktig hÃƒÂ¸ykantvisning */
 @media (max-width: 760px) {
   .filterColumn {
     grid-template-columns: 1fr !important;
@@ -779,7 +779,7 @@
   }
 }
 
-/* Popup pÃ¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
+/* Popup pÃƒÂ¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
 @media (max-width: 760px) {
   .page[data-timeline-only="true"] .timelineShell {
     position: fixed !important;
@@ -804,7 +804,7 @@
    CT PATCH - skinfarger Rad 1-4 + lavere filter + fikset tidslinjebredde
    ============================================================ */
 
-/* Hele filterfeltet krympes i høyden */
+/* Hele filterfeltet krympes i hÃ¸yden */
 .filterColumn {
   gap: 5px !important;
   padding: 7px 8px !important;
@@ -862,7 +862,7 @@
   text-overflow: ellipsis !important;
 }
 
-/* Skinfarger på Rad 1-4, basert på rekkefølge i filterboksen:
+/* Skinfarger pÃ¥ Rad 1-4, basert pÃ¥ rekkefÃ¸lge i filterboksen:
    1 Masterfilter
    2 Land
    3 Objekttype
@@ -915,7 +915,7 @@
   color: #59338f !important;
 }
 
-/* Master/Land/Objekttype mer nøytrale og lavere */
+/* Master/Land/Objekttype mer nÃ¸ytrale og lavere */
 .filterColumn > .selectBox:nth-of-type(1),
 .filterColumn > .selectBox:nth-of-type(2),
 .filterColumn > .selectBox:nth-of-type(3) {
@@ -923,7 +923,7 @@
   border-color: #d8e6f6 !important;
 }
 
-/* Valgt-boksen skal ikke bli høy og dominerende */
+/* Valgt-boksen skal ikke bli hÃ¸y og dominerende */
 .selectedStack {
   padding: 6px !important;
   gap: 4px !important;
@@ -943,7 +943,7 @@
   line-height: 1.1 !important;
 }
 
-/* Tidslinje: fjern rar høyremarg / fyll til høyre */
+/* Tidslinje: fjern rar hÃ¸yremarg / fyll til hÃ¸yre */
 .timelineShell {
   padding: 10px !important;
 }
@@ -960,7 +960,7 @@
   padding-right: 16px !important;
 }
 
-/* Viktig: grid og akse skal bruke samme høyre/venstre */
+/* Viktig: grid og akse skal bruke samme hÃ¸yre/venstre */
 .decadeBand {
   left: 140px !important;
   right: 16px !important;
@@ -971,7 +971,7 @@
   right: 16px !important;
 }
 
-/* Lane-label litt smalere så tidslinjen får mer plass */
+/* Lane-label litt smalere sÃ¥ tidslinjen fÃ¥r mer plass */
 .timelineLane {
   grid-template-columns: 120px minmax(0, 1fr) !important;
 }
@@ -995,7 +995,7 @@
   font-size: 9px !important;
 }
 
-/* Verktøy og årfelter lavere */
+/* VerktÃ¸y og Ã¥rfelter lavere */
 .timelineHeader {
   margin-bottom: 6px !important;
 }
@@ -1019,7 +1019,7 @@
   line-height: 1 !important;
 }
 
-/* Større skjermer: tving 3 per rad og behold kompakt høyde */
+/* StÃ¸rre skjermer: tving 3 per rad og behold kompakt hÃ¸yde */
 @media (min-width: 1201px) {
   .filterColumn {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -1060,5 +1060,244 @@
   .axisLine {
     left: 108px !important;
     right: 18px !important;
+  }
+}
+
+
+/* ============================================================
+   CT PATCH - Fjern "Master + Rad 1-4", flytt år-label inn i bokser,
+   og fjern tomt venstrefelt i tidslinjen
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1) Fjern overskrift "Master + Rad 1-4"
+   ------------------------------------------------------------ */
+.filterColumnHeader h2 {
+  display: none !important;
+}
+
+.filterColumnHeader {
+  padding-bottom: 2px !important;
+  margin-bottom: 2px !important;
+  min-height: 0 !important;
+  align-items: center !important;
+}
+
+.filterColumnHeader span {
+  margin: 0 !important;
+}
+
+/* ------------------------------------------------------------
+   2) År fra / År til inn i selve årboksene
+   ------------------------------------------------------------ */
+.yearInputs {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+}
+
+.yearInputs > label {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-height: 34px !important;
+  padding: 0 10px !important;
+  border: 1px solid #cfe0f4 !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+  color: transparent !important;
+  box-sizing: border-box !important;
+}
+
+.yearInputs > label:nth-of-type(1)::before {
+  content: "Fra";
+  display: inline-block;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  color: #6a7f9c !important;
+  line-height: 1 !important;
+}
+
+.yearInputs > label:nth-of-type(2)::before {
+  content: "Til";
+  display: inline-block;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  color: #6a7f9c !important;
+  line-height: 1 !important;
+}
+
+.yearInputs > label input {
+  width: 68px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 7px 0 !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  color: #07356e !important;
+  line-height: 1 !important;
+}
+
+.yearInputs > label span,
+.yearInputs > label small {
+  display: none !important;
+}
+
+/* Zoom-chip beholdes */
+.yearInputs > span,
+.yearInputs > div {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* ------------------------------------------------------------
+   3) Rett opp tomt felt til venstre i tidslinjetabellen
+   ------------------------------------------------------------ */
+
+/* Fjern ekstra venstre padding som skaper tom stripen */
+.timelineCanvas {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding-left: 0 !important;
+  padding-right: 12px !important;
+}
+
+/* Selve raden skal starte helt til venstre med labelkolonnen */
+.timelineLane {
+  grid-template-columns: 118px minmax(0, 1fr) !important;
+}
+
+/* Label-feltet skal stå helt til venstre */
+.laneLabel {
+  margin-left: 0 !important;
+  padding: 8px 8px !important;
+  justify-self: stretch !important;
+  align-self: center !important;
+}
+
+/* Tidsakse og 10-årsfelter skal starte rett etter labelkolonnen */
+.decadeBand {
+  left: 118px !important;
+  right: 12px !important;
+}
+
+.axisLine {
+  left: 118px !important;
+  right: 12px !important;
+}
+
+/* Litt strammere tidslinje */
+.timelineShell {
+  padding: 8px 10px !important;
+}
+
+.timelineViewport {
+  width: 100% !important;
+  overflow-x: auto !important;
+  padding-left: 0 !important;
+}
+
+/* Ryddigere objektbokser */
+.timelineItem {
+  top: 4px !important;
+  height: 29px !important;
+  padding: 3px 6px !important;
+}
+
+.timelineItem strong {
+  font-size: 10px !important;
+}
+
+.timelineItem span {
+  font-size: 9px !important;
+}
+
+/* ------------------------------------------------------------
+   4) Litt mer kompakt filterhøyde generelt
+   ------------------------------------------------------------ */
+.filterColumn {
+  gap: 5px !important;
+  padding: 7px 8px !important;
+}
+
+.selectBox {
+  padding: 5px 6px !important;
+  border-radius: 10px !important;
+}
+
+.selectBox span {
+  margin-bottom: 2px !important;
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+}
+
+.selectBox select {
+  min-height: 31px !important;
+  height: 31px !important;
+  padding: 5px 8px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+}
+
+.selectBox small {
+  min-height: 13px !important;
+  max-height: 14px !important;
+  margin-top: 3px !important;
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Mobil */
+@media (max-width: 760px) {
+  .timelineCanvas {
+    padding-left: 0 !important;
+    padding-right: 10px !important;
+  }
+
+  .timelineLane {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+  }
+
+  .laneLabel {
+    padding: 6px 6px !important;
+    font-size: 10px !important;
+  }
+
+  .decadeBand {
+    left: 92px !important;
+    right: 10px !important;
+  }
+
+  .axisLine {
+    left: 92px !important;
+    right: 10px !important;
+  }
+
+  .yearInputs {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  .yearInputs > label {
+    min-height: 34px !important;
+  }
+
+  .yearInputs > label input {
+    width: 60px !important;
+    font-size: 13px !important;
   }
 }
