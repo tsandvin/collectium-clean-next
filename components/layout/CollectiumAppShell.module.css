@@ -2,6 +2,7 @@
   --ct-sidebar-width: clamp(236px, 15vw, 292px);
   --ct-sidebar-max: 300px;
   --ct-topbar-height: 72px;
+  --ct-mobile-bottom-nav-height: 66px;
 }
 
 .shell {
@@ -484,6 +485,84 @@
 
   .shell:not([data-screen-mode="desktop"]):not([data-screen-mode="wide"]) .content {
     padding: 12px;
+  }
+}
+
+.mobileBottomNav {
+  display: none;
+}
+
+.shell[data-screen-mode="mobile"] .mobileBottomNav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--ct-mobile-bottom-nav-height);
+  z-index: 120;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--ct-panel);
+  color: var(--ct-text);
+  border-top: 1px solid var(--ct-border);
+  box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18);
+  padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
+}
+
+.shell[data-screen-mode="mobile"] .mainColumn {
+  padding-bottom: calc(var(--ct-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 16px);
+}
+
+.mobileBottomItem {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: var(--ct-muted);
+  border-radius: 12px;
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 650;
+  transition: all 0.2s ease;
+}
+
+.mobileBottomItem svg {
+  display: block;
+}
+
+.mobileBottomItem span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileBottomItemActive {
+  color: var(--ct-accent);
+  background: color-mix(in srgb, var(--ct-accent) 12%, transparent);
+}
+
+/* Fallback before hydration */
+@media (max-width: 719px) {
+  .mobileBottomNav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--ct-mobile-bottom-nav-height);
+    z-index: 120;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    background: var(--ct-panel);
+    color: var(--ct-text);
+    border-top: 1px solid var(--ct-border);
+    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18);
+    padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
+  }
+
+  .mainColumn {
+    padding-bottom: calc(var(--ct-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 16px);
   }
 }
 

@@ -14,7 +14,8 @@ import {
   Store,
   ShieldCheck,
   Menu,
-  X
+  X,
+  UserRound
 } from "lucide-react";
 import styles from "./CollectiumAppShell.module.css";
 import { CollectiumLayoutModeProvider, useCollectiumLayout } from "./CollectiumLayoutModeProvider";
@@ -35,6 +36,13 @@ const navItems = [
   { href: "/auksjon", label: "Auksjon", icon: Gavel, disabled: true },
   { href: "/forhandler", label: "Forhandler", icon: Store, disabled: true },
   { href: "/admin", label: "Admin", icon: ShieldCheck },
+];
+
+const mobileBottomItems = [
+  { href: "/min-side", label: "Min side", icon: UserRound, key: "minside" },
+  { href: "/", label: "Index", icon: Home, key: "index" },
+  { href: "/katalog", label: "Katalog søk", icon: Search, key: "katalog" },
+  { href: "/min-side", label: "Min samling", icon: Archive, key: "samling" }, // TODO: change to /samling when collection page is active.
 ];
 
 const skins: { value: CollectiumSkin; label: string }[] = [
@@ -104,6 +112,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
       return pathname.startsWith("/admin");
     }
     return pathname.startsWith(href);
+  }
+
+  function checkMobileBottomActive(item: typeof mobileBottomItems[number]) {
+    if (item.key === "index") return pathname === "/";
+    if (item.key === "katalog") return pathname.startsWith("/katalog");
+    if (item.key === "samling") return pathname.startsWith("/samling");
+    if (item.key === "minside") return pathname.startsWith("/min-side");
+    return pathname === item.href;
   }
 
   const isDarkSkin = skin === "museum" || skin === "finans";
@@ -202,6 +218,25 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
 
         <main className={styles.content}>{children}</main>
       </div>
+
+      <nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
+        {mobileBottomItems.map((item) => {
+          const IconComponent = item.icon;
+          const isActive = checkMobileBottomActive(item);
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <IconComponent size={20} strokeWidth={1.8} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
