@@ -9,7 +9,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nb" data-template="collectium" data-skin="signature-light" data-vp="pc">
+    <html lang="nb" data-template="collectium" data-skin="collectium" data-vp="pc">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const stored = localStorage.getItem('collectium-active-skin');
+                  if (stored) {
+                    document.documentElement.setAttribute('data-skin', stored);
+                    document.documentElement.setAttribute('data-ct-skin', stored);
+                  }
+                } catch (e) {}
+              })()
+            `,
+          }}
+        />
+      </head>
       <body>
         <CollectiumAppShell>{children}</CollectiumAppShell>
       </body>
