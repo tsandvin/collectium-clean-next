@@ -516,11 +516,11 @@
 /* ============================================================
    CT PATCH - Periodefilter 3x3 over tidslinje
    Endring:
-   - Filterfeltet ligger over tidslinjen, ikke som smal hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yreboks.
-   - Master/Land/Objekttype pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸rste rekke.
-   - Rad 1/Rad 2/Rad 3 pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ andre rekke.
-   - Rad 4/Valgt pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ tredje rekke.
-   - Mobil/popup fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥r mer tabellaktig tidslinjevisning.
+   - Filterfeltet ligger over tidslinjen, ikke som smal hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yreboks.
+   - Master/Land/Objekttype pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸rste rekke.
+   - Rad 1/Rad 2/Rad 3 pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ andre rekke.
+   - Rad 4/Valgt pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ tredje rekke.
+   - Mobil/popup fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥r mer tabellaktig tidslinjevisning.
    ============================================================ */
 
 .layout {
@@ -664,7 +664,7 @@
   margin-top: 0 !important;
 }
 
-/* ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦r fra/til kan ligge kompakt oppe til hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yre i tidslinjen */
+/* ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦r fra/til kan ligge kompakt oppe til hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yre i tidslinjen */
 .yearInputs {
   display: flex !important;
   justify-content: flex-end !important;
@@ -706,7 +706,7 @@
   }
 }
 
-/* Mobil: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n kolonne, men popup/tidslinje fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥r tabellaktig hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ykantvisning */
+/* Mobil: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n kolonne, men popup/tidslinje fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥r tabellaktig hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ykantvisning */
 @media (max-width: 760px) {
   .filterColumn {
     grid-template-columns: 1fr !important;
@@ -779,7 +779,7 @@
   }
 }
 
-/* Popup pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
+/* Popup pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ mobil: tidslinjen tar hele laget og tabellen kan scrolles */
 @media (max-width: 760px) {
   .page[data-timeline-only="true"] .timelineShell {
     position: fixed !important;
@@ -804,7 +804,7 @@
    CT PATCH - skinfarger Rad 1-4 + lavere filter + fikset tidslinjebredde
    ============================================================ */
 
-/* Hele filterfeltet krympes i hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yden */
+/* Hele filterfeltet krympes i hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yden */
 .filterColumn {
   gap: 5px !important;
   padding: 7px 8px !important;
@@ -862,7 +862,7 @@
   text-overflow: ellipsis !important;
 }
 
-/* Skinfarger pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ Rad 1-4, basert pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ rekkefÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸lge i filterboksen:
+/* Skinfarger pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ Rad 1-4, basert pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ rekkefÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸lge i filterboksen:
    1 Masterfilter
    2 Land
    3 Objekttype
@@ -915,7 +915,7 @@
   color: #59338f !important;
 }
 
-/* Master/Land/Objekttype mer nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸ytrale og lavere */
+/* Master/Land/Objekttype mer nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ytrale og lavere */
 .filterColumn > .selectBox:nth-of-type(1),
 .filterColumn > .selectBox:nth-of-type(2),
 .filterColumn > .selectBox:nth-of-type(3) {
@@ -923,7 +923,7 @@
   border-color: #d8e6f6 !important;
 }
 
-/* Valgt-boksen skal ikke bli hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸y og dominerende */
+/* Valgt-boksen skal ikke bli hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸y og dominerende */
 .selectedStack {
   padding: 6px !important;
   gap: 4px !important;
@@ -943,7 +943,7 @@
   line-height: 1.1 !important;
 }
 
-/* Tidslinje: fjern rar hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yremarg / fyll til hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yre */
+/* Tidslinje: fjern rar hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yremarg / fyll til hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yre */
 .timelineShell {
   padding: 10px !important;
 }
@@ -960,7 +960,7 @@
   padding-right: 16px !important;
 }
 
-/* Viktig: grid og akse skal bruke samme hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yre/venstre */
+/* Viktig: grid og akse skal bruke samme hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yre/venstre */
 .decadeBand {
   left: 140px !important;
   right: 16px !important;
@@ -971,7 +971,7 @@
   right: 16px !important;
 }
 
-/* Lane-label litt smalere sÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ tidslinjen fÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥r mer plass */
+/* Lane-label litt smalere sÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ tidslinjen fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥r mer plass */
 .timelineLane {
   grid-template-columns: 120px minmax(0, 1fr) !important;
 }
@@ -995,7 +995,7 @@
   font-size: 9px !important;
 }
 
-/* VerktÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸y og ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥rfelter lavere */
+/* VerktÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸y og ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥rfelter lavere */
 .timelineHeader {
   margin-bottom: 6px !important;
 }
@@ -1019,7 +1019,7 @@
   line-height: 1 !important;
 }
 
-/* StÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸rre skjermer: tving 3 per rad og behold kompakt hÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yde */
+/* StÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸rre skjermer: tving 3 per rad og behold kompakt hÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸yde */
 @media (min-width: 1201px) {
   .filterColumn {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -1065,7 +1065,7 @@
 
 
 /* ============================================================
-   CT PATCH - Fjern "Master + Rad 1-4", flytt ÃƒÆ’Ã‚Â¥r-label inn i bokser,
+   CT PATCH - Fjern "Master + Rad 1-4", flytt ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥r-label inn i bokser,
    og fjern tomt venstrefelt i tidslinjen
    ============================================================ */
 
@@ -1088,7 +1088,7 @@
 }
 
 /* ------------------------------------------------------------
-   2) ÃƒÆ’Ã¢â‚¬Â¦r fra / ÃƒÆ’Ã¢â‚¬Â¦r til inn i selve ÃƒÆ’Ã‚Â¥rboksene
+   2) ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦r fra / ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦r til inn i selve ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥rboksene
    ------------------------------------------------------------ */
 .yearInputs {
   display: flex !important;
@@ -1178,7 +1178,7 @@
   grid-template-columns: 118px minmax(0, 1fr) !important;
 }
 
-/* Label-feltet skal stÃƒÆ’Ã‚Â¥ helt til venstre */
+/* Label-feltet skal stÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ helt til venstre */
 .laneLabel {
   margin-left: 0 !important;
   padding: 8px 8px !important;
@@ -1186,7 +1186,7 @@
   align-self: center !important;
 }
 
-/* Tidsakse og 10-ÃƒÆ’Ã‚Â¥rsfelter skal starte rett etter labelkolonnen */
+/* Tidsakse og 10-ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥rsfelter skal starte rett etter labelkolonnen */
 .decadeBand {
   left: 118px !important;
   right: 12px !important;
@@ -1224,7 +1224,7 @@
 }
 
 /* ------------------------------------------------------------
-   4) Litt mer kompakt filterhÃƒÆ’Ã‚Â¸yde generelt
+   4) Litt mer kompakt filterhÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¸yde generelt
    ------------------------------------------------------------ */
 .filterColumn {
   gap: 5px !important;
@@ -1341,12 +1341,12 @@
   border-color: #c4a3e9 !important;
 }
 
-/* Tidslinjeradene fÃƒÂ¥r samme fargefamilier som filter-radene.
-   1 Konge/regent = Rad 1 blÃƒÂ¥
+/* Tidslinjeradene fÃƒÆ’Ã‚Â¥r samme fargefamilier som filter-radene.
+   1 Konge/regent = Rad 1 blÃƒÆ’Ã‚Â¥
    2 Nasjonal periode = Rad 2 gull
-   3 Krig/konflikt = Rad 3 grÃƒÂ¸nn
-   4 Finans/ÃƒÂ¸konomi = Rad 4 lilla
-   resterende beholdes nÃƒÂ¸ytralt/relasjon.
+   3 Krig/konflikt = Rad 3 grÃƒÆ’Ã‚Â¸nn
+   4 Finans/ÃƒÆ’Ã‚Â¸konomi = Rad 4 lilla
+   resterende beholdes nÃƒÆ’Ã‚Â¸ytralt/relasjon.
 */
 
 .timelineLane:nth-of-type(1) .laneLabel {
@@ -1385,7 +1385,7 @@
   border: 1px solid #d8e6f6 !important;
 }
 
-/* Radspor fÃƒÂ¥r svak bakgrunnsfarge som matcher label */
+/* Radspor fÃƒÆ’Ã‚Â¥r svak bakgrunnsfarge som matcher label */
 .timelineLane:nth-of-type(1) .laneTrack {
   background: linear-gradient(90deg, rgba(159,197,236,.14), transparent) !important;
 }
@@ -1403,7 +1403,7 @@
 }
 
 /* Mobil popup tilbake til standard horisontal tidslinje.
-   Fjerner tidligere vertikal/hÃƒÂ¸ykant label-oppsett.
+   Fjerner tidligere vertikal/hÃƒÆ’Ã‚Â¸ykant label-oppsett.
 */
 @media (max-width: 760px) {
   .page[data-timeline-only="true"] .timelineShell {
@@ -1460,7 +1460,7 @@
    CT PATCH - selvstendige dynamiske felt + svak kildefarge fra tidslinje
    ============================================================ */
 
-/* Fjern felles tung bakgrunn rundt dynamisk omrÃ¥de */
+/* Fjern felles tung bakgrunn rundt dynamisk omrÃƒÂ¥de */
 .dynamicArea {
   background: transparent !important;
   border: none !important;
@@ -1474,7 +1474,7 @@
   margin-bottom: 8px !important;
 }
 
-/* De to dynamiske feltene skal stÃ¥ selvstendig */
+/* De to dynamiske feltene skal stÃƒÂ¥ selvstendig */
 .infoPanel {
   background: rgba(255,255,255,.98) !important;
   border: 1px solid rgba(213,229,247,.95) !important;
@@ -1490,7 +1490,7 @@
   content: none !important;
 }
 
-/* Bio-boksen fÃ¥r svak kildefarge, men bare i selve tekstfeltet */
+/* Bio-boksen fÃƒÂ¥r svak kildefarge, men bare i selve tekstfeltet */
 .bioText {
   border-radius: 13px !important;
   border: 1px solid rgba(213,229,247,.9) !important;
@@ -1508,7 +1508,7 @@
   background: linear-gradient(180deg, rgba(234,244,255,.85), rgba(255,255,255,.92)) !important;
 }
 
-/* Faktaradene skal vÃ¦re hvite og selvstendige, ikke pÃ¥ farget bakgrunn */
+/* Faktaradene skal vÃƒÂ¦re hvite og selvstendige, ikke pÃƒÂ¥ farget bakgrunn */
 .fact {
   background: #fff !important;
   border: 1px solid #edf3fa !important;
@@ -1531,21 +1531,21 @@
 }
 
 /* Svak kildefarge per valgt tidslinje-type.
-   Dette baserer seg pÃ¥ tekst/kategori i infofeltet via eksisterende timeline lane-farger visuelt:
-   blÃ¥ = konge/regent
+   Dette baserer seg pÃƒÂ¥ tekst/kategori i infofeltet via eksisterende timeline lane-farger visuelt:
+   blÃƒÂ¥ = konge/regent
    gull = nasjonal periode
-   grÃ¸nn = krig/konflikt
-   lilla = finans/Ã¸konomi
-   nÃ¸ytral = person/objekt
+   grÃƒÂ¸nn = krig/konflikt
+   lilla = finans/ÃƒÂ¸konomi
+   nÃƒÂ¸ytral = person/objekt
 */
 
-/* NÃ¥r kortet ligger som andre dynamiske panel, gi det en diskret venstremarkÃ¸r */
+/* NÃƒÂ¥r kortet ligger som andre dynamiske panel, gi det en diskret venstremarkÃƒÂ¸r */
 .dynamicGrid .infoPanel:nth-child(2) {
   border-left-width: 4px !important;
   border-left-color: #9fc5ec !important;
 }
 
-/* Fargetone for nÃ¸kkelinfofeltet inne i Periode dynamiske felt */
+/* Fargetone for nÃƒÂ¸kkelinfofeltet inne i Periode dynamiske felt */
 .dynamicGrid .infoPanel:nth-child(2) .fact:nth-of-type(1) {
   background: linear-gradient(90deg, rgba(234,244,255,.9), #fff) !important;
 }
@@ -1580,7 +1580,7 @@
   gap: 12px !important;
 }
 
-/* Mobil: kortene skal fortsatt vÃ¦re egne kort */
+/* Mobil: kortene skal fortsatt vÃƒÂ¦re egne kort */
 @media (max-width: 900px) {
   .dynamicGrid {
     grid-template-columns: 1fr !important;
@@ -1589,6 +1589,421 @@
   .infoPanel {
     box-shadow: 0 12px 22px rgba(7, 53, 110, .11) !important;
   }
+}
+
+
+/* ============================================================
+   CT PATCH - Light/Dark skin tokens + 1px top edge on boxes
+   FormÃ¥l:
+   - Fjerner statisk hvit design i periodefilter-testen.
+   - Bruker lokale theme tokens som fÃ¸lger lys/mÃ¸rk modus.
+   - Alle kort/bokser fÃ¥r 1px kant.
+   - Aksentkant flyttes fra venstre side til topp.
+   ============================================================ */
+
+/* ---------- lokale skin tokens ---------- */
+
+.page {
+  --ct-page-bg: var(--collectium-page-bg, #f4f8fc);
+  --ct-surface: var(--collectium-surface, rgba(255, 255, 255, .92));
+  --ct-surface-soft: var(--collectium-surface-soft, rgba(248, 251, 255, .88));
+  --ct-field-bg: var(--collectium-field-bg, rgba(255, 255, 255, .94));
+  --ct-border: var(--collectium-border, rgba(169, 199, 232, .82));
+  --ct-border-soft: var(--collectium-border-soft, rgba(213, 229, 247, .9));
+  --ct-text: var(--collectium-text, #07356e);
+  --ct-text-soft: var(--collectium-text-soft, #547090);
+  --ct-heading: var(--collectium-heading, #0b4387);
+  --ct-shadow: var(--collectium-shadow, 0 14px 28px rgba(7, 53, 110, .10));
+
+  --ct-row1-bg: rgba(72, 139, 211, .13);
+  --ct-row1-border: rgba(72, 139, 211, .70);
+  --ct-row1-text: #073f82;
+
+  --ct-row2-bg: rgba(198, 153, 52, .17);
+  --ct-row2-border: rgba(198, 153, 52, .70);
+  --ct-row2-text: #6f4c00;
+
+  --ct-row3-bg: rgba(74, 154, 105, .15);
+  --ct-row3-border: rgba(74, 154, 105, .68);
+  --ct-row3-text: #0d5d3a;
+
+  --ct-row4-bg: rgba(132, 91, 190, .15);
+  --ct-row4-border: rgba(132, 91, 190, .68);
+  --ct-row4-text: #59338f;
+
+  background: var(--ct-page-bg) !important;
+  color: var(--ct-text) !important;
+}
+
+/* MÃ¸rk modus via system */
+@media (prefers-color-scheme: dark) {
+  .page {
+    --ct-page-bg: var(--collectium-page-bg, #07111f);
+    --ct-surface: var(--collectium-surface, rgba(13, 25, 43, .92));
+    --ct-surface-soft: var(--collectium-surface-soft, rgba(17, 32, 54, .88));
+    --ct-field-bg: var(--collectium-field-bg, rgba(10, 21, 37, .95));
+    --ct-border: var(--collectium-border, rgba(93, 132, 177, .58));
+    --ct-border-soft: var(--collectium-border-soft, rgba(78, 111, 151, .45));
+    --ct-text: var(--collectium-text, #e7f0ff);
+    --ct-text-soft: var(--collectium-text-soft, #a9bad1);
+    --ct-heading: var(--collectium-heading, #d8e8ff);
+    --ct-shadow: var(--collectium-shadow, 0 16px 34px rgba(0, 0, 0, .34));
+
+    --ct-row1-bg: rgba(82, 157, 232, .18);
+    --ct-row1-border: rgba(118, 183, 248, .72);
+    --ct-row1-text: #d8eaff;
+
+    --ct-row2-bg: rgba(210, 169, 67, .20);
+    --ct-row2-border: rgba(230, 190, 85, .72);
+    --ct-row2-text: #ffe7a8;
+
+    --ct-row3-bg: rgba(87, 180, 126, .18);
+    --ct-row3-border: rgba(112, 205, 152, .70);
+    --ct-row3-text: #c9f5db;
+
+    --ct-row4-bg: rgba(169, 125, 231, .20);
+    --ct-row4-border: rgba(191, 151, 244, .72);
+    --ct-row4-text: #ead9ff;
+  }
+}
+
+/* MÃ¸rk modus dersom global skin bruker data-attributt */
+:global(html[data-skin*="dark"]) .page,
+:global(body[data-skin*="dark"]) .page,
+:global([data-theme="dark"]) .page {
+  --ct-page-bg: var(--collectium-page-bg, #07111f);
+  --ct-surface: var(--collectium-surface, rgba(13, 25, 43, .92));
+  --ct-surface-soft: var(--collectium-surface-soft, rgba(17, 32, 54, .88));
+  --ct-field-bg: var(--collectium-field-bg, rgba(10, 21, 37, .95));
+  --ct-border: var(--collectium-border, rgba(93, 132, 177, .58));
+  --ct-border-soft: var(--collectium-border-soft, rgba(78, 111, 151, .45));
+  --ct-text: var(--collectium-text, #e7f0ff);
+  --ct-text-soft: var(--collectium-text-soft, #a9bad1);
+  --ct-heading: var(--collectium-heading, #d8e8ff);
+  --ct-shadow: var(--collectium-shadow, 0 16px 34px rgba(0, 0, 0, .34));
+
+  --ct-row1-bg: rgba(82, 157, 232, .18);
+  --ct-row1-border: rgba(118, 183, 248, .72);
+  --ct-row1-text: #d8eaff;
+
+  --ct-row2-bg: rgba(210, 169, 67, .20);
+  --ct-row2-border: rgba(230, 190, 85, .72);
+  --ct-row2-text: #ffe7a8;
+
+  --ct-row3-bg: rgba(87, 180, 126, .18);
+  --ct-row3-border: rgba(112, 205, 152, .70);
+  --ct-row3-text: #c9f5db;
+
+  --ct-row4-bg: rgba(169, 125, 231, .20);
+  --ct-row4-border: rgba(191, 151, 244, .72);
+  --ct-row4-text: #ead9ff;
+}
+
+/* ---------- generelle bokser: ikke statisk hvit ---------- */
+
+.hero,
+.filterColumn,
+.timelineShell,
+.infoPanel,
+.statusBox,
+.timelineInfo,
+.selectBox,
+.selectedStack,
+.fact {
+  background: var(--ct-surface) !important;
+  border: 1px solid var(--ct-border) !important;
+  color: var(--ct-text) !important;
+  box-shadow: var(--ct-shadow) !important;
+}
+
+/* Mykere felt inni kort */
+.selectBox select,
+.yearInputs > label,
+.yearInputs input,
+.timelineViewport,
+.bioText {
+  background: var(--ct-field-bg) !important;
+  border: 1px solid var(--ct-border-soft) !important;
+  color: var(--ct-text) !important;
+}
+
+/* Tekstfarger */
+.hero h1,
+.filterColumnHeader h2,
+.timelineHeader h2,
+.dynamicArea h2,
+.infoPanel h2,
+.timelineInfo strong {
+  color: var(--ct-heading) !important;
+}
+
+.hero p,
+.selectBox small,
+.timelineInfo p,
+.bioText,
+.fact span,
+.eyebrow {
+  color: var(--ct-text-soft) !important;
+}
+
+.fact strong,
+.selectBox select,
+.yearInputs input {
+  color: var(--ct-text) !important;
+}
+
+/* ---------- kantregel: 1px pÃ¥ alle bokser, aksent pÃ¥ toppen ---------- */
+
+/* Fjern tidligere venstrekant pÃ¥ dynamiske felt */
+.dynamicGrid .infoPanel:nth-child(2),
+.infoPanel {
+  border-left-width: 1px !important;
+  border-left-color: var(--ct-border) !important;
+}
+
+/* Topplinje, ikke sidelinje */
+.infoPanel::before,
+.filterColumn::before,
+.timelineShell::before,
+.hero::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 14px !important;
+  right: 14px !important;
+  top: 0 !important;
+  height: 1px !important;
+  background: var(--ct-border) !important;
+  pointer-events: none !important;
+}
+
+/* SÃ¸rg for posisjonering for topplinje */
+.infoPanel,
+.filterColumn,
+.timelineShell,
+.hero {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Dynamiske kort fÃ¥r egen toppaksent etter innholdstype */
+.dynamicGrid .infoPanel:nth-child(1)::before {
+  background: var(--ct-row1-border) !important;
+}
+
+.dynamicGrid .infoPanel:nth-child(2)::before {
+  background: var(--ct-row4-border) !important;
+}
+
+/* Ingen felles bakgrunn rundt dynamiske felt */
+.dynamicArea,
+.dynamicGrid {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Selvstendige dynamiske kort */
+.infoPanel {
+  border-radius: 16px !important;
+  padding: 12px !important;
+  box-shadow: 0 16px 30px rgba(7, 53, 110, .12) !important;
+}
+
+:global(html[data-skin*="dark"]) .infoPanel,
+:global(body[data-skin*="dark"]) .infoPanel,
+:global([data-theme="dark"]) .infoPanel {
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .36) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .infoPanel {
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .36) !important;
+  }
+}
+
+/* Biofelt fÃ¥r svak tone, ikke hard hvit */
+.bioText {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-row1-border) 12%, transparent), transparent),
+    var(--ct-surface-soft) !important;
+  color: var(--ct-text) !important;
+}
+
+/* Faktarader skal ikke vÃ¦re hvite */
+.fact {
+  background: var(--ct-surface-soft) !important;
+  border: 1px solid var(--ct-border-soft) !important;
+  box-shadow: 0 5px 12px rgba(7, 53, 110, .045) !important;
+}
+
+/* ---------- Rad 1-4 filterfarger med lys/mÃ¸rk tokens ---------- */
+
+.filterColumn > .selectBox:nth-of-type(4) {
+  background: var(--ct-row1-bg) !important;
+  border-color: var(--ct-row1-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(4)::before {
+  background: var(--ct-row1-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(4) span,
+.filterColumn > .selectBox:nth-of-type(4) select {
+  color: var(--ct-row1-text) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(5) {
+  background: var(--ct-row2-bg) !important;
+  border-color: var(--ct-row2-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(5) span,
+.filterColumn > .selectBox:nth-of-type(5) select {
+  color: var(--ct-row2-text) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(6) {
+  background: var(--ct-row3-bg) !important;
+  border-color: var(--ct-row3-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(6) span,
+.filterColumn > .selectBox:nth-of-type(6) select {
+  color: var(--ct-row3-text) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(7) {
+  background: var(--ct-row4-bg) !important;
+  border-color: var(--ct-row4-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(7) span,
+.filterColumn > .selectBox:nth-of-type(7) select {
+  color: var(--ct-row4-text) !important;
+}
+
+/* ---------- topplinje ogsÃ¥ pÃ¥ select-bokser ---------- */
+
+.selectBox {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.selectBox::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 10px !important;
+  right: 10px !important;
+  top: 0 !important;
+  height: 1px !important;
+  background: var(--ct-border-soft) !important;
+  pointer-events: none !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(4)::before {
+  background: var(--ct-row1-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(5)::before {
+  background: var(--ct-row2-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(6)::before {
+  background: var(--ct-row3-border) !important;
+}
+
+.filterColumn > .selectBox:nth-of-type(7)::before {
+  background: var(--ct-row4-border) !important;
+}
+
+/* ---------- tidslinje: ikke statisk hvit/blÃ¥ ---------- */
+
+.timelineViewport {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-surface-soft) 84%, transparent), transparent),
+    var(--ct-surface) !important;
+}
+
+.decadeBlock[data-even="true"] {
+  background: color-mix(in srgb, var(--ct-border) 12%, transparent) !important;
+}
+
+.decadeBlock {
+  border-left: 1px solid color-mix(in srgb, var(--ct-border) 52%, transparent) !important;
+}
+
+.axisLine {
+  background: var(--ct-heading) !important;
+}
+
+.axisLine span,
+.decadeBlock span {
+  color: var(--ct-heading) !important;
+}
+
+.laneTrack {
+  border-bottom: 1px solid color-mix(in srgb, var(--ct-border) 48%, transparent) !important;
+}
+
+/* Tidslinjeradene fÃ¥r topptone og 1px kant, ikke bare statisk pill */
+.timelineLane:nth-of-type(1) .laneLabel {
+  background: var(--ct-row1-bg) !important;
+  border: 1px solid var(--ct-row1-border) !important;
+  color: var(--ct-row1-text) !important;
+}
+
+.timelineLane:nth-of-type(2) .laneLabel {
+  background: var(--ct-row2-bg) !important;
+  border: 1px solid var(--ct-row2-border) !important;
+  color: var(--ct-row2-text) !important;
+}
+
+.timelineLane:nth-of-type(3) .laneLabel {
+  background: var(--ct-row3-bg) !important;
+  border: 1px solid var(--ct-row3-border) !important;
+  color: var(--ct-row3-text) !important;
+}
+
+.timelineLane:nth-of-type(4) .laneLabel {
+  background: var(--ct-row4-bg) !important;
+  border: 1px solid var(--ct-row4-border) !important;
+  color: var(--ct-row4-text) !important;
+}
+
+.timelineLane:nth-of-type(5) .laneLabel,
+.timelineLane:nth-of-type(6) .laneLabel {
+  background: var(--ct-surface-soft) !important;
+  border: 1px solid var(--ct-border-soft) !important;
+  color: var(--ct-text) !important;
+}
+
+/* ---------- knapper ---------- */
+
+.timelineTools button,
+.segmentTabs button {
+  background: var(--ct-field-bg) !important;
+  border: 1px solid var(--ct-border) !important;
+  color: var(--ct-text) !important;
+  box-shadow: none !important;
+}
+
+.timelineTools button[data-active="true"],
+.segmentTabs button[data-active="true"] {
+  background: var(--ct-heading) !important;
+  border-color: var(--ct-heading) !important;
+  color: var(--ct-surface) !important;
+}
+
+/* ---------- valgt-boksen ---------- */
+
+.selectedStack {
+  background: var(--ct-surface) !important;
+}
+
+.selectedStack span {
+  background: var(--ct-surface-soft) !important;
+  border: 1px solid var(--ct-border-soft) !important;
+  color: var(--ct-text) !important;
 }
 
 
