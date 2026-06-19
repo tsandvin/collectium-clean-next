@@ -30,7 +30,7 @@
  * log_action: view
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-V3
+ * CT-PERIOD-TIMELINE-V4
  */
 
 import { CollectiumPeriodTimelineClient } from "@/components/period-timeline/CollectiumPeriodTimelineClient";

@@ -31,7 +31,7 @@
  * log_action: api_read
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-V3
+ * CT-PERIOD-TIMELINE-V4
  */
 
 import { NextResponse } from "next/server";

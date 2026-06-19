@@ -32,7 +32,7 @@
  * log_action: interact
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-V3
+ * CT-PERIOD-TIMELINE-V4
  */
 
 "use client";

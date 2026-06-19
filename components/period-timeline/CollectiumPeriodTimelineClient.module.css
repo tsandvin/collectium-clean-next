@@ -32,7 +32,7 @@
  * log_action: render
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-V3
+ * CT-PERIOD-TIMELINE-V4
  */
 
 .page {
@@ -172,6 +172,10 @@
 .periodField {
   display: grid;
   gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel-soft);
 }
 
 .field span,
@@ -226,9 +230,12 @@
 .yearScale {
   position: relative;
   min-width: 1100px;
-  height: 34px;
+  height: 38px;
   margin-left: 150px;
   border-bottom: 2px solid var(--ct-accent);
+  background: var(--ct-panel-soft);
+  border-radius: var(--ct-radius);
+  box-shadow: var(--ct-shadow);
 }
 
 .yearScale span {
@@ -244,9 +251,9 @@
 .timelineGrid {
   position: relative;
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 1250px;
-  padding: 10px 0 6px;
+  padding: 12px 0 8px;
 }
 
 .yearLine {
@@ -269,72 +276,113 @@
 .laneLabel {
   display: flex;
   align-items: center;
-  min-height: 50px;
-  padding: 10px;
+  min-height: 58px;
+  padding: 12px;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius);
   background: var(--ct-panel-soft);
   color: var(--ct-text);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: 14px;
+  font-weight: 950;
 }
 
 .laneTrack {
   position: relative;
-  min-height: 58px;
-  border-bottom: 1px solid var(--ct-border);
+  min-height: 68px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  background: var(--ct-input-bg);
+  overflow: hidden;
 }
 
 .periodBlock,
 .eventMarker {
   position: absolute;
-  top: 6px;
-  min-width: 82px;
+  top: 9px;
+  min-width: 96px;
   max-width: 100%;
-  height: 46px;
-  padding: 6px 10px;
+  height: 50px;
+  padding: 7px 12px;
   overflow: hidden;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius);
-  background: var(--ct-panel-soft);
+  background: var(--ct-card-bg);
   color: var(--ct-text);
   box-shadow: var(--ct-shadow);
   text-align: center;
   cursor: pointer;
+  isolation: isolate;
+  transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.periodBlock::before,
+.eventMarker::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border-radius: calc(var(--ct-radius) - 2px);
+  background: var(--ct-panel-soft);
+  box-shadow: var(--ct-shadow);
+}
+
+.periodBlock:hover,
+.eventMarker:hover {
+  border-color: var(--ct-accent);
+  box-shadow: var(--ct-shadow-strong, var(--ct-shadow)), 0 12px 28px color-mix(in srgb, var(--ct-accent) 22%, transparent);
+  transform: translateY(-2px) scale(1.01);
 }
 
 .periodBlock strong,
 .eventMarker strong {
+  position: relative;
+  z-index: 1;
   display: block;
   overflow: hidden;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1.1;
+  color: var(--ct-text);
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1.12;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--ct-card-bg) 70%, transparent);
 }
 
 .periodBlock span,
 .eventMarker span {
+  position: relative;
+  z-index: 1;
   display: block;
-  color: var(--ct-muted);
+  color: var(--ct-text);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
+  opacity: 0.9;
 }
 
 .eventMarker {
-  width: 86px;
+  width: 96px;
   transform: translateX(-50%);
+}
+
+.eventMarker:hover {
+  transform: translateX(-50%) translateY(-2px) scale(1.01);
 }
 
 .periodBlockActive {
   border-color: var(--ct-accent);
   background: var(--ct-accent);
   color: var(--ct-card-bg);
+  box-shadow: var(--ct-shadow-strong, var(--ct-shadow)), 0 14px 34px color-mix(in srgb, var(--ct-accent) 28%, transparent);
 }
 
+.periodBlockActive::before {
+  background: color-mix(in srgb, var(--ct-accent) 78%, var(--ct-card-bg));
+}
+
+.periodBlockActive strong,
 .periodBlockActive span {
   color: var(--ct-card-bg);
+  text-shadow: none;
 }
 
 .dynamicGrid {
@@ -365,6 +413,7 @@
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius);
   background: var(--ct-panel-soft);
+  box-shadow: var(--ct-shadow);
 }
 
 .fieldCard span,
@@ -384,8 +433,9 @@
 .longField strong,
 .catalogCard dd {
   color: var(--ct-text);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1.35;
 }
 
 .longField {
