@@ -666,6 +666,7 @@ export function CollectiumPeriodTimelineClient() {
               <option value="">Velg hovedperiode innen {filters.yearFrom}–{filters.yearTo}</option>
               {optionsByRow.row1.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
             </select>
+            <small className={styles.helperText}>Filtrerer overordnede tidsepoker</small>
           </label>
 
           <label className={`${styles.periodField} ${styles.row2}`}>
@@ -674,6 +675,7 @@ export function CollectiumPeriodTimelineClient() {
               <option value="">Velg tematisk periode</option>
               {optionsByRow.row2.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
             </select>
+            <small className={styles.helperText}>Historiske, kulturelle eller krigsperioder</small>
           </label>
 
           <label className={`${styles.periodField} ${styles.row3}`}>
@@ -682,6 +684,7 @@ export function CollectiumPeriodTimelineClient() {
               <option value="">Velg objektperiode</option>
               {optionsByRow.row3.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
             </select>
+            <small className={styles.helperText}>Spesifikke penge- og myntutgaver</small>
           </label>
 
           <label className={`${styles.periodField} ${styles.row4}`}>
@@ -690,6 +693,7 @@ export function CollectiumPeriodTimelineClient() {
               <option value="">Velg node fra aktiv tidslinje</option>
               {optionsByRow.row4.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
             </select>
+            <small className={styles.helperText}>Valgt node i det visuelle tidslinjesporet</small>
           </label>
         </div>
       </section>

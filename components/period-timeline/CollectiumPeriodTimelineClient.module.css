@@ -525,9 +525,132 @@
   font-size: 12px;
 }
 
+/* V7: Skin-based layout colors, lane-track contrast, shadows, dynamic panels, and integrated card display styles */
 
+/* Light mode defaults (or fallback) */
+.row1 {
+  --row-accent: #1e5a9a;
+  --row-accent-dark: #0b2a4a;
+  --row-bg-soft: #eef5fc;
+  --row-border-soft: #c4dcfa;
+}
+.row2 {
+  --row-accent: #b08a3e;
+  --row-accent-dark: #5c4314;
+  --row-bg-soft: #fdfaf2;
+  --row-border-soft: #f2e3c9;
+}
+.row3 {
+  --row-accent: #145c38;
+  --row-accent-dark: #0a331e;
+  --row-bg-soft: #effcf5;
+  --row-border-soft: #caebd7;
+}
+.row4 {
+  --row-accent: #8a70a8;
+  --row-accent-dark: #372054;
+  --row-bg-soft: #f9f5fc;
+  --row-border-soft: #ebdcf7;
+}
 
-/* V5: Rettet tidslinje-node-typografi: 18px node-tittel og 15px meta */
+/* Dark mode overrides (Museum and Finans skins) */
+:global(html[data-skin="museum"]) .row1,
+:global(html[data-skin="finans"]) .row1 {
+  --row-accent: #63b3ed;
+  --row-accent-dark: #eef5fc;
+  --row-bg-soft: #0b2a4a;
+  --row-border-soft: #1e5a9a;
+}
+:global(html[data-skin="museum"]) .row2,
+:global(html[data-skin="finans"]) .row2 {
+  --row-accent: #ecc94b;
+  --row-accent-dark: #fdfaf2;
+  --row-bg-soft: #5c4314;
+  --row-border-soft: #b08a3e;
+}
+:global(html[data-skin="museum"]) .row3,
+:global(html[data-skin="finans"]) .row3 {
+  --row-accent: #48bb78;
+  --row-accent-dark: #effcf5;
+  --row-bg-soft: #0a331e;
+  --row-border-soft: #145c38;
+}
+:global(html[data-skin="museum"]) .row4,
+:global(html[data-skin="finans"]) .row4 {
+  --row-accent: #b794f4;
+  --row-accent-dark: #f9f5fc;
+  --row-bg-soft: #372054;
+  --row-border-soft: #8a70a8;
+}
+
+/* Apply HSL/Skin Colors to the 4 Filter Rows */
+.periodField {
+  border: 1px solid var(--row-border-soft);
+  background: var(--row-bg-soft);
+  border-radius: var(--ct-radius);
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+  box-shadow: var(--ct-shadow-inset);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.periodField span {
+  color: var(--row-accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.periodField select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--row-border-soft);
+  border-radius: var(--ct-radius);
+  background: var(--ct-card-bg);
+  color: var(--row-accent-dark);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover and focus/active states */
+.periodField:hover {
+  border-color: var(--row-accent);
+  box-shadow: var(--ct-shadow-card);
+  transform: translateY(-1px);
+}
+
+.periodField select:hover {
+  border-color: var(--row-accent);
+  background: color-mix(in srgb, var(--row-accent) 5%, var(--ct-card-bg));
+}
+
+.periodField select:focus {
+  outline: none;
+  border-color: var(--row-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--row-accent) 30%, transparent);
+}
+
+.periodField:focus-within {
+  border-color: var(--row-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--row-accent) 15%, transparent);
+}
+
+.helperText {
+  color: var(--row-accent-dark);
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-top: 2px;
+  transition: color 0.2s ease;
+}
+
+/* Master Layout Contrast and Transitions */
 .hero,
 .masterFilter,
 .timelinePanel,
@@ -538,9 +661,10 @@
 .errorState,
 .loadingState,
 .emptyState {
-  background: transparent;
+  background: var(--ct-card-bg);
   border: 1px solid var(--ct-border);
-  box-shadow: var(--ct-shadow);
+  box-shadow: var(--ct-shadow-soft);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .hero:hover,
@@ -549,36 +673,26 @@
 .detailPanel:hover,
 .segmentPanel:hover,
 .catalogPanel:hover {
-  box-shadow: var(--ct-shadow-strong, var(--ct-shadow)), 0 14px 34px color-mix(in srgb, var(--ct-accent) 12%, transparent);
+  box-shadow: var(--ct-shadow-card), 0 10px 30px color-mix(in srgb, var(--ct-accent) 6%, transparent);
 }
 
 .field,
-.periodField,
 .laneLabel,
-.laneTrack,
 .fieldCard,
 .longField,
-.catalogCard,
-.yearScale,
 .primaryButton,
 .toolbarButtons button,
-.segmentButton,
-.segmentButtonActive {
+.segmentButton {
   background: var(--ct-card-bg);
-  box-shadow: var(--ct-shadow);
-  transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+  box-shadow: var(--ct-shadow-inset);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .field:hover,
-.periodField:hover,
-.fieldCard:hover,
-.longField:hover,
-.catalogCard:hover,
 .primaryButton:hover,
-.toolbarButtons button:hover,
-.segmentButton:hover {
+.toolbarButtons button:hover {
   border-color: var(--ct-accent);
-  box-shadow: var(--ct-shadow-strong, var(--ct-shadow)), 0 10px 26px color-mix(in srgb, var(--ct-accent) 14%, transparent);
+  box-shadow: var(--ct-shadow-card);
   transform: translateY(-1px);
 }
 
@@ -590,20 +704,44 @@
   height: 44px;
   border: 1px solid var(--ct-border);
   border-bottom: 3px solid var(--ct-accent);
-  background: transparent;
+  background: var(--ct-panel-soft);
+  position: relative;
+  min-width: 1100px;
+  margin-left: 150px;
+  border-radius: var(--ct-radius);
+  box-shadow: var(--ct-shadow-soft);
 }
 
 .yearScale span {
   font-size: 13px;
   font-weight: 950;
+  position: absolute;
+  bottom: 8px;
+  transform: translateX(-50%);
+  color: var(--ct-accent);
+  white-space: nowrap;
 }
 
 .timelineGrid {
+  position: relative;
+  display: grid;
   gap: 18px;
+  min-width: 1250px;
   padding: 18px 0 12px;
 }
 
+.yearLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: 150px;
+  background: var(--ct-border);
+  pointer-events: none;
+}
+
 .lane {
+  display: grid;
   grid-template-columns: 154px 1fr;
   gap: 16px;
   min-height: 84px;
@@ -613,92 +751,965 @@
   min-height: 76px;
   padding: 14px;
   background: var(--ct-card-bg);
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.1;
   border-width: 1px;
+  border-radius: var(--ct-radius);
+  font-weight: 950;
 }
 
 .laneTrack {
+  position: relative;
   min-height: 82px;
-  border-width: 1px;
-  background: transparent;
-  box-shadow: var(--ct-shadow);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ct-bg) 91%, var(--ct-text) 9%);
 }
 
+/* Timeline Period Nodes and Buttons */
 .periodBlock,
 .eventMarker {
+  position: absolute;
   top: 13px;
   height: 56px;
-  min-width: 116px;
+  min-width: 154px;
   padding: 8px 14px;
-  border-width: 1px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
   background: var(--ct-card-bg);
-  box-shadow: var(--ct-shadow-strong, var(--ct-shadow));
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06), var(--ct-shadow-inset);
+  text-align: center;
+  cursor: pointer;
+  isolation: isolate;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .periodBlock::before,
 .eventMarker::before {
+  content: "";
+  position: absolute;
   inset: 6px;
+  z-index: -1;
+  border-radius: calc(var(--ct-radius) - 2px);
   background: var(--ct-panel-soft);
-  box-shadow: inset 0 0 0 1px var(--ct-border), var(--ct-shadow);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.periodBlock:hover,
+.eventMarker:hover {
+  border-color: var(--ct-accent);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--ct-card-bg) 95%, #ffffff);
 }
 
 .periodBlock strong,
 .eventMarker strong {
-  font-size: 18px;
+  z-index: 1;
+  display: block;
+  position: relative;
+  color: var(--ct-text);
+  font-size: 16px;
   font-weight: 950;
-  letter-spacing: -0.01em;
   line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .periodBlock span,
 .eventMarker span {
+  z-index: 1;
+  display: block;
+  position: relative;
   margin-top: 3px;
-  font-size: 13px;
+  color: var(--ct-muted);
+  font-size: 12px;
   font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.fieldCard strong,
-.longField strong,
-.catalogCard dd,
-.field select,
-.field input,
-.periodField select {
-  font-size: 18px;
-  line-height: 1.25;
+.eventMarker {
+  width: 96px;
+  transform: translateX(-50%);
 }
 
-.field span,
-.periodField span,
-.fieldCard span,
-.longField span,
-.catalogCard span,
-.catalogCard dt {
+.eventMarker:hover {
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.periodBlockActive {
+  border-color: var(--ct-accent);
+  background: var(--ct-accent);
+  color: var(--ct-on-accent, #ffffff);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ct-accent) 25%, transparent);
+}
+
+.periodBlockActive::before {
+  background: color-mix(in srgb, var(--ct-accent) 76%, var(--ct-card-bg));
+  box-shadow: none;
+}
+
+.periodBlockActive strong,
+.periodBlockActive span {
+  color: var(--ct-card-bg);
+  text-shadow: none;
+}
+
+/* Reorganized Dynamic Panels structures */
+.detailPanel,
+.segmentPanel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.detailPanel .panelHeader,
+.segmentPanel .panelHeader {
+  background: color-mix(in srgb, var(--ct-card-bg) 93%, var(--ct-text) 7%);
+  padding: 16px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.detailInfoList,
+.segmentBodyList {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  background: var(--ct-card-bg);
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--ct-border);
+  gap: 16px;
+}
+
+.detailRow span {
   font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
   color: var(--ct-muted);
 }
 
-.detailGrid,
-.segmentBody {
-  gap: 14px;
+.detailRow strong {
+  font-size: 14px;
+  color: var(--ct-text);
+  text-align: right;
+  font-weight: 700;
 }
 
-.fieldCard,
-.longField,
-.catalogCard {
+.detailRowBlock {
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--ct-border);
+}
+
+.detailRowBlock:last-child {
+  border-bottom: none;
+}
+
+.detailRowBlock span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ct-muted);
+  margin-bottom: 6px;
+}
+
+.detailRowBlock p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ct-text);
+  line-height: 1.45;
+}
+
+.relationLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ct-accent);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: var(--ct-radius);
+  background: var(--ct-hover);
+  transition: all 0.2s ease;
+}
+
+.relationLink:hover {
+  background: color-mix(in srgb, var(--ct-accent) 12%, transparent);
+  text-decoration: underline;
+}
+
+.segmentTabsContainer {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ct-border);
+  background: color-mix(in srgb, var(--ct-card-bg) 97%, var(--ct-text) 3%);
+}
+
+.segmentTabs {
+  display: flex;
+  gap: 8px;
+}
+
+.segmentButton {
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-card-bg);
+  color: var(--ct-text);
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segmentButton:hover {
+  background: var(--ct-hover);
+  border-color: var(--ct-accent);
+}
+
+.segmentButtonActive {
+  border: 1px solid var(--ct-accent);
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-accent);
+  color: var(--ct-card-bg);
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tablePanel {
+  overflow-x: auto;
+}
+
+.periodTable {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--ct-text);
+}
+
+.periodTable th,
+.periodTable td {
+  padding: 10px;
+  border-bottom: 1px solid var(--ct-border);
+  text-align: left;
+}
+
+.periodTable th {
+  color: var(--ct-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.periodTable tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.periodTable tr:hover {
+  background: var(--ct-hover);
+}
+
+.loadingState,
+.errorState,
+.emptyState,
+.warningState {
+  padding: 18px;
+  color: var(--ct-muted);
+  font-weight: 800;
+}
+
+.errorState {
+  border-color: var(--ct-accent);
+}
+
+.warningState {
+  font-size: 12px;
+}
+
+/* View Layout Selector buttons styled in the same skin-based system */
+.viewSelectorsContainer {
+  display: flex;
+  gap: 6px;
+}
+
+.viewSelector {
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-card-bg);
+  color: var(--ct-text);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewSelector:hover {
+  background: var(--ct-hover);
+  border-color: var(--ct-accent);
+}
+
+.viewSelectorActive {
+  border: 1px solid var(--ct-accent);
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-accent);
+  color: var(--ct-card-bg);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Catalog Card layouts integration for Dynamic Neon Hits */
+
+.catalogGrid {
+  display: grid;
+  gap: 20px;
+}
+
+.catalogGrid_horizontal {
+  grid-template-columns: 1fr;
+}
+
+.catalogGrid_standing {
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+}
+
+.catalogGrid_list {
+  grid-template-columns: 1fr;
+}
+
+.catalogGrid_museum {
+  grid-template-columns: 1fr;
+}
+
+.ui85Card {
+  position: relative;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-card);
+  background: var(--ct-card-bg);
+  color: var(--ct-text);
+  box-shadow: var(--ct-shadow-soft);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+}
+
+.ui85Card:hover {
+  box-shadow: var(--ct-shadow-card);
+}
+
+.ui85Card::after {
+  content: "Collectium";
+  position: absolute;
+  right: 16px;
+  bottom: 9px;
+  color: var(--ct-muted);
+  font-family: var(--ct-font-serif);
+  font-size: 10px;
+  font-style: italic;
+  letter-spacing: .04em;
+  opacity: .5;
+}
+
+.ui85HorizontalCard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 248px;
+  gap: 24px;
+  padding: 24px;
+}
+
+.cardMainContentFlow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardTopSection {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+}
+
+.cardMediaContainer {
+  width: 100%;
+}
+
+.cardInfoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cardInfoContainer h2,
+.ui85MuseumCard h2 {
+  margin: 0;
+  color: var(--ct-text);
+  font-family: var(--ct-font-serif);
+  font-size: clamp(22px, 2.5vw, 32px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.cardBottomSection {
+  width: 100%;
+}
+
+.ui85ListCard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px;
+  min-height: auto;
+}
+
+.cardListMedia {
+  width: 140px;
+}
+
+.cardListInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cardListInfo h2 {
+  margin: 0;
+  color: var(--ct-text);
+  font-family: var(--ct-font-serif);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cardListSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+
+.cardListSpecs div {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardListSpecs span {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ct-muted);
+  margin-bottom: 2px;
+}
+
+.cardListSpecs strong {
+  font-size: 13px;
+  font-family: var(--ct-font-serif);
+  color: var(--ct-text);
+  font-weight: 700;
+}
+
+.cardListActions {
+  display: flex;
+  align-items: center;
+}
+
+.cardListBadges {
+  display: flex;
+  align-items: center;
+}
+
+.cardListPrice {
+  display: flex;
+  align-items: center;
+}
+
+.ui85StandingCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.ui85StandingCard h2 {
+  margin: 0;
+  font-family: var(--ct-font-serif);
+  font-size: 24px;
+  color: var(--ct-text);
+}
+
+.cardStandingDetails {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 20px;
+  align-items: start;
+}
+
+.cardStandingLeftColumn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cardStandingRightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardStandingBottomActions {
+  border-top: 1px dashed var(--ct-border);
+  padding-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.ui85MuseumCard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 28px;
+  padding: 24px;
+}
+
+.cardMuseumLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardMuseumRight {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.cardMuseumActions {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.cardSideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardBanknote {
+  position: relative;
+  height: 172px;
+  overflow: hidden;
+  border: 1px solid var(--ct-border);
+  border-radius: calc(var(--ct-radius-card) - 3px);
+  background:
+    repeating-linear-gradient(135deg, transparent 0 8px, rgba(20, 51, 39, 0.05) 8px 10px),
+    radial-gradient(circle at 80% 44%, rgba(20, 92, 56, 0.15), transparent 48px),
+    linear-gradient(135deg, var(--ct-panel-soft), var(--ct-bg));
+}
+
+.cardBanknoteList {
+  height: 80px;
+}
+
+.cardBanknoteImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cardBanknote strong {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  color: var(--ct-text);
+  font-family: var(--ct-font-serif);
+  font-size: clamp(46px, 5.5vw, 82px);
+  line-height: 1;
+  opacity: .2;
+}
+
+.cardPortrait {
+  position: absolute;
+  right: 30px;
+  top: 45px;
+  width: 66px;
+  height: 78px;
+  border-radius: 999px 999px 18px 18px;
+  background:
+    radial-gradient(circle at 48% 34%, rgba(255, 255, 255, 0.2), transparent 30px),
+    linear-gradient(180deg, var(--ct-border), var(--ct-bg));
+  box-shadow: inset 0 14px 24px rgba(255, 255, 255, .08);
+}
+
+.cardBanknoteLine {
+  position: absolute;
+  left: 18px;
+  right: 88px;
+  bottom: 35px;
+  height: 1px;
+  background: var(--ct-border);
+}
+
+.cardBanknote span {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  color: var(--ct-muted);
+  font-family: var(--ct-font-mono);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.cardFactGrid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+}
+
+.cardFactItem {
+  padding: 0 0 11px;
+  border-bottom: 1px dashed var(--ct-border);
+}
+
+.cardFactItem dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 7px;
+  color: var(--ct-muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.cardSpecIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: var(--ct-accent);
+}
+
+.cardSpecIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cardFactItem dd {
+  margin: 0;
+  color: var(--ct-text);
+  font-family: var(--ct-font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.cardMeta {
+  margin: 0;
+  color: var(--ct-muted);
+  font-size: 12px;
+}
+
+.cardHistoryPanel {
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel-bg);
+  border-radius: var(--ct-radius-card);
+  padding: 16px;
+  min-height: auto;
+}
+
+.cardHistoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: var(--ct-text);
+}
+
+.cardHistoryHeader strong {
+  font-family: var(--ct-font-serif);
+  font-size: 12px;
+}
+
+.cardHistoryHeader small {
+  color: var(--ct-muted);
+  font-size: 10px;
+}
+
+.cardBookIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: calc(var(--ct-radius-card) - 2px);
+  background: var(--ct-hover);
+  color: var(--ct-accent);
+}
+
+.cardBookIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cardHistoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 0;
+}
+
+.cardHistoryItem {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--ct-border);
+}
+
+.cardHistoryItem dt {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--ct-muted);
+  margin-bottom: 4px;
+}
+
+.cardHistoryItem dd {
+  margin: 0;
+  font-size: 13px;
+  font-family: var(--ct-font-serif);
+  color: var(--ct-text);
+  font-weight: 700;
+}
+
+.cardHistoryActions {
+  margin-top: 20px;
+  border-top: 1px dashed var(--ct-border);
+  padding-top: 16px;
+}
+
+.cardActionPanel {
+  display: grid;
+  gap: 9px;
+}
+
+.cardActionPanelList {
+  display: flex;
+  gap: 8px;
+}
+
+.cardAction {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel-bg);
+  border-radius: var(--ct-radius-card);
+  color: var(--ct-text);
+  cursor: pointer;
+  font: inherit;
+  padding: 7px 10px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.cardAction:hover {
+  background: var(--ct-hover);
+  border-color: var(--ct-accent);
+}
+
+.cardActionList {
+  min-height: auto;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardActionIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: calc(var(--ct-radius-card) - 2px);
+  background: var(--ct-hover);
+  color: var(--ct-accent);
+}
+
+.cardActionIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cardAction b,
+.cardAction em {
+  color: var(--ct-text);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.cardActionList b {
+  font-size: 12px;
+}
+
+.cardAction small {
+  display: block;
+  color: var(--ct-muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.cardPriceBox {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel-bg);
+  border-radius: var(--ct-radius-card);
+  color: var(--ct-text);
   padding: 16px;
 }
 
-.panelHeader h2,
-.timelineToolbar h2 {
-  font-size: clamp(24px, 2.2vw, 34px);
+.cardPriceBoxList {
+  min-height: auto;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.cardPriceBox span {
+  color: var(--ct-muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.cardPriceBox strong {
+  font-family: var(--ct-font-serif);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.cardPriceBoxList strong {
+  font-size: 20px;
+}
+
+.cardPriceBox small {
+  color: var(--ct-accent);
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cardCheckIcon {
+  display: inline-flex;
+  align-items: center;
+  width: 12px;
+  height: 12px;
+}
+
+.cardCheckIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cardActionButtonsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardBtnAction {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--ct-radius-pill);
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel-bg);
+  color: var(--ct-text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 16px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cardBtnAction:hover {
+  background: var(--ct-hover);
+  border-color: var(--ct-accent);
+}
+
+.cardBtnActionIcon {
+  display: inline-flex;
+  align-items: center;
+  width: 14px;
+  height: 14px;
+  color: var(--ct-accent);
+}
+
+.cardBtnActionIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cardBtnActionMore {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ct-radius-pill);
+  border: 1px solid var(--ct-border);
+  background: var(--ct-panel-bg);
+  color: var(--ct-text);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 900;
+  transition: all 0.2s ease;
+}
+
+.cardBtnActionMore:hover {
+  background: var(--ct-hover);
+  border-color: var(--ct-accent);
 }
 
 @media (max-width: 1100px) {
   .masterGrid,
   .periodRows,
-  .dynamicGrid,
-  .catalogGrid {
+  .dynamicGrid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -706,9 +1717,56 @@
   .timelineToolbar,
   .panelHeader {
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .toolbarButtons {
+  .toolbarButtons,
+  .viewSelectorsContainer {
+    margin-top: 10px;
+    justify-content: flex-start;
+  }
+
+  .ui85HorizontalCard {
+    grid-template-columns: 1fr;
+  }
+  
+  .cardSideColumn {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cardActionPanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex: 1;
+  }
+
+  .cardPriceBox {
+    min-height: 120px;
+    width: 248px;
+  }
+
+  .ui85StandingCard {
+    max-width: 100%;
+  }
+
+  .ui85MuseumCard {
+    grid-template-columns: 1fr;
+  }
+
+  .cardBanknoteMuseum {
+    height: 300px;
+  }
+
+  .ui85ListCard {
+    grid-template-columns: auto 1fr;
+  }
+
+  .cardListActions,
+  .cardListBadges,
+  .cardListPrice {
+    grid-column: 1 / -1;
+    width: 100%;
     justify-content: flex-start;
   }
 }
@@ -737,82 +1795,42 @@
   }
 
   .segmentTabs,
-  .toolbarButtons {
+  .toolbarButtons,
+  .viewSelectorsContainer {
     overflow-x: auto;
     flex-wrap: nowrap;
   }
-}
 
-/* V6: Rettet tidslinjetypografi som egen node-typografi, ikke liten hovedskrift */
-.page {
-  --ct-timeline-node-title-size: 18px;
-  --ct-timeline-node-meta-size: 15px;
-  --ct-timeline-node-title-weight: 950;
-  --ct-timeline-node-meta-weight: 850;
-}
+  .cardTopSection {
+    grid-template-columns: 1fr;
+  }
 
-.periodBlock,
-.eventMarker {
-  min-width: 154px;
-  height: 64px;
-  padding: 10px 16px;
-}
+  .cardFactGrid {
+    grid-template-columns: 1fr;
+  }
 
-.periodBlock strong,
-.eventMarker strong {
-  z-index: 1;
-  display: block;
-  position: relative;
-  color: var(--ct-text);
-  opacity: 1;
-  font-size: var(--ct-timeline-node-title-size);
-  font-weight: var(--ct-timeline-node-title-weight);
-  line-height: 1.08;
-  letter-spacing: -0.01em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
+  .cardStandingDetails {
+    grid-template-columns: 1fr;
+  }
 
-.periodBlock span,
-.eventMarker span {
-  z-index: 1;
-  display: block;
-  position: relative;
-  margin-top: 4px;
-  color: var(--ct-muted);
-  opacity: 1;
-  font-size: var(--ct-timeline-node-meta-size);
-  font-weight: var(--ct-timeline-node-meta-weight);
-  line-height: 1.08;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
+  .cardSideColumn {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.periodBlockActive strong,
-.periodBlockActive span {
-  color: var(--ct-card-bg);
-  opacity: 1;
-}
+  .cardPriceBox {
+    width: 100%;
+  }
 
-.lane {
-  min-height: 98px;
-}
+  .ui85ListCard {
+    grid-template-columns: 1fr;
+  }
 
-.laneLabel,
-.laneTrack {
-  min-height: 92px;
-}
+  .cardListMedia {
+    width: 100%;
+  }
 
-.laneLabel {
-  font-size: 18px;
-  font-weight: 950;
-}
-
-@media (max-width: 720px) {
-  .page {
-    --ct-timeline-node-title-size: 17px;
-    --ct-timeline-node-meta-size: 14px;
+  .cardHistoryGrid {
+    grid-template-columns: 1fr;
   }
 }
