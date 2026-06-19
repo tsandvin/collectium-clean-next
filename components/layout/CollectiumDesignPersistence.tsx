@@ -6,24 +6,24 @@
  * Overskrift:
  * CollectiumDesignPersistence
  *
- * Definering / formål:
+ * Definering / formÃ¥l:
  * Leser og lagrer brukerens valgte skin og skjermmodus i browser localStorage.
- * Setter data-skin, data-theme og data-vp på html-elementet slik at global layout
- * kan bruke samme visuelle valg etter reload og nytt besøk.
+ * Setter data-skin, data-theme og data-vp pÃ¥ html-elementet slik at global layout
+ * kan bruke samme visuelle valg etter reload og nytt besÃ¸k.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Monteres globalt i app/layout.tsx.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - Alle sider under app.collectium.no
  *
- * Berørte DB-brytere / feature_keys:
+ * BerÃ¸rte DB-brytere / feature_keys:
  * - Ingen. Dette er lokal template/design-kontroll, ikke systemhandling.
  *
- * Berørte API-ruter:
+ * BerÃ¸rte API-ruter:
  * - Ingen.
  *
- * Berørte tabeller / views:
+ * BerÃ¸rte tabeller / views:
  * - Ingen.
  *
  * Dataretning:
@@ -128,7 +128,7 @@ function saveValue(key: string, value: string): void {
   try {
     window.localStorage.setItem(key, value);
   } catch {
-    // localStorage kan være blokkert. I så fall lar vi bare runtime-attributtene stå.
+    // localStorage kan vÃ¦re blokkert. I sÃ¥ fall lar vi bare runtime-attributtene stÃ¥.
   }
 }
 
@@ -138,11 +138,11 @@ function getAutoScreenMode(width: number): Exclude<CollectiumScreenMode, "auto" 
 
   /**
    * Collectium-beslutning:
-   * Ved ca. 2126px skal automatisk valg fortsatt være Desktop.
+   * Ved ca. 2126px skal automatisk valg fortsatt vÃ¦re Desktop.
    * TV / Presentasjon skal aldri velges automatisk her.
    *
-   * Wide kan velges manuelt, men auto holder desktop til svært brede flater.
-   * Juster bare denne grensen senere hvis Collectium låser ny bredskjermregel.
+   * Wide kan velges manuelt, men auto holder desktop til svÃ¦rt brede flater.
+   * Juster bare denne grensen senere hvis Collectium lÃ¥ser ny bredskjermregel.
    */
   if (width >= 2900) return "wide";
 
@@ -252,8 +252,8 @@ export default function CollectiumDesignPersistence() {
     window.addEventListener("resize", handleResize);
 
     /**
-     * Observer lagrer valg når eksisterende designpanel endrer html data-attributter.
-     * Dette gjør at vi slipper å endre AppShell-knappene nå.
+     * Observer lagrer valg nÃ¥r eksisterende designpanel endrer html data-attributter.
+     * Dette gjÃ¸r at vi slipper Ã¥ endre AppShell-knappene nÃ¥.
      */
     let isApplyingFromObserver = false;
 
