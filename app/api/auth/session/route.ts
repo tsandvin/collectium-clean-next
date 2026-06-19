@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -46,16 +46,41 @@ export async function GET() {
   try {
     const user = await getCurrentSessionUser();
 
+    if (!user) {
+      return NextResponse.json({
+        status: "ok",
+        authenticated: false,
+        user: null
+      });
+    }
+
     return NextResponse.json({
-      ok: true,
-      authenticated: Boolean(user),
-      user,
-      mode: "neon_session",
+      status: "ok",
+      authenticated: true,
+      user: {
+        id: String(user.id),
+        displayName: user.display_name,
+        display_name: user.display_name,
+        email: user.email,
+        role: user.role,
+        isAdmin: user.is_admin,
+        is_admin: user.is_admin,
+        membershipLevel: user.is_admin ? null : user.membership_level,
+        membership_level: user.membership_level,
+        public_id: user.public_id,
+        public_display_name: user.public_display_name,
+        preferred_language: user.preferred_language,
+        preferred_theme: user.preferred_theme,
+        account_status: user.account_status,
+        email_status: user.email_status,
+        admin_approval_status: user.admin_approval_status,
+        is_active: user.is_active,
+      }
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown session error";
     return NextResponse.json(
-      { ok: false, authenticated: false, user: null, message: "Session failed", error: message, mode: "neon_session" },
+      { status: "error", ok: false, authenticated: false, user: null, message: "Session failed", error: message },
       { status: 500 },
     );
   }

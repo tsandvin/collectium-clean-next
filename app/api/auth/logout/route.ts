@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -43,11 +43,11 @@ export const dynamic = "force-dynamic";
 export async function POST() {
   try {
     await revokeCurrentSession();
-    return NextResponse.json({ ok: true, authenticated: false, mode: "neon_logout" });
+    return NextResponse.json({ status: "ok", ok: true, authenticated: false, mode: "neon_logout" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown logout error";
     return NextResponse.json(
-      { ok: false, message: "Logout failed", error: message, mode: "neon_logout" },
+      { status: "error", ok: false, message: "Logout failed", error: message, mode: "neon_logout" },
       { status: 500 },
     );
   }

@@ -1,47 +1,45 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Login page
+ * Collectium login page
  *
- * Definering / formÃ¥l:
- * Next.js-side for Neon-basert Collectium-login.
+ * Definering / formål:
+ * Login-side for Collectium med sessionstatus, medlemsnivåvisning og CollectiumBro-adminmodus.
  *
- * BruksomrÃ¥de:
- * Brukes av brukere som skal logge inn.
- *
- * BerÃ¸rte sider / routes:
+ * Berørte sider / routes:
  * - /login
+ * - /min-side
+ * - /admin
+ * - /admin/neon
  *
- * BerÃ¸rte DB-brytere / feature_keys:
+ * Berørte DB-brytere / feature_keys:
  * - auth.login
+ * - auth.logout
+ * - auth.session.view
+ * - account.view
+ * - admin.collectiumbro.view
  *
- * BerÃ¸rte API-ruter:
+ * Berørte API-ruter:
+ * - GET /api/auth/session
  * - POST /api/auth/login
- *
- * BerÃ¸rte tabeller / views:
- * - ct_users
- * - ct_user_sessions
- * - ct_login_attempts
+ * - POST /api/auth/logout
  *
  * Dataretning:
- * Neon/Postgres -> API/backend -> Next.js -> React -> UI
+ * Neon → API/backend → Next.js → React → UI
  *
  * Logging:
  * log_category: auth
- * log_action: login.page
- *
- * Versjon:
- * CT-FILE-AUTH-NEON-0009 / CHANGE-2026-06-10-0002
+ * log_action: login_view
  */
 
-import CollectiumAuthForm from "@/components/auth/CollectiumAuthForm";
+import CollectiumLoginClient from "./CollectiumLoginClient";
 
 export const metadata = {
   title: "Logg inn | Collectium",
-  description: "Logg inn pÃ¥ Collectium med Neon-basert auth.",
+  description: "Logg inn på Collectium med sessionstatus og CollectiumBro-adminmodus.",
 };
 
 export default function LoginPage() {
-  return <CollectiumAuthForm mode="login" />;
+  return <CollectiumLoginClient />;
 }

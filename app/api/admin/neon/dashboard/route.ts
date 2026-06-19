@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { neonQuery } from "@/lib/db/neon";
 
+import { protectAdminApi } from "@/lib/auth/admin-api-guard";
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const guard = await protectAdminApi();
+  if (guard) return guard;
+
   try {
     let usersCount = 0;
     let sessionsCount = 0;

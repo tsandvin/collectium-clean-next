@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -190,23 +190,27 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
+        status: "ok",
         ok: true,
         authenticated: true,
         mode: "neon_login",
         user: {
-          id: user.id,
-          public_id: user.public_id,
-          email: user.email,
+          id: String(user.id),
+          displayName: user.display_name,
           display_name: user.display_name,
+          email: user.email,
+          role: user.role,
+          isAdmin: user.is_admin,
+          is_admin: user.is_admin,
+          membershipLevel: user.is_admin ? null : user.membership_level,
+          membership_level: user.membership_level,
+          public_id: user.public_id,
           public_display_name: user.public_display_name,
           preferred_language: user.preferred_language,
           preferred_theme: user.preferred_theme,
           account_status: user.account_status,
           email_status: user.email_status,
           admin_approval_status: user.admin_approval_status,
-          role: user.role,
-          membership_level: user.membership_level,
-          is_admin: user.is_admin,
           is_active: user.is_active,
         },
       },

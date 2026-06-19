@@ -50,13 +50,13 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
 
 const mobileBottomItems = [
   { key: "menu", label: "Meny", icon: Menu },
-  { key: "notifications", href: "/min-side", label: "Varsler", icon: Bell },
-  { key: "account", href: "/min-side", label: "Min side", icon: UserRound },
+  { key: "notifications", href: "/min-side", label: "Varsler", icon: Bell, requiresAuth: true },
+  { key: "account", href: "/min-side", label: "Min side", icon: UserRound, requiresAuth: true },
   { key: "catalog", href: "/katalog", label: "Katalog", icon: Search },
   { key: "period-filter", href: "/test/periodefilter", label: "Periodefilter", icon: CalendarDays },
   { key: "period-search", href: "/test/period-timeline", label: "Periode søk", icon: CalendarDays },
-  { key: "admin", href: "/admin", label: "Admin", icon: ShieldCheck },
-  { key: "admin-neon", href: "/admin/neon", label: "Neon Control", icon: Database },
+  { key: "admin", href: "/admin", label: "Admin", icon: ShieldCheck, requiresAuth: true, requiresAdmin: true },
+  { key: "admin-neon", href: "/admin/neon", label: "Neon Control", icon: Database, requiresAuth: true, requiresAdmin: true },
   { key: "support", href: "/support", label: "Support", icon: HelpCircle },
 ];
 
@@ -94,6 +94,47 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     isMobileMenuOpen,
     setIsMobileMenuOpen
   } = useCollectiumLayout();
+
+  const [session, setSession] = useState<{
+    authenticated: boolean;
+    user: {
+      id: string;
+      displayName: string;
+      email: string;
+      role: string;
+      isAdmin: boolean;
+      membershipLevel: string | null;
+    } | null;
+  } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchSession() {
+      try {
+        const res = await fetch("/api/auth/session", { cache: "no-store" });
+        if (res.ok && active) {
+          const data = await res.json();
+          setSession(data);
+        } else if (active) {
+          setSession({ authenticated: false, user: null });
+        }
+      } catch {
+        if (active) {
+          setSession({ authenticated: false, user: null });
+        }
+      }
+    }
+    void fetchSession();
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
+
+  function canShowMenuItem(item: { requiresAuth?: boolean; requiresAdmin?: boolean }, sessionVal: typeof session) {
+    if (item.requiresAdmin && !sessionVal?.user?.isAdmin) return false;
+    if (item.requiresAuth && !sessionVal?.authenticated) return false;
+    return true;
+  }
 
   // Helper function to map bold and light levels to weight values
   function getFontWeight(base: number, boldLevel: number, lightLevel: number): number {
@@ -376,10 +417,11 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
             </button>
           )}
         </div>
-
-        <nav className={styles.nav}>
+        <nav className={styles.nav}>
           {(["Hoved", "Bruker", "Marked", "System"] as const).map((groupName) => {
-            const items = collectiumSidebarItems.filter((item) => item.group === groupName);
+            const items = collectiumSidebarItems
+              .filter((item) => item.group === groupName)
+              .filter((item) => canShowMenuItem(item, session));
             return (
               <div key={groupName} className={styles.navGroup}>
                 <div className={styles.navGroupHeader}>{groupName}</div>
@@ -402,7 +444,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                         aria-current={isActive && !item.disabled ? "page" : undefined}
                       >
                         <span className={styles.navIcon}>
-                          <IconComponent size={22} />
+                           <IconComponent size={22} />
                         </span>
                         <span className={styles.navLabel}>{item.label}</span>
                       </Link>
@@ -692,7 +734,17 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                 </section>
               )}
             </div>
-            <Link className={styles.loginButton} href="/login">Login</Link>
+            {session === null ? (
+              <span className={styles.loginButton} style={{ opacity: 0.7 }}>Laster...</span>
+            ) : !session.authenticated ? (
+              <Link className={styles.loginButton} href="/login">Logg inn</Link>
+            ) : session.user?.isAdmin ? (
+              <Link className={styles.loginButton} href="/admin/neon">CollectiumBro</Link>
+            ) : (
+              <Link className={styles.loginButton} href="/min-side">
+                Min {session.user?.membershipLevel || "Free"} side
+              </Link>
+            )}
           </div>
         </header>
 
@@ -700,40 +752,42 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
       </div>
 
       <nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
-        {mobileBottomItems.map((item) => {
-          const IconComponent = item.icon;
-          const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
-          
-          if (item.key === "menu") {
+        {mobileBottomItems
+          .filter((item) => canShowMenuItem(item, session))
+          .map((item) => {
+            const IconComponent = item.icon;
+            const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
+            
+            if (item.key === "menu") {
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-label="Åpne eller lukk hovedmeny"
+                  style={{ background: "none", border: "none", cursor: "pointer" }}
+                >
+                  <IconComponent size={20} strokeWidth={1.8} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            }
+
             return (
-              <button
+              <Link
                 key={item.key}
-                type="button"
+                href={item.href || "#"}
                 className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-expanded={isMobileMenuOpen}
-                aria-label="Åpne eller lukk hovedmeny"
-                style={{ background: "none", border: "none", cursor: "pointer" }}
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 <IconComponent size={20} strokeWidth={1.8} />
                 <span>{item.label}</span>
-              </button>
+              </Link>
             );
-          }
-
-          return (
-            <Link
-              key={item.key}
-              href={item.href || "#"}
-              className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-              aria-current={isActive ? "page" : undefined}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <IconComponent size={20} strokeWidth={1.8} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+          })}
       </nav>
     </div>
   );

@@ -46,6 +46,8 @@ export interface CollectiumSidebarItem {
   description: string;
   group: "Hoved" | "Bruker" | "Marked" | "System";
   disabled?: boolean;
+  requiresAuth?: boolean;
+  requiresAdmin?: boolean;
 }
 
 export const collectiumSidebarItems: CollectiumSidebarItem[] = [
@@ -104,6 +106,7 @@ export const collectiumSidebarItems: CollectiumSidebarItem[] = [
     href: "/min-side",
     description: "Profil, medlemskap, varsler og prosesser",
     group: "Bruker",
+    requiresAuth: true,
   },
   {
     key: "collection",
@@ -112,6 +115,7 @@ export const collectiumSidebarItems: CollectiumSidebarItem[] = [
     href: "/samling",
     description: "Brukerens samling",
     group: "Bruker",
+    requiresAuth: true,
   },
   {
     key: "auction",
@@ -144,6 +148,8 @@ export const collectiumSidebarItems: CollectiumSidebarItem[] = [
     href: "/admin",
     description: "Admin oversikt",
     group: "System",
+    requiresAuth: true,
+    requiresAdmin: true,
   },
   {
     key: "admin-neon",
@@ -152,6 +158,8 @@ export const collectiumSidebarItems: CollectiumSidebarItem[] = [
     href: "/admin/neon",
     description: "Neon, API, logging, tester og deploy gate",
     group: "System",
+    requiresAuth: true,
+    requiresAdmin: true,
   },
   {
     key: "support",

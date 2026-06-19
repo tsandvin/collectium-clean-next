@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { neonQuery } from "@/lib/db/neon";
+import { protectAdminApi } from "@/lib/auth/admin-api-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,9 @@ function hasEnv(name: string): boolean {
 }
 
 export async function GET() {
+  const guard = await protectAdminApi();
+  if (guard) return guard;
+
   try {
     const versionRes = await neonQuery<{ version: string }>("select version() as version");
     const nowRes = await neonQuery<{ now: string }>("select now()::text as now");

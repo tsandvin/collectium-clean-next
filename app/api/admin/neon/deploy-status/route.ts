@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 
+import { protectAdminApi } from "@/lib/auth/admin-api-guard";
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const guard = await protectAdminApi();
+  if (guard) return guard;
+
   try {
     return NextResponse.json({
       status: "ok",
