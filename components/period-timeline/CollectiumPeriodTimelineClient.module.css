@@ -2,10 +2,11 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * CollectiumPeriodTimelineClient styles
+ * CollectiumPeriodTimelineClient.module.css
  *
  * Definering / formål:
- * CSS-module for Tidslinjeperiode testsiden. Bruker kun Collectium globale design-tokens.
+ * CSS-module for horisontal Tidslinjeperiode med årsskala, lanes/spor, periodeblokker,
+ * detaljpanel, tabellvisning og tidsnavigator.
  *
  * Bruksområde:
  * Brukes av components/period-timeline/CollectiumPeriodTimelineClient.tsx.
@@ -18,346 +19,511 @@
  *
  * Berørte tabeller / views:
  * - ct_v_period_filter_options
- * - ct_v_period_filter_registry_active
- * - ct_catalog_period_relations
- * - ct_v_catalog_period_relations
  *
  * Dataretning:
- * Neon/Postgres -> API/backend -> Next.js -> React -> UI
+ * Neon/Postgres -> API -> React -> tokenstyrt UI
  *
  * Logging:
  * log_category: test.period_timeline
- * log_action: style
+ * log_action: style_horizontal_timeline
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-CSS-0001 / CHANGE-2026-06-19-0001
+ * CT-PERIOD-TIMELINE-CSS-0002 / CHANGE-2026-06-19-0002
  */
 
 .page {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 18px;
-  width: 100%;
   color: var(--ct-text);
 }
 
-.hero,
-.statusCard,
-.toolbar,
-.timelineShell,
-.segmentPanel,
-.loadingState,
-.errorState,
-.emptyState {
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-theme, var(--ct-radius));
-  background: var(--ct-card-bg);
+  background: var(--ct-panel-bg, var(--ct-card-bg));
   box-shadow: var(--ct-shadow);
 }
 
-.hero {
-  display: grid;
-  gap: 8px;
-  padding: 22px;
-}
-
 .eyebrow {
-  margin: 0;
+  margin: 0 0 5px;
   color: var(--ct-muted);
   font-size: 0.78rem;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .title {
   margin: 0;
   color: var(--ct-text);
-  font-size: clamp(1.7rem, 3vw, 2.8rem);
-  line-height: 1.05;
+  font-size: clamp(2rem, 4vw, 4.1rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
 }
 
 .subtitle {
   max-width: 780px;
-  margin: 0;
+  margin: 10px 0 0;
   color: var(--ct-muted);
-  font-size: 0.98rem;
-  line-height: 1.55;
-}
-
-.statusGrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.statusCard {
-  display: grid;
-  gap: 6px;
-  min-height: 88px;
-  padding: 16px;
-}
-
-.statusCard span {
-  color: var(--ct-muted);
-  font-size: 0.78rem;
-}
-
-.statusCard strong {
-  color: var(--ct-text);
-  font-size: 1.15rem;
-  overflow-wrap: anywhere;
+  font-size: 1rem;
+  line-height: 1.45;
 }
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px;
-  background: var(--ct-panel-bg);
-}
-
-.toolbarGroup {
-  display: flex;
-  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
+  min-width: 320px;
 }
 
-.chip,
+.toolbarButton,
 .segmentButton {
+  appearance: none;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius);
-  background: var(--ct-input-bg);
+  background: var(--ct-input-bg, var(--ct-card-bg));
   color: var(--ct-text);
   cursor: pointer;
   font: inherit;
-  transition: border-color 160ms ease, transform 160ms ease;
+  font-weight: 800;
+  line-height: 1;
+  padding: 11px 15px;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
-.chip {
-  padding: 9px 12px;
-  font-size: 0.86rem;
-}
-
-.chip:hover,
+.toolbarButton:hover,
 .segmentButton:hover {
   border-color: var(--ct-accent);
+  transform: translateY(-1px);
 }
 
-.chipActive,
+.toolbarButtonActive,
 .segmentButtonActive {
-  border-color: var(--ct-accent);
-  color: var(--ct-accent);
-}
-
-.timelineShell {
-  position: relative;
-  display: grid;
-  gap: 14px;
-  padding: 18px;
-  background: var(--ct-panel-bg);
-  overflow: hidden;
-}
-
-.timelineRail {
-  position: absolute;
-  inset-block: 28px;
-  inset-inline-start: 31px;
-  width: 1px;
-  background: var(--ct-border);
-}
-
-.timelineItem {
-  position: relative;
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-
-.timelineMarker {
-  position: relative;
-  z-index: 1;
-  width: 18px;
-  height: 18px;
-  margin-top: 18px;
-  border: 1px solid var(--ct-border);
-  border-radius: 999px;
-  background: var(--ct-input-bg);
-  cursor: pointer;
-}
-
-.timelineMarker[aria-pressed="true"] {
-  border-color: var(--ct-accent);
   background: var(--ct-accent);
+  border-color: var(--ct-accent);
+  color: var(--ct-card-bg);
 }
 
-.timelineCard {
+.statusGrid,
+.detailGrid,
+.segmentGrid {
   display: grid;
-  gap: 7px;
-  width: 100%;
-  padding: 15px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.infoItem {
+  min-width: 0;
+  padding: 13px 15px;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius);
   background: var(--ct-card-bg);
+}
+
+.infoItem span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ct-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.infoItem strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--ct-text);
+  font-size: 0.96rem;
+  line-height: 1.3;
+}
+
+.infoItemWide {
+  grid-column: span 2;
+}
+
+.timelinePanel,
+.detailPanel,
+.tablePanel,
+.navigator {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme, var(--ct-radius));
+  background: var(--ct-panel-bg, var(--ct-card-bg));
+  box-shadow: var(--ct-shadow);
+}
+
+.timelinePanel {
+  padding: 18px;
+}
+
+.timelineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: var(--ct-text);
+}
+
+.timelineHeader strong {
+  font-size: 1.12rem;
+}
+
+.timelineHeader span {
+  color: var(--ct-muted);
+  font-weight: 800;
+}
+
+.yearScale {
+  position: relative;
+  height: 34px;
+  margin-left: 210px;
+  border-bottom: 2px solid var(--ct-accent);
+}
+
+.yearScale::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--ct-accent);
+  border-right: 2px solid var(--ct-accent);
+  transform: rotate(45deg);
+}
+
+.yearTick {
+  position: absolute;
+  bottom: 8px;
+  transform: translateX(-50%);
+  color: var(--ct-text);
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.timelineGrid {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.gridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: 210px;
+  background: var(--ct-border);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.lane {
+  position: relative;
+  display: grid;
+  grid-template-columns: 190px minmax(620px, 1fr);
+  gap: 20px;
+  min-height: 82px;
+}
+
+.laneLabel {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--ct-text);
+  font-weight: 900;
+}
+
+.laneLabel span {
+  color: var(--ct-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.laneTrack {
+  position: relative;
+  min-height: 72px;
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.periodBlock {
+  position: absolute;
+  top: 8px;
+  min-width: 86px;
+  min-height: 48px;
+  overflow: hidden;
+  padding: 8px 10px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel-soft, var(--ct-input-bg));
+  box-shadow: var(--ct-shadow);
   color: var(--ct-text);
   cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: center;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
-.timelineCardActive {
+.periodBlock:hover {
   border-color: var(--ct-accent);
+  transform: translateY(-1px);
 }
 
-.timelineCard small,
-.timelineMeta {
-  color: var(--ct-muted);
-  line-height: 1.45;
-}
-
-.timelineMeta {
-  font-size: 0.8rem;
-}
-
-.levelBadge {
-  width: fit-content;
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-radius);
-  padding: 5px 8px;
-  background: var(--ct-panel-soft);
-  color: var(--ct-muted);
-  font-size: 0.76rem;
-}
-
-.relationLink {
-  display: inline-flex;
-  width: fit-content;
-  margin-top: 10px;
-  border: 1px solid var(--ct-accent);
-  border-radius: var(--ct-radius);
-  padding: 9px 12px;
-  color: var(--ct-accent);
-  text-decoration: none;
-}
-
-.segmentPanel {
-  display: grid;
-  gap: 0;
+.periodBlock span,
+.periodBlock small {
+  display: block;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.periodBlock span {
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.periodBlock small {
+  margin-top: 3px;
+  color: var(--ct-muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.periodBlockActive {
+  z-index: 2;
+  background: var(--ct-accent);
+  border-color: var(--ct-accent);
+  color: var(--ct-card-bg);
+}
+
+.periodBlockActive small {
+  color: var(--ct-card-bg);
+}
+
+.laneEmpty {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  color: var(--ct-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.detailPanel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.detailHero {
+  display: grid;
+  gap: 5px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.detailBadge {
+  justify-self: start;
+  padding: 6px 10px;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-input-bg, var(--ct-card-bg));
+  color: var(--ct-muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detailHero h2 {
+  margin: 0;
+  color: var(--ct-text);
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
+  letter-spacing: -0.04em;
+}
+
+.detailHero p {
+  margin: 0;
+  color: var(--ct-muted);
+  font-weight: 800;
 }
 
 .segmentTabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 12px;
-  border-bottom: 1px solid var(--ct-border);
-  background: var(--ct-panel-bg);
-}
-
-.segmentButton {
-  padding: 10px 14px;
+  padding-top: 4px;
 }
 
 .segmentBody {
-  padding: 18px;
-  background: var(--ct-card-bg);
-}
-
-.segmentBody h2 {
-  margin: 0 0 8px;
-  color: var(--ct-text);
+  padding: 14px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel-soft, var(--ct-card-bg));
 }
 
 .segmentBody p {
-  margin: 0 0 14px;
-  color: var(--ct-muted);
-  line-height: 1.55;
-}
-
-.segmentBody dl {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
   margin: 0;
-}
-
-.segmentBody dl div {
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-radius);
-  padding: 12px;
-  background: var(--ct-panel-soft);
-}
-
-.segmentBody dt {
   color: var(--ct-muted);
-  font-size: 0.78rem;
+  font-weight: 750;
 }
 
-.segmentBody dd {
-  margin: 4px 0 0;
+.navigator {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 18px;
+  color: var(--ct-muted);
+  font-weight: 900;
+}
+
+.navigatorTrack {
+  position: relative;
+  height: 14px;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-input-bg, var(--ct-card-bg));
+}
+
+.navigatorWindow {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  min-width: 4px;
+  border-radius: 999px;
+  background: var(--ct-accent);
+}
+
+.tablePanel {
+  overflow-x: auto;
+  padding: 12px;
+}
+
+.periodTable {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
   color: var(--ct-text);
+}
+
+.periodTable th,
+.periodTable td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--ct-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.periodTable th {
+  color: var(--ct-muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.periodTable td {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.warningText {
+  margin: 0;
+  color: var(--ct-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .loadingState,
 .errorState,
 .emptyState {
-  padding: 18px;
-  color: var(--ct-text);
+  padding: 24px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme, var(--ct-radius));
   background: var(--ct-card-bg);
+  color: var(--ct-text);
+  font-weight: 850;
+  box-shadow: var(--ct-shadow);
 }
 
-.errorState p,
-.emptyState p {
-  color: var(--ct-muted);
+.errorState {
+  border-color: var(--ct-accent);
 }
 
 @media (max-width: 1100px) {
-  .statusGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .hero {
+    display: grid;
+  }
+
+  .toolbar {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .statusGrid,
+  .detailGrid,
+  .segmentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yearScale {
+    margin-left: 150px;
+  }
+
+  .gridLine {
+    margin-left: 150px;
+  }
+
+  .lane {
+    grid-template-columns: 130px minmax(560px, 1fr);
+    gap: 16px;
   }
 }
 
 @media (max-width: 720px) {
   .hero,
-  .timelineShell,
-  .segmentBody {
-    padding: 14px;
+  .timelinePanel,
+  .detailPanel,
+  .navigator,
+  .tablePanel {
+    border-radius: var(--ct-radius);
   }
 
-  .statusGrid {
+  .statusGrid,
+  .detailGrid,
+  .segmentGrid {
     grid-template-columns: 1fr;
   }
 
-  .toolbar {
-    display: grid;
+  .infoItemWide {
+    grid-column: auto;
   }
 
-  .toolbarGroup,
-  .segmentTabs {
-    display: grid;
-    grid-template-columns: 1fr;
+  .timelinePanel {
+    overflow-x: auto;
   }
 
-  .chip,
+  .yearScale,
+  .timelineGrid {
+    min-width: 900px;
+  }
+
+  .toolbarButton,
   .segmentButton {
-    width: 100%;
-  }
-
-  .timelineRail {
-    display: none;
-  }
-
-  .timelineItem {
-    grid-template-columns: 1fr;
-  }
-
-  .timelineMarker {
-    display: none;
-  }
-
-  .segmentBody dl {
-    grid-template-columns: 1fr;
+    flex: 1 1 auto;
   }
 }

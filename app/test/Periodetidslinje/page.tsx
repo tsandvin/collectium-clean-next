@@ -5,10 +5,10 @@
  * Tidslinjeperiode testside
  *
  * Definering / formål:
- * Next.js App Router-side for ny periode-/tidslinjevisning basert på Neon/API-data.
+ * Next.js server component for en horisontal tidslinjevisning av perioder fra Neon/API.
  *
  * Bruksområde:
- * Brukes som testside for å vise perioder, nivåer, relasjoner og objektkoblinger i historisk rekkefølge.
+ * Testside for Collectium UI/UX 8.6 periode- og relasjonstidslinje.
  *
  * Berørte sider / routes:
  * - /test/Periodetidslinje
@@ -27,14 +27,14 @@
  * - ct_v_period_filter_find_relations
  *
  * Dataretning:
- * Neon/Postgres -> API/backend -> Next.js -> React -> UI
+ * Neon/Postgres -> Next.js route handler -> React client component -> UI
  *
  * Logging:
  * log_category: test.period_timeline
- * log_action: view
+ * log_action: page_render
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-0001 / CHANGE-2026-06-19-0001
+ * CT-PERIOD-TIMELINE-PAGE-0002 / CHANGE-2026-06-19-0002
  */
 
 import { CollectiumPeriodTimelineClient } from "@/components/period-timeline/CollectiumPeriodTimelineClient";
