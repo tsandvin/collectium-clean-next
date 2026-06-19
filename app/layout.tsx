@@ -1,3 +1,4 @@
+﻿import CollectiumDesignPersistence from "@/components/layout/CollectiumDesignPersistence";
 import type { Metadata } from "next";
 import {
   Cinzel,
@@ -111,6 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <CollectiumDesignPersistence />
         <CollectiumAppShell>{children}</CollectiumAppShell>
       </body>
     </html>
