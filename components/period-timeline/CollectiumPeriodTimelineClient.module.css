@@ -1,0 +1,363 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * CollectiumPeriodTimelineClient styles
+ *
+ * Definering / formål:
+ * CSS-module for Tidslinjeperiode testsiden. Bruker kun Collectium globale design-tokens.
+ *
+ * Bruksområde:
+ * Brukes av components/period-timeline/CollectiumPeriodTimelineClient.tsx.
+ *
+ * Berørte sider / routes:
+ * - /test/Periodetidslinje
+ *
+ * Berørte API-ruter:
+ * - GET /api/test/period-timeline
+ *
+ * Berørte tabeller / views:
+ * - ct_v_period_filter_options
+ * - ct_v_period_filter_registry_active
+ * - ct_catalog_period_relations
+ * - ct_v_catalog_period_relations
+ *
+ * Dataretning:
+ * Neon/Postgres -> API/backend -> Next.js -> React -> UI
+ *
+ * Logging:
+ * log_category: test.period_timeline
+ * log_action: style
+ *
+ * Versjon:
+ * CT-PERIOD-TIMELINE-CSS-0001 / CHANGE-2026-06-19-0001
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  color: var(--ct-text);
+}
+
+.hero,
+.statusCard,
+.toolbar,
+.timelineShell,
+.segmentPanel,
+.loadingState,
+.errorState,
+.emptyState {
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-theme, var(--ct-radius));
+  background: var(--ct-card-bg);
+  box-shadow: var(--ct-shadow);
+}
+
+.hero {
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--ct-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--ct-text);
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  line-height: 1.05;
+}
+
+.subtitle {
+  max-width: 780px;
+  margin: 0;
+  color: var(--ct-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.statusCard {
+  display: grid;
+  gap: 6px;
+  min-height: 88px;
+  padding: 16px;
+}
+
+.statusCard span {
+  color: var(--ct-muted);
+  font-size: 0.78rem;
+}
+
+.statusCard strong {
+  color: var(--ct-text);
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: var(--ct-panel-bg);
+}
+
+.toolbarGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip,
+.segmentButton {
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  background: var(--ct-input-bg);
+  color: var(--ct-text);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.chip {
+  padding: 9px 12px;
+  font-size: 0.86rem;
+}
+
+.chip:hover,
+.segmentButton:hover {
+  border-color: var(--ct-accent);
+}
+
+.chipActive,
+.segmentButtonActive {
+  border-color: var(--ct-accent);
+  color: var(--ct-accent);
+}
+
+.timelineShell {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  background: var(--ct-panel-bg);
+  overflow: hidden;
+}
+
+.timelineRail {
+  position: absolute;
+  inset-block: 28px;
+  inset-inline-start: 31px;
+  width: 1px;
+  background: var(--ct-border);
+}
+
+.timelineItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.timelineMarker {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  margin-top: 18px;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-input-bg);
+  cursor: pointer;
+}
+
+.timelineMarker[aria-pressed="true"] {
+  border-color: var(--ct-accent);
+  background: var(--ct-accent);
+}
+
+.timelineCard {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  padding: 15px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  background: var(--ct-card-bg);
+  color: var(--ct-text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.timelineCardActive {
+  border-color: var(--ct-accent);
+}
+
+.timelineCard small,
+.timelineMeta {
+  color: var(--ct-muted);
+  line-height: 1.45;
+}
+
+.timelineMeta {
+  font-size: 0.8rem;
+}
+
+.levelBadge {
+  width: fit-content;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  padding: 5px 8px;
+  background: var(--ct-panel-soft);
+  color: var(--ct-muted);
+  font-size: 0.76rem;
+}
+
+.relationLink {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 10px;
+  border: 1px solid var(--ct-accent);
+  border-radius: var(--ct-radius);
+  padding: 9px 12px;
+  color: var(--ct-accent);
+  text-decoration: none;
+}
+
+.segmentPanel {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+}
+
+.segmentTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--ct-border);
+  background: var(--ct-panel-bg);
+}
+
+.segmentButton {
+  padding: 10px 14px;
+}
+
+.segmentBody {
+  padding: 18px;
+  background: var(--ct-card-bg);
+}
+
+.segmentBody h2 {
+  margin: 0 0 8px;
+  color: var(--ct-text);
+}
+
+.segmentBody p {
+  margin: 0 0 14px;
+  color: var(--ct-muted);
+  line-height: 1.55;
+}
+
+.segmentBody dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.segmentBody dl div {
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius);
+  padding: 12px;
+  background: var(--ct-panel-soft);
+}
+
+.segmentBody dt {
+  color: var(--ct-muted);
+  font-size: 0.78rem;
+}
+
+.segmentBody dd {
+  margin: 4px 0 0;
+  color: var(--ct-text);
+}
+
+.loadingState,
+.errorState,
+.emptyState {
+  padding: 18px;
+  color: var(--ct-text);
+  background: var(--ct-card-bg);
+}
+
+.errorState p,
+.emptyState p {
+  color: var(--ct-muted);
+}
+
+@media (max-width: 1100px) {
+  .statusGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero,
+  .timelineShell,
+  .segmentBody {
+    padding: 14px;
+  }
+
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    display: grid;
+  }
+
+  .toolbarGroup,
+  .segmentTabs {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .chip,
+  .segmentButton {
+    width: 100%;
+  }
+
+  .timelineRail {
+    display: none;
+  }
+
+  .timelineItem {
+    grid-template-columns: 1fr;
+  }
+
+  .timelineMarker {
+    display: none;
+  }
+
+  .segmentBody dl {
+    grid-template-columns: 1fr;
+  }
+}
