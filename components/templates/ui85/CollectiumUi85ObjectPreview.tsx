@@ -33,7 +33,21 @@
  */
 
 import Link from "next/link";
-import { HeartIcon, PlusIcon, ShareIcon, StarIcon } from "./CollectiumUi85Icons";
+import {
+  HeartIcon,
+  PlusIcon,
+  ShareIcon,
+  StarIcon,
+  TagIcon,
+  CalendarIcon,
+  LayersIcon,
+  ShieldIcon,
+  BookOpenIcon,
+  ExternalLinkIcon,
+  GitBranchIcon,
+  GlobeIcon,
+  CheckCircleIcon,
+} from "./CollectiumUi85Icons";
 import type { CollectiumUi85Action, CollectiumUi85Layout, CollectiumUi85Skin } from "./collectium-ui85-types";
 import styles from "./CollectiumUi85ObjectPreview.module.css";
 
@@ -77,9 +91,17 @@ function IconFor({ icon }: { icon: CollectiumUi85Action["icon"] }) {
   return <ShareIcon />;
 }
 
-function Banknote({ museum = false }: { museum?: boolean }) {
+function Banknote({ museum = false, realImage = false, list = false }: { museum?: boolean; realImage?: boolean; list?: boolean }) {
+  if (realImage) {
+    return (
+      <div className={`${styles.banknote} ${museum ? styles.banknoteMuseum : ""} ${list ? styles.banknoteList : ""}`} aria-label="Objektbilde">
+        <img src="/100_kroner_1877.jpg" alt="100 kroner 1877" className={styles.banknoteImg} />
+      </div>
+    );
+  }
+
   return (
-    <div className={museum ? `${styles.banknote} ${styles.banknoteMuseum}` : styles.banknote} aria-label="Objektbilde">
+    <div className={`${styles.banknote} ${museum ? styles.banknoteMuseum : ""} ${list ? styles.banknoteList : ""}`} aria-label="Objektbilde">
       <strong>100</strong>
       {!museum ? <div className={styles.portrait} /> : <div className={styles.museumGlow} />}
       <div className={styles.banknoteLine} />
@@ -89,36 +111,44 @@ function Banknote({ museum = false }: { museum?: boolean }) {
   );
 }
 
-function PrimaryActions() {
+function ActionButtons() {
   return (
-    <div className={styles.primaryActions} aria-label="Kortkommandoer">
-      <Link href="/katalog">Åpne objekt</Link>
-      <Link href="/katalog/kontroll">Se relasjon</Link>
+    <div className={styles.actionButtonsRow} aria-label="Kortkommandoer">
+      <Link href="/katalog" className={styles.btnAction}>
+        <span className={styles.btnActionIcon}><ExternalLinkIcon /></span>
+        <span>Åpne objekt</span>
+      </Link>
+      <Link href="/katalog/kontroll" className={styles.btnAction}>
+        <span className={styles.btnActionIcon}><GitBranchIcon /></span>
+        <span>Se relasjon</span>
+      </Link>
+      <Link href="/min-side" className={styles.btnAction}>
+        <span className={styles.btnActionIcon}><GlobeIcon /></span>
+        <span>Legg i samling</span>
+      </Link>
+      <button type="button" className={styles.btnActionMore} aria-label="Flere valg">
+        <span>...</span>
+      </button>
     </div>
   );
 }
 
-function AddActions() {
+function ActionPanel({ listMode = false }: { listMode?: boolean }) {
   return (
-    <div className={styles.addActions} aria-label="Samling">
-      <Link href="/min-side">Legg i samling</Link>
-      <button type="button" aria-label="Flere valg">...</button>
-    </div>
-  );
-}
-
-function ActionPanel() {
-  return (
-    <div className={styles.actionPanel} aria-label="Objekthandlinger">
+    <div className={`${styles.actionPanel} ${listMode ? styles.actionPanelList : ""}`} aria-label="Objekthandlinger">
       {actions.map((action) => (
-        <button className={styles.action} key={action.label} type="button">
+        <button className={`${styles.action} ${listMode ? styles.actionList : ""}`} key={action.label} type="button">
           <span className={styles.actionIcon}>
             <IconFor icon={action.icon} />
           </span>
-          <span>
+          {!listMode ? (
+            <span>
+              <b>{action.label}</b>
+              <small>{action.meta}</small>
+            </span>
+          ) : (
             <b>{action.label}</b>
-            <small>{action.meta}</small>
-          </span>
+          )}
           <em>{action.count}</em>
         </button>
       ))}
@@ -126,12 +156,17 @@ function ActionPanel() {
   );
 }
 
-function PriceBox() {
+function PriceBox({ listMode = false }: { listMode?: boolean }) {
   return (
-    <section className={styles.priceBox} aria-label="Estimert pris">
+    <section className={`${styles.priceBox} ${listMode ? styles.priceBoxList : ""}`} aria-label="Estimert pris">
       <span>Estimert pris</span>
       <strong>15 000 kr</strong>
-      <small>Vurdert</small>
+      <small>
+        <span className={styles.checkIcon}>
+          <CheckCircleIcon />
+        </span>
+        <span>Vurdert</span>
+      </small>
     </section>
   );
 }
@@ -141,53 +176,125 @@ function Facts({ compact = false }: { compact?: boolean }) {
 
   return (
     <dl className={styles.factGrid}>
-      {rows.map((fact) => (
-        <div key={fact.label}>
-          <dt>{fact.label}</dt>
-          <dd>{fact.value}</dd>
-        </div>
-      ))}
+      {rows.map((fact) => {
+        let IconComponent = TagIcon;
+        if (fact.label === "Utgave") IconComponent = CalendarIcon;
+        else if (fact.label === "Variant") IconComponent = LayersIcon;
+        else if (fact.label === "Sjeldenhet") IconComponent = ShieldIcon;
+        else if (fact.label === "Signatur") IconComponent = GitBranchIcon;
+        else if (fact.label === "Konge") IconComponent = ShieldIcon;
+
+        return (
+          <div key={fact.label} className={styles.factItem}>
+            <dt>
+              <span className={styles.specIcon}>
+                <IconComponent />
+              </span>
+              <span>{fact.label}</span>
+            </dt>
+            <dd>{fact.value}</dd>
+          </div>
+        );
+      })}
     </dl>
   );
 }
 
-function HistoryPanel({ museum = false }: { museum?: boolean }) {
+function HistoryPanel({ museum = false, showActions = false }: { museum?: boolean; showActions?: boolean }) {
   return (
-    <section className={museum ? `${styles.historyPanel} ${styles.historyPanelMuseum}` : styles.historyPanel} aria-label="Historic dynamisk felt">
+    <section className={`${styles.historyPanel} ${museum ? styles.historyPanelMuseum : ""} ${showActions ? styles.historyPanelWithActions : ""}`} aria-label="Historic dynamisk felt">
       <div className={styles.historyHeader}>
-        <span className={styles.bookIcon} aria-hidden="true">H</span>
+        <span className={styles.bookIcon} aria-hidden="true">
+          <BookOpenIcon />
+        </span>
         <strong>Historie</strong>
-        <small>dynamisk felt</small>
+        <small>· dynamisk felt</small>
       </div>
 
-      <dl>
-        {(museum ? history : history.slice(0, 4)).map((item) => (
-          <div key={item.label}>
+      <dl className={styles.historyGrid}>
+        {(museum ? history : history.slice(0, 6)).map((item) => (
+          <div key={item.label} className={styles.historyItem}>
             <dt>{item.label}</dt>
             <dd>{item.value}</dd>
           </div>
         ))}
       </dl>
+
+      {showActions && (
+        <div className={styles.historyActions}>
+          <ActionButtons />
+        </div>
+      )}
     </section>
   );
 }
 
-function HorizontalCard({ layout }: { layout: CollectiumUi85Layout }) {
-  const listMode = layout === "list";
-
+function ListCard() {
   return (
-    <article className={listMode ? `${styles.card} ${styles.horizontalCard} ${styles.listCard}` : `${styles.card} ${styles.horizontalCard}`} data-layout={layout}>
-      <div className={styles.mediaColumn}>
-        <Banknote />
-        <PrimaryActions />
+    <article className={`${styles.card} ${styles.listCard}`} data-layout="list">
+      <div className={styles.listMedia}>
+        <Banknote list />
       </div>
 
-      <div className={styles.identityColumn}>
-        <div className={styles.taxonomy}>Norge - Seddel - Norske sedler - Standardutgave</div>
-        <h2>100 kroner - 1877</h2>
-        <Facts />
-        <p className={styles.meta}>Seddel - Norske sedler - Oscar II - NS 1459</p>
-        <AddActions />
+      <div className={styles.listInfo}>
+        <h2>100 kroner 1877</h2>
+        <div className={styles.listSpecs}>
+          <div>
+            <span>Valørutgave</span>
+            <strong>100 kroner</strong>
+          </div>
+          <div>
+            <span>Utgave</span>
+            <strong>1. utgave</strong>
+          </div>
+          <div>
+            <span>Variant</span>
+            <strong>Standardutgave</strong>
+          </div>
+          <div>
+            <span>Sjeldenhet</span>
+            <strong>Sjelden</strong>
+          </div>
+        </div>
+        <p className={styles.meta}>Seddel · Norske sedler · Oscar II · NS 1459</p>
+      </div>
+
+      <div className={styles.listActions}>
+        <ActionButtons />
+      </div>
+
+      <div className={styles.listBadges}>
+        <ActionPanel listMode />
+      </div>
+
+      <div className={styles.listPrice}>
+        <PriceBox listMode />
+      </div>
+    </article>
+  );
+}
+
+function HorizontalCard({ layout }: { layout: CollectiumUi85Layout }) {
+  if (layout === "list") {
+    return <ListCard />;
+  }
+
+  return (
+    <article className={`${styles.card} ${styles.horizontalCard}`} data-layout="horizontal">
+      <div className={styles.mainContentFlow}>
+        <div className={styles.topSection}>
+          <div className={styles.mediaContainer}>
+            <Banknote realImage />
+          </div>
+          <div className={styles.infoContainer}>
+            <h2>100 kroner 1877</h2>
+            <Facts />
+            <p className={styles.meta}>Seddel · Norske sedler · Oscar II · NS 1459</p>
+          </div>
+        </div>
+        <div className={styles.bottomSection}>
+          <HistoryPanel showActions />
+        </div>
       </div>
 
       <aside className={styles.sideColumn} aria-label="Handlinger og pris">
@@ -204,16 +311,21 @@ function StandingCard() {
       <Banknote />
       <h2>100 kroner 1877</h2>
       <Facts compact />
-      <p className={styles.meta}>Seddel - Norske sedler - Oscar II - NS 1459</p>
+      <p className={styles.meta}>Seddel · Norske sedler · Oscar II · NS 1459</p>
 
       <div className={styles.standingDetails}>
-        <HistoryPanel />
-        <ActionPanel />
+        <div className={styles.standingLeftColumn}>
+          <HistoryPanel />
+        </div>
+        <div className={styles.standingRightColumn}>
+          <ActionPanel />
+          <PriceBox />
+        </div>
       </div>
 
-      <PriceBox />
-      <PrimaryActions />
-      <AddActions />
+      <div className={styles.standingBottomActions}>
+        <ActionButtons />
+      </div>
     </article>
   );
 }
@@ -221,14 +333,15 @@ function StandingCard() {
 function MuseumCard() {
   return (
     <article className={`${styles.card} ${styles.museumCard}`} data-layout="museum">
-      <Banknote museum />
+      <div className={styles.museumLeft}>
+        <Banknote museum />
+      </div>
 
-      <div className={styles.museumInfo}>
-        <h2>Museum - 100 kroner 1877</h2>
+      <div className={styles.museumRight}>
+        <h2>Museum · 100 kroner 1877</h2>
         <HistoryPanel museum />
         <div className={styles.museumActions}>
-          <PrimaryActions />
-          <AddActions />
+          <ActionButtons />
         </div>
       </div>
     </article>
@@ -270,3 +383,4 @@ export function CollectiumUi85ObjectPreview({
     </section>
   );
 }
+
