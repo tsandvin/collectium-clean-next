@@ -48,10 +48,10 @@
  * CT-FILE-PERIOD-UI86-0003 / CHANGE-2026-06-19-0001
  */
 
-import CollectiumPeriodFilterTest from "@/components/period-filter-test/CollectiumPeriodFilterTest";
+import CollectiumPeriodFilterClient from "@/components/period-filter/CollectiumPeriodFilterClient";
 
 export const dynamic = "force-dynamic";
 
 export default function PeriodFilterTestPage() {
-  return <CollectiumPeriodFilterTest />;
+  return <CollectiumPeriodFilterClient />;
 }

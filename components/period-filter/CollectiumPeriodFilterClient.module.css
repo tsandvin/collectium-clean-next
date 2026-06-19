@@ -1,0 +1,1029 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * CollectiumPeriodFilterClient.module.css
+ *
+ * Definering / formål:
+ * CSS-module for periodefilteret. Definerer HSL-systemfarger for fire rader,
+ * kompakte elementer for tidslinjen, og fire visningskort (horisontal, stående, liste, museum)
+ * i henhold til UI 8.6-standarder.
+ *
+ * Versjon:
+ * CT-PERIOD-FILTER-CSS-V1
+ */
+
+.page {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--ct-text, #ffffff);
+  font-family: inherit;
+}
+
+/* Colors by row */
+.row1 {
+  --row-color: #3b82f6; /* Blå */
+  --row-bg-soft: rgba(59, 130, 246, 0.06);
+  --row-border: rgba(59, 130, 246, 0.3);
+  --row-border-active: #3b82f6;
+  --row-glow: rgba(59, 130, 246, 0.25);
+}
+
+.row2 {
+  --row-color: #eab308; /* Gull */
+  --row-bg-soft: rgba(234, 179, 8, 0.06);
+  --row-border: rgba(234, 179, 8, 0.3);
+  --row-border-active: #eab308;
+  --row-glow: rgba(234, 179, 8, 0.25);
+}
+
+.row3 {
+  --row-color: #10b981; /* Grønn */
+  --row-bg-soft: rgba(16, 185, 129, 0.06);
+  --row-border: rgba(16, 185, 129, 0.3);
+  --row-border-active: #10b981;
+  --row-glow: rgba(16, 185, 129, 0.25);
+}
+
+.row4 {
+  --row-color: #a855f7; /* Lilla */
+  --row-bg-soft: rgba(168, 85, 247, 0.06);
+  --row-border: rgba(168, 85, 247, 0.3);
+  --row-border-active: #a855f7;
+  --row-glow: rgba(168, 85, 247, 0.25);
+}
+
+/* Hero Section */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--ct-card-bg, #1e293b);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: var(--ct-radius, 8px);
+}
+
+.heroContent h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ct-text, #ffffff);
+}
+
+.heroContent p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: var(--ct-muted, #94a3b8);
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusBadge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.statusBadge[data-tone="ok"] {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.statusBadge[data-tone="warning"] {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.statusBadge[data-tone="error"] {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Filter Controls Layout */
+.filterPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--ct-card-bg, #1e293b);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: var(--ct-radius, 8px);
+}
+
+.masterRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 100px 100px;
+  gap: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ct-muted, #94a3b8);
+}
+
+.select, .input {
+  width: 100%;
+  height: 36px;
+  padding: 0 8px;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 6px;
+  color: var(--ct-text, #ffffff);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.select:focus, .input:focus {
+  border-color: var(--ct-accent, #3b82f6);
+}
+
+/* 4-Rad Dropdowns */
+.selectorsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.rowSelectBox {
+  composes: row1; /* Default placeholder fallback */
+  background: var(--row-bg-soft);
+  border: 1px solid var(--row-border);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.rowSelectBox:focus-within {
+  border-color: var(--row-border-active);
+  box-shadow: 0 0 0 2px var(--row-glow);
+}
+
+.rowSelectBox select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--row-color);
+  font-weight: 700;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.rowSelectBox select option {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.rowSelectBox span {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--row-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rowSelectBox p {
+  margin: 0;
+  font-size: 10px;
+  color: var(--ct-muted, #94a3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Timeline Container */
+.timelineContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--ct-card-bg, #1e293b);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: var(--ct-radius, 8px);
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timelineHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ct-text, #ffffff);
+}
+
+.zoomButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.zoomBtn {
+  padding: 4px 8px;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 4px;
+  color: var(--ct-text, #ffffff);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.zoomBtn:hover {
+  background: var(--ct-border, #334155);
+}
+
+.zoomBtn[data-active="true"] {
+  background: var(--ct-accent, #3b82f6);
+  border-color: var(--ct-accent, #3b82f6);
+}
+
+/* Actual Timeline Tracks */
+.timelineTracks {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ct-border, #334155);
+}
+
+.timelineGridLines {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.gridLine {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.gridLineLabel {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--ct-muted, #94a3b8);
+  background: var(--ct-card-bg, #1e293b);
+  padding: 0 2px;
+}
+
+.trackRow {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.trackHeader {
+  position: absolute;
+  left: 6px;
+  z-index: 10;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--row-color);
+  pointer-events: none;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.timelineBar {
+  position: absolute;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--row-bg-soft);
+  border: 1px solid var(--row-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+
+.timelineBar:hover {
+  border-color: var(--row-color);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.timelineBar[data-active="true"] {
+  background: var(--row-color);
+  border-color: var(--row-color);
+}
+
+.timelineBar[data-active="true"] span {
+  color: #0f172a !important;
+  font-weight: 800;
+}
+
+.timelineBar span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--row-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Results Section Header (Compact inline tabs & layout) */
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--ct-card-bg, #1e293b);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: var(--ct-radius, 8px);
+}
+
+.resultsTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resultsTitle h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.resultsCount {
+  font-size: 11px;
+  color: var(--ct-muted, #94a3b8);
+  background: var(--ct-input-bg, #0f172a);
+  padding: 2px 6px;
+  border-radius: 99px;
+  border: 1px solid var(--ct-border, #334155);
+}
+
+.controlsRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Tabs for Segment (Samler, Historie, Finans) */
+.segmentTabs {
+  display: flex;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.segmentTab {
+  padding: 4px 12px;
+  background: transparent;
+  border: none;
+  color: var(--ct-muted, #94a3b8);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.segmentTab:hover {
+  color: var(--ct-text, #ffffff);
+}
+
+.segmentTab[data-active="true"] {
+  background: var(--ct-card-bg, #1e293b);
+  color: var(--ct-text, #ffffff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* View Mode Buttons (Horisontal, Stående, Liste, Museum) */
+.viewModes {
+  display: flex;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.viewBtn {
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  color: var(--ct-muted, #94a3b8);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.viewBtn:hover {
+  color: var(--ct-text, #ffffff);
+}
+
+.viewBtn[data-active="true"] {
+  background: var(--ct-card-bg, #1e293b);
+  color: var(--ct-text, #ffffff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Results Content Layouts */
+.resultsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 600px), 1fr));
+}
+
+.resultsGrid[data-layout="list"] {
+  grid-template-columns: 1fr;
+}
+
+/* Base Card Styling */
+.card {
+  position: relative;
+  background: var(--ct-card-bg, #1e293b);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: var(--ct-radius, 8px);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: min(100%, 600px);
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Card Banknote Placeholder Graphic */
+.banknoteThumb {
+  width: 100px;
+  height: 60px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.banknoteValue {
+  font-size: 14px;
+  font-weight: 850;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.banknoteSeal {
+  width: 20px;
+  height: 20px;
+  border-radius: 99px;
+  background: radial-gradient(circle, rgba(234, 179, 8, 0.3) 0%, transparent 70%);
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+}
+
+.banknoteLabel {
+  font-size: 6px;
+  color: var(--ct-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.4;
+  margin-top: 2px;
+}
+
+/* Dynamic Segment Panel Facts (horizontal compact design) */
+.segmentFacts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 6px 12px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.factItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.factLabel {
+  color: var(--ct-muted, #94a3b8);
+}
+
+.factValue {
+  font-weight: 700;
+  color: var(--ct-text, #ffffff);
+  text-align: right;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Layout 1: Horisontal Visningskort */
+.horizontalCard {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+}
+
+.horizontalLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.horizontalTopSection {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+.horizontalMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.horizontalMeta h4 {
+  margin: 0 0 2px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ct-text, #ffffff);
+  line-height: 1.2;
+}
+
+.horizontalSubtext {
+  font-size: 10px;
+  color: var(--ct-muted, #94a3b8);
+  margin-bottom: 6px;
+}
+
+.specRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 10px;
+}
+
+.specChip {
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--ct-text, #ffffff);
+}
+
+.horizontalActions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.horizontalActions a, .horizontalActions button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 4px;
+  color: var(--ct-text, #ffffff);
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.horizontalActions a:hover, .horizontalActions button:hover {
+  background: var(--ct-border, #334155);
+}
+
+.actionIcon {
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+}
+
+/* Right side status column (full height) */
+.statusColumn {
+  background: rgba(0, 0, 0, 0.18);
+  border-left: 1px solid var(--ct-border, #334155);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  height: 100%;
+}
+
+.statusMiniGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.statusMiniItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+.statusMiniItem span {
+  display: inline-flex;
+  width: 10px;
+  height: 10px;
+  color: var(--ct-muted, #94a3b8);
+}
+
+.statusMiniItem em {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--ct-text, #ffffff);
+}
+
+.priceSection {
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 4px;
+  padding: 6px;
+  text-align: center;
+}
+
+.priceSection span {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--ct-muted, #94a3b8);
+}
+
+.priceSection strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ct-accent, #3b82f6);
+  margin: 1px 0;
+}
+
+.priceSection em {
+  display: block;
+  font-style: normal;
+  font-size: 9px;
+  color: #10b981; /* Green trend positive */
+  font-weight: 700;
+}
+
+/* Layout 2: Stående Visningskort (Vertikalt kort) */
+.standingCard {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+}
+
+.standingHeader {
+  display: flex;
+  gap: 12px;
+}
+
+.standingInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.standingInfo h4 {
+  margin: 0 0 2px 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.standingBottom {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding-top: 8px;
+}
+
+.standingLeft {
+  flex: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.standingRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Layout 3: Listevisning (superkompakt) */
+.listCard {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+}
+
+.listMedia {
+  width: 60px;
+  height: 38px;
+}
+
+.listMedia .banknoteThumb {
+  width: 100%;
+  height: 100%;
+}
+
+.listMedia .banknoteValue {
+  font-size: 10px;
+}
+
+.listInfo {
+  min-width: 0;
+}
+
+.listInfo h4 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listInfo p {
+  margin: 1px 0 0 0;
+  font-size: 9px;
+  color: var(--ct-muted, #94a3b8);
+}
+
+.listStats {
+  display: flex;
+  gap: 4px;
+}
+
+.listStatBadge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.listStatBadge span {
+  display: inline-flex;
+  width: 10px;
+  height: 10px;
+  color: var(--ct-muted, #94a3b8);
+}
+
+.listStatBadge em {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--ct-text, #ffffff);
+}
+
+.listPriceBox {
+  text-align: right;
+  padding-left: 12px;
+  border-left: 1px solid var(--ct-border, #334155);
+}
+
+.listPriceBox span {
+  display: block;
+  font-size: 8px;
+  color: var(--ct-muted, #94a3b8);
+  text-transform: uppercase;
+}
+
+.listPriceBox strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ct-accent, #3b82f6);
+}
+
+.listPriceBox em {
+  display: block;
+  font-style: normal;
+  font-size: 8px;
+  color: #10b981;
+}
+
+.listActions {
+  display: flex;
+  gap: 4px;
+}
+
+.listActions a, .listActions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--ct-input-bg, #0f172a);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: 4px;
+  color: var(--ct-text, #ffffff);
+  cursor: pointer;
+}
+
+.listActions a:hover, .listActions button:hover {
+  background: var(--ct-border, #334155);
+}
+
+/* Layout 4: Museumsvisning */
+.museumCard {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  padding: 0;
+  height: 140px;
+}
+
+.museumLeft {
+  height: 100%;
+}
+
+.museumLeft .banknoteThumb {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  background: linear-gradient(135deg, #1e1b4b, #0f172a);
+}
+
+.museumLeft .banknoteValue {
+  font-size: 24px;
+}
+
+.museumRight {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  min-width: 0;
+}
+
+.museumRight h4 {
+  margin: 0 0 4px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbbf24; /* Museum golden tint */
+}
+
+.museumContext {
+  font-size: 11px;
+  color: var(--ct-muted, #94a3b8);
+  line-height: 1.4;
+  height: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.museumFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.museumActions {
+  display: flex;
+  gap: 4px;
+}
+
+.museumActions a, .museumActions button {
+  padding: 2px 8px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 4px;
+  color: #fbbf24;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.museumActions a:hover, .museumActions button:hover {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+.museumType {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--ct-muted, #94a3b8);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Empty/Error state */
+.emptyState {
+  grid-column: 1 / -1;
+  padding: 24px;
+  text-align: center;
+  background: var(--ct-card-bg, #1e293b);
+  border: 1px solid var(--ct-border, #334155);
+  border-radius: var(--ct-radius, 8px);
+  color: var(--ct-muted, #94a3b8);
+  font-size: 12px;
+}
+
+/* Mobile responsive adaptions */
+@media (max-width: 640px) {
+  .selectorsRow {
+    grid-template-columns: 1fr;
+  }
+  .masterRow {
+    grid-template-columns: 1fr 1fr;
+  }
+  .horizontalCard {
+    grid-template-columns: 1fr;
+  }
+  .statusColumn {
+    border-left: none;
+    border-top: 1px solid var(--ct-border, #334155);
+    padding-top: 12px;
+  }
+  .listCard {
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+  .listStats, .listPriceBox, .listActions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding: 4px 0;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+  }
+  .museumCard {
+    grid-template-columns: 100px 1fr;
+    height: auto;
+  }
+}

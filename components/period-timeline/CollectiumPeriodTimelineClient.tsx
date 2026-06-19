@@ -230,7 +230,7 @@ function DynamicActionButtons({ hit }: { hit: CatalogHit }) {
   );
 }
 
-function DynamicActionPanel({ listMode = false }) {
+function DynamicActionPanel({ listMode = false, compact = false }: { listMode?: boolean; compact?: boolean }) {
   const badges = [
     { label: "Hjerte", meta: "Ønskeliste", count: "0" },
     { label: "Stjerne", meta: "Favoritt", count: "0" },
@@ -238,16 +238,16 @@ function DynamicActionPanel({ listMode = false }) {
     { label: "Nettbutikk", meta: "Aktive salg", count: "1" },
   ];
   return (
-    <div className={`${styles.cardActionPanel} ${listMode ? styles.cardActionPanelList : ""}`} aria-label="Objekthandlinger">
+    <div className={`${styles.cardActionPanel} ${listMode ? styles.cardActionPanelList : ""} ${compact ? styles.cardActionPanelCompact : ""}`} aria-label="Objekthandlinger">
       {badges.map((badge) => (
-        <button className={`${styles.cardAction} ${listMode ? styles.cardActionList : ""}`} key={badge.label} type="button">
-          {!listMode ? (
+        <button className={`${styles.cardAction} ${listMode ? styles.actionList : ""} ${compact ? styles.cardActionCompact : ""}`} key={badge.label} type="button">
+          {compact || listMode ? (
+            <b>{badge.label}</b>
+          ) : (
             <span>
               <b>{badge.label}</b>
               <small>{badge.meta}</small>
             </span>
-          ) : (
-            <b>{badge.label}</b>
           )}
           <em>{badge.count}</em>
         </button>
@@ -256,9 +256,9 @@ function DynamicActionPanel({ listMode = false }) {
   );
 }
 
-function DynamicPriceBox({ listMode = false }) {
+function DynamicPriceBox({ listMode = false, compact = false }: { listMode?: boolean; compact?: boolean }) {
   return (
-    <section className={`${styles.cardPriceBox} ${listMode ? styles.cardPriceBoxList : ""}`} aria-label="Estimert pris">
+    <section className={`${styles.cardPriceBox} ${listMode ? styles.cardPriceBoxList : ""} ${compact ? styles.cardPriceBoxCompact : ""}`} aria-label="Estimert pris">
       <span>Estimert pris</span>
       <strong>15 000 kr</strong>
       <small>
@@ -380,8 +380,8 @@ function StandingCard({ hit }: { hit: CatalogHit }) {
           <DynamicHistoryPanel hit={hit} />
         </div>
         <div className={styles.cardStandingRightColumn}>
-          <DynamicActionPanel />
-          <DynamicPriceBox />
+          <DynamicActionPanel compact />
+          <DynamicPriceBox compact />
         </div>
       </div>
       <div className={styles.cardStandingBottomActions}>
@@ -444,10 +444,10 @@ function ListCard({ hit }: { hit: CatalogHit }) {
         <DynamicActionButtons hit={hit} />
       </div>
       <div className={styles.cardListBadges}>
-        <DynamicActionPanel listMode />
+        <DynamicActionPanel compact />
       </div>
       <div className={styles.cardListPrice}>
-        <DynamicPriceBox listMode />
+        <DynamicPriceBox compact />
       </div>
     </article>
   );
@@ -498,19 +498,13 @@ export function CollectiumPeriodTimelineClient() {
   }, [rows, filters.yearFrom, filters.yearTo]);
 
   const optionsByRow = useMemo(() => {
-    const used = selectedSlugs(filters);
-    const isAvailable = (period: PeriodRow, rowIndex: number) => {
-      const previous = used.slice(0, rowIndex);
-      return !previous.includes(period.period_slug);
-    };
-
     return {
-      row1: periodOptions.filter((period) => (period.period_level ?? 1) === 1),
-      row2: periodOptions.filter((period) => (period.period_level ?? 2) === 2 && isAvailable(period, 1)),
-      row3: periodOptions.filter((period) => (period.period_level ?? 3) >= 3 && isAvailable(period, 2)),
-      row4: periodOptions.filter((period) => isAvailable(period, 3)),
+      row1: periodOptions.filter((period) => laneForPeriod(period) === "Nasjonale perioder"),
+      row2: periodOptions.filter((period) => laneForPeriod(period) === "Historiske hendelser"),
+      row3: periodOptions.filter((period) => laneForPeriod(period) === "Penge / objektperioder"),
+      row4: periodOptions,
     };
-  }, [periodOptions, filters]);
+  }, [periodOptions]);
 
   const timelineWindow = useMemo(() => {
     return {
@@ -566,6 +560,33 @@ export function CollectiumPeriodTimelineClient() {
   function handlePeriodRowChange(rowKey: keyof Pick<Filters, "row1" | "row2" | "row3" | "row4">, slug: string) {
     const next = { ...filters, [rowKey]: slug };
     const period = rows.find((item) => item.period_slug === slug) || null;
+    if (period) {
+      next.row4 = period.period_slug;
+      const lane = laneForPeriod(period);
+      if (lane === "Nasjonale perioder") {
+        next.row1 = period.period_slug;
+      } else if (lane === "Historiske hendelser") {
+        next.row2 = period.period_slug;
+      } else if (lane === "Penge / objektperioder") {
+        next.row3 = period.period_slug;
+      }
+    } else {
+      if (rowKey === "row4") {
+        setSelectedPeriod(null);
+      } else {
+        if (selectedPeriod) {
+          const lane = laneForPeriod(selectedPeriod);
+          const clearedLane =
+            rowKey === "row1" ? "Nasjonale perioder" :
+            rowKey === "row2" ? "Historiske hendelser" :
+            rowKey === "row3" ? "Penge / objektperioder" : "";
+          if (lane === clearedLane) {
+            next.row4 = "";
+            setSelectedPeriod(null);
+          }
+        }
+      }
+    }
     setFilters(next);
     setSelectedPeriod(period);
     void fetchData(next, period);
@@ -574,6 +595,14 @@ export function CollectiumPeriodTimelineClient() {
   function handleTimelineSelect(period: PeriodRow) {
     setSelectedPeriod(period);
     const next = { ...filters, row4: period.period_slug };
+    const lane = laneForPeriod(period);
+    if (lane === "Nasjonale perioder") {
+      next.row1 = period.period_slug;
+    } else if (lane === "Historiske hendelser") {
+      next.row2 = period.period_slug;
+    } else if (lane === "Penge / objektperioder") {
+      next.row3 = period.period_slug;
+    }
     setFilters(next);
     void fetchData(next, period);
   }
@@ -848,8 +877,6 @@ export function CollectiumPeriodTimelineClient() {
               <p className={styles.eyebrow}>Dynamisk felt 2</p>
               <h2>Samler · Historie · Finans</h2>
             </div>
-          </div>
-          <div className={styles.segmentTabsContainer}>
             <div className={styles.segmentTabs}>
               {(Object.keys(SEGMENT_LABELS) as SegmentKey[]).map((key) => (
                 <button
