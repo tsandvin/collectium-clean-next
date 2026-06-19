@@ -2034,3 +2034,33 @@ html[data-resolved-vp="wide"] .ct-tv-hamburger-bridge {
 }
 
 /* COLLECTIUM TV MENU BRIDGE END */
+
+/* ============================================================
+   Collectium /start topbar-only chrome
+   Beholder toppmeny, skjuler sidemeny og lar startsiden bruke full bredde.
+   ============================================================ */
+
+html[data-ct-chrome="topbar-only"] .ct-v7-shell {
+  grid-template-columns: 1fr !important;
+}
+
+html[data-ct-chrome="topbar-only"] .ct-v7-sidebar,
+html[data-ct-chrome="topbar-only"] .collectium-sidebar,
+html[data-ct-chrome="topbar-only"] [data-ct-sidebar],
+html[data-ct-chrome="topbar-only"] aside[aria-label*="side" i],
+html[data-ct-chrome="topbar-only"] aside[aria-label*="meny" i] {
+  display: none !important;
+}
+
+html[data-ct-chrome="topbar-only"] .ct-v7-main,
+html[data-ct-chrome="topbar-only"] .ct-v7-content,
+html[data-ct-chrome="topbar-only"] main {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+}
+
+html[data-ct-chrome="topbar-only"] body {
+  overflow-x: hidden;
+}
+
