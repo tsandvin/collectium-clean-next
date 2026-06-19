@@ -7,6 +7,7 @@ const keyToIconMap: Record<string, IconName> = {
   index: "home",
   catalog: "catalog",
   "period-filter": "catalog",
+  "period-search": "catalog",
   object: "catalog",
   relations: "catalog",
   account: "collection",

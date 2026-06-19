@@ -1,3 +1,38 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Periodefilter katalogresultat API
+ *
+ * Definering / formal:
+ * Leser sanne katalogobjekter fra Neon for /test/periodefilter og filtrerer
+ * pa valgt periodeintervall eller valgt objektrelasjon.
+ *
+ * Bruksomrade:
+ * Brukes av components/period-filter-test/CollectiumPeriodFilterTest.tsx.
+ *
+ * Berorte sider / routes:
+ * - /test/periodefilter
+ *
+ * Berorte API-ruter:
+ * - GET /api/test/period-catalog
+ *
+ * Berorte DB/views:
+ * - ct_v_object_presentation_resolved
+ * - ct_v_object_relations_resolved
+ * - ct_v_catalog_period_relations
+ * - ct_catalog_period_relations
+ * - ct_v_period_filter_find_relations
+ *
+ * Dataretning:
+ * Neon -> API/backend -> Next.js -> React -> UI
+ *
+ * Endring:
+ * Ruten returnerer ikke demodata. relation_type/relation_slug filtrerer med
+ * ct_v_object_relations_resolved, og year_from/year_to filtrerer objektar fra
+ * ct_v_object_presentation_resolved.
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { neonQuery } from "@/lib/db/neon";
 
@@ -87,6 +122,13 @@ function asOffset(value: string | null): number {
   return Math.floor(parsed);
 }
 
+function asOptionalYear(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.floor(parsed);
+}
+
 function asSegment(value: string | null): Segment {
   if (value && SEGMENTS.includes(value as Segment)) {
     return value as Segment;
@@ -138,8 +180,8 @@ function segmentSummary(row: DbRow, segment: Segment): string {
   }
 
   const ruler = text(row.ruler_name_raw_no) ?? "Mangler regent";
-  const year = text(row.object_year_label) ?? text(row.publication_year_label) ?? "Mangler ÃƒÂ¥r";
-  const issue = text(row.denomination_issue_raw_no) ?? "Mangler valÃƒÂ¸rutgave / serie";
+  const year = text(row.object_year_label) ?? text(row.publication_year_label) ?? "Mangler ar";
+  const issue = text(row.denomination_issue_raw_no) ?? "Mangler valorutgave / serie";
 
   return `${year} / ${ruler} / ${issue}`;
 }
@@ -187,6 +229,7 @@ function toObject(row: DbRow, relations: RelationRow[], segment: Segment): Perio
 }
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
 
   const sourceKey = searchParams.get("source_key") ?? "norske_sedler";
@@ -195,24 +238,70 @@ export async function GET(request: NextRequest) {
   const view = asView(searchParams.get("view"));
   const limit = asPositiveInteger(searchParams.get("limit"), 25, 100);
   const offset = asOffset(searchParams.get("offset"));
+  const relationType = text(searchParams.get("relation_type"));
+  const relationSlug = text(searchParams.get("relation_slug"));
+  const yearFrom = asOptionalYear(searchParams.get("year_from"));
+  const yearTo = asOptionalYear(searchParams.get("year_to"));
+
+  const whereClauses = [
+    "p.source_key = $1",
+    "p.object_group = $2",
+  ];
+  const params: unknown[] = [sourceKey, objectGroup];
+
+  if (relationType && relationSlug) {
+    params.push(relationType, relationSlug);
+    whereClauses.push(`
+      exists (
+        select 1
+        from public.ct_v_object_relations_resolved rr
+        where rr.source_key = p.source_key
+          and rr.object_group = p.object_group
+          and rr.object_id::text = p.object_id::text
+          and rr.relation_type = $${params.length - 1}
+          and rr.relation_slug = $${params.length}
+      )
+    `);
+  }
+
+  if (yearFrom !== null) {
+    params.push(yearFrom);
+    whereClauses.push(`
+      coalesce(
+        substring(coalesce(p.object_year_label, '') from '-?[0-9]{1,4}')::int,
+        substring(coalesce(p.publication_year_label, '') from '-?[0-9]{1,4}')::int
+      ) >= $${params.length}
+    `);
+  }
+
+  if (yearTo !== null) {
+    params.push(yearTo);
+    whereClauses.push(`
+      coalesce(
+        substring(coalesce(p.object_year_label, '') from '-?[0-9]{1,4}')::int,
+        substring(coalesce(p.publication_year_label, '') from '-?[0-9]{1,4}')::int
+      ) <= $${params.length}
+    `);
+  }
+
+  params.push(limit, offset);
 
   const rows = await neonQuery<DbRow>(
     `
       select
-        *
-      from public.ct_v_object_presentation_resolved
-      where source_key = $1
-        and object_group = $2
-      order by object_id::text
-      limit $3
-      offset $4
+        p.*
+      from public.ct_v_object_presentation_resolved p
+      where ${whereClauses.join("\n        and ")}
+      order by p.object_id::text
+      limit $${params.length - 1}
+      offset $${params.length}
     `,
-    [sourceKey, objectGroup, limit, offset]
+    params
   );
 
   const objectKeys = rows
-    .map((row) => numberValue(row.object_id))
-    .filter((objectId) => objectId > 0);
+    .map((row) => String(row.object_id ?? "").trim())
+    .filter((objectId) => objectId.length > 0);
 
   let relationRows: RelationRow[] = [];
 
@@ -224,16 +313,14 @@ export async function GET(request: NextRequest) {
           object_group,
           object_id,
           relation_type,
-          relation_key,
           relation_slug,
-          display_name_no,
           relation_label_no,
-          href
+          relation_href as href
         from public.ct_v_object_relations_resolved
         where source_key = $1
           and object_group = $2
           and object_id::text = any($3::text[])
-        order by object_id::text, relation_type, display_name_no
+        order by object_id::text, relation_type, relation_label_no
       `,
       [sourceKey, objectGroup, objectKeys]
     );
@@ -262,9 +349,28 @@ export async function GET(request: NextRequest) {
     object_group: objectGroup,
     segment,
     view,
+    applied_filter: {
+      relation_type: relationType,
+      relation_slug: relationSlug,
+      year_from: yearFrom,
+      year_to: yearTo,
+    },
     limit,
     offset,
     count: objects.length,
     objects,
   });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        source: "neon",
+        route: "/api/test/period-catalog",
+        message: error instanceof Error ? error.message : "Ukjent feil ved lesing av katalogresultater fra Neon.",
+        count: 0,
+        objects: [],
+      },
+      { status: 500 },
+    );
+  }
 }

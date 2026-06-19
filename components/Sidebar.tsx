@@ -29,6 +29,7 @@ const keyToIconMap: Record<string, IconType> = {
   index: "activity",
   catalog: "catalog",
   "period-filter": "catalog",
+  "period-search": "catalog",
   object: "catalog",
   relations: "relations",
   account: "collection",
@@ -45,6 +46,7 @@ const keyToCountMap: Record<string, string> = {
   index: "01",
   catalog: "24",
   "period-filter": "05",
+  "period-search": "06",
   object: "09",
   relations: "17",
   account: "08",
@@ -119,6 +121,7 @@ export default function Sidebar() {
     if (key === "index") return pathname === "/";
     if (key === "admin-neon") return pathname.startsWith("/admin/neon");
     if (key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
+    if (key === "period-search") return pathname.startsWith("/test/period-timeline");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

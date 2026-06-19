@@ -74,6 +74,14 @@ export const collectiumSidebarItems: CollectiumSidebarItem[] = [
     group: "Hoved",
   },
   {
+    key: "period-search",
+    label: "Periode søk",
+    shortLabel: "PS",
+    href: "/test/period-timeline",
+    description: "Periodesøk og tidslinjevisning",
+    group: "Hoved",
+  },
+  {
     key: "object",
     label: "Objekt",
     shortLabel: "O",

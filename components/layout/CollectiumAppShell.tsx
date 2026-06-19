@@ -35,6 +35,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
   index: Home,
   catalog: Search,
   "period-filter": CalendarDays,
+  "period-search": CalendarDays,
   object: Box,
   relations: Network,
   account: UserRound,
@@ -53,6 +54,7 @@ const mobileBottomItems = [
   { key: "account", href: "/min-side", label: "Min side", icon: UserRound },
   { key: "catalog", href: "/katalog", label: "Katalog", icon: Search },
   { key: "period-filter", href: "/test/periodefilter", label: "Periodefilter", icon: CalendarDays },
+  { key: "period-search", href: "/test/period-timeline", label: "Periode søk", icon: CalendarDays },
   { key: "admin", href: "/admin", label: "Admin", icon: ShieldCheck },
   { key: "admin-neon", href: "/admin/neon", label: "Neon Control", icon: Database },
   { key: "support", href: "/support", label: "Support", icon: HelpCircle },
@@ -318,6 +320,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     if (key === "index") return pathname === "/";
     if (key === "admin-neon") return pathname.startsWith("/admin/neon");
     if (key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
+    if (key === "period-search") return pathname.startsWith("/test/period-timeline");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
@@ -327,6 +330,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     if (item.key === "index") return pathname === "/";
     if (item.key === "catalog") return pathname.startsWith("/katalog");
     if (item.key === "period-filter") return pathname === "/test/periodefilter" || pathname === "/periodefilter";
+    if (item.key === "period-search") return pathname.startsWith("/test/period-timeline");
     if (item.key === "account") return pathname.startsWith("/min-side");
     if (item.key === "admin-neon") return pathname.startsWith("/admin/neon");
     if (item.key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
