@@ -2064,3 +2064,72 @@ html[data-ct-chrome="topbar-only"] body {
   overflow-x: hidden;
 }
 
+
+/* ============================================================
+   Collectium /start hard sidebar removal
+   /start er offentlig frontside: toppmeny beholdes, sidemeny fjernes.
+   Trigger: main.ct-start-page
+   ============================================================ */
+
+body:has(.ct-start-page) {
+  overflow-x: hidden;
+}
+
+/* Gjør hovedshell til en kolonne på startsiden */
+body:has(.ct-start-page) .ct-v7-shell,
+body:has(.ct-start-page) .collectium-shell,
+body:has(.ct-start-page) [data-ct-shell] {
+  grid-template-columns: minmax(0, 1fr) !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Skjul kjente sidebar-varianter */
+body:has(.ct-start-page) .ct-v7-sidebar,
+body:has(.ct-start-page) .collectium-sidebar,
+body:has(.ct-start-page) .sidebar,
+body:has(.ct-start-page) .sideBar,
+body:has(.ct-start-page) [data-ct-sidebar],
+body:has(.ct-start-page) [data-sidebar],
+body:has(.ct-start-page) aside[class*="sidebar" i],
+body:has(.ct-start-page) nav[class*="sidebar" i] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hvis shell bruker første gridkolonne som sidemeny */
+body:has(.ct-start-page) .ct-v7-shell > aside:first-child,
+body:has(.ct-start-page) .ct-v7-shell > nav:first-child,
+body:has(.ct-start-page) .collectium-shell > aside:first-child,
+body:has(.ct-start-page) .collectium-shell > nav:first-child {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+}
+
+/* Flytt innhold til full bredde */
+body:has(.ct-start-page) .ct-v7-main,
+body:has(.ct-start-page) .ct-v7-content,
+body:has(.ct-start-page) .collectium-main,
+body:has(.ct-start-page) .collectium-content,
+body:has(.ct-start-page) [data-ct-main],
+body:has(.ct-start-page) [data-ct-content] {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+}
+
+/* Selve startsiden skal alltid kunne bruke full bredde */
+.ct-start-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+}
+
