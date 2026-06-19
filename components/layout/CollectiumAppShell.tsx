@@ -41,7 +41,7 @@ const navItems = [
 const mobileBottomItems = [
   { href: "/min-side", label: "Min side", icon: UserRound, key: "minside" },
   { href: "/", label: "Index", icon: Home, key: "index" },
-  { href: "/katalog", label: "Katalog sÃƒÆ’Ã‚Â¸k", icon: Search, key: "katalog" },
+  { href: "/katalog", label: "Katalog søk", icon: Search, key: "katalog" },
   { href: "/min-side", label: "Min samling", icon: Archive, key: "samling" }, // TODO: change to /samling when collection page is active.
 ];
 
@@ -421,7 +421,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
               </button>
             )}
             <div className={styles.searchWrap}>
-              <input className={styles.search} placeholder="SÃƒÆ’Ã‚Â¸k i Collectium / bruker..." aria-label="SÃƒÆ’Ã‚Â¸k" />
+              <input className={styles.search} placeholder="Søk i Collectium / bruker..." aria-label="Søk" />
             </div>
           </div>
           <div className={styles.topActions}>
@@ -517,7 +517,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                           
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
-                              <span>StÃƒÆ’Ã‚Â¸rrelse</span>
+                              <span>størrelse</span>
                               <strong>{bodyScale > 0 ? `+${bodyScale}` : bodyScale}</strong>
                             </div>
                             <input
@@ -527,14 +527,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={bodyScale}
                               onChange={(e) => updateBodyScale(parseInt(e.target.value, 10))}
-                              aria-label="Juster hovedskrift stÃƒÆ’Ã‚Â¸rrelse"
+                              aria-label="Juster hovedskrift størrelse"
                             />
                           </div>
 
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
                               <span>Fet skrift</span>
-                              <strong>NivÃƒÆ’Ã‚Â¥ {bodyBoldLevel}</strong>
+                              <strong>Nivå {bodyBoldLevel}</strong>
                             </div>
                             <input
                               type="range"
@@ -543,14 +543,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={bodyBoldLevel}
                               onChange={(e) => updateBodyBoldLevel(parseInt(e.target.value, 10))}
-                              aria-label="Juster hovedskrift fet nivÃƒÆ’Ã‚Â¥"
+                              aria-label="Juster hovedskrift fet nivå"
                             />
                           </div>
 
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
                               <span>Slank skrift</span>
-                              <strong>NivÃƒÆ’Ã‚Â¥ {bodyLightLevel}</strong>
+                              <strong>Nivå {bodyLightLevel}</strong>
                             </div>
                             <input
                               type="range"
@@ -559,7 +559,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={bodyLightLevel}
                               onChange={(e) => updateBodyLightLevel(parseInt(e.target.value, 10))}
-                              aria-label="Juster hovedskrift slank nivÃƒÆ’Ã‚Â¥"
+                              aria-label="Juster hovedskrift slank nivå"
                             />
                           </div>
                         </div>
@@ -570,7 +570,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                           
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
-                              <span>StÃƒÆ’Ã‚Â¸rrelse</span>
+                              <span>størrelse</span>
                               <strong>{headingScale > 0 ? `+${headingScale}` : headingScale}</strong>
                             </div>
                             <input
@@ -580,14 +580,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={headingScale}
                               onChange={(e) => updateHeadingScale(parseInt(e.target.value, 10))}
-                              aria-label="Juster overskrift stÃƒÆ’Ã‚Â¸rrelse"
+                              aria-label="Juster overskrift størrelse"
                             />
                           </div>
 
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
                               <span>Fet skrift</span>
-                              <strong>NivÃƒÆ’Ã‚Â¥ {headingBoldLevel}</strong>
+                              <strong>Nivå {headingBoldLevel}</strong>
                             </div>
                             <input
                               type="range"
@@ -596,14 +596,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={headingBoldLevel}
                               onChange={(e) => updateHeadingBoldLevel(parseInt(e.target.value, 10))}
-                              aria-label="Juster overskrift fet nivÃƒÆ’Ã‚Â¥"
+                              aria-label="Juster overskrift fet nivå"
                             />
                           </div>
 
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
                               <span>Slank skrift</span>
-                              <strong>NivÃƒÆ’Ã‚Â¥ {headingLightLevel}</strong>
+                              <strong>Nivå {headingLightLevel}</strong>
                             </div>
                             <input
                               type="range"
@@ -612,7 +612,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={headingLightLevel}
                               onChange={(e) => updateHeadingLightLevel(parseInt(e.target.value, 10))}
-                              aria-label="Juster overskrift slank nivÃƒÆ’Ã‚Â¥"
+                              aria-label="Juster overskrift slank nivå"
                             />
                           </div>
                         </div>
@@ -623,7 +623,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                           
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
-                              <span>StÃƒÆ’Ã‚Â¸rrelse</span>
+                              <span>størrelse</span>
                               <strong>{headlineScale > 0 ? `+${headlineScale}` : headlineScale}</strong>
                             </div>
                             <input
@@ -633,14 +633,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={headlineScale}
                               onChange={(e) => updateHeadlineScale(parseInt(e.target.value, 10))}
-                              aria-label="Juster headline stÃƒÆ’Ã‚Â¸rrelse"
+                              aria-label="Juster headline størrelse"
                             />
                           </div>
 
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
                               <span>Fet skrift</span>
-                              <strong>NivÃƒÆ’Ã‚Â¥ {headlineBoldLevel}</strong>
+                              <strong>Nivå {headlineBoldLevel}</strong>
                             </div>
                             <input
                               type="range"
@@ -649,14 +649,14 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={headlineBoldLevel}
                               onChange={(e) => updateHeadlineBoldLevel(parseInt(e.target.value, 10))}
-                              aria-label="Juster headline fet nivÃƒÆ’Ã‚Â¥"
+                              aria-label="Juster headline fet nivå"
                             />
                           </div>
 
                           <div className={styles.designSliderRow}>
                             <div className={styles.designSliderLabel}>
                               <span>Slank skrift</span>
-                              <strong>NivÃƒÆ’Ã‚Â¥ {headlineLightLevel}</strong>
+                              <strong>Nivå {headlineLightLevel}</strong>
                             </div>
                             <input
                               type="range"
@@ -665,7 +665,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                               step="1"
                               value={headlineLightLevel}
                               onChange={(e) => updateHeadlineLightLevel(parseInt(e.target.value, 10))}
-                              aria-label="Juster headline slank nivÃƒÆ’Ã‚Â¥"
+                              aria-label="Juster headline slank nivå"
                             />
                           </div>
                         </div>
