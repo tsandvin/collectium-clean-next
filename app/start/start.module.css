@@ -3,36 +3,49 @@
  *
  * Filnavn:      app/start/start.module.css
  * Definering:   Side-scoped CSS-modul for startsiden (app.collectium/start).
- * Formaal:      Layout, felt-skiller og animasjon for startsiden. Definerer
- *               INGEN egne farger/fonter — leser kun globale --ct-*-tokens
- *               (med ett dokumentert fallback-punkt pr. token). Tema bytter
- *               kun tokens, aldri struktur (regel: tema = tokens).
- * Designkobling: app/globals.css (skin + ramme), .ct-surface-rammesystem,
- *               hjoernesignatur (regel 21), hover (regel 22).
- * DB-kobling:   Ingen. Ren presentasjon. Lenker til /objekt/... og /relasjon/...
+ * Formaal:      Layout, felt-skiller, skin-baserte bakgrunner og animasjon.
+ *               Definerer INGEN egne farger/fonter — leser kun de globale
+ *               --ct-*-tokenene (content-familien + timeline-farger), med ett
+ *               dokumentert fallback-punkt pr. token. Tema bytter kun tokens.
+ * Designkobling: globals.css (skin + content-tokens), themes.css.
+ * DB-kobling:   Ingen. Lenker til /objekt/... og /relasjon/...
  * Tags:         collectium, start, landing, tokens, tema, ingen-sidemeny
  */
 
 /* ---------------------------------------------------------------------------
-   Side-lokale aliaser: ETT sted aa mappe globale tokens -> sidebruk.
-   Stemmer ikke et token-navn med ditt globale sett, bytt det her (ikke i koden).
+   Side-lokale aliaser -> globale Collectium-tokens (ETT sted aa endre).
 --------------------------------------------------------------------------- */
 .page {
-  --s-bg:            var(--ct-bg, var(--ct-ui-bg, #faf6ec));
-  --s-surface:       var(--ct-card-bg, var(--ct-ui-panel, #ffffff));
-  --s-surface-soft:  var(--ct-card-bg-soft, var(--ct-ui-panel-soft, #f3eee2));
-  --s-text:          var(--ct-text, var(--ct-ui-text, #2c2519));
-  --s-muted:         var(--ct-text-muted, var(--ct-muted, var(--ct-ui-soft, #6c6453)));
-  --s-heading:       var(--ct-heading, var(--s-text));
-  --s-border:        var(--ct-card-border, var(--ct-panel-border, var(--ct-ui-border, rgba(44, 37, 25, 0.16))));
-  --s-shadow:        var(--ct-card-shadow, var(--ct-shadow-card, 0 18px 40px rgba(28, 22, 12, 0.14)));
-  --s-radius:        var(--ct-radius-card, var(--ct-radius-lg, 14px));
-  --s-accent:        var(--ct-accent, #a9783a);
-  --s-accent-strong: var(--ct-accent-strong, var(--ct-accent, #8a5f28));
-  --s-on-accent:     var(--ct-on-accent, #1c1409);
-  --s-ok:            var(--ct-success, var(--ct-status-ok, #4b7a52));
-  --s-display:       var(--ct-font-display, "Playfair Display", "Cinzel", Georgia, serif);
-  --s-body:          var(--ct-font-body, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  --s-bg:            var(--ct-content-bg, var(--ct-page-bg, var(--ct-app-bg, #fffaf2)));
+  --s-surface:       var(--ct-content-panel, var(--ct-panel, #ffffff));
+  --s-surface-soft:  var(--ct-content-panel-soft, var(--ct-panel-soft, var(--ct-card-bg, #fffdf9)));
+  --s-field:         var(--ct-content-field-bg, var(--ct-input-bg, var(--s-surface)));
+  --s-chip:          var(--ct-content-chip-bg, color-mix(in srgb, var(--ct-accent, #145c38) 8%, transparent));
+  --s-text:          var(--ct-content-text, var(--ct-text, #143327));
+  --s-muted:         var(--ct-content-muted, var(--ct-muted, var(--ct-text-muted, #4a685b)));
+  --s-heading:       var(--ct-content-text, var(--ct-text, #143327));
+  --s-border:        var(--ct-content-border, var(--ct-border, #e2d7c5));
+  --s-border-strong: var(--ct-content-border-strong, var(--ct-border-strong, #cfa861));
+  --s-accent:        var(--ct-content-accent, var(--ct-accent, #145c38));
+  --s-accent-strong: var(--ct-content-accent, var(--ct-accent, #145c38));
+  --s-accent-soft:   var(--ct-content-accent-soft, color-mix(in srgb, var(--ct-accent, #145c38) 12%, transparent));
+  --s-on-accent:     var(--ct-on-accent, #ffffff);
+  --s-gold:          var(--ct-accent-2, var(--ct-soft-gold, #d6a641));
+  --s-ok:            var(--ct-status-ok, #2f7d52);
+  --s-shadow:        var(--ct-shadow-card, var(--ct-shadow, 0 8px 16px rgb(20 51 39 / 12%)));
+  --s-shadow-lg:     var(--ct-shadow-lg, var(--ct-shadow-xl, 0 16px 32px rgb(20 51 39 / 18%)));
+  --s-radius:        var(--ct-radius-lg, 14px);
+  --s-pill:          var(--ct-radius-pill, 99px);
+  --s-watermark:     var(--ct-watermark, color-mix(in srgb, var(--ct-accent, #145c38) 60%, transparent));
+  --s-display:       var(--ct-font-display, var(--ct-font-head, Georgia, "Times New Roman", serif));
+  --s-body:          var(--ct-font-body, ui-sans-serif, system-ui, sans-serif);
+
+  /* Periodefilter-kategorifarger fra det globale tidslinje-settet */
+  --s-tl-national:   var(--ct-timeline-national, #1e5a9a);
+  --s-tl-historical: var(--ct-timeline-historical, #cfa861);
+  --s-tl-period:     var(--ct-timeline-period, #145c38);
+  --s-tl-century:    var(--ct-timeline-century, #8a70a8);
+  --s-tl-object:     var(--ct-timeline-object, #5a7a8c);
 
   color: var(--s-text);
   font-family: var(--s-body);
@@ -41,8 +54,8 @@
 }
 
 /* ===========================================================================
-   Felt-skille (seksjoner): hver seksjon = eget felt med klar overgang.
-   --------------------------------------------------------------------------- */
+   Felt-skille + skin-baserte bakgrunner
+--------------------------------------------------------------------------- */
 .section {
   position: relative;
   padding: clamp(40px, 6vw, 82px) clamp(18px, 4vw, 40px);
@@ -50,139 +63,106 @@
 }
 .section:first-child { border-top: 0; }
 
-/* Mykt felt: rolig bakgrunn som forsterker, ikke forstyrrer */
+/* Mykt skin-tonet felt (accent-vask over panel) */
 .soft {
   background:
-    radial-gradient(120% 80% at 12% 0%, color-mix(in srgb, var(--s-accent) 7%, transparent) 0%, transparent 60%),
+    linear-gradient(180deg, var(--s-accent-soft) 0%, transparent 58%),
     var(--s-surface-soft);
 }
+/* Dypere skin-felt */
 .deep {
   background:
     linear-gradient(180deg, var(--s-surface-soft) 0%, var(--s-bg) 100%);
 }
+/* Tydelig accent-felt */
+.tint {
+  background:
+    radial-gradient(120% 90% at 100% 0%, var(--s-accent-soft) 0%, transparent 55%),
+    var(--s-surface-soft);
+}
 
-.inner { width: min(100%, 1180px); margin: 0 auto; }
-.narrow { width: min(100%, 880px); margin: 0 auto; }
+.inner  { width: min(100%, 1180px); margin: 0 auto; }
+.narrow { width: min(100%, 880px);  margin: 0 auto; }
 
 /* ===========================================================================
-   Typografi — moderate overskrifter, kursiv display tillatt, brodtekst normal.
-   --------------------------------------------------------------------------- */
+   Typografi — moderate overskrifter, kursiv display, brodtekst normal
+--------------------------------------------------------------------------- */
 .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex; align-items: center; gap: 8px;
   margin: 0 0 12px;
   font-family: var(--s-body);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--s-accent-strong);
+  font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--s-accent);
 }
-.eyebrow::before {
-  content: "";
-  width: 22px; height: 1px;
-  background: currentColor;
-}
+.eyebrow::before { content: ""; width: 22px; height: 1px; background: currentColor; }
 
 .h2 {
   margin: 0 0 14px;
-  font-family: var(--s-display);
-  font-style: italic;          /* kursiv display — moderat, ikke svaer */
-  font-weight: 600;
-  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
-  line-height: 1.12;
+  font-family: var(--s-display); font-style: italic; font-weight: 600;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem); line-height: 1.12;
   color: var(--s-heading);
 }
 .h3 {
   margin: 0 0 6px;
-  font-family: var(--s-display);
-  font-weight: 600;
+  font-family: var(--s-display); font-weight: 600;
   font-size: clamp(1.05rem, 1.6vw, 1.25rem);
   color: var(--s-heading);
 }
 .lead {
-  margin: 0;
-  max-width: 64ch;
-  color: var(--s-muted);
-  font-size: clamp(0.96rem, 1.1vw, 1.05rem);
-  line-height: 1.66;
+  margin: 0; max-width: 64ch;
+  color: var(--s-muted); font-size: clamp(0.96rem, 1.1vw, 1.05rem); line-height: 1.66;
 }
 .p { margin: 0; color: var(--s-muted); line-height: 1.62; }
 
 /* ===========================================================================
    Knapper / lenker
-   --------------------------------------------------------------------------- */
+--------------------------------------------------------------------------- */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 11px 20px;
-  border-radius: 999px;
-  border: 1px solid var(--s-border);
-  background: var(--s-surface);
-  color: var(--s-text);
-  font: inherit;
-  font-size: 0.92rem;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 11px 20px; border-radius: var(--s-pill);
+  border: 1px solid var(--s-border); background: var(--s-surface); color: var(--s-text);
+  font: inherit; font-size: 0.92rem; cursor: pointer; text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, filter 0.18s ease;
 }
 .btn:hover { transform: translateY(-2px); box-shadow: var(--s-shadow); }
 .btnPrimary {
-  background: linear-gradient(180deg, var(--s-accent) 0%, var(--s-accent-strong) 100%);
-  color: var(--s-on-accent);
-  border-color: color-mix(in srgb, var(--s-accent-strong) 70%, black 30%);
-  font-weight: 600;
+  background: var(--s-accent); color: var(--s-on-accent);
+  border-color: color-mix(in srgb, var(--s-accent) 72%, black 28%); font-weight: 600;
 }
-.btnGhost { background: transparent; }
+.btnPrimary:hover { filter: brightness(1.06); }
+.btnGhost { background: transparent; border-color: var(--s-border-strong); color: var(--s-accent); }
 .btnRow { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
 
 .arrow { transition: transform 0.18s ease; }
-.btn:hover .arrow,
-.linkInline:hover .arrow { transform: translateX(3px); }
+.btn:hover .arrow, .linkInline:hover .arrow { transform: translateX(3px); }
 
 .linkInline {
   display: inline-flex; align-items: center; gap: 6px;
-  color: var(--s-accent-strong);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.92rem;
+  color: var(--s-accent); text-decoration: none; font-weight: 600; font-size: 0.92rem;
 }
 .linkInline:hover { text-decoration: underline; }
 
 /* ===========================================================================
-   HERO — tidslinje / periodesoek (sidens tese)
-   --------------------------------------------------------------------------- */
+   HERO — periodesoek (tidslinje)
+--------------------------------------------------------------------------- */
 .hero {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: clamp(20px, 3vw, 44px);
-  align-items: center;
-  width: min(100%, 1180px);
-  margin: 0 auto;
+  display: grid; grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(20px, 3vw, 44px); align-items: center;
+  width: min(100%, 1180px); margin: 0 auto;
 }
 .heroCopy { min-width: 0; }
 .heroTitle {
   margin: 6px 0 14px;
-  font-family: var(--s-display);
-  font-weight: 600;
-  font-size: clamp(2rem, 4.4vw, 3.1rem);
-  line-height: 1.04;
-  color: var(--s-heading);
+  font-family: var(--s-display); font-weight: 600;
+  font-size: clamp(2rem, 4.4vw, 3.1rem); line-height: 1.04; color: var(--s-heading);
 }
-.heroTitle em { font-style: italic; color: var(--s-accent-strong); }
+.heroTitle em { font-style: italic; color: var(--s-accent); }
 
-/* Periodesoek-panel */
-.periodPanel { padding: clamp(16px, 2vw, 22px); }
+.periodPanel { padding: clamp(16px, 2vw, 22px); background: var(--s-surface); }
 .searchRow { display: flex; gap: 10px; margin-bottom: 18px; }
 .searchInput {
-  flex: 1; min-width: 0;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--s-border);
-  background: var(--s-bg);
-  color: var(--s-text);
-  font: inherit;
+  flex: 1; min-width: 0; padding: 12px 14px; border-radius: 10px;
+  border: 1px solid var(--s-border); background: var(--s-field); color: var(--s-text); font: inherit;
 }
 .searchInput:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
 
@@ -191,136 +171,84 @@
   font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--s-muted); margin-bottom: 8px;
 }
+/* Tidslinjeaksen farges av kategori-settet */
 .axis {
-  position: relative;
-  height: 3px; border-radius: 2px;
-  background: linear-gradient(90deg, var(--s-border), color-mix(in srgb, var(--s-accent) 55%, transparent), var(--s-border));
-  margin: 0 6px 26px;
+  position: relative; height: 4px; border-radius: 3px; margin: 0 6px 24px;
+  background: linear-gradient(90deg,
+    var(--s-tl-period) 0%, var(--s-tl-national) 28%,
+    var(--s-tl-historical) 55%, var(--s-tl-object) 78%, var(--s-tl-century) 100%);
 }
 .eraRow { display: flex; flex-wrap: wrap; gap: 7px; }
 .era {
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--s-border);
-  background: var(--s-surface);
-  color: var(--s-text);
-  font: inherit; font-size: 0.82rem;
-  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 12px; border-radius: var(--s-pill);
+  border: 1px solid var(--s-border); background: var(--s-surface); color: var(--s-text);
+  font: inherit; font-size: 0.82rem; cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.era:hover { transform: translateY(-1px); }
-.eraActive {
-  background: linear-gradient(180deg, var(--s-accent) 0%, var(--s-accent-strong) 100%);
-  color: var(--s-on-accent);
-  border-color: var(--s-accent-strong);
-}
+.era:hover { transform: translateY(-1px); border-color: var(--era-c, var(--s-border-strong)); }
+.eraDot { width: 9px; height: 9px; border-radius: 50%; background: var(--era-c, var(--s-accent)); flex: none; }
+.eraActive { background: var(--s-accent); color: var(--s-on-accent); border-color: var(--s-accent); }
+.eraActive .eraDot { background: var(--s-on-accent); }
+
 .periodResult {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--s-border);
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--s-border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
 }
 .periodResult b { font-family: var(--s-display); font-style: italic; }
-.count { color: var(--s-accent-strong); font-variant-numeric: tabular-nums; }
+.count { color: var(--s-accent); font-variant-numeric: tabular-nums; font-weight: 600; }
 
 /* ===========================================================================
-   Datatyper + relasjoner (kort felt) + ekte objekt-/relasjonslenke
-   --------------------------------------------------------------------------- */
-.dataGrid {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: clamp(16px, 2.4vw, 32px);
-  align-items: stretch;
-}
+   Data + relasjoner + ekte objektkort
+--------------------------------------------------------------------------- */
+.dataGrid { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(16px, 2.4vw, 32px); align-items: stretch; }
 .statStrip { display: flex; gap: 14px; flex-wrap: wrap; margin: 4px 0 18px; }
 .stat { display: flex; flex-direction: column; }
-.statNum {
-  font-family: var(--s-display);
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  line-height: 1; color: var(--s-heading);
-}
+.statNum { font-family: var(--s-display); font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1; color: var(--s-heading); }
 .statLbl { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--s-muted); margin-top: 4px; }
-
 .relChips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 .chip {
-  padding: 5px 11px; border-radius: 999px;
-  border: 1px solid var(--s-border); background: var(--s-surface-soft);
-  font-size: 0.8rem; color: var(--s-text);
+  padding: 5px 11px; border-radius: var(--s-pill);
+  border: 1px solid var(--s-border); background: var(--s-chip); font-size: 0.8rem; color: var(--s-text); text-decoration: none;
 }
+a.chip:hover { border-color: var(--s-accent); }
 
-/* Ekte objekt-kort (lenker til objektpresentasjon + relasjon) */
 .objCard { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .objHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .objTitle { font-family: var(--s-display); font-size: 1.05rem; color: var(--s-heading); }
 .objTag { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--s-muted); }
 .objImg {
-  aspect-ratio: 16 / 7;
-  border-radius: 10px;
-  border: 1px solid var(--s-border);
-  background:
-    repeating-linear-gradient(135deg, color-mix(in srgb, var(--s-accent) 6%, transparent) 0 10px, transparent 10px 20px),
-    var(--s-surface-soft);
-  display: grid; place-items: center;
-  color: var(--s-muted); font-size: 0.8rem;
-  object-fit: cover;
+  aspect-ratio: 16 / 7; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--s-border); background: var(--s-surface-soft);
 }
 .objRel { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.objFoot { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.objFoot { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; align-items: center; }
 
 /* ===========================================================================
-   MEDLEMSKAP (fullbredde) — gratis-start + Bronse / Soelv (hevet) / Gull
-   --------------------------------------------------------------------------- */
+   MEDLEMSKAP (fullbredde)
+--------------------------------------------------------------------------- */
 .memberHead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
-
 .freeBanner {
   display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
-  padding: 14px 18px; margin: 18px 0 6px;
-  border-radius: var(--s-radius);
-  border: 1px dashed var(--s-accent);
-  background: color-mix(in srgb, var(--s-accent) 8%, var(--s-surface));
+  padding: 14px 18px; margin: 18px 0 6px; border-radius: var(--s-radius);
+  border: 1px dashed var(--s-border-strong); background: var(--s-accent-soft);
 }
 .freeBanner strong { font-family: var(--s-display); font-style: italic; font-size: 1.1rem; color: var(--s-heading); }
-
 .discount {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 12px; border-radius: 999px;
-  background: var(--s-accent-strong); color: var(--s-on-accent);
-  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em;
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--s-pill);
+  background: var(--s-gold); color: #2a1f08; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.03em;
 }
+.toggle { display: inline-flex; padding: 4px; gap: 4px; border-radius: var(--s-pill); border: 1px solid var(--s-border); background: var(--s-surface); }
+.toggleBtn { padding: 7px 16px; border-radius: var(--s-pill); border: 0; background: transparent; color: var(--s-muted); font: inherit; font-size: 0.85rem; cursor: pointer; }
+.toggleOn { background: var(--s-accent); color: var(--s-on-accent); font-weight: 600; }
 
-/* mnd/aar-bryter */
-.toggle { display: inline-flex; padding: 4px; gap: 4px; border-radius: 999px; border: 1px solid var(--s-border); background: var(--s-surface); }
-.toggleBtn {
-  padding: 7px 16px; border-radius: 999px; border: 0; background: transparent;
-  color: var(--s-muted); font: inherit; font-size: 0.85rem; cursor: pointer;
-}
-.toggleOn { background: var(--s-text); color: var(--s-bg); font-weight: 600; }
-
-.tierGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  align-items: stretch;
-  margin-top: 22px;
-}
-.tier {
-  position: relative;
-  display: flex; flex-direction: column; gap: 12px;
-  padding: 22px;
-}
-/* Soelv hevet fremfor de andre — beste valg */
-.tierFeatured {
-  transform: translateY(-12px);
-  border-color: var(--s-accent) !important;
-  box-shadow: 0 26px 54px rgba(28, 22, 12, 0.2);
-}
+.tierGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; margin-top: 22px; }
+.tier { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 22px; background: var(--s-surface); }
+.tierFeatured { transform: translateY(-12px); border-color: var(--s-accent) !important; box-shadow: var(--s-shadow-lg); }
 .bestPick {
   position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-  padding: 5px 14px; border-radius: 999px;
-  background: linear-gradient(180deg, var(--s-accent) 0%, var(--s-accent-strong) 100%);
-  color: var(--s-on-accent); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+  padding: 5px 14px; border-radius: var(--s-pill); background: var(--s-gold); color: #2a1f08;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
 }
 .tierName { font-family: var(--s-display); font-size: 1.3rem; color: var(--s-heading); }
 .tierFor { font-size: 0.84rem; color: var(--s-muted); margin-top: -6px; }
@@ -333,94 +261,76 @@
 .cap span { display: block; font-size: 0.74rem; color: var(--s-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .benefits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .benefits li { display: flex; gap: 9px; font-size: 0.88rem; color: var(--s-text); line-height: 1.4; }
-.benefits li::before { content: "✦"; color: var(--s-accent-strong); flex: none; }
+.benefits li::before { content: "\2726"; color: var(--s-accent); flex: none; }
 .pkgNote { font-size: 0.78rem; color: var(--s-muted); }
 .tier .btn { margin-top: auto; justify-content: center; }
 
-/* Platinum + Forhandler (fullbredde-callouts under nivaaene) */
 .extraGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
-.extra { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-.extraTag { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--s-accent-strong); }
+.extra { padding: 20px; display: flex; flex-direction: column; gap: 8px; background: var(--s-surface); }
+.extraTag { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--s-accent); }
 .compareLink { margin-top: 18px; }
 
 /* ===========================================================================
-   QUOTE-felt (morsom) + bilde
-   --------------------------------------------------------------------------- */
+   QUOTE
+--------------------------------------------------------------------------- */
 .quoteWrap { display: grid; grid-template-columns: 1fr 0.8fr; gap: clamp(18px, 3vw, 40px); align-items: center; }
 .quoteFig { margin: 0; }
-.quoteText {
-  margin: 0;
-  font-family: var(--s-display);
-  font-style: italic;
-  font-size: clamp(1.4rem, 3vw, 2.1rem);
-  line-height: 1.22;
-  color: var(--s-heading);
-}
-.quoteText span { color: var(--s-accent-strong); }
+.quoteText { margin: 0; font-family: var(--s-display); font-style: italic; font-size: clamp(1.4rem, 3vw, 2.1rem); line-height: 1.22; color: var(--s-heading); }
+.quoteText span { color: var(--s-accent); }
 .quoteCite { display: block; margin-top: 14px; font-family: var(--s-body); font-style: normal; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--s-muted); }
-.quoteImg {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: var(--s-radius);
-  border: 1px solid var(--s-border);
-  object-fit: cover;
-  background:
-    radial-gradient(80% 60% at 70% 30%, color-mix(in srgb, var(--s-accent) 16%, transparent), transparent 70%),
-    var(--s-surface-soft);
-  display: grid; place-items: center;
-  color: var(--s-muted); font-size: 0.82rem; text-align: center; padding: 12px;
-}
+.quoteImg { width: 100%; aspect-ratio: 4 / 3; border-radius: var(--s-radius); overflow: hidden; border: 1px solid var(--s-border); background: var(--s-surface-soft); }
 
 /* ===========================================================================
-   "Har du en samling" — bli medlem + tre blurbs
-   --------------------------------------------------------------------------- */
+   "Har du en samling"
+--------------------------------------------------------------------------- */
 .blurbGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; }
-.blurb { padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+.blurb { padding: 20px; display: flex; flex-direction: column; gap: 6px; background: var(--s-surface); }
 
 /* ===========================================================================
-   "Hva vil du utforske" — tre perspektiver (I/II/III)
-   --------------------------------------------------------------------------- */
+   "Hva vil du utforske" — tre perspektiver
+--------------------------------------------------------------------------- */
 .perspGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
-.persp { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
-.perspImg {
-  width: 100%; aspect-ratio: 16 / 10; object-fit: cover;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--s-accent) 14%, transparent), transparent 60%),
-    var(--s-surface-soft);
-  display: grid; place-items: center; color: var(--s-muted); font-size: 0.8rem;
-}
+.persp { padding: 0; overflow: hidden; display: flex; flex-direction: column; background: var(--s-surface); }
+.perspImg { width: 100%; aspect-ratio: 16 / 10; overflow: hidden; background: var(--s-surface-soft); border-bottom: 1px solid var(--s-border); }
 .perspBody { padding: 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.perspNum { font-family: var(--s-display); font-style: italic; font-size: 0.9rem; color: var(--s-accent-strong); }
+.perspNum { font-family: var(--s-display); font-style: italic; font-size: 0.9rem; color: var(--s-accent); }
 .perspBody .btnRow { margin-top: auto; }
 
 /* ===========================================================================
-   Komme igang (trinn) + Maalsetting (kommer) + Slutt-CTA
-   --------------------------------------------------------------------------- */
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; counter-reset: step; }
-.step { padding: 18px; }
-.stepNo {
-  display: inline-grid; place-items: center;
-  width: 30px; height: 30px; border-radius: 50%;
-  border: 1px solid var(--s-accent); color: var(--s-accent-strong);
-  font-family: var(--s-display); font-size: 0.95rem; margin-bottom: 8px;
-}
+   Komme i gang + Maalsetting
+--------------------------------------------------------------------------- */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.step { padding: 18px; background: var(--s-surface); }
+.stepNo { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--s-accent); color: var(--s-accent); font-family: var(--s-display); font-size: 0.95rem; margin-bottom: 8px; }
 
 .goalGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 24px; }
-.goal { padding: 18px; }
-.goalState { display: inline-block; margin-bottom: 8px; padding: 3px 9px; border-radius: 999px; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.goal { padding: 18px; background: var(--s-surface); }
+.goalState { display: inline-block; margin-bottom: 8px; padding: 3px 9px; border-radius: var(--s-pill); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .stateLive { background: color-mix(in srgb, var(--s-ok) 16%, transparent); color: var(--s-ok); }
-.stateSoon { background: color-mix(in srgb, var(--s-accent) 14%, transparent); color: var(--s-accent-strong); }
+.stateSoon { background: var(--s-accent-soft); color: var(--s-accent); }
 
-.finalCta { text-align: center; }
-.finalCta .h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); }
-.philanthrope {
-  max-width: 60ch; margin: 12px auto 0; color: var(--s-muted); line-height: 1.6;
+/* ===========================================================================
+   Slutt-CTA med ANNO 2022-stempel
+--------------------------------------------------------------------------- */
+.stampField { position: relative; overflow: hidden; }
+.stamp {
+  position: absolute; top: 50%; left: 50%;
+  width: min(64vw, 460px); aspect-ratio: 1; transform: translate(-50%, -50%) rotate(-8deg);
+  color: var(--s-accent); opacity: 0.10; pointer-events: none; z-index: 0;
 }
+.finalCta { position: relative; z-index: 1; text-align: center; }
+.finalCta .h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); }
+.philanthrope { max-width: 60ch; margin: 12px auto 0; color: var(--s-muted); line-height: 1.6; }
 .finalCta .btnRow { justify-content: center; }
 
 /* ===========================================================================
-   Animasjon (reveal) — respekterer reduced-motion
-   --------------------------------------------------------------------------- */
+   SVG-illustrasjoner
+--------------------------------------------------------------------------- */
+.art { display: block; width: 100%; height: 100%; }
+
+/* ===========================================================================
+   Animasjon
+--------------------------------------------------------------------------- */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .revealIn { opacity: 1; transform: none; }
 
@@ -428,11 +338,12 @@
   .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .era, .arrow { transition: none; }
   .tierFeatured { transform: none; }
+  .stamp { transform: translate(-50%, -50%) rotate(-8deg); }
 }
 
 /* ===========================================================================
    Responsiv
-   --------------------------------------------------------------------------- */
+--------------------------------------------------------------------------- */
 @media (max-width: 980px) {
   .hero { grid-template-columns: 1fr; }
   .dataGrid, .quoteWrap { grid-template-columns: 1fr; }

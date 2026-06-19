@@ -15,20 +15,28 @@
  */
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import s from "./start.module.css";
+import {
+  BanknoteArt,
+  CompassMapArt,
+  SamlerArt,
+  HistorieArt,
+  FinansArt,
+  AnnoStamp,
+} from "./StartArt";
 
 /* ---- Data (teaser-tall for landingssiden; ekte tall hentes via API i app) ---- */
 const TOTAL_OBJ = 3180; // 2 200 sedler + 980 mynter
 
 const ERAS = [
-  { id: "spesidaler", label: "1816–1873", name: "Spesidaler", count: 180 },
-  { id: "kroneunion", label: "1875–1905", name: "Kroneunion", count: 240 },
-  { id: "selvstendig", label: "1905–1945", name: "Selvstendig Norge", count: 410 },
-  { id: "femte-utgave", label: "1966–1983", name: "5. seddelutgave", count: 320 },
-  { id: "moderne", label: "1994–", name: "Moderne", count: 285 },
+  { id: "spesidaler", label: "1816–1873", name: "Spesidaler", count: 180, cat: "var(--s-tl-period)" },
+  { id: "kroneunion", label: "1875–1905", name: "Kroneunion", count: 240, cat: "var(--s-tl-national)" },
+  { id: "selvstendig", label: "1905–1945", name: "Selvstendig Norge", count: 410, cat: "var(--s-tl-historical)" },
+  { id: "femte-utgave", label: "1966–1983", name: "5. seddelutgave", count: 320, cat: "var(--s-tl-object)" },
+  { id: "moderne", label: "1994–", name: "Moderne", count: 285, cat: "var(--s-tl-century)" },
 ];
 
 type Tier = {
@@ -170,9 +178,11 @@ export default function StartClient() {
                   key={e.id}
                   type="button"
                   className={`${s.era} ${era === e.id ? s.eraActive : ""}`}
+                  style={{ "--era-c": e.cat } as CSSProperties}
                   aria-pressed={era === e.id}
                   onClick={() => setEra(era === e.id ? null : e.id)}
                 >
+                  <span className={s.eraDot} aria-hidden="true" />
                   {e.name} · {e.label}
                 </button>
               ))}
@@ -241,8 +251,8 @@ export default function StartClient() {
                 <span className={s.objTitle}>10 kroner · 1979 · BH</span>
                 <span className={s.objTag}>Norske sedler</span>
               </div>
-              {/* Bytt placeholder til <img src="/bilder/objekt/norske-sedler-9.webp" .../> */}
-              <div className={s.objImg}>variant_obverse_image_path</div>
+              {/* Bytt ev. til <img src="/bilder/objekt/norske-sedler-9.webp" .../> */}
+              <div className={s.objImg}><BanknoteArt /></div>
               <div className={s.objRel}>
                 <span className={s.objTag}>Relasjon:</span>
                 <Link className={s.chip} href="/relasjon/regent/olav-v">
@@ -400,9 +410,9 @@ export default function StartClient() {
                 <cite className={s.quoteCite}>— Samlervisdom, anno 2022</cite>
               </blockquote>
             </figure>
-            {/* Bytt placeholder til <img src="/bilder/start/quote-polfarer.webp" .../> */}
+            {/* Bytt ev. til <img src="/bilder/start/quote-polfarer.webp" .../> */}
             <div className={`ct-surface ct-sig ${s.quoteImg}`}>
-              quote-polfarer.webp
+              <CompassMapArt />
             </div>
           </div>
         </div>
@@ -460,36 +470,38 @@ export default function StartClient() {
           <div className={s.perspGrid}>
             {[
               {
-                num: "I.", kicker: "Personlig oversikt", name: "Samler",
-                img: "02_samler-collectium.webp", href: "/samler", cta: "Til samler",
+                num: "I.", kicker: "Personlig oversikt", name: "Samler", Art: SamlerArt,
+                href: "/samler", cta: "Til samler",
                 text: "Bygg din egen samling, marker ønskeliste og favoritter, registrer kjøp og salg, og hold dokumentasjon samlet ett sted.",
               },
               {
-                num: "II.", kicker: "Konger og perioder", name: "Historie",
-                img: "03_historie-konge-regent-collectium.webp", href: "/historie", cta: "Til historie",
+                num: "II.", kicker: "Konger og perioder", name: "Historie", Art: HistorieArt,
+                href: "/historie", cta: "Til historie",
                 text: "Se regenter, signaturer, perioder, materialer, utgaver og motiver — som relasjoner du kan åpne fra hvert objekt.",
               },
               {
-                num: "III.", kicker: "Verdi og marked", name: "Finans",
-                img: "04_finans-markedsindex-collectium.webp", href: "/finans", cta: "Til finans",
+                num: "III.", kicker: "Verdi og marked", name: "Finans", Art: FinansArt,
+                href: "/finans", cta: "Til finans",
                 text: "Følg markedsverdi, trend og prisobservasjoner. Sammenlign egen samling mot marked og se utvikling over tid.",
               },
-            ].map((p) => (
-              <article key={p.name} className={`ct-surface ct-hover ${s.persp}`}>
-                {/* Bytt placeholder til <img src={`/bilder/start/${p.img}`} .../> */}
-                <div className={s.perspImg}>{p.img}</div>
-                <div className={s.perspBody}>
-                  <span className={s.perspNum}>{p.num} · {p.kicker}</span>
-                  <h3 className={s.h3}>{p.name}</h3>
-                  <p className={s.p}>{p.text}</p>
-                  <div className={s.btnRow}>
-                    <Link className={`${s.btn} ${s.btnGhost}`} href={p.href}>
-                      {p.cta} <span className={s.arrow}>→</span>
-                    </Link>
+            ].map((p) => {
+              const Art = p.Art;
+              return (
+                <article key={p.name} className={`ct-surface ct-hover ${s.persp}`}>
+                  <div className={s.perspImg}><Art /></div>
+                  <div className={s.perspBody}>
+                    <span className={s.perspNum}>{p.num} · {p.kicker}</span>
+                    <h3 className={s.h3}>{p.name}</h3>
+                    <p className={s.p}>{p.text}</p>
+                    <div className={s.btnRow}>
+                      <Link className={`${s.btn} ${s.btnGhost}`} href={p.href}>
+                        {p.cta} <span className={s.arrow}>→</span>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -562,8 +574,11 @@ export default function StartClient() {
         </div>
       </section>
 
-      {/* ============================================================= 9 · SLUTT-CTA */}
-      <section className={`${s.section} ${s.soft}`}>
+      {/* ============================================================= 9 · SLUTT-CTA (ANNO 2022) */}
+      <section className={`${s.section} ${s.tint} ${s.stampField}`}>
+        <div className={s.stamp} aria-hidden="true">
+          <AnnoStamp />
+        </div>
         <div className={`${s.narrow} ${s.finalCta} ${s.reveal}`} data-reveal>
           <span className={s.eyebrow}>Registrer deg i dag</span>
           <h2 className={s.h2}>Bli med på å bygge katalogen</h2>
