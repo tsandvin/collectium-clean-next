@@ -2,49 +2,46 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Tidslinjeperiode API
+ * Period timeline test API
  *
  * Definering / formål:
- * Read-only Next.js route handler som henter periode-/tidslinjedata fra Neon/Postgres.
+ * Read-only Next.js route handler for Tidslinjeperiode. Returnerer perioder,
+ * filtre og katalogtreff basert på Neon/Postgres-data.
  *
  * Bruksområde:
- * Brukes av /test/Periodetidslinje for å vise sanne perioder, nivåer og relasjonskoblinger.
+ * Brukes av /test/Periodetidslinje og /test/period-timeline.
  *
  * Berørte sider / routes:
  * - /test/Periodetidslinje
+ * - /test/period-timeline
  *
  * Berørte API-ruter:
  * - GET /api/test/period-timeline
  *
  * Berørte tabeller / views:
  * - ct_v_period_filter_options
- * - ct_v_period_filter_registry_active
- * - ct_catalog_period_relations
- * - ct_v_catalog_period_relations
- * - ct_sn_period_relation
- * - ct_sn_period_relation_links
- * - ct_sn_period_type_registry
- * - ct_v_period_filter_find_relations
+ * - ct_v_catalog_period_relations når tilgjengelig
+ * - ct_v_object_presentation_resolved når tilgjengelig
  *
  * Dataretning:
- * Neon/Postgres -> Next.js route handler -> JSON -> React UI
+ * Neon/Postgres -> route handler -> JSON -> React UI
  *
  * Logging:
  * log_category: test.period_timeline
- * log_action: read
+ * log_action: api_read
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-API-0001 / CHANGE-2026-06-19-0001
+ * CT-PERIOD-TIMELINE-V3
  */
 
 import { NextResponse } from "next/server";
+import { Pool } from "pg";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type DbRow = {
-  period_slug: string | null;
-  display_name_no: string | null;
+type PeriodRow = {
+  period_slug: string;
+  display_name_no: string;
   period_type_key: string | null;
   period_type_label_no: string | null;
   period_level: number | null;
@@ -59,170 +56,190 @@ type DbRow = {
   timeline_group: string | null;
 };
 
-type QueryResult = { rows: DbRow[]; driver: string };
-
-type PostgresJsSql = {
-  unsafe: (query: string) => Promise<DbRow[]>;
-  end: () => Promise<void>;
+type CatalogRow = {
+  object_id: number | string | null;
+  source_key: string | null;
+  object_group: string | null;
+  title_no: string | null;
+  source_catalog_number: string | null;
+  denomination_raw_no: string | null;
+  object_year_label: string | null;
+  publication_year_label: string | null;
+  denomination_issue_raw_no: string | null;
+  variant_type_raw_no: string | null;
 };
 
-const TIMELINE_QUERY = `
-  with period_rows as (
-    select
-      p.period_slug::text as period_slug,
-      p.display_name_no::text as display_name_no,
-      p.period_type_key::text as period_type_key,
-      p.period_type_label_no::text as period_type_label_no,
-      p.period_level::int as period_level,
-      p.parent_period_slug::text as parent_period_slug,
-      p.start_year::int as start_year,
-      p.end_year::int as end_year,
-      p.summary_short_no::text as summary_short_no,
-      p.collectium_relevance_no::text as collectium_relevance_no,
-      p.relation_href::text as relation_href,
-      null::int as object_count,
-      null::int as relation_count,
-      coalesce(p.period_type_label_no::text, p.period_type_key::text, 'Ukjent') as timeline_group
-    from public.ct_v_period_filter_options p
-  )
-  select *
-  from period_rows
-  order by
-    case when start_year is null then 1 else 0 end,
-    start_year asc,
-    end_year asc,
-    display_name_no asc
-  limit 500
-`;
+let pool: Pool | null = null;
 
-function connectionString() {
+function getConnectionString(): string | null {
   return (
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
     process.env.POSTGRES_PRISMA_URL ||
     process.env.NEON_DATABASE_URL ||
-    ""
+    null
   );
 }
 
-async function dynamicImport(moduleName: string): Promise<unknown> {
-  const importer = new Function("moduleName", "return import(moduleName)") as (value: string) => Promise<unknown>;
-  return importer(moduleName);
+function getPool(): Pool {
+  const connectionString = getConnectionString();
+  if (!connectionString) {
+    throw new Error("DATABASE_URL/POSTGRES_URL/NEON_DATABASE_URL mangler.");
+  }
+  if (!pool) {
+    pool = new Pool({ connectionString, ssl: connectionString.includes("localhost") ? false : { rejectUnauthorized: false } });
+  }
+  return pool;
 }
 
-async function queryWithPostgresJs(url: string): Promise<QueryResult> {
-  const mod = (await dynamicImport("postgres")) as { default?: (url: string, options?: Record<string, unknown>) => PostgresJsSql };
-  const postgres = mod.default;
-
-  if (!postgres) {
-    throw new Error("postgres_default_export_missing");
-  }
-
-  const sql = postgres(url, { ssl: "require" });
-
-  try {
-    const rows = await sql.unsafe(TIMELINE_QUERY);
-    return { rows, driver: "postgres" };
-  } finally {
-    await sql.end();
-  }
+function asNumber(value: string | null, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-async function queryWithPg(url: string): Promise<QueryResult> {
-  const mod = (await dynamicImport("pg")) as {
-    Pool?: new (config: Record<string, unknown>) => { query: (query: string) => Promise<{ rows: DbRow[] }>; end: () => Promise<void> };
-  };
-
-  if (!mod.Pool) {
-    throw new Error("pg_pool_export_missing");
-  }
-
-  const pool = new mod.Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const yearFrom = asNumber(url.searchParams.get("year_from"), 1814);
+  const yearTo = asNumber(url.searchParams.get("year_to"), 2024);
+  const periodSlug = url.searchParams.get("period_slug");
+  const objectType = url.searchParams.get("object_type") || "Verdibrev";
 
   try {
-    const result = await pool.query(TIMELINE_QUERY);
-    return { rows: result.rows, driver: "pg" };
-  } finally {
-    await pool.end();
-  }
-}
+    const db = getPool();
 
-async function readTimelineRows(): Promise<QueryResult> {
-  const url = connectionString();
+    const periodsResult = await db.query<PeriodRow>(
+      `
+        select
+          period_slug,
+          display_name_no,
+          period_type_key,
+          period_type_label_no,
+          period_level,
+          parent_period_slug,
+          start_year,
+          end_year,
+          summary_short_no,
+          collectium_relevance_no,
+          relation_href,
+          null::integer as object_count,
+          null::integer as relation_count,
+          period_type_label_no as timeline_group
+        from ct_v_period_filter_options
+        order by coalesce(start_year, 999999), coalesce(end_year, 999999), display_name_no
+      `,
+    );
 
-  if (!url) {
-    throw new Error("missing_database_url");
-  }
+    const rows = periodsResult.rows;
+    const relationTypes = Array.from(new Set(rows.map((row) => row.period_type_key).filter(Boolean))) as string[];
 
-  const errors: string[] = [];
+    let catalogRows: CatalogRow[] = [];
+    const warnings: string[] = [];
 
-  try {
-    return await queryWithPostgresJs(url);
-  } catch (error) {
-    errors.push(error instanceof Error ? error.message : "postgres_failed");
-  }
+    try {
+      const selectedSlug = periodSlug || rows.find((row) => row.period_slug === "svensk-union")?.period_slug || null;
+      const sourceObjectGroup = objectType === "banknote" ? "banknote" : objectType === "coin" ? "coin" : null;
 
-  try {
-    return await queryWithPg(url);
-  } catch (error) {
-    errors.push(error instanceof Error ? error.message : "pg_failed");
-  }
+      const catalogResult = await db.query<CatalogRow>(
+        `
+          select distinct
+            o.object_id,
+            o.source_key,
+            o.object_group,
+            o.title_no,
+            o.source_catalog_number,
+            o.denomination_raw_no,
+            o.object_year_label,
+            o.publication_year_label,
+            o.denomination_issue_raw_no,
+            o.variant_type_raw_no
+          from ct_v_object_presentation_resolved o
+          where (
+            ($1::text is null)
+            or exists (
+              select 1
+              from ct_v_catalog_period_relations cpr
+              where cpr.source_key = o.source_key
+                and cpr.object_group = o.object_group
+                and cpr.object_id = o.object_id
+                and cpr.period_slug = $1
+            )
+          )
+          and ($2::text is null or o.object_group = $2)
+          and (
+            nullif(regexp_replace(coalesce(o.object_year_label, o.publication_year_label, ''), '[^0-9-]', '', 'g'), '')::integer
+              between $3::integer and $4::integer
+            or o.object_year_label is null
+          )
+          order by o.source_key, o.object_group, o.object_id
+          limit 12
+        `,
+        [selectedSlug, sourceObjectGroup, yearFrom, yearTo],
+      );
+      catalogRows = catalogResult.rows;
+    } catch (catalogError) {
+      warnings.push("catalog_period_relation_lookup_not_available");
+      const fallbackResult = await db.query<CatalogRow>(
+        `
+          select
+            object_id,
+            source_key,
+            object_group,
+            title_no,
+            source_catalog_number,
+            denomination_raw_no,
+            object_year_label,
+            publication_year_label,
+            denomination_issue_raw_no,
+            variant_type_raw_no
+          from ct_v_object_presentation_resolved
+          where (
+            nullif(regexp_replace(coalesce(object_year_label, publication_year_label, ''), '[^0-9-]', '', 'g'), '')::integer
+              between $1::integer and $2::integer
+            or object_year_label is null
+          )
+          order by source_key, object_group, object_id
+          limit 12
+        `,
+        [yearFrom, yearTo],
+      );
+      catalogRows = fallbackResult.rows;
+    }
 
-  throw new Error(`no_supported_db_driver:${errors.join("|")}`);
-}
-
-function buildSummary(rows: DbRow[]) {
-  const relationTypes = Array.from(
-    new Set(rows.map((row) => row.period_type_key).filter((value): value is string => Boolean(value))),
-  ).sort((a, b) => a.localeCompare(b, "nb"));
-
-  return {
-    summary: {
-      totalPeriods: rows.length,
-      level1Count: rows.filter((row) => row.period_level === 1).length,
-      level2Count: rows.filter((row) => row.period_level === 2).length,
-      level3Count: rows.filter((row) => row.period_level === 3).length,
-      relationTypeCount: relationTypes.length,
-      periodsWithRelationHref: rows.filter((row) => Boolean(row.relation_href)).length,
-      periodsWithObjectRelation: null,
-    },
-    relationTypes,
-  };
-}
-
-export async function GET() {
-  try {
-    const result = await readTimelineRows();
-    const { summary, relationTypes } = buildSummary(result.rows);
+    warnings.push("object_count_not_available", "relation_count_not_available");
 
     return NextResponse.json({
       ok: true,
-      source: `neon:${result.driver}`,
+      source: "neon:pg",
       title: "Tidslinjeperiode",
-      rows: result.rows,
-      summary,
+      rows,
+      summary: {
+        totalPeriods: rows.length,
+        level1Count: rows.filter((row) => row.period_level === 1).length,
+        level2Count: rows.filter((row) => row.period_level === 2).length,
+        level3Count: rows.filter((row) => row.period_level === 3).length,
+        relationTypeCount: relationTypes.length,
+        periodsWithRelationHref: rows.filter((row) => row.relation_href).length,
+        periodWindow: `${yearFrom}-${yearTo}`,
+        selectedPeriod: periodSlug,
+        catalogHits: catalogRows.length,
+      },
       relationTypes,
-      warnings: ["object_count_not_available", "relation_count_not_available"],
+      catalogRows,
+      warnings: Array.from(new Set(warnings)),
     });
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
-        source: "neon",
+        source: "neon:pg",
         title: "Tidslinjeperiode",
         rows: [],
-        summary: {
-          totalPeriods: 0,
-          level1Count: 0,
-          level2Count: 0,
-          level3Count: 0,
-          relationTypeCount: 0,
-          periodsWithRelationHref: 0,
-          periodsWithObjectRelation: null,
-        },
+        summary: {},
         relationTypes: [],
+        catalogRows: [],
         warnings: [],
-        error: error instanceof Error ? error.message : "unknown_period_timeline_error",
+        error: error instanceof Error ? error.message : "Ukjent API-feil.",
       },
       { status: 500 },
     );

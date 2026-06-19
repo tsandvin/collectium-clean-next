@@ -2,16 +2,17 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Tidslinjeperiode testside
+ * Tidslinjeperiode alias-side
  *
  * Definering / formål:
- * Next.js App Router-side for ny horisontal periodetidslinje med Masterfilter,
- * tidslinjevalg, dynamiske informasjonsfelt og katalogtreff.
+ * Alias-route for brukere som åpner /test/period-timeline. Hindrer 404 og viser samme
+ * Tidslinjeperiode-komponent som /test/Periodetidslinje.
  *
  * Bruksområde:
- * Brukes som testside for periodefilter/tidslinje i UI/UX 8.6.
+ * Midlertidig test-/kompatibilitetsroute.
  *
  * Berørte sider / routes:
+ * - /test/period-timeline
  * - /test/Periodetidslinje
  *
  * Berørte API-ruter:
@@ -19,15 +20,13 @@
  *
  * Berørte tabeller / views:
  * - ct_v_period_filter_options
- * - ct_catalog_period_relations / ct_v_catalog_period_relations når tilgjengelig
- * - ct_v_object_presentation_resolved når tilgjengelig
  *
  * Dataretning:
  * Neon -> API route -> Next.js page -> React client component -> UI
  *
  * Logging:
  * log_category: test.period_timeline
- * log_action: view
+ * log_action: alias_view
  *
  * Versjon:
  * CT-PERIOD-TIMELINE-V3
@@ -35,6 +34,6 @@
 
 import { CollectiumPeriodTimelineClient } from "@/components/period-timeline/CollectiumPeriodTimelineClient";
 
-export default function PeriodetidslinjePage() {
+export default function PeriodTimelineAliasPage() {
   return <CollectiumPeriodTimelineClient />;
 }
