@@ -520,45 +520,105 @@ function DynamicFacts({ hit, compact = false }: { hit: CatalogHit; compact?: boo
   );
 }
 
-function DynamicHistoryPanel({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
+function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
   return (
-    <section className={styles.cardHistoryPanel} aria-label="Historic dynamisk felt">
+    <section className={`${styles.cardHistoryPanel} ${styles[`cardPanel_${segment}`]}`} aria-label="Dynamisk kortfelt">
       <div className={styles.cardHistoryHeader}>
         <span className={styles.cardBookIcon} aria-hidden="true"><BookOpenIcon /></span>
-        <strong>Historie</strong>
-        <small>{period ? formatPeriodYears(period) : "Ingen periode valgt"}</small>
+        <strong>{SEGMENT_LABELS[segment]}</strong>
+        <small>{segment === "historie" && period ? formatPeriodYears(period) : cardMetaText(hit, period)}</small>
       </div>
       <dl className={styles.cardHistoryGrid}>
-        <div className={styles.cardHistoryItem}>
-          <dt>Regent / konge</dt>
-          <dd>{period && matchesRow(period, "row1") ? period.display_name_no : "Ikke registrert"}</dd>
-        </div>
-        <div className={styles.cardHistoryItem}>
-          <dt>Motiv / person</dt>
-          <dd>{valueOrMissing(hit.title_no || hit.source_catalog_number)}</dd>
-        </div>
-        <div className={styles.cardHistoryItem}>
-          <dt>Årstall</dt>
-          <dd>{objectYearLabel(hit)}</dd>
-        </div>
-        <div className={styles.cardHistoryItem}>
-          <dt>Historisk kontekst</dt>
-          <dd>{period?.summary_short_no || period?.display_name_no || "Ikke vurdert"}</dd>
-        </div>
-        <div className={styles.cardHistoryItem}>
-          <dt>Signatur</dt>
-          <dd>Ikke registrert</dd>
-        </div>
-        <div className={styles.cardHistoryItem}>
-          <dt>Relasjon</dt>
-          <dd>{period?.relation_href ? "Relasjon tilgjengelig" : "Ikke registrert"}</dd>
-        </div>
+        {segment === "samler" && (
+          <>
+            <div className={styles.cardHistoryItem}>
+              <dt>Hjerte</dt>
+              <dd>Ikke vurdert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Stjerne</dt>
+              <dd>Ikke vurdert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>I samling</dt>
+              <dd>Ikke registrert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Katalogstatus</dt>
+              <dd>{valueOrMissing(hit.source_catalog_number, "Katalogtreff")}</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Kilde / type</dt>
+              <dd>{valueOrMissing(hit.source_key)} · {valueOrMissing(hit.object_group)}</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Variant / status</dt>
+              <dd>{valueOrMissing(hit.variant_type_raw_no)} · Ikke vurdert</dd>
+            </div>
+          </>
+        )}
+        {segment === "historie" && (
+          <>
+            <div className={styles.cardHistoryItem}>
+              <dt>Regent / konge</dt>
+              <dd>{period && matchesRow(period, "row1") ? period.display_name_no : "Ikke registrert"}</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Motiv / person</dt>
+              <dd>{valueOrMissing(hit.title_no || hit.source_catalog_number)}</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Årstall</dt>
+              <dd>{objectYearLabel(hit)}</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Historisk kontekst</dt>
+              <dd>{period?.summary_short_no || period?.display_name_no || "Ikke vurdert"}</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Signatur</dt>
+              <dd>Ikke registrert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Relasjon</dt>
+              <dd>{period?.relation_href ? "Relasjon tilgjengelig" : "Ikke registrert"}</dd>
+            </div>
+          </>
+        )}
+        {segment === "finans" && (
+          <>
+            <div className={styles.cardHistoryItem}>
+              <dt>Estimert verdi</dt>
+              <dd>Ikke estimert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Markedsverdi</dt>
+              <dd>Mangler markedsverdi</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Trend</dt>
+              <dd>Ikke vurdert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Likviditet</dt>
+              <dd>Ikke vurdert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Auksjon / nettbutikk</dt>
+              <dd>Ikke vurdert</dd>
+            </div>
+            <div className={styles.cardHistoryItem}>
+              <dt>Indeksperiode</dt>
+              <dd>{period ? formatPeriodYears(period) : "Ikke valgt"}</dd>
+            </div>
+          </>
+        )}
       </dl>
     </section>
   );
 }
 
-function HorizontalCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
+function HorizontalCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -575,8 +635,8 @@ function HorizontalCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | 
           </div>
         </div>
         <div className={styles.cardBottomSection}>
-          <DynamicHistoryPanel hit={hit} period={period} />
-          <div className={styles.cardUnderHistoryActions}>
+          <DynamicCardPanel hit={hit} period={period} segment={segment} />
+          <div className={styles.cardUnderDynamicActions}>
             <DynamicActionButtons hit={hit} />
           </div>
         </div>
@@ -589,7 +649,7 @@ function HorizontalCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | 
   );
 }
 
-function StandingCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
+function StandingCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -600,7 +660,7 @@ function StandingCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | nu
       <p className={styles.cardMeta}>{cardMetaText(hit, period)}</p>
       <div className={styles.cardStandingDetails}>
         <div className={styles.cardStandingLeftColumn}>
-          <DynamicHistoryPanel hit={hit} period={period} />
+          <DynamicCardPanel hit={hit} period={period} segment={segment} />
         </div>
         <div className={styles.cardStandingRightColumn}>
           <DynamicActionPanel compact />
@@ -614,7 +674,7 @@ function StandingCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | nu
   );
 }
 
-function MuseumCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
+function MuseumCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -624,7 +684,7 @@ function MuseumCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null
       </div>
       <div className={styles.cardMuseumRight}>
         <h2>Museum · {title}</h2>
-        <DynamicHistoryPanel hit={hit} period={period} />
+        <DynamicCardPanel hit={hit} period={period} segment={segment} />
         <div className={styles.cardMuseumActions}>
           <DynamicActionButtons hit={hit} />
         </div>
@@ -681,6 +741,7 @@ export function CollectiumPeriodTimelineClient() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodRow | null>(null);
   const [segment, setSegment] = useState<SegmentKey>("samler");
+  const [cardSegment, setCardSegment] = useState<SegmentKey>("historie");
   const [viewMode, setViewMode] = useState<ViewMode>("timeline");
   const [cardLayout, setCardLayout] = useState<CardLayout>("horizontal");
   const [loading, setLoading] = useState(true);
@@ -1219,35 +1280,50 @@ export function CollectiumPeriodTimelineClient() {
             <p className={styles.eyebrow}>Katalogtreff</p>
             <h2>Treff fra valgt tidslinje og Masterfilter</h2>
           </div>
-          <div className={styles.viewSelectorsContainer}>
-            <button
-              type="button"
-              className={cardLayout === "horizontal" ? styles.viewSelectorActive : styles.viewSelector}
-              onClick={() => setCardLayout("horizontal")}
-            >
-              Horisontal
-            </button>
-            <button
-              type="button"
-              className={cardLayout === "standing" ? styles.viewSelectorActive : styles.viewSelector}
-              onClick={() => setCardLayout("standing")}
-            >
-              Stående
-            </button>
-            <button
-              type="button"
-              className={cardLayout === "list" ? styles.viewSelectorActive : styles.viewSelector}
-              onClick={() => setCardLayout("list")}
-            >
-              Liste
-            </button>
-            <button
-              type="button"
-              className={cardLayout === "museum" ? styles.viewSelectorActive : styles.viewSelector}
-              onClick={() => setCardLayout("museum")}
-            >
-              Museum
-            </button>
+          <div className={styles.catalogHeaderControls}>
+            <div className={styles.cardSegmentTabs} aria-label="Dynamisk kortfelt">
+              {(Object.keys(SEGMENT_LABELS) as SegmentKey[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={cardSegment === key ? styles.segmentButtonActive : styles.segmentButton}
+                  aria-pressed={cardSegment === key}
+                  onClick={() => setCardSegment(key)}
+                >
+                  {SEGMENT_LABELS[key]}
+                </button>
+              ))}
+            </div>
+            <div className={styles.viewSelectorsContainer}>
+              <button
+                type="button"
+                className={cardLayout === "horizontal" ? styles.viewSelectorActive : styles.viewSelector}
+                onClick={() => setCardLayout("horizontal")}
+              >
+                Horisontal
+              </button>
+              <button
+                type="button"
+                className={cardLayout === "standing" ? styles.viewSelectorActive : styles.viewSelector}
+                onClick={() => setCardLayout("standing")}
+              >
+                Stående
+              </button>
+              <button
+                type="button"
+                className={cardLayout === "list" ? styles.viewSelectorActive : styles.viewSelector}
+                onClick={() => setCardLayout("list")}
+              >
+                Liste
+              </button>
+              <button
+                type="button"
+                className={cardLayout === "museum" ? styles.viewSelectorActive : styles.viewSelector}
+                onClick={() => setCardLayout("museum")}
+              >
+                Museum
+              </button>
+            </div>
           </div>
           <span className={styles.badge}>{catalogRows.length} treff</span>
         </div>
@@ -1256,10 +1332,10 @@ export function CollectiumPeriodTimelineClient() {
         ) : (
           <div className={`${styles.catalogGrid} ${styles[`catalogGrid_${cardLayout}`]}`}>
             {catalogRows.map((hit, index) => {
-              if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} period={selectedPeriod} />;
-              if (cardLayout === "standing") return <StandingCard key={index} hit={hit} period={selectedPeriod} />;
+              if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
+              if (cardLayout === "standing") return <StandingCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
               if (cardLayout === "list") return <ListCard key={index} hit={hit} period={selectedPeriod} />;
-              return <MuseumCard key={index} hit={hit} period={selectedPeriod} />;
+              return <MuseumCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
             })}
           </div>
         )}

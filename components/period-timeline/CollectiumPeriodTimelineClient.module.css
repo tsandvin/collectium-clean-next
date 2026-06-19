@@ -1171,12 +1171,30 @@
   width: 100%;
 }
 
-.cardUnderHistoryActions {
+.cardUnderDynamicActions {
   margin-top: 8px;
   padding: 8px 10px;
   border: 1px solid var(--ct-border);
   border-radius: min(var(--ct-radius-card), 8px);
   background: var(--ct-panel-bg);
+}
+
+.catalogHeaderControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cardSegmentTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-panel-soft);
 }
 
 .ui85ListCard {
@@ -1950,6 +1968,18 @@
 .cardHistoryPanel {
   padding: 10px;
   border-radius: min(var(--ct-radius-card), 8px);
+}
+
+.cardPanel_samler {
+  border-color: color-mix(in srgb, #145c38 35%, var(--ct-border));
+}
+
+.cardPanel_historie {
+  border-color: color-mix(in srgb, #1e5a9a 35%, var(--ct-border));
+}
+
+.cardPanel_finans {
+  border-color: color-mix(in srgb, #b08a3e 40%, var(--ct-border));
 }
 
 .cardHistoryHeader {
