@@ -69,6 +69,12 @@ type CatalogRow = {
   variant_type_raw_no: string | null;
 };
 
+type PeriodCountRow = {
+  period_slug: string;
+  object_count: string | number | null;
+  relation_count: string | number | null;
+};
+
 let pool: Pool | null = null;
 
 function getConnectionString(): string | null {
@@ -130,11 +136,36 @@ export async function GET(request: Request) {
       `,
     );
 
-    const rows = periodsResult.rows;
+    let rows = periodsResult.rows;
+    const warnings: string[] = [];
+
+    try {
+      const countResult = await db.query<PeriodCountRow>(
+        `
+          select
+            period_slug,
+            count(distinct (source_key, object_group, object_id)) as object_count,
+            count(*) as relation_count
+          from ct_v_catalog_period_relations
+          group by period_slug
+        `,
+      );
+      const countsBySlug = new Map(countResult.rows.map((row) => [row.period_slug, row]));
+      rows = rows.map((row) => {
+        const counts = countsBySlug.get(row.period_slug);
+        return {
+          ...row,
+          object_count: counts?.object_count === null || typeof counts?.object_count === "undefined" ? null : Number(counts.object_count),
+          relation_count: counts?.relation_count === null || typeof counts?.relation_count === "undefined" ? null : Number(counts.relation_count),
+        };
+      });
+    } catch {
+      warnings.push("period_relation_counts_not_available");
+    }
+
     const relationTypes = Array.from(new Set(rows.map((row) => row.period_type_key).filter(Boolean))) as string[];
 
     let catalogRows: CatalogRow[] = [];
-    const warnings: string[] = [];
 
     try {
       const selectedSlug = periodSlug || rows.find((row) => row.period_slug === "svensk-union")?.period_slug || null;
@@ -167,9 +198,9 @@ export async function GET(request: Request) {
           )
           and ($2::text is null or o.object_group = $2)
           and (
-            nullif(regexp_replace(coalesce(o.object_year_label, o.publication_year_label, ''), '[^0-9-]', '', 'g'), '')::integer
+            substring(coalesce(o.object_year_label, o.publication_year_label, '') from '-?[0-9]{3,4}')::integer
               between $3::integer and $4::integer
-            or o.object_year_label is null
+            or substring(coalesce(o.object_year_label, o.publication_year_label, '') from '-?[0-9]{3,4}') is null
           )
           order by o.source_key, o.object_group, o.object_id
           limit 12
@@ -194,9 +225,9 @@ export async function GET(request: Request) {
             variant_type_raw_no
           from ct_v_object_presentation_resolved
           where (
-            nullif(regexp_replace(coalesce(object_year_label, publication_year_label, ''), '[^0-9-]', '', 'g'), '')::integer
+            substring(coalesce(object_year_label, publication_year_label, '') from '-?[0-9]{3,4}')::integer
               between $1::integer and $2::integer
-            or object_year_label is null
+            or substring(coalesce(object_year_label, publication_year_label, '') from '-?[0-9]{3,4}') is null
           )
           order by source_key, object_group, object_id
           limit 12
@@ -205,8 +236,6 @@ export async function GET(request: Request) {
       );
       catalogRows = fallbackResult.rows;
     }
-
-    warnings.push("object_count_not_available", "relation_count_not_available");
 
     return NextResponse.json({
       ok: true,

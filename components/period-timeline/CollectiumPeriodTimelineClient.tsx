@@ -37,8 +37,6 @@
 
 "use client";
 
-"use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -57,6 +55,21 @@ import styles from "./CollectiumPeriodTimelineClient.module.css";
 type SegmentKey = "samler" | "historie" | "finans";
 type ViewMode = "timeline" | "table";
 type CardLayout = "horizontal" | "standing" | "list" | "museum";
+type PeriodRowKey = "row1" | "row2" | "row3" | "row4";
+
+type PeriodRowDefinition = {
+  key: PeriodRowKey;
+  label: string;
+  selectLabel: string;
+  emptyLabel: string;
+  helper: string;
+  className: "row1" | "row2" | "row3" | "row4";
+};
+
+type GroupedPeriods = {
+  label: string;
+  periods: PeriodRow[];
+};
 
 type PeriodRow = {
   period_slug: string;
@@ -130,6 +143,72 @@ const SEGMENT_LABELS: Record<SegmentKey, string> = {
   finans: "Finans",
 };
 
+const PERIOD_ROW_DEFINITIONS: PeriodRowDefinition[] = [
+  {
+    key: "row1",
+    label: "Kongeperiode / nasjonal hovedperiode",
+    selectLabel: "Rad 1 · kongeperiode og nasjonale hovedperioder",
+    emptyLabel: "Velg kongeperiode eller nasjonal hovedperiode",
+    helper: "Grov historisk ramme: regent, dynasti, union, statsperiode og hovedepoke.",
+    className: "row1",
+  },
+  {
+    key: "row2",
+    label: "Sykdom / krig / finans / samfunnsperiode",
+    selectLabel: "Rad 2 · sykdom, krig, finans og samfunn",
+    emptyLabel: "Velg overlappende hendelses- eller samfunnsperiode",
+    helper: "Store hendelser og samfunnsperioder som kan overlappe hovedperioden.",
+    className: "row2",
+  },
+  {
+    key: "row3",
+    label: "Objektspesifikk periode / katalogperiode",
+    selectLabel: "Rad 3 · objektspesifikk periode",
+    emptyLabel: "Velg objekt-, katalog- eller relasjonsperiode",
+    helper: "Nærmeste kobling mot katalogtreff, utgaver, valører, varianter og relasjoner.",
+    className: "row3",
+  },
+  {
+    key: "row4",
+    label: "Valgfri periode",
+    selectLabel: "Rad 4 · valgfri periode",
+    emptyLabel: "Velg kryssperiode innen aktivt årsspenn",
+    helper: "Kryssfilter fra alle periodetyper som overlapper aktivt årsspenn.",
+    className: "row4",
+  },
+];
+
+const ROW4_GROUP_ORDER = [
+  "Konge / regent",
+  "Nasjonale perioder",
+  "Krig / konflikt",
+  "Sykdom / krise",
+  "Finans / økonomi",
+  "Pengehistorie",
+  "Objektperioder",
+  "Kultur / samfunn",
+  "Funn / proveniens",
+  "Lokale perioder",
+  "Andre perioder",
+];
+
+function normalizeText(value: string | null | undefined): string {
+  return (value || "").toLocaleLowerCase("nb");
+}
+
+function periodText(period: PeriodRow): string {
+  return [
+    period.period_slug,
+    period.display_name_no,
+    period.period_type_key,
+    period.period_type_label_no,
+    period.timeline_group,
+    period.summary_short_no,
+  ]
+    .map((value) => normalizeText(value))
+    .join(" ");
+}
+
 function normalizeEndYear(period: PeriodRow): number | null {
   if (typeof period.end_year === "number") return period.end_year;
   if (typeof period.start_year === "number") return CURRENT_YEAR;
@@ -152,13 +231,139 @@ function sortPeriods(a: PeriodRow, b: PeriodRow): number {
   return a.display_name_no.localeCompare(b.display_name_no, "nb");
 }
 
-function laneForPeriod(period: PeriodRow): string {
-  const key = period.period_type_key ?? "";
-  if (key === "regent_period" || key === "dynasty_period") return "Konger / regenter";
-  if (key === "union_period" || key === "historical_main_period") return "Nasjonale perioder";
-  if (key === "war_period" || key === "conflict_period" || key === "health_period") return "Historiske hendelser";
-  if (key === "monetary_period" || key === "banknote_issue_period" || key === "coin_issue_period" || key === "object_issue_period" || key === "economic_period") return "Penge / objektperioder";
-  return period.timeline_group || period.period_type_label_no || "Andre perioder";
+function matchesRow(period: PeriodRow, rowKey: PeriodRowKey): boolean {
+  if (rowKey === "row4") return true;
+
+  const text = periodText(period);
+  const key = normalizeText(period.period_type_key);
+  const label = normalizeText(period.period_type_label_no);
+
+  if (rowKey === "row1") {
+    return [
+      "regent",
+      "konge",
+      "king",
+      "dynasty",
+      "dynasti",
+      "national",
+      "nasjonal",
+      "historical_main",
+      "hovedperiode",
+      "union",
+      "state",
+      "statsperiode",
+      "independence",
+      "selvstendig",
+      "viking",
+      "middelalder",
+      "dansketiden",
+      "1814",
+      "haakon",
+      "olav",
+      "harald",
+      "oscar",
+    ].some((needle) => text.includes(needle));
+  }
+
+  if (rowKey === "row2") {
+    return [
+      "war",
+      "krig",
+      "conflict",
+      "konflikt",
+      "health",
+      "sykdom",
+      "epidemi",
+      "disease",
+      "finance",
+      "finans",
+      "economic",
+      "økonomi",
+      "okonomi",
+      "crisis",
+      "krise",
+      "society",
+      "samfunn",
+      "market",
+      "marked",
+      "inflasjon",
+      "bankkrise",
+      "oljealder",
+      "gjenreisning",
+    ].some((needle) => text.includes(needle));
+  }
+
+  if (rowKey === "row3") {
+    return [
+      "object",
+      "objekt",
+      "catalog",
+      "katalog",
+      "banknote",
+      "seddel",
+      "coin",
+      "mynt",
+      "issue",
+      "utgave",
+      "series",
+      "serie",
+      "denomination",
+      "valør",
+      "valor",
+      "print",
+      "trykk",
+      "material",
+      "signature",
+      "signatur",
+      "variant",
+      "relation",
+      "relasjon",
+      "monetary",
+      "penge",
+    ].some((needle) => key.includes(needle) || label.includes(needle) || text.includes(needle));
+  }
+
+  return false;
+}
+
+function primaryRowForPeriod(period: PeriodRow): PeriodRowKey {
+  if (matchesRow(period, "row1")) return "row1";
+  if (matchesRow(period, "row2")) return "row2";
+  if (matchesRow(period, "row3")) return "row3";
+  return "row4";
+}
+
+function row4GroupForPeriod(period: PeriodRow): string {
+  const text = periodText(period);
+  if (matchesRow(period, "row1") && /regent|konge|king|dynasty|dynasti|oscar|haakon|olav|harald/.test(text)) return "Konge / regent";
+  if (matchesRow(period, "row1")) return "Nasjonale perioder";
+  if (/war|krig|conflict|konflikt/.test(text)) return "Krig / konflikt";
+  if (/health|sykdom|epidemi|disease|crisis|krise/.test(text)) return "Sykdom / krise";
+  if (/finance|finans|economic|økonomi|okonomi|market|marked|inflasjon|bankkrise/.test(text)) return "Finans / økonomi";
+  if (/monetary|penge|banknote|seddel|coin|mynt/.test(text)) return "Pengehistorie";
+  if (matchesRow(period, "row3")) return "Objektperioder";
+  if (/culture|kultur|society|samfunn/.test(text)) return "Kultur / samfunn";
+  if (/provenance|proveniens|funn|find/.test(text)) return "Funn / proveniens";
+  if (/local|lokal|kommune|sted/.test(text)) return "Lokale perioder";
+  return "Andre perioder";
+}
+
+function groupPeriods(periods: PeriodRow[], groupForPeriod: (period: PeriodRow) => string): GroupedPeriods[] {
+  const grouped = new Map<string, PeriodRow[]>();
+  for (const period of periods) {
+    const group = groupForPeriod(period);
+    grouped.set(group, [...(grouped.get(group) || []), period]);
+  }
+
+  const knownGroups = ROW4_GROUP_ORDER.filter((group) => grouped.has(group));
+  const extraGroups = Array.from(grouped.keys())
+    .filter((group) => !ROW4_GROUP_ORDER.includes(group))
+    .sort((a, b) => a.localeCompare(b, "nb"));
+
+  return [...knownGroups, ...extraGroups].map((label) => ({
+    label,
+    periods: grouped.get(label) || [],
+  }));
 }
 
 function formatPeriodYears(period: PeriodRow): string {
@@ -185,6 +390,26 @@ function optionLabel(period: PeriodRow): string {
 
 function selectedSlugs(filters: Filters): string[] {
   return [filters.row1, filters.row2, filters.row3, filters.row4].filter(Boolean);
+}
+
+function valueOrMissing(value: string | number | null | undefined, fallback = "Ikke registrert"): string {
+  if (value === null || typeof value === "undefined" || value === "") return fallback;
+  return String(value);
+}
+
+function objectYearLabel(hit: CatalogHit): string {
+  return valueOrMissing(hit.object_year_label || hit.publication_year_label);
+}
+
+function cardMetaText(hit: CatalogHit, period: PeriodRow | null): string {
+  return [
+    valueOrMissing(hit.source_key, "Ukjent kilde"),
+    valueOrMissing(hit.object_group, "Ukjent gruppe"),
+    objectYearLabel(hit),
+    period?.display_name_no,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /* UI 8.5 Dynamic Card Helper Components */
@@ -260,10 +485,10 @@ function DynamicPriceBox({ listMode = false, compact = false }: { listMode?: boo
   return (
     <section className={`${styles.cardPriceBox} ${listMode ? styles.cardPriceBoxList : ""} ${compact ? styles.cardPriceBoxCompact : ""}`} aria-label="Estimert pris">
       <span>Estimert pris</span>
-      <strong>15 000 kr</strong>
+      <strong>Ikke estimert</strong>
       <small>
         <span className={styles.cardCheckIcon}><CheckCircleIcon /></span>
-        <span>Vurdert</span>
+        <span>Mangler markedsverdi</span>
       </small>
     </section>
   );
@@ -271,10 +496,10 @@ function DynamicPriceBox({ listMode = false, compact = false }: { listMode?: boo
 
 function DynamicFacts({ hit, compact = false }: { hit: CatalogHit; compact?: boolean }) {
   const hitFacts = [
-    { label: "Valørutgave", value: hit.denomination_raw_no || "100 kroner", icon: TagIcon },
-    { label: "Utgave", value: hit.denomination_issue_raw_no || "1. utgave", icon: CalendarIcon },
-    { label: "Variant", value: hit.variant_type_raw_no || "Standardutgave", icon: LayersIcon },
-    { label: "Sjeldenhet", value: "Sjelden", icon: ShieldIcon },
+    { label: "Valørutgave", value: valueOrMissing(hit.denomination_raw_no), icon: TagIcon },
+    { label: "Utgave", value: valueOrMissing(hit.denomination_issue_raw_no), icon: CalendarIcon },
+    { label: "Variant", value: valueOrMissing(hit.variant_type_raw_no), icon: LayersIcon },
+    { label: "Sjeldenhet", value: "Ikke vurdert", icon: ShieldIcon },
   ];
   const rows = compact ? hitFacts.slice(0, 4) : hitFacts;
   return (
@@ -295,38 +520,38 @@ function DynamicFacts({ hit, compact = false }: { hit: CatalogHit; compact?: boo
   );
 }
 
-function DynamicHistoryPanel({ hit, showActions = false }: { hit: CatalogHit; showActions?: boolean }) {
+function DynamicHistoryPanel({ hit, period, showActions = false }: { hit: CatalogHit; period: PeriodRow | null; showActions?: boolean }) {
   return (
     <section className={styles.cardHistoryPanel} aria-label="Historic dynamisk felt">
       <div className={styles.cardHistoryHeader}>
         <span className={styles.cardBookIcon} aria-hidden="true"><BookOpenIcon /></span>
         <strong>Historie</strong>
-        <small>· dynamisk felt</small>
+        <small>{period ? formatPeriodYears(period) : "Ingen periode valgt"}</small>
       </div>
       <dl className={styles.cardHistoryGrid}>
         <div className={styles.cardHistoryItem}>
           <dt>Regent / konge</dt>
-          <dd>Oscar II</dd>
+          <dd>{period && matchesRow(period, "row1") ? period.display_name_no : "Ikke registrert"}</dd>
         </div>
         <div className={styles.cardHistoryItem}>
           <dt>Motiv / person</dt>
-          <dd>Riksvåpen</dd>
+          <dd>{valueOrMissing(hit.title_no || hit.source_catalog_number)}</dd>
         </div>
         <div className={styles.cardHistoryItem}>
-          <dt>Periode</dt>
-          <dd>1872-1905</dd>
+          <dt>Årstall</dt>
+          <dd>{objectYearLabel(hit)}</dd>
         </div>
         <div className={styles.cardHistoryItem}>
           <dt>Historisk kontekst</dt>
-          <dd>Unionstid, norsk seddelhistorie</dd>
+          <dd>{period?.summary_short_no || period?.display_name_no || "Ikke vurdert"}</dd>
         </div>
         <div className={styles.cardHistoryItem}>
           <dt>Signatur</dt>
-          <dd>Winge / Getz</dd>
+          <dd>Ikke registrert</dd>
         </div>
         <div className={styles.cardHistoryItem}>
-          <dt>Kort forklaring</dt>
-          <dd>Objektet kobles til regent, signatur og motiv som egne relasjoner.</dd>
+          <dt>Relasjon</dt>
+          <dd>{period?.relation_href ? "Relasjon tilgjengelig" : "Ikke registrert"}</dd>
         </div>
       </dl>
       {showActions && (
@@ -338,7 +563,7 @@ function DynamicHistoryPanel({ hit, showActions = false }: { hit: CatalogHit; sh
   );
 }
 
-function HorizontalCard({ hit }: { hit: CatalogHit }) {
+function HorizontalCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -351,11 +576,11 @@ function HorizontalCard({ hit }: { hit: CatalogHit }) {
           <div className={styles.cardInfoContainer}>
             <h2>{title}</h2>
             <DynamicFacts hit={hit} />
-            <p className={styles.cardMeta}>{hit.source_key || "Seddel"} · Norske sedler · Oscar II · NS 1459</p>
+            <p className={styles.cardMeta}>{cardMetaText(hit, period)}</p>
           </div>
         </div>
         <div className={styles.cardBottomSection}>
-          <DynamicHistoryPanel hit={hit} showActions />
+          <DynamicHistoryPanel hit={hit} period={period} showActions />
         </div>
       </div>
       <aside className={styles.cardSideColumn}>
@@ -366,7 +591,7 @@ function HorizontalCard({ hit }: { hit: CatalogHit }) {
   );
 }
 
-function StandingCard({ hit }: { hit: CatalogHit }) {
+function StandingCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -374,10 +599,10 @@ function StandingCard({ hit }: { hit: CatalogHit }) {
       <DynamicBanknote isBanknote={isBanknote} title={title} />
       <h2>{title}</h2>
       <DynamicFacts hit={hit} compact />
-      <p className={styles.cardMeta}>{hit.source_key || "Seddel"} · Norske sedler · Oscar II · NS 1459</p>
+      <p className={styles.cardMeta}>{cardMetaText(hit, period)}</p>
       <div className={styles.cardStandingDetails}>
         <div className={styles.cardStandingLeftColumn}>
-          <DynamicHistoryPanel hit={hit} />
+          <DynamicHistoryPanel hit={hit} period={period} />
         </div>
         <div className={styles.cardStandingRightColumn}>
           <DynamicActionPanel compact />
@@ -391,7 +616,7 @@ function StandingCard({ hit }: { hit: CatalogHit }) {
   );
 }
 
-function MuseumCard({ hit }: { hit: CatalogHit }) {
+function MuseumCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -401,7 +626,7 @@ function MuseumCard({ hit }: { hit: CatalogHit }) {
       </div>
       <div className={styles.cardMuseumRight}>
         <h2>Museum · {title}</h2>
-        <DynamicHistoryPanel hit={hit} />
+        <DynamicHistoryPanel hit={hit} period={period} />
         <div className={styles.cardMuseumActions}>
           <DynamicActionButtons hit={hit} />
         </div>
@@ -410,7 +635,7 @@ function MuseumCard({ hit }: { hit: CatalogHit }) {
   );
 }
 
-function ListCard({ hit }: { hit: CatalogHit }) {
+function ListCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -423,22 +648,22 @@ function ListCard({ hit }: { hit: CatalogHit }) {
         <div className={styles.cardListSpecs}>
           <div>
             <span>Valørutgave</span>
-            <strong>{hit.denomination_raw_no || "100 kroner"}</strong>
+            <strong>{valueOrMissing(hit.denomination_raw_no)}</strong>
           </div>
           <div>
             <span>Utgave</span>
-            <strong>{hit.denomination_issue_raw_no || "1. utgave"}</strong>
+            <strong>{valueOrMissing(hit.denomination_issue_raw_no)}</strong>
           </div>
           <div>
             <span>Variant</span>
-            <strong>{hit.variant_type_raw_no || "Standardutgave"}</strong>
+            <strong>{valueOrMissing(hit.variant_type_raw_no)}</strong>
           </div>
           <div>
             <span>Sjeldenhet</span>
-            <strong>Sjelden</strong>
+            <strong>Ikke vurdert</strong>
           </div>
         </div>
-        <p className={styles.cardMeta}>{hit.source_key || "Seddel"} · Norske sedler · Oscar II · NS 1459</p>
+        <p className={styles.cardMeta}>{cardMetaText(hit, period)}</p>
       </div>
       <div className={styles.cardListActions}>
         <DynamicActionButtons hit={hit} />
@@ -499,12 +724,21 @@ export function CollectiumPeriodTimelineClient() {
 
   const optionsByRow = useMemo(() => {
     return {
-      row1: periodOptions.filter((period) => laneForPeriod(period) === "Nasjonale perioder"),
-      row2: periodOptions.filter((period) => laneForPeriod(period) === "Historiske hendelser"),
-      row3: periodOptions.filter((period) => laneForPeriod(period) === "Penge / objektperioder"),
+      row1: periodOptions.filter((period) => matchesRow(period, "row1")),
+      row2: periodOptions.filter((period) => matchesRow(period, "row2")),
+      row3: periodOptions.filter((period) => matchesRow(period, "row3")),
       row4: periodOptions,
     };
   }, [periodOptions]);
+
+  const groupedOptionsByRow = useMemo(() => {
+    return {
+      row1: groupPeriods(optionsByRow.row1, (period) => row4GroupForPeriod(period)),
+      row2: groupPeriods(optionsByRow.row2, (period) => row4GroupForPeriod(period)),
+      row3: groupPeriods(optionsByRow.row3, (period) => row4GroupForPeriod(period)),
+      row4: groupPeriods(optionsByRow.row4, (period) => row4GroupForPeriod(period)),
+    };
+  }, [optionsByRow]);
 
   const timelineWindow = useMemo(() => {
     return {
@@ -514,21 +748,13 @@ export function CollectiumPeriodTimelineClient() {
     };
   }, [filters.yearFrom, filters.yearTo]);
 
-  const visibleTimelineRows = useMemo(() => {
-    return rows.filter((period) => overlapsWindow(period, timelineWindow.start, timelineWindow.end)).sort(sortPeriods);
-  }, [rows, timelineWindow.start, timelineWindow.end]);
-
-  const lanes = useMemo(() => {
-    const laneOrder = ["Konger / regenter", "Nasjonale perioder", "Historiske hendelser", "Penge / objektperioder", "Andre perioder"];
-    const grouped = new Map<string, PeriodRow[]>();
-    for (const row of visibleTimelineRows) {
-      const lane = laneForPeriod(row);
-      grouped.set(lane, [...(grouped.get(lane) || []), row]);
-    }
-    return laneOrder
-      .filter((lane) => grouped.has(lane))
-      .map((lane) => ({ label: lane, rows: grouped.get(lane) || [] }));
-  }, [visibleTimelineRows]);
+  const timelineRows = useMemo(() => {
+    return PERIOD_ROW_DEFINITIONS.map((definition) => ({
+      ...definition,
+      periods: optionsByRow[definition.key],
+      selectedSlug: filters[definition.key],
+    }));
+  }, [filters, optionsByRow]);
 
   const yearTicks = useMemo(() => {
     const span = timelineWindow.span;
@@ -557,52 +783,21 @@ export function CollectiumPeriodTimelineClient() {
     void fetchData(filters, selectedPeriod);
   }
 
-  function handlePeriodRowChange(rowKey: keyof Pick<Filters, "row1" | "row2" | "row3" | "row4">, slug: string) {
+  function handlePeriodRowChange(rowKey: PeriodRowKey, slug: string) {
     const next = { ...filters, [rowKey]: slug };
     const period = rows.find((item) => item.period_slug === slug) || null;
-    if (period) {
-      next.row4 = period.period_slug;
-      const lane = laneForPeriod(period);
-      if (lane === "Nasjonale perioder") {
-        next.row1 = period.period_slug;
-      } else if (lane === "Historiske hendelser") {
-        next.row2 = period.period_slug;
-      } else if (lane === "Penge / objektperioder") {
-        next.row3 = period.period_slug;
-      }
-    } else {
-      if (rowKey === "row4") {
-        setSelectedPeriod(null);
-      } else {
-        if (selectedPeriod) {
-          const lane = laneForPeriod(selectedPeriod);
-          const clearedLane =
-            rowKey === "row1" ? "Nasjonale perioder" :
-            rowKey === "row2" ? "Historiske hendelser" :
-            rowKey === "row3" ? "Penge / objektperioder" : "";
-          if (lane === clearedLane) {
-            next.row4 = "";
-            setSelectedPeriod(null);
-          }
-        }
-      }
+    if (!period && selectedPeriod?.period_slug === filters[rowKey]) {
+      setSelectedPeriod(null);
     }
     setFilters(next);
     setSelectedPeriod(period);
     void fetchData(next, period);
   }
 
-  function handleTimelineSelect(period: PeriodRow) {
+  function handleTimelineSelect(period: PeriodRow, rowKey: PeriodRowKey) {
     setSelectedPeriod(period);
-    const next = { ...filters, row4: period.period_slug };
-    const lane = laneForPeriod(period);
-    if (lane === "Nasjonale perioder") {
-      next.row1 = period.period_slug;
-    } else if (lane === "Historiske hendelser") {
-      next.row2 = period.period_slug;
-    } else if (lane === "Penge / objektperioder") {
-      next.row3 = period.period_slug;
-    }
+    const targetRow = rowKey === "row4" ? "row4" : primaryRowForPeriod(period);
+    const next = { ...filters, [targetRow]: period.period_slug };
     setFilters(next);
     void fetchData(next, period);
   }
@@ -625,6 +820,18 @@ export function CollectiumPeriodTimelineClient() {
     const nextFilters = { ...filters, yearFrom: start, yearTo: start + years };
     setFilters(nextFilters);
     void fetchData(nextFilters, selectedPeriod);
+  }
+
+  function renderGroupedOptions(rowKey: PeriodRowKey) {
+    return groupedOptionsByRow[rowKey].map((group) => (
+      <optgroup key={group.label} label={group.label}>
+        {group.periods.map((period) => (
+          <option key={period.period_slug} value={period.period_slug}>
+            {optionLabel(period)}
+          </option>
+        ))}
+      </optgroup>
+    ));
   }
 
   if (loading && !data) {
@@ -689,41 +896,16 @@ export function CollectiumPeriodTimelineClient() {
         </div>
 
         <div className={styles.periodRows}>
-          <label className={`${styles.periodField} ${styles.row1}`}>
-            <span>Rad 1 · hovedperiode</span>
-            <select value={filters.row1} onChange={(event) => handlePeriodRowChange("row1", event.target.value)}>
-              <option value="">Velg hovedperiode innen {filters.yearFrom}–{filters.yearTo}</option>
-              {optionsByRow.row1.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
-            </select>
-            <small className={styles.helperText}>Filtrerer overordnede tidsepoker</small>
-          </label>
-
-          <label className={`${styles.periodField} ${styles.row2}`}>
-            <span>Rad 2 · tematisk periode</span>
-            <select value={filters.row2} onChange={(event) => handlePeriodRowChange("row2", event.target.value)}>
-              <option value="">Velg tematisk periode</option>
-              {optionsByRow.row2.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
-            </select>
-            <small className={styles.helperText}>Historiske, kulturelle eller krigsperioder</small>
-          </label>
-
-          <label className={`${styles.periodField} ${styles.row3}`}>
-            <span>Rad 3 · objektperiode</span>
-            <select value={filters.row3} onChange={(event) => handlePeriodRowChange("row3", event.target.value)}>
-              <option value="">Velg objektperiode</option>
-              {optionsByRow.row3.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
-            </select>
-            <small className={styles.helperText}>Spesifikke penge- og myntutgaver</small>
-          </label>
-
-          <label className={`${styles.periodField} ${styles.row4}`}>
-            <span>Rad 4 · aktiv tidslinjenode</span>
-            <select value={filters.row4} onChange={(event) => handlePeriodRowChange("row4", event.target.value)}>
-              <option value="">Velg node fra aktiv tidslinje</option>
-              {optionsByRow.row4.map((period) => <option key={period.period_slug} value={period.period_slug}>{optionLabel(period)}</option>)}
-            </select>
-            <small className={styles.helperText}>Valgt node i det visuelle tidslinjesporet</small>
-          </label>
+          {PERIOD_ROW_DEFINITIONS.map((row) => (
+            <label key={row.key} className={`${styles.periodField} ${styles[row.className]}`}>
+              <span>{row.selectLabel}</span>
+              <select value={filters[row.key]} onChange={(event) => handlePeriodRowChange(row.key, event.target.value)}>
+                <option value="">{row.emptyLabel} ({filters.yearFrom}–{filters.yearTo})</option>
+                {renderGroupedOptions(row.key)}
+              </select>
+              <small className={styles.helperText}>{row.helper}</small>
+            </label>
+          ))}
         </div>
       </section>
 
@@ -755,27 +937,31 @@ export function CollectiumPeriodTimelineClient() {
                 const left = ((year - timelineWindow.start) / timelineWindow.span) * 100;
                 return <span key={year} className={styles.yearLine} style={{ left: `${left}%` }} />;
               })}
-              {lanes.length === 0 ? (
-                <div className={styles.emptyState}>Ingen perioder funnet innen valgt år.</div>
-              ) : lanes.map((lane) => (
-                <div className={styles.lane} key={lane.label}>
-                  <div className={styles.laneLabel}>{lane.label}</div>
+              {timelineRows.map((lane) => (
+                <div className={`${styles.lane} ${styles[lane.className]}`} key={lane.key}>
+                  <div className={styles.laneLabel}>
+                    <strong>{lane.label}</strong>
+                    <span>{lane.selectedSlug ? rows.find((period) => period.period_slug === lane.selectedSlug)?.display_name_no || "Ingen valgt" : "Ingen valgt"}</span>
+                  </div>
                   <div className={styles.laneTrack}>
-                    {lane.rows.map((period) => {
+                    {lane.periods.length === 0 ? (
+                      <div className={styles.laneEmpty}>Ingen perioder i valgt årsspenn</div>
+                    ) : lane.periods.map((period, index) => {
                       const start = period.start_year ?? timelineWindow.start;
                       const end = normalizeEndYear(period) ?? start;
                       const left = Math.max(0, ((start - timelineWindow.start) / timelineWindow.span) * 100);
                       const width = Math.max(2, ((end - start || 1) / timelineWindow.span) * 100);
                       const isEvent = start === end;
                       const active = selectedPeriod?.period_slug === period.period_slug;
+                      const stackTop = 6 + (index % 3) * 20;
                       return (
                         <button
                           key={period.period_slug}
                           type="button"
                           className={`${isEvent ? styles.eventMarker : styles.periodBlock} ${active ? styles.periodBlockActive : ""}`}
-                          style={{ left: `${left}%`, width: isEvent ? undefined : `${width}%` }}
+                          style={{ left: `${left}%`, top: `${stackTop}px`, width: isEvent ? undefined : `${width}%` }}
                           title={`${period.display_name_no} ${formatPeriodYears(period)}`}
-                          onClick={() => handleTimelineSelect(period)}
+                          onClick={() => handleTimelineSelect(period, lane.key)}
                         >
                           <strong>{period.display_name_no}</strong>
                           <span>{formatPeriodYears(period)}</span>
@@ -802,7 +988,7 @@ export function CollectiumPeriodTimelineClient() {
               </thead>
               <tbody>
                 {periodOptions.map((period) => (
-                  <tr key={period.period_slug} onClick={() => handleTimelineSelect(period)}>
+                  <tr key={period.period_slug} onClick={() => handleTimelineSelect(period, primaryRowForPeriod(period))}>
                     <td>{period.display_name_no}</td>
                     <td>{period.period_type_label_no || period.period_type_key}</td>
                     <td>{period.period_level ?? "-"}</td>
@@ -845,6 +1031,14 @@ export function CollectiumPeriodTimelineClient() {
                 <strong>{selectedPeriod.period_level ?? "Ikke definert"}</strong>
               </div>
               <div className={styles.detailRow}>
+                <span>Tilknyttede objekter</span>
+                <strong>{selectedPeriod.object_count ?? "Ikke tilgjengelig"}</strong>
+              </div>
+              <div className={styles.detailRow}>
+                <span>Relasjoner</span>
+                <strong>{selectedPeriod.relation_count ?? "Ikke tilgjengelig"}</strong>
+              </div>
+              <div className={styles.detailRow}>
                 <span>Forelder</span>
                 <strong>{selectedPeriod.parent_period_slug || "Ingen"}</strong>
               </div>
@@ -875,7 +1069,7 @@ export function CollectiumPeriodTimelineClient() {
           <div className={styles.panelHeader}>
             <div>
               <p className={styles.eyebrow}>Dynamisk felt 2</p>
-              <h2>Samler · Historie · Finans</h2>
+              <h2>{SEGMENT_LABELS[segment]}</h2>
             </div>
             <div className={styles.segmentTabs}>
               {(Object.keys(SEGMENT_LABELS) as SegmentKey[]).map((key) => (
@@ -895,25 +1089,49 @@ export function CollectiumPeriodTimelineClient() {
             {segment === "samler" && (
               <>
                 <div className={styles.detailRow}>
-                  <span>Land</span>
-                  <strong>{filters.country}</strong>
+                  <span>Hjerte</span>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Stjerne</span>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>I samling</span>
+                  <strong>Ikke registrert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Katalogstatus</span>
+                  <strong>{catalogRows.length} treff</strong>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Objekttype</span>
                   <strong>{filters.objectType}</strong>
                 </div>
                 <div className={styles.detailRow}>
-                  <span>Katalogtreff</span>
-                  <strong>{catalogRows.length} objekter</strong>
+                  <span>Kilde</span>
+                  <strong>{catalogRows[0]?.source_key || "Ikke registrert"}</strong>
                 </div>
                 <div className={styles.detailRow}>
-                  <span>Samlerstatus</span>
-                  <strong>Hjerte · stjerne · min samling</strong>
+                  <span>Variant</span>
+                  <strong>{catalogRows[0]?.variant_type_raw_no || "Ikke registrert"}</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Sjeldenhet / kvalitet</span>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Brukerstatus</span>
+                  <strong>Ikke registrert</strong>
                 </div>
               </>
             )}
             {segment === "historie" && (
               <>
+                <div className={styles.detailRow}>
+                  <span>Regent / konge</span>
+                  <strong>{selectedPeriod && matchesRow(selectedPeriod, "row1") ? selectedPeriod.display_name_no : "Ikke registrert"}</strong>
+                </div>
                 <div className={styles.detailRow}>
                   <span>Periode</span>
                   <strong>{selectedPeriod?.display_name_no || "Ikke valgt"}</strong>
@@ -921,6 +1139,18 @@ export function CollectiumPeriodTimelineClient() {
                 <div className={styles.detailRow}>
                   <span>År</span>
                   <strong>{selectedPeriod ? formatPeriodYears(selectedPeriod) : `${filters.yearFrom}–${filters.yearTo}`}</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Hendelse</span>
+                  <strong>{selectedPeriod?.period_type_label_no || selectedPeriod?.period_type_key || "Ikke registrert"}</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Person / signatur</span>
+                  <strong>Ikke registrert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Motiv</span>
+                  <strong>{catalogRows[0]?.title_no || "Ikke registrert"}</strong>
                 </div>
                 {selectedPeriod?.relation_href && (
                   <div className={styles.detailRow}>
@@ -940,8 +1170,8 @@ export function CollectiumPeriodTimelineClient() {
             {segment === "finans" && (
               <>
                 <div className={styles.detailRow}>
-                  <span>Finansperiode</span>
-                  <strong>{selectedPeriod?.period_type_label_no || "Ikke valgt"}</strong>
+                  <span>Estimert verdi</span>
+                  <strong>Ikke estimert</strong>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Markedsverdi</span>
@@ -949,10 +1179,30 @@ export function CollectiumPeriodTimelineClient() {
                 </div>
                 <div className={styles.detailRow}>
                   <span>Trend</span>
-                  <strong>Ikke beregnet trend</strong>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Trend %</span>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Trendperiode</span>
+                  <strong>{selectedPeriod ? formatPeriodYears(selectedPeriod) : "Ikke valgt"}</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Likviditet</span>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Auksjon</span>
+                  <strong>Ikke vurdert</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Nettbutikk</span>
+                  <strong>Ikke vurdert</strong>
                 </div>
                 <div className={styles.detailRowBlock}>
-                  <span>Indexkobling</span>
+                  <span>Indeksperiode</span>
                   <p>
                     {selectedPeriod?.period_type_key?.includes("economic") || selectedPeriod?.period_type_key?.includes("monetary")
                       ? "Relevant for økonomisk periodeanalyse"
@@ -1008,10 +1258,10 @@ export function CollectiumPeriodTimelineClient() {
         ) : (
           <div className={`${styles.catalogGrid} ${styles[`catalogGrid_${cardLayout}`]}`}>
             {catalogRows.map((hit, index) => {
-              if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} />;
-              if (cardLayout === "standing") return <StandingCard key={index} hit={hit} />;
-              if (cardLayout === "list") return <ListCard key={index} hit={hit} />;
-              return <MuseumCard key={index} hit={hit} />;
+              if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} period={selectedPeriod} />;
+              if (cardLayout === "standing") return <StandingCard key={index} hit={hit} period={selectedPeriod} />;
+              if (cardLayout === "list") return <ListCard key={index} hit={hit} period={selectedPeriod} />;
+              return <MuseumCard key={index} hit={hit} period={selectedPeriod} />;
             })}
           </div>
         )}

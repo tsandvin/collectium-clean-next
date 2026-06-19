@@ -1777,6 +1777,254 @@
   border-color: var(--ct-accent);
 }
 
+/* Period timeline V8: explicit four-row identity and dense result cards */
+.lane.row1,
+.lane.row2,
+.lane.row3,
+.lane.row4 {
+  --timeline-accent: var(--row-accent);
+  --timeline-soft: var(--row-bg-soft);
+  --timeline-border: var(--row-border-soft);
+}
+
+.lane {
+  grid-template-columns: 176px minmax(0, 1fr);
+  min-height: 92px;
+}
+
+.laneLabel {
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 84px;
+  border-color: var(--timeline-border, var(--ct-border));
+  background: var(--timeline-soft, var(--ct-card-bg));
+  color: var(--timeline-accent, var(--ct-text));
+}
+
+.laneLabel strong {
+  color: var(--timeline-accent, var(--ct-text));
+  font-size: 12px;
+  line-height: 1.18;
+}
+
+.laneLabel span {
+  color: var(--row-accent-dark, var(--ct-muted));
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.laneTrack {
+  min-height: 84px;
+  border-color: var(--timeline-border, var(--ct-border));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--timeline-accent, var(--ct-accent)) 10%, transparent), transparent 18%),
+    var(--ct-input-bg);
+  overflow: hidden;
+}
+
+.laneTrack::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41px;
+  height: 2px;
+  background: color-mix(in srgb, var(--timeline-accent, var(--ct-accent)) 48%, transparent);
+  pointer-events: none;
+}
+
+.laneEmpty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center start;
+  padding-left: 14px;
+  color: var(--ct-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.periodBlock,
+.eventMarker {
+  min-width: 132px;
+  height: 32px;
+  padding: 3px 8px;
+  border-color: color-mix(in srgb, var(--timeline-accent, var(--ct-accent)) 42%, var(--ct-border));
+  background: color-mix(in srgb, var(--timeline-soft, var(--ct-card-bg)) 74%, var(--ct-card-bg));
+}
+
+.periodBlock::before,
+.eventMarker::before {
+  background: color-mix(in srgb, var(--timeline-accent, var(--ct-accent)) 10%, var(--ct-card-bg));
+}
+
+.periodBlock:hover,
+.eventMarker:hover {
+  border-color: var(--timeline-accent, var(--ct-accent));
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--timeline-accent, var(--ct-accent)) 20%, transparent);
+}
+
+.periodBlockActive {
+  border-color: var(--timeline-accent, var(--ct-accent));
+  background: var(--timeline-accent, var(--ct-accent));
+}
+
+.periodBlockActive::before {
+  background: color-mix(in srgb, var(--timeline-accent, var(--ct-accent)) 82%, var(--ct-card-bg));
+}
+
+.catalogPanel {
+  width: 100%;
+}
+
+.catalogGrid,
+.catalogGrid_horizontal,
+.catalogGrid_standing,
+.catalogGrid_list,
+.catalogGrid_museum {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+  justify-content: stretch;
+  align-items: start;
+  gap: 12px;
+}
+
+.ui85Card {
+  border-radius: min(var(--ct-radius-card), 8px);
+}
+
+.ui85HorizontalCard {
+  grid-template-columns: minmax(0, 1fr) 176px;
+  gap: 12px;
+  padding: 12px;
+}
+
+.cardMainContentFlow,
+.cardTopSection,
+.cardInfoContainer,
+.cardSideColumn,
+.cardMuseumRight {
+  gap: 10px;
+}
+
+.cardTopSection {
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+.cardInfoContainer h2,
+.ui85StandingCard h2,
+.ui85MuseumCard h2,
+.cardListInfo h2 {
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.cardFactGrid,
+.cardHistoryGrid {
+  gap: 6px 10px;
+}
+
+.cardFactItem,
+.cardHistoryItem {
+  padding-bottom: 6px;
+}
+
+.cardFactItem dd,
+.cardHistoryItem dd {
+  font-size: 12px;
+}
+
+.cardHistoryPanel {
+  padding: 10px;
+  border-radius: min(var(--ct-radius-card), 8px);
+}
+
+.cardHistoryHeader {
+  margin-bottom: 8px;
+}
+
+.cardHistoryActions {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.cardBanknote {
+  height: 132px;
+  border-radius: min(calc(var(--ct-radius-card) - 3px), 8px);
+}
+
+.cardAction {
+  min-height: 38px;
+  padding: 5px 8px;
+}
+
+.cardActionPanel {
+  gap: 6px;
+}
+
+.cardPriceBox {
+  min-height: 72px;
+  padding: 10px;
+  text-align: center;
+}
+
+.cardPriceBox strong {
+  font-size: 18px;
+}
+
+.cardPriceBox small {
+  justify-content: center;
+}
+
+.ui85StandingCard {
+  gap: 8px;
+  padding: 12px;
+}
+
+.cardStandingDetails {
+  grid-template-columns: minmax(0, 1fr) 128px;
+  gap: 8px;
+}
+
+.ui85ListCard {
+  grid-template-columns: 112px minmax(0, 1fr) auto auto auto;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.cardListMedia {
+  width: 112px;
+}
+
+.cardBanknoteList {
+  height: 58px;
+}
+
+.cardListSpecs {
+  gap: 6px 12px;
+}
+
+.ui85MuseumCard {
+  grid-template-columns: minmax(260px, 38%) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  padding: 12px;
+}
+
+.cardMuseumLeft {
+  min-height: 260px;
+}
+
+.cardMuseumLeft .cardBanknote {
+  height: 100%;
+  min-height: 260px;
+}
+
 @media (max-width: 1100px) {
   .masterGrid,
   .periodRows,
