@@ -32,7 +32,7 @@
  * log_action: render
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-V5
+ * CT-PERIOD-TIMELINE-V6
  */
 
 .page {
@@ -527,7 +527,7 @@
 
 
 
-/* V5: Tydeligere felt/barer, mindre flatebakgrunn og 18px hovedtekst */
+/* V5: Rettet tidslinje-node-typografi: 18px node-tittel og 15px meta */
 .hero,
 .masterFilter,
 .timelinePanel,
@@ -740,5 +740,79 @@
   .toolbarButtons {
     overflow-x: auto;
     flex-wrap: nowrap;
+  }
+}
+
+/* V6: Rettet tidslinjetypografi som egen node-typografi, ikke liten hovedskrift */
+.page {
+  --ct-timeline-node-title-size: 18px;
+  --ct-timeline-node-meta-size: 15px;
+  --ct-timeline-node-title-weight: 950;
+  --ct-timeline-node-meta-weight: 850;
+}
+
+.periodBlock,
+.eventMarker {
+  min-width: 154px;
+  height: 64px;
+  padding: 10px 16px;
+}
+
+.periodBlock strong,
+.eventMarker strong {
+  z-index: 1;
+  display: block;
+  position: relative;
+  color: var(--ct-text);
+  opacity: 1;
+  font-size: var(--ct-timeline-node-title-size);
+  font-weight: var(--ct-timeline-node-title-weight);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.periodBlock span,
+.eventMarker span {
+  z-index: 1;
+  display: block;
+  position: relative;
+  margin-top: 4px;
+  color: var(--ct-muted);
+  opacity: 1;
+  font-size: var(--ct-timeline-node-meta-size);
+  font-weight: var(--ct-timeline-node-meta-weight);
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.periodBlockActive strong,
+.periodBlockActive span {
+  color: var(--ct-card-bg);
+  opacity: 1;
+}
+
+.lane {
+  min-height: 98px;
+}
+
+.laneLabel,
+.laneTrack {
+  min-height: 92px;
+}
+
+.laneLabel {
+  font-size: 18px;
+  font-weight: 950;
+}
+
+@media (max-width: 720px) {
+  .page {
+    --ct-timeline-node-title-size: 17px;
+    --ct-timeline-node-meta-size: 14px;
   }
 }
