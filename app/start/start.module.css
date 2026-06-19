@@ -1,0 +1,447 @@
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Filnavn:      app/start/start.module.css
+ * Definering:   Side-scoped CSS-modul for startsiden (app.collectium/start).
+ * Formaal:      Layout, felt-skiller og animasjon for startsiden. Definerer
+ *               INGEN egne farger/fonter — leser kun globale --ct-*-tokens
+ *               (med ett dokumentert fallback-punkt pr. token). Tema bytter
+ *               kun tokens, aldri struktur (regel: tema = tokens).
+ * Designkobling: app/globals.css (skin + ramme), .ct-surface-rammesystem,
+ *               hjoernesignatur (regel 21), hover (regel 22).
+ * DB-kobling:   Ingen. Ren presentasjon. Lenker til /objekt/... og /relasjon/...
+ * Tags:         collectium, start, landing, tokens, tema, ingen-sidemeny
+ */
+
+/* ---------------------------------------------------------------------------
+   Side-lokale aliaser: ETT sted aa mappe globale tokens -> sidebruk.
+   Stemmer ikke et token-navn med ditt globale sett, bytt det her (ikke i koden).
+--------------------------------------------------------------------------- */
+.page {
+  --s-bg:            var(--ct-bg, var(--ct-ui-bg, #faf6ec));
+  --s-surface:       var(--ct-card-bg, var(--ct-ui-panel, #ffffff));
+  --s-surface-soft:  var(--ct-card-bg-soft, var(--ct-ui-panel-soft, #f3eee2));
+  --s-text:          var(--ct-text, var(--ct-ui-text, #2c2519));
+  --s-muted:         var(--ct-text-muted, var(--ct-muted, var(--ct-ui-soft, #6c6453)));
+  --s-heading:       var(--ct-heading, var(--s-text));
+  --s-border:        var(--ct-card-border, var(--ct-panel-border, var(--ct-ui-border, rgba(44, 37, 25, 0.16))));
+  --s-shadow:        var(--ct-card-shadow, var(--ct-shadow-card, 0 18px 40px rgba(28, 22, 12, 0.14)));
+  --s-radius:        var(--ct-radius-card, var(--ct-radius-lg, 14px));
+  --s-accent:        var(--ct-accent, #a9783a);
+  --s-accent-strong: var(--ct-accent-strong, var(--ct-accent, #8a5f28));
+  --s-on-accent:     var(--ct-on-accent, #1c1409);
+  --s-ok:            var(--ct-success, var(--ct-status-ok, #4b7a52));
+  --s-display:       var(--ct-font-display, "Playfair Display", "Cinzel", Georgia, serif);
+  --s-body:          var(--ct-font-body, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+
+  color: var(--s-text);
+  font-family: var(--s-body);
+  background: var(--s-bg);
+  width: 100%;
+}
+
+/* ===========================================================================
+   Felt-skille (seksjoner): hver seksjon = eget felt med klar overgang.
+   --------------------------------------------------------------------------- */
+.section {
+  position: relative;
+  padding: clamp(40px, 6vw, 82px) clamp(18px, 4vw, 40px);
+  border-top: 1px solid var(--s-border);
+}
+.section:first-child { border-top: 0; }
+
+/* Mykt felt: rolig bakgrunn som forsterker, ikke forstyrrer */
+.soft {
+  background:
+    radial-gradient(120% 80% at 12% 0%, color-mix(in srgb, var(--s-accent) 7%, transparent) 0%, transparent 60%),
+    var(--s-surface-soft);
+}
+.deep {
+  background:
+    linear-gradient(180deg, var(--s-surface-soft) 0%, var(--s-bg) 100%);
+}
+
+.inner { width: min(100%, 1180px); margin: 0 auto; }
+.narrow { width: min(100%, 880px); margin: 0 auto; }
+
+/* ===========================================================================
+   Typografi — moderate overskrifter, kursiv display tillatt, brodtekst normal.
+   --------------------------------------------------------------------------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-family: var(--s-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--s-accent-strong);
+}
+.eyebrow::before {
+  content: "";
+  width: 22px; height: 1px;
+  background: currentColor;
+}
+
+.h2 {
+  margin: 0 0 14px;
+  font-family: var(--s-display);
+  font-style: italic;          /* kursiv display — moderat, ikke svaer */
+  font-weight: 600;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.12;
+  color: var(--s-heading);
+}
+.h3 {
+  margin: 0 0 6px;
+  font-family: var(--s-display);
+  font-weight: 600;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  color: var(--s-heading);
+}
+.lead {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--s-muted);
+  font-size: clamp(0.96rem, 1.1vw, 1.05rem);
+  line-height: 1.66;
+}
+.p { margin: 0; color: var(--s-muted); line-height: 1.62; }
+
+/* ===========================================================================
+   Knapper / lenker
+   --------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--s-border);
+  background: var(--s-surface);
+  color: var(--s-text);
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--s-shadow); }
+.btnPrimary {
+  background: linear-gradient(180deg, var(--s-accent) 0%, var(--s-accent-strong) 100%);
+  color: var(--s-on-accent);
+  border-color: color-mix(in srgb, var(--s-accent-strong) 70%, black 30%);
+  font-weight: 600;
+}
+.btnGhost { background: transparent; }
+.btnRow { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+
+.arrow { transition: transform 0.18s ease; }
+.btn:hover .arrow,
+.linkInline:hover .arrow { transform: translateX(3px); }
+
+.linkInline {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--s-accent-strong);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.linkInline:hover { text-decoration: underline; }
+
+/* ===========================================================================
+   HERO — tidslinje / periodesoek (sidens tese)
+   --------------------------------------------------------------------------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(20px, 3vw, 44px);
+  align-items: center;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+}
+.heroCopy { min-width: 0; }
+.heroTitle {
+  margin: 6px 0 14px;
+  font-family: var(--s-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 4.4vw, 3.1rem);
+  line-height: 1.04;
+  color: var(--s-heading);
+}
+.heroTitle em { font-style: italic; color: var(--s-accent-strong); }
+
+/* Periodesoek-panel */
+.periodPanel { padding: clamp(16px, 2vw, 22px); }
+.searchRow { display: flex; gap: 10px; margin-bottom: 18px; }
+.searchInput {
+  flex: 1; min-width: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--s-border);
+  background: var(--s-bg);
+  color: var(--s-text);
+  font: inherit;
+}
+.searchInput:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
+
+.axisLabel {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--s-muted); margin-bottom: 8px;
+}
+.axis {
+  position: relative;
+  height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--s-border), color-mix(in srgb, var(--s-accent) 55%, transparent), var(--s-border));
+  margin: 0 6px 26px;
+}
+.eraRow { display: flex; flex-wrap: wrap; gap: 7px; }
+.era {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--s-border);
+  background: var(--s-surface);
+  color: var(--s-text);
+  font: inherit; font-size: 0.82rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.era:hover { transform: translateY(-1px); }
+.eraActive {
+  background: linear-gradient(180deg, var(--s-accent) 0%, var(--s-accent-strong) 100%);
+  color: var(--s-on-accent);
+  border-color: var(--s-accent-strong);
+}
+.periodResult {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--s-border);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.periodResult b { font-family: var(--s-display); font-style: italic; }
+.count { color: var(--s-accent-strong); font-variant-numeric: tabular-nums; }
+
+/* ===========================================================================
+   Datatyper + relasjoner (kort felt) + ekte objekt-/relasjonslenke
+   --------------------------------------------------------------------------- */
+.dataGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(16px, 2.4vw, 32px);
+  align-items: stretch;
+}
+.statStrip { display: flex; gap: 14px; flex-wrap: wrap; margin: 4px 0 18px; }
+.stat { display: flex; flex-direction: column; }
+.statNum {
+  font-family: var(--s-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1; color: var(--s-heading);
+}
+.statLbl { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--s-muted); margin-top: 4px; }
+
+.relChips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip {
+  padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--s-border); background: var(--s-surface-soft);
+  font-size: 0.8rem; color: var(--s-text);
+}
+
+/* Ekte objekt-kort (lenker til objektpresentasjon + relasjon) */
+.objCard { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.objHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.objTitle { font-family: var(--s-display); font-size: 1.05rem; color: var(--s-heading); }
+.objTag { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--s-muted); }
+.objImg {
+  aspect-ratio: 16 / 7;
+  border-radius: 10px;
+  border: 1px solid var(--s-border);
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--s-accent) 6%, transparent) 0 10px, transparent 10px 20px),
+    var(--s-surface-soft);
+  display: grid; place-items: center;
+  color: var(--s-muted); font-size: 0.8rem;
+  object-fit: cover;
+}
+.objRel { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.objFoot { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+
+/* ===========================================================================
+   MEDLEMSKAP (fullbredde) — gratis-start + Bronse / Soelv (hevet) / Gull
+   --------------------------------------------------------------------------- */
+.memberHead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+
+.freeBanner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  padding: 14px 18px; margin: 18px 0 6px;
+  border-radius: var(--s-radius);
+  border: 1px dashed var(--s-accent);
+  background: color-mix(in srgb, var(--s-accent) 8%, var(--s-surface));
+}
+.freeBanner strong { font-family: var(--s-display); font-style: italic; font-size: 1.1rem; color: var(--s-heading); }
+
+.discount {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--s-accent-strong); color: var(--s-on-accent);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em;
+}
+
+/* mnd/aar-bryter */
+.toggle { display: inline-flex; padding: 4px; gap: 4px; border-radius: 999px; border: 1px solid var(--s-border); background: var(--s-surface); }
+.toggleBtn {
+  padding: 7px 16px; border-radius: 999px; border: 0; background: transparent;
+  color: var(--s-muted); font: inherit; font-size: 0.85rem; cursor: pointer;
+}
+.toggleOn { background: var(--s-text); color: var(--s-bg); font-weight: 600; }
+
+.tierGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 22px;
+}
+.tier {
+  position: relative;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 22px;
+}
+/* Soelv hevet fremfor de andre — beste valg */
+.tierFeatured {
+  transform: translateY(-12px);
+  border-color: var(--s-accent) !important;
+  box-shadow: 0 26px 54px rgba(28, 22, 12, 0.2);
+}
+.bestPick {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  padding: 5px 14px; border-radius: 999px;
+  background: linear-gradient(180deg, var(--s-accent) 0%, var(--s-accent-strong) 100%);
+  color: var(--s-on-accent); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+}
+.tierName { font-family: var(--s-display); font-size: 1.3rem; color: var(--s-heading); }
+.tierFor { font-size: 0.84rem; color: var(--s-muted); margin-top: -6px; }
+.priceLine { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.priceNow { font-family: var(--s-display); font-size: 1.7rem; color: var(--s-heading); font-variant-numeric: tabular-nums; }
+.priceUnit { font-size: 0.84rem; color: var(--s-muted); }
+.priceWas { font-size: 0.84rem; color: var(--s-muted); text-decoration: line-through; }
+.capRow { display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid var(--s-border); border-bottom: 1px solid var(--s-border); }
+.cap b { font-family: var(--s-display); font-size: 1.05rem; color: var(--s-heading); }
+.cap span { display: block; font-size: 0.74rem; color: var(--s-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.benefits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.benefits li { display: flex; gap: 9px; font-size: 0.88rem; color: var(--s-text); line-height: 1.4; }
+.benefits li::before { content: "✦"; color: var(--s-accent-strong); flex: none; }
+.pkgNote { font-size: 0.78rem; color: var(--s-muted); }
+.tier .btn { margin-top: auto; justify-content: center; }
+
+/* Platinum + Forhandler (fullbredde-callouts under nivaaene) */
+.extraGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+.extra { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+.extraTag { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--s-accent-strong); }
+.compareLink { margin-top: 18px; }
+
+/* ===========================================================================
+   QUOTE-felt (morsom) + bilde
+   --------------------------------------------------------------------------- */
+.quoteWrap { display: grid; grid-template-columns: 1fr 0.8fr; gap: clamp(18px, 3vw, 40px); align-items: center; }
+.quoteFig { margin: 0; }
+.quoteText {
+  margin: 0;
+  font-family: var(--s-display);
+  font-style: italic;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+  line-height: 1.22;
+  color: var(--s-heading);
+}
+.quoteText span { color: var(--s-accent-strong); }
+.quoteCite { display: block; margin-top: 14px; font-family: var(--s-body); font-style: normal; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--s-muted); }
+.quoteImg {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--s-radius);
+  border: 1px solid var(--s-border);
+  object-fit: cover;
+  background:
+    radial-gradient(80% 60% at 70% 30%, color-mix(in srgb, var(--s-accent) 16%, transparent), transparent 70%),
+    var(--s-surface-soft);
+  display: grid; place-items: center;
+  color: var(--s-muted); font-size: 0.82rem; text-align: center; padding: 12px;
+}
+
+/* ===========================================================================
+   "Har du en samling" — bli medlem + tre blurbs
+   --------------------------------------------------------------------------- */
+.blurbGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; }
+.blurb { padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+/* ===========================================================================
+   "Hva vil du utforske" — tre perspektiver (I/II/III)
+   --------------------------------------------------------------------------- */
+.perspGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
+.persp { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.perspImg {
+  width: 100%; aspect-ratio: 16 / 10; object-fit: cover;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--s-accent) 14%, transparent), transparent 60%),
+    var(--s-surface-soft);
+  display: grid; place-items: center; color: var(--s-muted); font-size: 0.8rem;
+}
+.perspBody { padding: 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.perspNum { font-family: var(--s-display); font-style: italic; font-size: 0.9rem; color: var(--s-accent-strong); }
+.perspBody .btnRow { margin-top: auto; }
+
+/* ===========================================================================
+   Komme igang (trinn) + Maalsetting (kommer) + Slutt-CTA
+   --------------------------------------------------------------------------- */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; counter-reset: step; }
+.step { padding: 18px; }
+.stepNo {
+  display: inline-grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--s-accent); color: var(--s-accent-strong);
+  font-family: var(--s-display); font-size: 0.95rem; margin-bottom: 8px;
+}
+
+.goalGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 24px; }
+.goal { padding: 18px; }
+.goalState { display: inline-block; margin-bottom: 8px; padding: 3px 9px; border-radius: 999px; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.stateLive { background: color-mix(in srgb, var(--s-ok) 16%, transparent); color: var(--s-ok); }
+.stateSoon { background: color-mix(in srgb, var(--s-accent) 14%, transparent); color: var(--s-accent-strong); }
+
+.finalCta { text-align: center; }
+.finalCta .h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); }
+.philanthrope {
+  max-width: 60ch; margin: 12px auto 0; color: var(--s-muted); line-height: 1.6;
+}
+.finalCta .btnRow { justify-content: center; }
+
+/* ===========================================================================
+   Animasjon (reveal) — respekterer reduced-motion
+   --------------------------------------------------------------------------- */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.revealIn { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .btn, .era, .arrow { transition: none; }
+  .tierFeatured { transform: none; }
+}
+
+/* ===========================================================================
+   Responsiv
+   --------------------------------------------------------------------------- */
+@media (max-width: 980px) {
+  .hero { grid-template-columns: 1fr; }
+  .dataGrid, .quoteWrap { grid-template-columns: 1fr; }
+  .tierGrid, .blurbGrid, .perspGrid, .steps { grid-template-columns: 1fr 1fr; }
+  .extraGrid { grid-template-columns: 1fr; }
+  .goalGrid { grid-template-columns: 1fr 1fr; }
+  .tierFeatured { transform: none; }
+}
+@media (max-width: 620px) {
+  .tierGrid, .blurbGrid, .perspGrid, .steps, .goalGrid { grid-template-columns: 1fr; }
+  .searchRow { flex-direction: column; }
+}
