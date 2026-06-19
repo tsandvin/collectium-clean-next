@@ -92,3 +92,10 @@ install-objectpresentation-*.ps1
 collectium_repair_*.ps1
 neon-*-report.json
 neon-raw-*.json
+
+# Collectium local tools/backups - not part of Next/Vercel build
+.collectium-tools/
+_collectium-backup/
+_collectium-install/
+_collectium-page-design-check/
+install-periodfilter-system-design-v2-complete.ps1
