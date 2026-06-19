@@ -2133,3 +2133,106 @@ body:has(.ct-start-page) [data-ct-content] {
   margin-left: 0 !important;
 }
 
+
+/* ============================================================
+   Collectium /start remove sidebar reserved space
+   Sidemenyen er skjult; denne nuller ut resterende venstre felt.
+   ============================================================ */
+
+body:has(.ct-start-page),
+html[data-ct-chrome="topbar-only"] body {
+  --ct-sidebar-width: 0px !important;
+  --ct-sidebar-w: 0px !important;
+  --ct-v7-sidebar-width: 0px !important;
+  --ct-menu-width: 0px !important;
+  --sidebar-width: 0px !important;
+  overflow-x: hidden !important;
+}
+
+/* Nullstill alle vanlige shell-/layout-reserveringer */
+body:has(.ct-start-page) .ct-v7-shell,
+body:has(.ct-start-page) .collectium-shell,
+body:has(.ct-start-page) .ct-app-shell,
+body:has(.ct-start-page) .app-shell,
+body:has(.ct-start-page) [data-ct-shell],
+html[data-ct-chrome="topbar-only"] .ct-v7-shell,
+html[data-ct-chrome="topbar-only"] .collectium-shell,
+html[data-ct-chrome="topbar-only"] .ct-app-shell,
+html[data-ct-chrome="topbar-only"] .app-shell,
+html[data-ct-chrome="topbar-only"] [data-ct-shell] {
+  display: block !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Nullstill hovedinnhold som tidligere ble forskjøvet etter sidebar */
+body:has(.ct-start-page) .ct-v7-main,
+body:has(.ct-start-page) .ct-v7-content,
+body:has(.ct-start-page) .collectium-main,
+body:has(.ct-start-page) .collectium-content,
+body:has(.ct-start-page) .ct-page,
+body:has(.ct-start-page) .ct-page-frame,
+body:has(.ct-start-page) .ct-content,
+body:has(.ct-start-page) [data-ct-main],
+body:has(.ct-start-page) [data-ct-content],
+html[data-ct-chrome="topbar-only"] .ct-v7-main,
+html[data-ct-chrome="topbar-only"] .ct-v7-content,
+html[data-ct-chrome="topbar-only"] .collectium-main,
+html[data-ct-chrome="topbar-only"] .collectium-content,
+html[data-ct-chrome="topbar-only"] .ct-page,
+html[data-ct-chrome="topbar-only"] .ct-page-frame,
+html[data-ct-chrome="topbar-only"] .ct-content,
+html[data-ct-chrome="topbar-only"] [data-ct-main],
+html[data-ct-chrome="topbar-only"] [data-ct-content] {
+  grid-column: 1 / -1 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  transform: none !important;
+}
+
+/* Skjul sidebar og fjern fysisk bredde hvis den fortsatt ligger som fixed element */
+body:has(.ct-start-page) .ct-v7-sidebar,
+body:has(.ct-start-page) .collectium-sidebar,
+body:has(.ct-start-page) .sidebar,
+body:has(.ct-start-page) [data-ct-sidebar],
+body:has(.ct-start-page) [data-sidebar],
+body:has(.ct-start-page) aside[class*="sidebar" i],
+body:has(.ct-start-page) nav[class*="sidebar" i],
+html[data-ct-chrome="topbar-only"] .ct-v7-sidebar,
+html[data-ct-chrome="topbar-only"] .collectium-sidebar,
+html[data-ct-chrome="topbar-only"] .sidebar,
+html[data-ct-chrome="topbar-only"] [data-ct-sidebar],
+html[data-ct-chrome="topbar-only"] [data-sidebar],
+html[data-ct-chrome="topbar-only"] aside[class*="sidebar" i],
+html[data-ct-chrome="topbar-only"] nav[class*="sidebar" i] {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Startside skal starte helt til venstre og bruke hele viewport-bredden */
+body:has(.ct-start-page) .ct-start-page,
+html[data-ct-chrome="topbar-only"] .ct-start-page {
+  display: block !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  transform: none !important;
+}
+
