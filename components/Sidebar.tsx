@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * COLLECTIUM FILE HEADER
  *
@@ -18,24 +20,44 @@
  */
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { collectiumSidebarItems } from "./layout/collectiumSidebarItems";
 
-type NavItem = {
-  href: string;
-  label: string;
-  count: string;
-  icon: "activity" | "catalog" | "collection" | "auction" | "relations" | "rules";
+type IconType = "activity" | "catalog" | "collection" | "auction" | "relations" | "rules";
+
+const keyToIconMap: Record<string, IconType> = {
+  index: "activity",
+  catalog: "catalog",
+  "period-filter": "catalog",
+  object: "catalog",
+  relations: "relations",
+  account: "collection",
+  collection: "collection",
+  auction: "auction",
+  shop: "auction",
+  dealer: "auction",
+  admin: "rules",
+  "admin-neon": "rules",
+  support: "rules",
 };
 
-const navItems: NavItem[] = [
-  { href: "/", label: "Aktivitet", count: "01", icon: "activity" },
-  { href: "/katalog", label: "Katalog", count: "24", icon: "catalog" },
-  { href: "/min-side", label: "Min samling", count: "08", icon: "collection" },
-  { href: "/auksjon", label: "Auksjon", count: "12", icon: "auction" },
-  { href: "/relasjon", label: "Relasjoner", count: "17", icon: "relations" },
-  { href: "/admin/system/mariadb-neon", label: "Regler", count: "06", icon: "rules" },
-];
+const keyToCountMap: Record<string, string> = {
+  index: "01",
+  catalog: "24",
+  "period-filter": "05",
+  object: "09",
+  relations: "17",
+  account: "08",
+  collection: "12",
+  auction: "10",
+  shop: "03",
+  dealer: "02",
+  admin: "04",
+  "admin-neon": "06",
+  support: "07",
+};
 
-function Icon({ type }: { type: NavItem["icon"] }) {
+function Icon({ type }: { type: IconType }) {
   if (type === "activity") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -91,6 +113,15 @@ function Icon({ type }: { type: NavItem["icon"] }) {
 }
 
 export default function Sidebar() {
+  const pathname = usePathname() || "/";
+
+  function isActiveItem(pathname: string, href: string, key: string) {
+    if (key === "index") return pathname === "/";
+    if (key === "admin-neon") return pathname.startsWith("/admin/neon");
+    if (key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
     <aside className="ct-sidebar-enhanced" aria-label="Collectium hovedmeny">
       <div className="ct-sidebar-logo-card">
@@ -102,21 +133,38 @@ export default function Sidebar() {
         />
       </div>
 
-      <nav className="ct-sidebar-nav" aria-label="Hovednavigasjon">
-        {navItems.map((item, index) => (
-          <Link
-            key={item.href}
-            className={`ct-sidebar-link ${index === 0 ? "is-active" : ""}`}
-            href={item.href}
-            aria-current={index === 0 ? "page" : undefined}
-          >
-            <span className="ct-sidebar-icon">
-              <Icon type={item.icon} />
-            </span>
-            <span className="ct-sidebar-label">{item.label}</span>
-            <span className="ct-sidebar-count">{item.count}</span>
-          </Link>
-        ))}
+      <nav className="ct-sidebar-nav" aria-label="Hovednavigasjon" style={{ display: "grid", gap: "14px" }}>
+        {(["Hoved", "Bruker", "Marked", "System"] as const).map((groupName) => {
+          const items = collectiumSidebarItems.filter((item) => item.group === groupName);
+          return (
+            <div key={groupName} className="ct-sidebar-group" style={{ display: "grid", gap: "6px" }}>
+              <div className="ct-sidebar-group-title" style={{ fontSize: "10px", fontWeight: 700, padding: "4px 14px 2px", textTransform: "uppercase", opacity: 0.5, letterSpacing: "0.05em", color: "var(--ct-sidebar-muted, var(--ct-muted))" }}>
+                {groupName}
+              </div>
+              <div style={{ display: "grid", gap: "6px" }}>
+                {items.map((item) => {
+                  const icon = keyToIconMap[item.key] || "rules";
+                  const count = keyToCountMap[item.key] || "00";
+                  const isActive = isActiveItem(pathname, item.href, item.key);
+                  return (
+                    <Link
+                      key={item.key}
+                      className={`ct-sidebar-link ${isActive ? "is-active" : ""}`}
+                      href={item.href}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span className="ct-sidebar-icon">
+                        <Icon type={icon} />
+                      </span>
+                      <span className="ct-sidebar-label">{item.label}</span>
+                      <span className="ct-sidebar-count">{count}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </nav>
 
       <div className="ct-sidebar-status">

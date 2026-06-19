@@ -1,13 +1,38 @@
-﻿import { NextResponse } from "next/server";
+/**
+ * COLLECTIUM FILE HEADER
+ *
+ * Overskrift:
+ * Account Processes API route
+ *
+ * Definering / formål:
+ * Fallback API-rute for brukerprosesser. Returnerer status "not_connected"
+ * når reell Neon-tilkobling eller bruker-session mangler.
+ *
+ * Berørte sider / routes:
+ * - /min-side
+ *
+ * Berørte DB-brytere / feature_keys:
+ * - processes.view
+ *
+ * Berørte API-ruter:
+ * - GET /api/account/processes
+ *
+ * Dataretning:
+ * Neon → API/backend → Next.js → React → UI
+ *
+ * Logging:
+ * log_category: account
+ * log_action: view
+ */
+
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   return NextResponse.json({
-    ok: true,
-    route: "/api/account/processes",
-    source: "neon_pending",
     status: "not_connected",
-    message: "Endpoint finnes, men er ikke koblet til produksjonsdata ennå."
+    message: "Ikke koblet til reell brukerdata ennå",
+    data: null
   });
 }

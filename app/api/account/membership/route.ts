@@ -2,20 +2,20 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Account Overview API route
+ * Account Membership API route
  *
  * Definering / formål:
- * Fallback API-rute for kontooversikt. Returnerer status "not_connected"
+ * Fallback API-rute for medlemskap. Returnerer status "not_connected"
  * når reell Neon-tilkobling eller bruker-session mangler.
  *
  * Berørte sider / routes:
  * - /min-side
  *
  * Berørte DB-brytere / feature_keys:
- * - account.overview.view
+ * - membership.view
  *
  * Berørte API-ruter:
- * - GET /api/account/overview
+ * - GET /api/account/membership
  *
  * Dataretning:
  * Neon → API/backend → Next.js → React → UI

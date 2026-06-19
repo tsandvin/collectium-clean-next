@@ -75,9 +75,31 @@
 }
 
 .nav {
-  margin-top: 28px;
+  margin-top: 14px;
   display: grid;
-  gap: 8px;
+  gap: 14px;
+}
+
+.navGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.navGroupHeader {
+  margin-top: 8px;
+  margin-bottom: 2px;
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ct-sidebar-muted, var(--ct-muted));
+  opacity: 0.85;
+}
+
+.navGroupItems {
+  display: grid;
+  gap: 6px;
 }
 
 .navItem {
@@ -546,15 +568,21 @@
   bottom: 0;
   height: var(--ct-mobile-bottom-nav-height);
   max-width: 100vw;
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
   z-index: 120;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
   background: var(--ct-panel);
   color: var(--ct-text);
   border-top: 1px solid var(--ct-border);
   box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18);
   padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
+}
+
+.shell[data-screen-mode="mobile"] .mobileBottomNav::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .shell[data-screen-mode="mobile"] .mainColumn {
@@ -568,7 +596,9 @@
 }
 
 .mobileBottomItem {
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 4px 6px;
   display: grid;
   place-items: center;
   align-content: center;
@@ -607,15 +637,20 @@
     bottom: 0;
     height: var(--ct-mobile-bottom-nav-height);
     max-width: 100vw;
-    overflow: hidden;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
     z-index: 120;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
     background: var(--ct-panel);
     color: var(--ct-text);
     border-top: 1px solid var(--ct-border);
     box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18);
     padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
+  }
+  .mobileBottomNav::-webkit-scrollbar {
+    display: none;
   }
 
   .mainColumn {

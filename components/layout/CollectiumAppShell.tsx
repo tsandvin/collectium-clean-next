@@ -15,9 +15,14 @@ import {
   ShieldCheck,
   Menu,
   X,
-  UserRound
+  UserRound,
+  Bell,
+  ShoppingCart,
+  Database,
+  HelpCircle
 } from "lucide-react";
 import styles from "./CollectiumAppShell.module.css";
+import { collectiumSidebarItems } from "./collectiumSidebarItems";
 import { CollectiumLayoutModeProvider, useCollectiumLayout } from "./CollectiumLayoutModeProvider";
 
 type CollectiumSkin = "collectium" | "samler" | "museum" | "finans";
@@ -26,23 +31,31 @@ type CollectiumAppShellProps = {
   children: React.ReactNode;
 };
 
-const navItems = [
-  { href: "/", label: "Index", icon: Home },
-  { href: "/katalog", label: "Katalog", icon: Search },
-  { href: "/test/periodefilter", label: "Periodefilter test", icon: CalendarDays },
-  { href: "/objekt/norske_sedler/banknote/1459", label: "Objekt", icon: Box },
-  { href: "/relasjon/regent/oscar-ii", label: "Relasjoner", icon: Network, disabled: true },
-  { href: "/min-side", label: "Min samling", icon: Archive },
-  { href: "/auksjon", label: "Auksjon", icon: Gavel, disabled: true },
-  { href: "/forhandler", label: "Forhandler", icon: Store, disabled: true },
-  { href: "/admin", label: "Admin", icon: ShieldCheck },
-];
+const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  index: Home,
+  catalog: Search,
+  "period-filter": CalendarDays,
+  object: Box,
+  relations: Network,
+  account: UserRound,
+  collection: Archive,
+  auction: Gavel,
+  shop: ShoppingCart,
+  dealer: Store,
+  admin: ShieldCheck,
+  "admin-neon": Database,
+  support: HelpCircle,
+};
 
 const mobileBottomItems = [
-  { href: "/min-side", label: "Min side", icon: UserRound, key: "minside" },
-  { href: "/", label: "Index", icon: Home, key: "index" },
-  { href: "/katalog", label: "Katalog søk", icon: Search, key: "katalog" },
-  { href: "/min-side", label: "Min samling", icon: Archive, key: "samling" }, // TODO: change to /samling when collection page is active.
+  { key: "menu", label: "Meny", icon: Menu },
+  { key: "notifications", href: "/min-side", label: "Varsler", icon: Bell },
+  { key: "account", href: "/min-side", label: "Min side", icon: UserRound },
+  { key: "catalog", href: "/katalog", label: "Katalog", icon: Search },
+  { key: "period-filter", href: "/test/periodefilter", label: "Periodefilter", icon: CalendarDays },
+  { key: "admin", href: "/admin", label: "Admin", icon: ShieldCheck },
+  { key: "admin-neon", href: "/admin/neon", label: "Neon Control", icon: Database },
+  { key: "support", href: "/support", label: "Support", icon: HelpCircle },
 ];
 
 const skins: { value: CollectiumSkin; label: string }[] = [
@@ -301,43 +314,23 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isDesignMenuOpen]);
 
-  function checkActive(href: string): boolean {
-    if (href === "/") {
-      return pathname === "/";
-    }
-    if (href === "/test/periodefilter" || href === "/periodefilter") {
-      return pathname === "/test/periodefilter" || pathname === "/periodefilter";
-    }
-    if (href.startsWith("/katalog")) {
-      return pathname.startsWith("/katalog");
-    }
-    if (href.startsWith("/objekt")) {
-      return pathname.startsWith("/objekt");
-    }
-    if (href.startsWith("/relasjon")) {
-      return pathname.startsWith("/relasjon");
-    }
-    if (href.startsWith("/samling") || href.startsWith("/min-side")) {
-      return pathname.startsWith("/samling") || pathname.startsWith("/min-side");
-    }
-    if (href.startsWith("/auksjon")) {
-      return pathname.startsWith("/auksjon");
-    }
-    if (href.startsWith("/forhandler")) {
-      return pathname.startsWith("/forhandler");
-    }
-    if (href.startsWith("/admin")) {
-      return pathname.startsWith("/admin");
-    }
-    return pathname.startsWith(href);
+  function isActiveItem(pathname: string, href: string, key: string) {
+    if (key === "index") return pathname === "/";
+    if (key === "admin-neon") return pathname.startsWith("/admin/neon");
+    if (key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
+    return pathname === href || pathname.startsWith(`${href}/`);
   }
 
-  function checkMobileBottomActive(item: typeof mobileBottomItems[number]) {
+  function checkMobileBottomActive(item: { key: string; href?: string }) {
+    if (!item.href) return false;
+    if (item.key === "menu") return isMobileMenuOpen;
     if (item.key === "index") return pathname === "/";
-    if (item.key === "katalog") return pathname.startsWith("/katalog");
-    if (item.key === "samling") return pathname.startsWith("/samling");
-    if (item.key === "minside") return pathname.startsWith("/min-side");
-    return pathname === item.href;
+    if (item.key === "catalog") return pathname.startsWith("/katalog");
+    if (item.key === "period-filter") return pathname === "/test/periodefilter" || pathname === "/periodefilter";
+    if (item.key === "account") return pathname.startsWith("/min-side");
+    if (item.key === "admin-neon") return pathname.startsWith("/admin/neon");
+    if (item.key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
   }
 
   const isDarkSkin = skin === "museum" || skin === "finans";
@@ -381,28 +374,38 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
         </div>
 
         <nav className={styles.nav}>
-          {navItems.map((item) => {
-            const IconComponent = item.icon;
-            const isActive = checkActive(item.href);
+          {(["Hoved", "Bruker", "Marked", "System"] as const).map((groupName) => {
+            const items = collectiumSidebarItems.filter((item) => item.group === groupName);
             return (
-              <Link
-                key={item.href}
-                href={item.disabled ? "#" : item.href}
-                className={`${styles.navItem} ${isActive && !item.disabled ? styles.isActive : ""} ${item.disabled ? styles.disabled : ""}`}
-                onClick={(e) => {
-                  if (item.disabled) {
-                    e.preventDefault();
-                  } else {
-                    setIsMobileMenuOpen(false);
-                  }
-                }}
-                aria-current={isActive && !item.disabled ? "page" : undefined}
-              >
-                <span className={styles.navIcon}>
-                  <IconComponent size={22} />
-                </span>
-                <span className={styles.navLabel}>{item.label}</span>
-              </Link>
+              <div key={groupName} className={styles.navGroup}>
+                <div className={styles.navGroupHeader}>{groupName}</div>
+                <div className={styles.navGroupItems}>
+                  {items.map((item) => {
+                    const IconComponent = iconMap[item.key] || Box;
+                    const isActive = isActiveItem(pathname, item.href, item.key);
+                    return (
+                      <Link
+                        key={item.key}
+                        href={item.disabled ? "#" : item.href}
+                        className={`${styles.navItem} ${isActive && !item.disabled ? styles.isActive : ""} ${item.disabled ? styles.disabled : ""}`}
+                        onClick={(e) => {
+                          if (item.disabled) {
+                            e.preventDefault();
+                          } else {
+                            setIsMobileMenuOpen(false);
+                          }
+                        }}
+                        aria-current={isActive && !item.disabled ? "page" : undefined}
+                      >
+                        <span className={styles.navIcon}>
+                          <IconComponent size={22} />
+                        </span>
+                        <span className={styles.navLabel}>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
@@ -695,11 +698,29 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
       <nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
         {mobileBottomItems.map((item) => {
           const IconComponent = item.icon;
-          const isActive = checkMobileBottomActive(item);
+          const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
+          
+          if (item.key === "menu") {
+            return (
+              <button
+                key={item.key}
+                type="button"
+                className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-expanded={isMobileMenuOpen}
+                aria-label="Åpne eller lukk hovedmeny"
+                style={{ background: "none", border: "none", cursor: "pointer" }}
+              >
+                <IconComponent size={20} strokeWidth={1.8} />
+                <span>{item.label}</span>
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.key}
-              href={item.href}
+              href={item.href || "#"}
               className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
               aria-current={isActive ? "page" : undefined}
               onClick={() => setIsMobileMenuOpen(false)}
