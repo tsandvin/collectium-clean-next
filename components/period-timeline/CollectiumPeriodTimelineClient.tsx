@@ -520,7 +520,7 @@ function DynamicFacts({ hit, compact = false }: { hit: CatalogHit; compact?: boo
   );
 }
 
-function DynamicHistoryPanel({ hit, period, showActions = false }: { hit: CatalogHit; period: PeriodRow | null; showActions?: boolean }) {
+function DynamicHistoryPanel({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
   return (
     <section className={styles.cardHistoryPanel} aria-label="Historic dynamisk felt">
       <div className={styles.cardHistoryHeader}>
@@ -554,11 +554,6 @@ function DynamicHistoryPanel({ hit, period, showActions = false }: { hit: Catalo
           <dd>{period?.relation_href ? "Relasjon tilgjengelig" : "Ikke registrert"}</dd>
         </div>
       </dl>
-      {showActions && (
-        <div className={styles.cardHistoryActions}>
-          <DynamicActionButtons hit={hit} />
-        </div>
-      )}
     </section>
   );
 }
@@ -580,7 +575,10 @@ function HorizontalCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | 
           </div>
         </div>
         <div className={styles.cardBottomSection}>
-          <DynamicHistoryPanel hit={hit} period={period} showActions />
+          <DynamicHistoryPanel hit={hit} period={period} />
+          <div className={styles.cardUnderHistoryActions}>
+            <DynamicActionButtons hit={hit} />
+          </div>
         </div>
       </div>
       <aside className={styles.cardSideColumn}>
