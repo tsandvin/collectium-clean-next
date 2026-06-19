@@ -1,4 +1,4 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -2191,3 +2191,154 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   Collectium safe patch: period-timeline responsive cards
+   Formål:
+   - Listevisning minimum 500px
+   - Kluster/overlap CSS tydelig
+   - Ingen sentrert resultatstabel
+   ============================================================ */
+
+.periodTimelineCatalogGrid,
+.catalogResultGrid,
+.resultGrid,
+.cardsGrid {
+  width: 100%;
+  max-width: none;
+  justify-content: stretch;
+  align-items: start;
+}
+
+.periodTimelineCatalogGrid[data-view="list"],
+.catalogResultGrid[data-view="list"],
+.resultGrid[data-view="list"],
+.cardsGrid[data-view="list"],
+.listResultGrid,
+.listCardsGrid {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
+  justify-content: stretch;
+  align-items: start;
+  gap: 10px;
+}
+
+.periodTimelineCatalogGrid[data-view="horizontal"],
+.catalogResultGrid[data-view="horizontal"],
+.resultGrid[data-view="horizontal"],
+.cardsGrid[data-view="horizontal"] {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 600px), 1fr));
+}
+
+.periodTimelineCatalogGrid[data-view="standing"],
+.periodTimelineCatalogGrid[data-view="museum"],
+.catalogResultGrid[data-view="standing"],
+.catalogResultGrid[data-view="museum"],
+.resultGrid[data-view="standing"],
+.resultGrid[data-view="museum"],
+.cardsGrid[data-view="standing"],
+.cardsGrid[data-view="museum"] {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+}
+
+/* Kluster / overlap / stagger for periodetidslinje */
+.cluster,
+.timelineCluster,
+.periodCluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    width 180ms ease,
+    max-width 180ms ease;
+}
+
+.clusterToggle,
+.timelineClusterToggle,
+.periodClusterToggle {
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ct-accent, #2d5f8b) 35%, transparent);
+  background: color-mix(in srgb, var(--ct-accent, #2d5f8b) 10%, transparent);
+  color: var(--ct-text, #172033);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.clusterToggle:hover,
+.timelineClusterToggle:hover,
+.periodClusterToggle:hover,
+.clusterToggle:focus-visible,
+.timelineClusterToggle:focus-visible,
+.periodClusterToggle:focus-visible {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--ct-accent, #2d5f8b) 16%, white);
+  border-color: color-mix(in srgb, var(--ct-accent, #2d5f8b) 55%, transparent);
+}
+
+.clusterExpanded,
+.timelineClusterExpanded,
+.periodClusterExpanded {
+  max-width: 100%;
+  opacity: 1;
+}
+
+.overlapLane,
+.timelineOverlapLane,
+.periodOverlapLane {
+  position: relative;
+  isolation: isolate;
+}
+
+.staggerUp,
+.periodStaggerUp {
+  transform: translateY(-7px);
+}
+
+.staggerDown,
+.periodStaggerDown {
+  transform: translateY(7px);
+}
+
+.staggerCenter,
+.periodStaggerCenter {
+  transform: translateY(0);
+}
+
+.clusterList,
+.timelineClusterList,
+.periodClusterList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+}
+
+@media (max-width: 720px) {
+  .periodTimelineCatalogGrid,
+  .catalogResultGrid,
+  .resultGrid,
+  .cardsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .staggerUp,
+  .periodStaggerUp,
+  .staggerDown,
+  .periodStaggerDown {
+    transform: translateY(0);
+  }
+}
+
