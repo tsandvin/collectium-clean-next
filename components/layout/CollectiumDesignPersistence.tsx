@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * COLLECTIUM FILE HEADER
@@ -168,12 +168,14 @@ function applyScreenMode(screenMode: CollectiumScreenMode): void {
     root.dataset.vp = resolvedMode;
     root.dataset.resolvedVp = resolvedMode;
     root.dataset.screenOverride = "off";
+    root.dataset.navMode = "sidebar";
     return;
   }
 
   root.dataset.vp = screenMode;
   root.dataset.resolvedVp = screenMode;
   root.dataset.screenOverride = "on";
+  root.dataset.navMode = screenMode === "tv" ? "hamburger" : "sidebar";
 }
 
 function readCurrentSkinFromDom(): CollectiumSkin {

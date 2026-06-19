@@ -1,4 +1,5 @@
-﻿import CollectiumDesignPersistence from "@/components/layout/CollectiumDesignPersistence";
+﻿import CollectiumTvMenuBridge from "@/components/layout/CollectiumTvMenuBridge";
+import CollectiumDesignPersistence from "@/components/layout/CollectiumDesignPersistence";
 import type { Metadata } from "next";
 import {
   Cinzel,
@@ -113,6 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <CollectiumDesignPersistence />
+        <CollectiumTvMenuBridge />
         <CollectiumAppShell>{children}</CollectiumAppShell>
       </body>
     </html>

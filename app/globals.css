@@ -1955,3 +1955,82 @@ h1,
 [data-screen-mode="tv"] .ct-hero-title {
   font-weight: var(--ct-user-headline-weight, 600);
 }
+
+/* COLLECTIUM TV MENU BRIDGE START */
+
+/**
+ * Collectium TV / Presentasjon:
+ * - TV mode uses hamburger overlay navigation.
+ * - Bredskjerm (internal data-vp="wide") keeps the fixed left sidebar.
+ * - The bridge marks the real sidebar with .ct-tv-managed-sidebar.
+ */
+
+.ct-tv-hamburger-bridge,
+.ct-tv-menu-backdrop {
+  display: none;
+}
+
+html[data-vp="tv"] .ct-tv-hamburger-bridge {
+  position: fixed;
+  top: 54px;
+  left: 18px;
+  z-index: 2147483001;
+  width: 44px;
+  height: 38px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid rgba(44, 70, 60, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 252, 245, 0.96);
+  box-shadow: 0 12px 28px rgba(20, 30, 26, 0.16);
+  cursor: pointer;
+}
+
+html[data-vp="tv"] .ct-tv-hamburger-bridge span {
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: #24483d;
+}
+
+html[data-vp="tv"] .ct-tv-managed-sidebar {
+  position: fixed !important;
+  inset: 0 auto 0 0 !important;
+  z-index: 2147483000 !important;
+  width: min(280px, 82vw) !important;
+  max-width: 82vw !important;
+  transform: translateX(-112%) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+  box-shadow: none !important;
+}
+
+html[data-vp="tv"][data-tv-menu-open="on"] .ct-tv-managed-sidebar {
+  transform: translateX(0) !important;
+  box-shadow: 18px 0 50px rgba(20, 30, 26, 0.22) !important;
+}
+
+html[data-vp="tv"][data-tv-menu-open="on"] .ct-tv-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482999;
+  display: block;
+  border: 0;
+  background: rgba(16, 24, 20, 0.22);
+  cursor: default;
+}
+
+html[data-vp="wide"] .ct-tv-managed-sidebar,
+html[data-resolved-vp="wide"] .ct-tv-managed-sidebar {
+  position: fixed;
+  transform: none !important;
+}
+
+html[data-vp="wide"] .ct-tv-hamburger-bridge,
+html[data-resolved-vp="wide"] .ct-tv-hamburger-bridge {
+  display: none !important;
+}
+
+/* COLLECTIUM TV MENU BRIDGE END */
