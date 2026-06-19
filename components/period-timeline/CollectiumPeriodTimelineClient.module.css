@@ -2342,3 +2342,177 @@
   }
 }
 
+/* V9: actual period-timeline grids and cards must scale with available lane width */
+.catalogGrid {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  justify-content: stretch;
+  align-items: start;
+  gap: 12px;
+}
+
+.catalogGrid_horizontal {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+}
+
+.catalogGrid_standing,
+.catalogGrid_museum {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.catalogGrid_list {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
+}
+
+.ui85HorizontalCard {
+  grid-template-columns: minmax(0, 1fr) minmax(118px, 28%);
+  min-width: 0;
+}
+
+.cardTopSection {
+  grid-template-columns: minmax(120px, 34%) minmax(0, 1fr);
+}
+
+.cardMediaContainer,
+.cardInfoContainer,
+.cardMainContentFlow,
+.cardSideColumn,
+.cardListInfo,
+.cardMuseumRight {
+  min-width: 0;
+}
+
+.cardBanknote {
+  height: clamp(96px, 9vw, 132px);
+}
+
+.cardListDynamic {
+  display: grid;
+  gap: 2px;
+  min-width: 180px;
+  padding: 7px 10px;
+  border: 1px solid var(--ct-border);
+  border-radius: min(var(--ct-radius-card), 8px);
+  background: var(--ct-panel-bg);
+}
+
+.cardListDynamic span {
+  color: var(--ct-muted);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.cardListDynamic strong {
+  color: var(--ct-text);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.lane {
+  min-height: 120px;
+}
+
+.laneTrack {
+  min-height: 112px;
+  overflow: hidden;
+}
+
+.laneTrack::before {
+  top: 55px;
+}
+
+.periodBlock,
+.eventMarker {
+  min-width: 118px;
+  height: 34px;
+  transition:
+    top 220ms ease,
+    left 220ms ease,
+    width 220ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.periodBlock:hover,
+.periodBlock:focus-visible,
+.eventMarker:hover,
+.eventMarker:focus-visible {
+  z-index: 20;
+  transform: translateY(-5px) scale(1.02);
+}
+
+.eventMarker:hover,
+.eventMarker:focus-visible {
+  transform: translateX(-50%) translateY(-5px) scale(1.02);
+}
+
+@media (max-width: 1280px) {
+  .catalogGrid_horizontal,
+  .catalogGrid_standing,
+  .catalogGrid_museum {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  }
+
+  .ui85HorizontalCard {
+    grid-template-columns: 1fr;
+  }
+
+  .cardSideColumn {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, 30%);
+    gap: 8px;
+  }
+
+  .cardPriceBox {
+    width: auto;
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .catalogHeaderControls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cardTopSection,
+  .cardStandingDetails,
+  .ui85MuseumCard,
+  .ui85ListCard {
+    grid-template-columns: 1fr;
+  }
+
+  .cardSideColumn {
+    grid-template-columns: 1fr;
+  }
+
+  .cardListDynamic,
+  .cardListActions,
+  .cardListBadges,
+  .cardListPrice {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .catalogGrid,
+  .catalogGrid_horizontal,
+  .catalogGrid_standing,
+  .catalogGrid_museum,
+  .catalogGrid_list {
+    grid-template-columns: 1fr;
+  }
+
+  .lane {
+    min-height: 132px;
+  }
+
+  .laneTrack {
+    min-height: 124px;
+  }
+}
+

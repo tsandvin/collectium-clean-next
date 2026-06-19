@@ -127,7 +127,7 @@ type Filters = {
 
 const CURRENT_YEAR = 2024;
 const DEFAULT_FILTERS: Filters = {
-  country: "Norge",
+  country: "",
   objectType: "Verdibrev",
   yearFrom: 1814,
   yearTo: 2024,
@@ -146,10 +146,10 @@ const SEGMENT_LABELS: Record<SegmentKey, string> = {
 const PERIOD_ROW_DEFINITIONS: PeriodRowDefinition[] = [
   {
     key: "row1",
-    label: "Kongeperiode / nasjonal hovedperiode",
-    selectLabel: "Rad 1 · kongeperiode og nasjonale hovedperioder",
-    emptyLabel: "Velg kongeperiode eller nasjonal hovedperiode",
-    helper: "Grov historisk ramme: regent, dynasti, union, statsperiode og hovedepoke.",
+    label: "Herskere / kongeperiode og nasjonal hovedperiode",
+    selectLabel: "Rad 1 · herskere, kongeperiode og nasjonale hovedperioder",
+    emptyLabel: "Velg hersker, statsoverhode eller nasjonal hovedperiode",
+    helper: "Regent, konge, keiser, president, statsminister, hersker og nasjonal ramme.",
     className: "row1",
   },
   {
@@ -179,6 +179,7 @@ const PERIOD_ROW_DEFINITIONS: PeriodRowDefinition[] = [
 ];
 
 const ROW4_GROUP_ORDER = [
+  "Herskere / statsoverhoder",
   "Konge / regent",
   "Nasjonale perioder",
   "Krig / konflikt",
@@ -191,6 +192,13 @@ const ROW4_GROUP_ORDER = [
   "Lokale perioder",
   "Andre perioder",
 ];
+
+const COUNTRY_ALIASES: Record<string, string[]> = {
+  Norge: ["norge", "norsk", "norway", "norwegian", "sverige-norge", "danmark-norge"],
+  Sverige: ["sverige", "svensk", "sweden", "swedish", "sverige-norge"],
+  Danmark: ["danmark", "dansk", "denmark", "danish", "danmark-norge"],
+  Skandinavia: ["skandinavia", "skandinavisk", "norden", "nordic", "norge", "sverige", "danmark"],
+};
 
 function normalizeText(value: string | null | undefined): string {
   return (value || "").toLocaleLowerCase("nb");
@@ -239,30 +247,7 @@ function matchesRow(period: PeriodRow, rowKey: PeriodRowKey): boolean {
   const label = normalizeText(period.period_type_label_no);
 
   if (rowKey === "row1") {
-    return [
-      "regent",
-      "konge",
-      "king",
-      "dynasty",
-      "dynasti",
-      "national",
-      "nasjonal",
-      "historical_main",
-      "hovedperiode",
-      "union",
-      "state",
-      "statsperiode",
-      "independence",
-      "selvstendig",
-      "viking",
-      "middelalder",
-      "dansketiden",
-      "1814",
-      "haakon",
-      "olav",
-      "harald",
-      "oscar",
-    ].some((needle) => text.includes(needle));
+    return isRulerPeriod(period) || isNationalFramePeriod(period);
   }
 
   if (rowKey === "row2") {
@@ -326,6 +311,72 @@ function matchesRow(period: PeriodRow, rowKey: PeriodRowKey): boolean {
   return false;
 }
 
+function isRulerPeriod(period: PeriodRow): boolean {
+  const text = periodText(period);
+  return [
+      "regent",
+      "konge",
+      "king",
+      "queen",
+      "dronning",
+      "monark",
+      "monarchy",
+      "dynasty",
+      "dynasti",
+      "hierarki",
+      "pastor",
+      "person",
+      "motiv",
+      "keiser",
+      "emperor",
+      "hersker",
+      "ruler",
+      "president",
+      "statsminister",
+      "prime minister",
+      "statsoverhode",
+      "head of state",
+      "maktperson",
+      "fyrste",
+      "jarl",
+      "eneveldet",
+      "haakon",
+      "olav",
+      "harald",
+      "oscar",
+      "christian",
+      "frederik",
+      "carl",
+      "gustav",
+  ].some((needle) => text.includes(needle));
+}
+
+function isNationalFramePeriod(period: PeriodRow): boolean {
+  const text = periodText(period);
+  return [
+      "national",
+      "nasjonal",
+      "historical_main",
+      "hovedperiode",
+      "union",
+      "state",
+      "statsperiode",
+      "independence",
+      "selvstendig",
+      "viking",
+      "middelalder",
+      "dansketiden",
+      "1814",
+    ].some((needle) => text.includes(needle));
+}
+
+function countryMatchesPeriod(period: PeriodRow, country: string): boolean {
+  if (!country) return true;
+  const aliases = COUNTRY_ALIASES[country] || [country.toLocaleLowerCase("nb")];
+  const text = periodText(period);
+  return aliases.some((alias) => text.includes(alias));
+}
+
 function primaryRowForPeriod(period: PeriodRow): PeriodRowKey {
   if (matchesRow(period, "row1")) return "row1";
   if (matchesRow(period, "row2")) return "row2";
@@ -335,6 +386,7 @@ function primaryRowForPeriod(period: PeriodRow): PeriodRowKey {
 
 function row4GroupForPeriod(period: PeriodRow): string {
   const text = periodText(period);
+  if (isRulerPeriod(period)) return "Herskere / statsoverhoder";
   if (matchesRow(period, "row1") && /regent|konge|king|dynasty|dynasti|oscar|haakon|olav|harald/.test(text)) return "Konge / regent";
   if (matchesRow(period, "row1")) return "Nasjonale perioder";
   if (/war|krig|conflict|konflikt/.test(text)) return "Krig / konflikt";
@@ -346,6 +398,30 @@ function row4GroupForPeriod(period: PeriodRow): string {
   if (/provenance|proveniens|funn|find/.test(text)) return "Funn / proveniens";
   if (/local|lokal|kommune|sted/.test(text)) return "Lokale perioder";
   return "Andre perioder";
+}
+
+function row1GroupForPeriod(period: PeriodRow): string {
+  if (isRulerPeriod(period)) return "Herskere / statsoverhoder";
+  if (isNationalFramePeriod(period)) return "Nasjonale perioder";
+  return row4GroupForPeriod(period);
+}
+
+function timelineStackIndex(period: PeriodRow, periods: PeriodRow[], index: number, span: number): number {
+  const start = period.start_year ?? 0;
+  const end = normalizeEndYear(period) ?? start;
+  const threshold = Math.max(2, Math.round(span * 0.025));
+  let overlaps = 0;
+
+  for (let previousIndex = 0; previousIndex < index; previousIndex += 1) {
+    const previous = periods[previousIndex];
+    const previousStart = previous.start_year ?? 0;
+    const previousEnd = normalizeEndYear(previous) ?? previousStart;
+    if (previousStart <= end + threshold && previousEnd >= start - threshold) {
+      overlaps += 1;
+    }
+  }
+
+  return overlaps % 4;
 }
 
 function groupPeriods(periods: PeriodRow[], groupForPeriod: (period: PeriodRow) => string): GroupedPeriods[] {
@@ -618,6 +694,33 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: P
   );
 }
 
+function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+  if (segment === "samler") {
+    return (
+      <div className={styles.cardListDynamic}>
+        <span>Samler</span>
+        <strong>Hjerte 0 · Stjerne 0 · Ikke i samling</strong>
+      </div>
+    );
+  }
+
+  if (segment === "finans") {
+    return (
+      <div className={styles.cardListDynamic}>
+        <span>Finans</span>
+        <strong>Ikke estimert · Mangler markedsverdi</strong>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.cardListDynamic}>
+      <span>Historie</span>
+      <strong>{period?.display_name_no || "Ikke valgt"} · {objectYearLabel(hit)}</strong>
+    </div>
+  );
+}
+
 function HorizontalCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
@@ -693,7 +796,7 @@ function MuseumCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodR
   );
 }
 
-function ListCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }) {
+function ListCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -723,6 +826,7 @@ function ListCard({ hit, period }: { hit: CatalogHit; period: PeriodRow | null }
         </div>
         <p className={styles.cardMeta}>{cardMetaText(hit, period)}</p>
       </div>
+      <ListSegmentSummary hit={hit} period={period} segment={segment} />
       <div className={styles.cardListActions}>
         <DynamicActionButtons hit={hit} />
       </div>
@@ -782,17 +886,22 @@ export function CollectiumPeriodTimelineClient() {
   }, [rows, filters.yearFrom, filters.yearTo]);
 
   const optionsByRow = useMemo(() => {
+    const rulerOptions = periodOptions.filter((period) => isRulerPeriod(period));
+    const row1Base = periodOptions.filter((period) => matchesRow(period, "row1"));
+    const row1AllCountries = rulerOptions.length > 0 ? rulerOptions : row1Base;
+    const row1CountryScoped = row1Base.filter((period) => countryMatchesPeriod(period, filters.country));
+
     return {
-      row1: periodOptions.filter((period) => matchesRow(period, "row1")),
+      row1: filters.country && row1CountryScoped.length > 0 ? row1CountryScoped : row1AllCountries,
       row2: periodOptions.filter((period) => matchesRow(period, "row2")),
       row3: periodOptions.filter((period) => matchesRow(period, "row3")),
       row4: periodOptions,
     };
-  }, [periodOptions]);
+  }, [filters.country, periodOptions]);
 
   const groupedOptionsByRow = useMemo(() => {
     return {
-      row1: groupPeriods(optionsByRow.row1, (period) => row4GroupForPeriod(period)),
+      row1: groupPeriods(optionsByRow.row1, (period) => row1GroupForPeriod(period)),
       row2: groupPeriods(optionsByRow.row2, (period) => row4GroupForPeriod(period)),
       row3: groupPeriods(optionsByRow.row3, (period) => row4GroupForPeriod(period)),
       row4: groupPeriods(optionsByRow.row4, (period) => row4GroupForPeriod(period)),
@@ -928,8 +1037,11 @@ export function CollectiumPeriodTimelineClient() {
           <label className={styles.field}>
             <span>Land</span>
             <select value={filters.country} onChange={(event) => updateFilters({ country: event.target.value })}>
+              <option value="">Alle land</option>
               <option value="Norge">Norge</option>
               <option value="Skandinavia">Skandinavia</option>
+              <option value="Sverige">Sverige</option>
+              <option value="Danmark">Danmark</option>
             </select>
           </label>
 
@@ -1012,7 +1124,7 @@ export function CollectiumPeriodTimelineClient() {
                       const width = Math.max(2, ((end - start || 1) / timelineWindow.span) * 100);
                       const isEvent = start === end;
                       const active = selectedPeriod?.period_slug === period.period_slug;
-                      const stackTop = 6 + (index % 3) * 20;
+                      const stackTop = 8 + timelineStackIndex(period, lane.periods, index, timelineWindow.span) * 24;
                       return (
                         <button
                           key={period.period_slug}
@@ -1278,7 +1390,7 @@ export function CollectiumPeriodTimelineClient() {
         <div className={styles.panelHeader}>
           <div>
             <p className={styles.eyebrow}>Katalogtreff</p>
-            <h2>Treff fra valgt tidslinje og Masterfilter</h2>
+            <h2>Katalogtreff {filters.yearFrom}–{filters.yearTo}</h2>
           </div>
           <div className={styles.catalogHeaderControls}>
             <div className={styles.cardSegmentTabs} aria-label="Dynamisk kortfelt">
@@ -1334,7 +1446,7 @@ export function CollectiumPeriodTimelineClient() {
             {catalogRows.map((hit, index) => {
               if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
               if (cardLayout === "standing") return <StandingCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
-              if (cardLayout === "list") return <ListCard key={index} hit={hit} period={selectedPeriod} />;
+              if (cardLayout === "list") return <ListCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
               return <MuseumCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
             })}
           </div>
