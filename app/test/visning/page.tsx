@@ -406,7 +406,7 @@ export default function TestVisningEditorV7() {
         selectedId={selectedId}
         overrides={overrides[selectedId] || {}}
         textValue={textOverrides[selectedId] ?? selected.defaultText ?? ""}
-        setTextValue={(value) => setTextOverrides((prev) => ({ ...prev, [selectedId]: value }))}
+        setTextValue={(value: string) => setTextOverrides((prev) => ({ ...prev, [selectedId]: value }))}
         editStyle={editStyle}
         resetSelected={resetSelected}
         copySelected={copySelected}
