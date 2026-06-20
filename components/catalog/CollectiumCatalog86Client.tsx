@@ -56,6 +56,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./CollectiumCatalog86Client.module.css";
+import { CollectiumCatalogObjectCard } from "./CollectiumCatalogObjectCard";
 import {
   CatalogApiPayload,
   CatalogFilters,
@@ -435,7 +436,7 @@ export function CollectiumCatalog86Client() {
       ) : (
         <div className={styles.results} data-view={view}>
           {objects.map((object) => (
-            <CatalogObjectCard key={`${object.source_key}-${object.object_group}-${object.object_id}`} object={object} segment={segment} view={view} />
+            <CollectiumCatalogObjectCard key={`${object.source_key}-${object.object_group}-${object.object_id}`} object={object} segment={segment} view={view} />
           ))}
         </div>
       )}
@@ -592,6 +593,9 @@ function buildFallbackRelations(object: CatalogObject): CatalogRelation[] {
   add("kilde", object.source_key);
   return relations;
 }
+
+
+
 
 
 

@@ -1,0 +1,213 @@
+﻿.page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.header,
+.controlPanel,
+.resultsHeader,
+.emptyState {
+  border: 1px solid rgba(30, 64, 112, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 20px 70px rgba(28, 55, 90, 0.08);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 18px;
+  align-items: stretch;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 46px);
+  line-height: 1;
+}
+
+.header p {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: rgba(25, 37, 56, 0.72);
+}
+
+.kicker {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  color: rgba(25, 72, 132, 0.72);
+}
+
+.statusBox {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(238, 244, 252, 0.82);
+}
+
+.statusBox span,
+.statusBox small,
+.queryBox span,
+.switchPanel span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(28, 50, 76, 0.6);
+}
+
+.statusBox strong {
+  font-size: 15px;
+}
+
+.controlPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+  gap: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.filterMegaMenu {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.filterMegaMenu fieldset {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid rgba(30, 64, 112, 0.14);
+  border-radius: 14px;
+}
+
+.filterMegaMenu legend {
+  padding: 0 6px;
+  font-weight: 700;
+  color: rgba(25, 37, 56, 0.84);
+}
+
+.filterMegaMenu label {
+  display: grid;
+  gap: 5px;
+}
+
+.filterMegaMenu label span {
+  font-size: 11px;
+  color: rgba(25, 37, 56, 0.62);
+}
+
+.filterMegaMenu input {
+  width: 100%;
+  border: 1px solid rgba(30, 64, 112, 0.18);
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.checkLine {
+  display: flex !important;
+  grid-template-columns: none !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkLine input {
+  width: auto;
+}
+
+.switchPanel {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.buttonRow button,
+.filterMegaMenu button {
+  border: 1px solid rgba(30, 64, 112, 0.18);
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.buttonRow button[data-active="true"],
+.filterMegaMenu button[type="submit"] {
+  background: rgba(24, 82, 156, 0.95);
+  color: white;
+  border-color: rgba(24, 82, 156, 0.95);
+}
+
+.queryBox {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(238, 244, 252, 0.82);
+  overflow: hidden;
+}
+
+.queryBox code {
+  white-space: normal;
+  word-break: break-word;
+  font-size: 11px;
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+.resultsHeader h2 {
+  margin: 0;
+}
+
+.emptyState {
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  color: rgba(25, 37, 56, 0.74);
+}
+
+.results {
+  display: grid;
+  gap: 14px;
+}
+
+.results[data-view="standing"] {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.results[data-view="museum"] {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 980px) {
+  .header,
+  .controlPanel,
+  .filterMegaMenu {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    padding: 14px;
+  }
+}
