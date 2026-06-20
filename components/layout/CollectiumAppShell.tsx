@@ -165,7 +165,9 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     roles?: string[];
     isAdmin?: boolean;
     isDealer?: boolean;
-  };
+      membership?: string;
+      membershipLevel?: string;
+    };
 
   const ctUser = ctSession?.user ?? ctSession;
 
@@ -970,6 +972,7 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
 
 
 
