@@ -3400,3 +3400,349 @@
   }
 }
 
+/* ============================================================
+   Period timeline hover animation and button shine
+   Scope: /test/period-timeline
+   Purpose:
+   - Alle felt/paneler/kort får hover-skygge
+   - Alle brytere får 2x skygge og myk animering
+   - Brytere får lys gradert toppfelt inn mot midten
+   ============================================================ */
+
+.page {
+  --pt-hover-shadow:
+    0 10px 24px color-mix(in srgb, var(--ct-text, #0d2b4d) 9%, transparent),
+    0 2px 8px color-mix(in srgb, var(--ct-text, #0d2b4d) 7%, transparent);
+
+  --pt-button-shadow:
+    0 6px 14px color-mix(in srgb, var(--ct-text, #0d2b4d) 9%, transparent);
+
+  --pt-button-shadow-strong:
+    0 12px 28px color-mix(in srgb, var(--ct-text, #0d2b4d) 16%, transparent),
+    0 4px 10px color-mix(in srgb, var(--ct-accent, #1f66ad) 18%, transparent);
+
+  --pt-top-shine:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.44) 18%,
+      rgba(255, 255, 255, 0.30) 50%,
+      rgba(255, 255, 255, 0.44) 82%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+
+  --pt-hover-duration: 180ms;
+  --pt-hover-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* Mørke skins får svakere men tydeligere glans */
+:global([data-theme="dark"]) .page,
+:global([data-skin="finans"]) .page {
+  --pt-hover-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.32),
+    0 2px 10px rgba(255, 255, 255, 0.035);
+
+  --pt-button-shadow:
+    0 7px 16px rgba(0, 0, 0, 0.28);
+
+  --pt-button-shadow-strong:
+    0 16px 34px rgba(0, 0, 0, 0.48),
+    0 4px 12px color-mix(in srgb, var(--ct-accent, #d5b45d) 22%, transparent);
+
+  --pt-top-shine:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.16) 20%,
+      rgba(255, 255, 255, 0.10) 50%,
+      rgba(255, 255, 255, 0.16) 80%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+}
+
+/* Alle informasjonsfelt, paneler og kort får jevn hover-animasjon */
+.hero,
+.masterFilter,
+.timelinePanel,
+.detailPanel,
+.segmentPanel,
+.catalogPanel,
+.ui85Card,
+.ui85HorizontalCard,
+.ui85StandingCard,
+.ui85ListCard,
+.ui85MuseumCard,
+.detailRow,
+.detailRowBlock,
+.field,
+.fieldCard,
+.lane,
+.tablePanel,
+.emptyState,
+.errorState,
+.cardBottomSection > :first-child,
+.cardStandingLeftColumn > :first-child,
+.cardMuseumRight > :where(div, section, article):first-of-type,
+.ui85ListCard > :nth-child(3),
+.cardListPrice > *,
+.cardListBadges > * > *,
+.cardSideColumn > :first-child > *,
+.cardStandingRightColumn > :first-child > *,
+.cardSideColumn > :last-child,
+.cardStandingRightColumn > :last-child {
+  transition:
+    box-shadow var(--pt-hover-duration) var(--pt-hover-ease),
+    transform var(--pt-hover-duration) var(--pt-hover-ease),
+    border-color var(--pt-hover-duration) var(--pt-hover-ease),
+    background-color var(--pt-hover-duration) var(--pt-hover-ease),
+    filter var(--pt-hover-duration) var(--pt-hover-ease);
+  will-change: transform, box-shadow;
+}
+
+/* Hover på felt: skygge under felt, men ikke for mye løft */
+.hero:hover,
+.masterFilter:hover,
+.timelinePanel:hover,
+.detailPanel:hover,
+.segmentPanel:hover,
+.catalogPanel:hover,
+.ui85Card:hover,
+.ui85HorizontalCard:hover,
+.ui85StandingCard:hover,
+.ui85ListCard:hover,
+.ui85MuseumCard:hover,
+.detailRow:hover,
+.detailRowBlock:hover,
+.field:hover,
+.fieldCard:hover,
+.tablePanel:hover,
+.emptyState:hover,
+.cardBottomSection > :first-child:hover,
+.cardStandingLeftColumn > :first-child:hover,
+.cardMuseumRight > :where(div, section, article):first-of-type:hover,
+.ui85ListCard > :nth-child(3):hover,
+.cardListPrice > *:hover,
+.cardListBadges > * > *:hover,
+.cardSideColumn > :first-child > *:hover,
+.cardStandingRightColumn > :first-child > *:hover,
+.cardSideColumn > :last-child:hover,
+.cardStandingRightColumn > :last-child:hover {
+  box-shadow: var(--pt-hover-shadow);
+  transform: translateY(-1px);
+}
+
+/* Alle knapper og klikkbare brytere */
+.page button,
+.page a.ct-btn,
+.page .ct-btn,
+.segmentButton,
+.segmentButtonActive,
+.viewSelector,
+.viewSelectorActive,
+.toolbarButtonActive,
+.primaryButton,
+.relationLink,
+.cardStandingBottomActions button,
+.cardStandingBottomActions a,
+.cardUnderDynamicActions button,
+.cardUnderDynamicActions a,
+.cardMuseumActions button,
+.cardMuseumActions a,
+.cardListActions button,
+.cardListActions a,
+.cardSideColumn button,
+.cardStandingRightColumn button,
+.cardListBadges button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: var(--pt-button-shadow);
+  transform: translateY(0) scale(1);
+  transition:
+    box-shadow 170ms var(--pt-hover-ease),
+    transform 170ms var(--pt-hover-ease),
+    border-color 170ms var(--pt-hover-ease),
+    background-color 170ms var(--pt-hover-ease),
+    color 170ms var(--pt-hover-ease),
+    filter 170ms var(--pt-hover-ease);
+  will-change: transform, box-shadow;
+}
+
+/* Lys gradert felt på øverste ramme av alle brytere */
+.page button::after,
+.page a.ct-btn::after,
+.page .ct-btn::after,
+.segmentButton::after,
+.segmentButtonActive::after,
+.viewSelector::after,
+.viewSelectorActive::after,
+.toolbarButtonActive::after,
+.primaryButton::after,
+.relationLink::after,
+.cardStandingBottomActions button::after,
+.cardStandingBottomActions a::after,
+.cardUnderDynamicActions button::after,
+.cardUnderDynamicActions a::after,
+.cardMuseumActions button::after,
+.cardMuseumActions a::after,
+.cardListActions button::after,
+.cardListActions a::after,
+.cardSideColumn button::after,
+.cardStandingRightColumn button::after,
+.cardListBadges button::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  left: 10%;
+  right: 10%;
+  top: 1px;
+  height: 42%;
+  border-radius: inherit;
+  background: var(--pt-top-shine);
+  opacity: 0.42;
+  transform: translateY(0);
+  transition:
+    opacity 170ms var(--pt-hover-ease),
+    transform 170ms var(--pt-hover-ease);
+}
+
+/* Knappens innhold skal ligge over glansen */
+.page button > *,
+.page a.ct-btn > *,
+.page .ct-btn > *,
+.segmentButton > *,
+.segmentButtonActive > *,
+.viewSelector > *,
+.viewSelectorActive > *,
+.toolbarButtonActive > *,
+.primaryButton > *,
+.relationLink > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Brytere: 2x skygge og tydelig animasjon ved hover */
+.page button:hover,
+.page a.ct-btn:hover,
+.page .ct-btn:hover,
+.segmentButton:hover,
+.segmentButtonActive:hover,
+.viewSelector:hover,
+.viewSelectorActive:hover,
+.toolbarButtonActive:hover,
+.primaryButton:hover,
+.relationLink:hover,
+.cardStandingBottomActions button:hover,
+.cardStandingBottomActions a:hover,
+.cardUnderDynamicActions button:hover,
+.cardUnderDynamicActions a:hover,
+.cardMuseumActions button:hover,
+.cardMuseumActions a:hover,
+.cardListActions button:hover,
+.cardListActions a:hover,
+.cardSideColumn button:hover,
+.cardStandingRightColumn button:hover,
+.cardListBadges button:hover {
+  box-shadow: var(--pt-button-shadow-strong);
+  transform: translateY(-2px) scale(1.018);
+  filter: saturate(1.04);
+}
+
+/* Glansen blir tydeligere på hover */
+.page button:hover::after,
+.page a.ct-btn:hover::after,
+.page .ct-btn:hover::after,
+.segmentButton:hover::after,
+.segmentButtonActive:hover::after,
+.viewSelector:hover::after,
+.viewSelectorActive:hover::after,
+.toolbarButtonActive:hover::after,
+.primaryButton:hover::after,
+.relationLink:hover::after,
+.cardStandingBottomActions button:hover::after,
+.cardStandingBottomActions a:hover::after,
+.cardUnderDynamicActions button:hover::after,
+.cardUnderDynamicActions a:hover::after,
+.cardMuseumActions button:hover::after,
+.cardMuseumActions a:hover::after,
+.cardListActions button:hover::after,
+.cardListActions a:hover::after,
+.cardSideColumn button:hover::after,
+.cardStandingRightColumn button:hover::after,
+.cardListBadges button:hover::after {
+  opacity: 0.72;
+  transform: translateY(1px);
+}
+
+/* Aktiv/focus: kontrollert trykkfølelse */
+.page button:active,
+.page a.ct-btn:active,
+.page .ct-btn:active,
+.segmentButton:active,
+.segmentButtonActive:active,
+.viewSelector:active,
+.viewSelectorActive:active,
+.toolbarButtonActive:active,
+.primaryButton:active,
+.relationLink:active {
+  transform: translateY(0) scale(0.992);
+  box-shadow: var(--pt-button-shadow);
+}
+
+/* Keyboard focus: tydelig, men innenfor design */
+.page button:focus-visible,
+.page a.ct-btn:focus-visible,
+.page .ct-btn:focus-visible,
+.segmentButton:focus-visible,
+.segmentButtonActive:focus-visible,
+.viewSelector:focus-visible,
+.viewSelectorActive:focus-visible,
+.toolbarButtonActive:focus-visible,
+.primaryButton:focus-visible,
+.relationLink:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ct-accent, #1f66ad) 60%, #ffffff);
+  outline-offset: 3px;
+}
+
+/* Tidslinjenoder får også hover, men mindre kraftig */
+.periodBlock,
+.eventMarker {
+  transition:
+    box-shadow 160ms var(--pt-hover-ease),
+    transform 160ms var(--pt-hover-ease),
+    filter 160ms var(--pt-hover-ease);
+}
+
+.periodBlock:hover,
+.eventMarker:hover {
+  box-shadow:
+    0 8px 18px color-mix(in srgb, var(--ct-accent, #1f66ad) 22%, transparent),
+    0 2px 7px color-mix(in srgb, var(--ct-text, #0d2b4d) 12%, transparent);
+  transform: translateY(-1px);
+  filter: saturate(1.06);
+}
+
+/* Reduser animasjon for brukere/enheter som ber om det */
+@media (prefers-reduced-motion: reduce) {
+  .page *,
+  .page *::before,
+  .page *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .page button:hover,
+  .page a.ct-btn:hover,
+  .page .ct-btn:hover,
+  .ui85Card:hover,
+  .ui85HorizontalCard:hover,
+  .ui85StandingCard:hover,
+  .ui85ListCard:hover,
+  .ui85MuseumCard:hover {
+    transform: none !important;
+  }
+}
+
