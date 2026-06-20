@@ -2,71 +2,65 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Katalog
+ * Katalogside UI/UX 8.6
  *
  * Definering / formål:
- * Ren katalogside-placeholder. Skal ikke eie topbar, sidebar, local shell eller skinmotor.
+ * Next.js-side for Collectium-katalogen. Siden bruker eksisterende global AppShell,
+ * topbar, sidemeny, skin/tokens og skjerminnstillinger. Siden lager ikke eget shell.
  *
  * Bruksområde:
- * Route /katalog
+ * Viser katalogens arbeidsflate med filter over resultater, segmenter, visningskort
+ * og dynamisk innhold fra API.
  *
  * Berørte sider / routes:
  * - /katalog
+ * - /objekt/[sourceKey]/[objectGroup]/[objectId]
+ * - /relasjon/[relationType]/[relationKey]
  *
  * Berørte DB-brytere / feature_keys:
  * - catalog.view
  * - catalog.search
  * - catalog.filters
  * - catalog.object.open
+ * - catalog.market
+ * - catalog.history
+ * - catalog.collection
+ * - catalog.favorite
+ * - catalog.wishlist
  *
  * Berørte API-ruter:
- * - GET /api/catalog/search senere
- * - GET /api/catalog/filters senere
+ * - GET /api/catalog/search
+ * - GET /api/catalog/filters
+ * - GET /api/period86/row1/nodes
+ * - GET /api/period86/row2/nodes
  *
  * Berørte tabeller / views:
- * - ct_v_catalog_objects_resolved senere
- * - ct_v_catalog_filter_counts senere
+ * - ct_v_catalog_objects_resolved
+ * - ct_v_catalog_filter_counts
+ * - ct_v_object_relations_resolved
+ * - ct_v_period_filter_options
  *
  * Dataretning:
- * MariaDB -> API/backend -> Next.js -> React -> UI
+ * Neon/MariaDB -> API/backend -> Next.js -> React -> UI
  *
  * Logging:
  * log_category: catalog
  * log_action: view
  *
  * Versjon:
- * CT-CLEAN-0001
+ * CT-FILE-CATALOG86-0001 / CHANGE-2026-06-20-0001
+ *
+ * Endringsregel:
+ * Legger til ny katalogside uten å endre kjernefiler, global layout, topbar eller sidemeny.
  */
-import { PageHeader } from '@/components/ui/PageHeader';
-import { InfoCard } from '@/components/ui/InfoCard';
+
+import { CollectiumCatalog86Client } from "@/components/catalog/CollectiumCatalog86Client";
+
+export const metadata = {
+  title: "Katalog · Collectium",
+  description: "Collectium relasjonskatalog med Filter Master, periodefilter og visningskort.",
+};
 
 export default function KatalogPage() {
-  return (
-    <main className="ct-stack">
-      <PageHeader
-        eyebrow="Katalog"
-        title="Relasjonskatalog for objekt, kilde, historie og marked."
-        lead="Dette er bare en ren katalogflate. Filter, visningskort og API kobles inn kontrollert senere."
-      />
-
-      <section className="ct-panel ct-signature-box">
-        <div className="ct-section-head">
-          <div>
-            <p className="ct-eyebrow">Filterrekkefølge</p>
-            <h2>Source-scoped filter skal bygges fra API.</h2>
-          </div>
-          <span className="ct-pill">source_key + object_group</span>
-        </div>
-        <div className="ct-filter-row" aria-label="Filter placeholder">
-          <span>Kilde</span><span>Objekttype</span><span>Land</span><span>Produsent</span><span>År</span><span>Valør</span><span>Regent</span><span>Verdi</span>
-        </div>
-      </section>
-
-      <section className="ct-grid ct-grid--three">
-        <InfoCard title="ObjectCard UI 8.5" label="Kort" text="Felles markup for horisontal, stående, liste og museum. Skin skal bare endre tokens." />
-        <InfoCard title="Samler · Historie · Finans" label="Segment" text="Segmentene skal redusere støy uten å endre objektets tekniske nøkkel." />
-        <InfoCard title="Åpne objekt" label="Route" text="Objektoppslag skal bruke source_key + object_group + object_id." />
-      </section>
-    </main>
-  );
+  return <CollectiumCatalog86Client />;
 }
