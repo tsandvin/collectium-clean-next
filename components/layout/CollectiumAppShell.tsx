@@ -895,22 +895,6 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
             </header>
 
             <div className={styles.mobileMegaMenuGrid}>
-              {([] as Array<{ title: string; requiresAdmin?: boolean; requiresDealer?: boolean; items: Array<{ label: string; href: string }> }>)
-                .filter((group) => {
-                  if (group.requiresAdmin && !isAdminUser) return false;
-                  if (group.requiresDealer && !isDealerUser && !isAdminUser) return false;
-                  return true;
-                })
-                .map((group) => (
-                  <section className={styles.mobileMegaMenuGroup} key={group.title}>
-                    <h3 className={styles.mobileMegaMenuGroupTitle}>{group.title}</h3>
-                    <div className={styles.mobileMegaMenuLinks}>
-                      {group.items.map((menuItem) => (
-                        <a
-                          key={`${group.title}-${menuItem.href}`}
-                          href={menuItem.href}
-                          className={styles.mobileMegaMenuLink}
-                          onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <span>{menuItem.label}</span>
                           <span aria-hidden="true">â€º</span>
@@ -972,6 +956,8 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
+
 
 
 
