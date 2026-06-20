@@ -3036,3 +3036,244 @@
   }
 }
 
+/* ============================================================
+   Period timeline skin tinted cards and status actions
+   Scope: /test/period-timeline
+   Purpose:
+   - Visningskort får svak mørkere tone enn bakgrunn
+   - Dynamisk felt får svak skin-betinget farge
+   - Estimert pris får svak grønn skin-farge
+   - Hjerte/Stjerne/Auksjon/Nettbutikk får ikon og svak fargetone
+   ============================================================ */
+
+/* Lokale skin-tokens for period-timeline */
+.page {
+  --pt-card-tint: color-mix(in srgb, var(--ct-text, #0d2b4d) 3.5%, var(--ct-card-bg, #ffffff));
+  --pt-card-tint-strong: color-mix(in srgb, var(--ct-text, #0d2b4d) 5%, var(--ct-card-bg, #ffffff));
+  --pt-dynamic-soft: color-mix(in srgb, var(--ct-accent, #1f66ad) 7%, var(--ct-card-bg, #ffffff));
+  --pt-dynamic-border: color-mix(in srgb, var(--ct-accent, #1f66ad) 28%, var(--ct-border, #c9ddf5));
+
+  --pt-heart: #c73535;
+  --pt-heart-soft: color-mix(in srgb, #c73535 12%, var(--ct-card-bg, #ffffff));
+
+  --pt-star: #c69a25;
+  --pt-star-soft: color-mix(in srgb, #c69a25 14%, var(--ct-card-bg, #ffffff));
+
+  --pt-auction: #1f66ad;
+  --pt-auction-soft: color-mix(in srgb, #1f66ad 12%, var(--ct-card-bg, #ffffff));
+
+  --pt-shop: #21845a;
+  --pt-shop-soft: color-mix(in srgb, #21845a 12%, var(--ct-card-bg, #ffffff));
+
+  --pt-price-green: #21845a;
+  --pt-price-soft: color-mix(in srgb, #21845a 10%, var(--ct-card-bg, #ffffff));
+  --pt-price-border: color-mix(in srgb, #21845a 28%, var(--ct-border, #c9ddf5));
+}
+
+/* Dark/Finans/skin-varianter: svakere, ikke neon */
+:global([data-skin="finans"]) .page,
+:global([data-skin="dark"]) .page,
+:global([data-theme="dark"]) .page {
+  --pt-card-tint: color-mix(in srgb, #ffffff 3.5%, var(--ct-card-bg, #171717));
+  --pt-card-tint-strong: color-mix(in srgb, #ffffff 5.5%, var(--ct-card-bg, #171717));
+  --pt-dynamic-soft: color-mix(in srgb, var(--ct-accent, #d5b45d) 12%, var(--ct-card-bg, #171717));
+  --pt-dynamic-border: color-mix(in srgb, var(--ct-accent, #d5b45d) 34%, var(--ct-border, #333333));
+
+  --pt-heart-soft: color-mix(in srgb, #e05a5a 18%, var(--ct-card-bg, #171717));
+  --pt-star-soft: color-mix(in srgb, #d5b45d 18%, var(--ct-card-bg, #171717));
+  --pt-auction-soft: color-mix(in srgb, #4d91d8 18%, var(--ct-card-bg, #171717));
+  --pt-shop-soft: color-mix(in srgb, #46a875 18%, var(--ct-card-bg, #171717));
+  --pt-price-soft: color-mix(in srgb, #46a875 16%, var(--ct-card-bg, #171717));
+  --pt-price-border: color-mix(in srgb, #46a875 38%, var(--ct-border, #333333));
+}
+
+/* Museum kan være litt varmere/grønnere */
+:global([data-skin="museum"]) .page {
+  --pt-card-tint: color-mix(in srgb, #123c2a 4%, var(--ct-card-bg, #ffffff));
+  --pt-card-tint-strong: color-mix(in srgb, #123c2a 6%, var(--ct-card-bg, #ffffff));
+  --pt-dynamic-soft: color-mix(in srgb, #2f7d57 9%, var(--ct-card-bg, #ffffff));
+  --pt-dynamic-border: color-mix(in srgb, #2f7d57 30%, var(--ct-border, #ded4bf));
+  --pt-price-green: #2f7d57;
+  --pt-price-soft: color-mix(in srgb, #2f7d57 12%, var(--ct-card-bg, #ffffff));
+  --pt-price-border: color-mix(in srgb, #2f7d57 30%, var(--ct-border, #ded4bf));
+}
+
+/* Finans kan ha mer nøytral/markedspreg */
+:global([data-skin="finans"]) .page {
+  --pt-price-green: #46a875;
+  --pt-price-soft: color-mix(in srgb, #46a875 18%, var(--ct-card-bg, #171717));
+}
+
+/* Alle visningskort: svakt mørkere/tydeligere enn bakgrunn */
+.ui85Card,
+.ui85HorizontalCard,
+.ui85StandingCard,
+.ui85ListCard,
+.ui85MuseumCard {
+  background:
+    linear-gradient(180deg, var(--pt-card-tint), var(--pt-card-tint-strong)) !important;
+  border-color: color-mix(in srgb, var(--ct-border, #c9ddf5) 78%, var(--ct-text, #0d2b4d) 8%) !important;
+}
+
+/* Bildekort/flater får litt kontrast mot kortet */
+.ui85Card :where(.banknote, .imageFrame, .cardImage, .cardListMedia, .cardMuseumLeft) {
+  background-color: color-mix(in srgb, var(--ct-text, #0d2b4d) 2.5%, var(--ct-card-bg, #ffffff));
+}
+
+/* Dynamiske felt / historiepanel inne i kortene */
+.cardBottomSection > :first-child,
+.cardStandingLeftColumn > :first-child,
+.cardMuseumRight > :where(div, section, article):first-of-type,
+.ui85ListCard > :nth-child(3),
+.detailPanel,
+.segmentPanel {
+  background:
+    linear-gradient(180deg, var(--pt-dynamic-soft), color-mix(in srgb, var(--pt-dynamic-soft) 55%, transparent)) !important;
+  border-color: var(--pt-dynamic-border) !important;
+}
+
+/* Estimert pris-boks: svak grønn skin-betinget tone */
+.cardSideColumn > :last-child,
+.cardStandingRightColumn > :last-child,
+.cardListPrice > *,
+.ui85Card :where([aria-label*="Estimert"], [class*="price"], [class*="Price"]) {
+  background:
+    linear-gradient(180deg, var(--pt-price-soft), color-mix(in srgb, var(--pt-price-soft) 58%, transparent)) !important;
+  border-color: var(--pt-price-border) !important;
+  color: color-mix(in srgb, var(--pt-price-green) 34%, var(--ct-text, #0d2b4d)) !important;
+}
+
+/* Statuspanelet: kompakt, symmetrisk og klart */
+.cardSideColumn > :first-child,
+.cardStandingRightColumn > :first-child,
+.cardListBadges > * {
+  display: grid !important;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+/* Felles statusboks-stil */
+.cardSideColumn > :first-child > *,
+.cardStandingRightColumn > :first-child > *,
+.cardListBadges > * > * {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 7px;
+  min-height: 34px;
+  padding: 6px 9px !important;
+  border-radius: 10px !important;
+  border: 1px solid color-mix(in srgb, var(--ct-border, #c9ddf5) 75%, transparent) !important;
+  overflow: hidden;
+}
+
+/* Ikonplass */
+.cardSideColumn > :first-child > *::before,
+.cardStandingRightColumn > :first-child > *::before,
+.cardListBadges > * > *::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+/* 1: Hjerte */
+.cardSideColumn > :first-child > :nth-child(1),
+.cardStandingRightColumn > :first-child > :nth-child(1),
+.cardListBadges > * > :nth-child(1) {
+  background: var(--pt-heart-soft) !important;
+  border-color: color-mix(in srgb, var(--pt-heart) 34%, var(--ct-border, #c9ddf5)) !important;
+}
+
+.cardSideColumn > :first-child > :nth-child(1)::before,
+.cardStandingRightColumn > :first-child > :nth-child(1)::before,
+.cardListBadges > * > :nth-child(1)::before {
+  content: "♥";
+  color: var(--pt-heart);
+  background: color-mix(in srgb, var(--pt-heart) 14%, transparent);
+}
+
+/* 2: Stjerne */
+.cardSideColumn > :first-child > :nth-child(2),
+.cardStandingRightColumn > :first-child > :nth-child(2),
+.cardListBadges > * > :nth-child(2) {
+  background: var(--pt-star-soft) !important;
+  border-color: color-mix(in srgb, var(--pt-star) 38%, var(--ct-border, #c9ddf5)) !important;
+}
+
+.cardSideColumn > :first-child > :nth-child(2)::before,
+.cardStandingRightColumn > :first-child > :nth-child(2)::before,
+.cardListBadges > * > :nth-child(2)::before {
+  content: "★";
+  color: var(--pt-star);
+  background: color-mix(in srgb, var(--pt-star) 16%, transparent);
+}
+
+/* 3: Auksjon */
+.cardSideColumn > :first-child > :nth-child(3),
+.cardStandingRightColumn > :first-child > :nth-child(3),
+.cardListBadges > * > :nth-child(3) {
+  background: var(--pt-auction-soft) !important;
+  border-color: color-mix(in srgb, var(--pt-auction) 36%, var(--ct-border, #c9ddf5)) !important;
+}
+
+.cardSideColumn > :first-child > :nth-child(3)::before,
+.cardStandingRightColumn > :first-child > :nth-child(3)::before,
+.cardListBadges > * > :nth-child(3)::before {
+  content: "⚑";
+  color: var(--pt-auction);
+  background: color-mix(in srgb, var(--pt-auction) 14%, transparent);
+}
+
+/* 4: Nettbutikk */
+.cardSideColumn > :first-child > :nth-child(4),
+.cardStandingRightColumn > :first-child > :nth-child(4),
+.cardListBadges > * > :nth-child(4) {
+  background: var(--pt-shop-soft) !important;
+  border-color: color-mix(in srgb, var(--pt-shop) 36%, var(--ct-border, #c9ddf5)) !important;
+}
+
+.cardSideColumn > :first-child > :nth-child(4)::before,
+.cardStandingRightColumn > :first-child > :nth-child(4)::before,
+.cardListBadges > * > :nth-child(4)::before {
+  content: "◆";
+  color: var(--pt-shop);
+  background: color-mix(in srgb, var(--pt-shop) 14%, transparent);
+}
+
+/* Tallene i statusboksene skal stå rolig til høyre */
+.cardSideColumn > :first-child > * strong,
+.cardStandingRightColumn > :first-child > * strong,
+.cardListBadges > * > * strong {
+  justify-self: end;
+  font-weight: 900;
+}
+
+/* Listevisning: status og pris skal ha likere totalhøyde */
+.cardListBadges > *,
+.cardListPrice > * {
+  min-height: 126px;
+}
+
+.cardListPrice > * {
+  justify-content: center;
+}
+
+/* Stående/horizontal: pris og status skal visuelt danne samlet blokk */
+.cardStandingRightColumn,
+.cardSideColumn {
+  gap: 8px;
+}
+
+/* Mørk modus: behold kontrast */
+:global([data-theme="dark"]) .ui85Card,
+:global([data-skin="finans"]) .ui85Card {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035), 0 12px 30px rgba(0,0,0,0.18);
+}
+
