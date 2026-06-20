@@ -1,13 +1,13 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift: Periode 8.6 Rad 1 Noder API
- * Definering / formål: Returnerer statsoverhode-/maktstruktur-noder for Periode 8.6.
- * Bruksområde: Rad 1 nodevalg i Periode 8.6 tidslinje.
- * Berørte sider / routes: /test/periodefilter, /katalog, /index
- * Berørte DB-brytere / feature_keys: period86.row1.nodes.view
- * Berørte API-ruter: GET /api/period86/row1/nodes
- * Berørte tabeller / views: ct_v_period86_row1_statsoverhode_nodes, ct_v_period_filter_options
+ * Definering / formÃ¥l: Returnerer statsoverhode-/maktstruktur-noder for Periode 8.6.
+ * BruksomrÃ¥de: Rad 1 nodevalg i Periode 8.6 tidslinje.
+ * BerÃ¸rte sider / routes: /test/periodefilter, /katalog, /index
+ * BerÃ¸rte DB-brytere / feature_keys: period86.row1.nodes.view
+ * BerÃ¸rte API-ruter: GET /api/period86/row1/nodes
+ * BerÃ¸rte tabeller / views: ct_v_period86_row1_statsoverhode_nodes, ct_v_period_filter_options
  * Dataretning: Neon -> API -> UI
  * Logging: log_category: period86, log_action: row1.nodes.view
  * Versjon: CT-PERIOD86-API-ROW1-0007 / CHANGE-2026-06-20-0002
@@ -97,7 +97,7 @@ export async function GET(request: Request) {
         start_year,
         coalesce(end_year, $2::integer) as end_year,
         relation_href,
-        0::text as count,
+        coalesce(object_count, 0)::text as count,
         'ct_v_period86_row1_statsoverhode_nodes'::text as source
       from ct_v_period86_row1_statsoverhode_nodes
       where start_year <= $2
@@ -118,3 +118,4 @@ export async function GET(request: Request) {
     return jsonError("Kunne ikke hente Periode 8.6 Rad 1-noder.", 500, error);
   }
 }
+
