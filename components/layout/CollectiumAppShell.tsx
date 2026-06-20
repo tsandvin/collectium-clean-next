@@ -866,11 +866,11 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
         <main className={styles.content}>{children}</main>
       </div>
 
-            {isMobileMegaMenuOpen ? (
+            {isMobileMenuOpen ? (
         <div
           className={styles.mobileMegaMenuOverlay}
           role="presentation"
-          onClick={() => setIsMobileMegaMenuOpen(false)}
+          onClick={() => setisMobileMenuOpen(false)}
         >
           <section
             className={styles.mobileMegaMenuSheet}
@@ -887,7 +887,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
               <button
                 type="button"
                 className={styles.mobileMegaMenuClose}
-                onClick={() => setIsMobileMegaMenuOpen(false)}
+                onClick={() => setisMobileMenuOpen(false)}
                 aria-label="Lukk meny"
               >
                 ×
@@ -910,7 +910,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                           key={`${group.title}-${menuItem.href}`}
                           href={menuItem.href}
                           className={styles.mobileMegaMenuLink}
-                          onClick={() => setIsMobileMegaMenuOpen(false)}
+                          onClick={() => setisMobileMenuOpen(false)}
                         >
                           <span>{menuItem.label}</span>
                           <span aria-hidden="true">›</span>
@@ -928,7 +928,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
           .filter((item) => canShowMenuItem(item as { requiresAuth?: boolean; requiresAdmin?: boolean }, session))
           .map((item) => {
             const IconComponent = item.icon;
-            const isActive = item.key === "menu" ? isMobileMegaMenuOpen : checkMobileBottomActive(item);
+            const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
             
             if (item.key === "menu") {
               return (
@@ -936,8 +936,8 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                   key={item.key}
                   type="button"
                   className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-                  onClick={() => setIsMobileMegaMenuOpen(!isMobileMegaMenuOpen)}
-                  aria-expanded={isMobileMegaMenuOpen}
+                  onClick={() => setisMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-expanded={isMobileMenuOpen}
                   aria-label="Ã…pne eller lukk hovedmeny"
                   style={{ background: "none", border: "none", cursor: "pointer" }}
                 >
@@ -953,7 +953,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                 href={item.href || "#"}
                 className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
                 aria-current={isActive ? "page" : undefined}
-                onClick={() => setIsMobileMegaMenuOpen(false)}
+                onClick={() => setisMobileMenuOpen(false)}
               >
                 <IconComponent size={20} strokeWidth={1.8} />
                 <span>{item.label}</span>
@@ -972,6 +972,7 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
 
 
 
