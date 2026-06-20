@@ -6,21 +6,21 @@
  * Overskrift:
  * Collectium katalogklient UI/UX 8.6
  *
- * Definering / formÃ¥l:
+ * Definering / formål:
  * Interaktiv katalogflate med filter over resultatene, Filter Master,
  * forhandlerfilter, auksjon/nettbutikk-status, enkel to-raders periodefilter,
  * avansert spesifikasjonsfilter og visningskort som peker til objektpresentasjon.
  *
- * BruksomrÃ¥de:
+ * Bruksområde:
  * Brukes av /katalog. Komponenten eier kun UI-state og kaller API. Den lager ikke
  * egen topbar, sidemeny, body, global bakgrunn eller skinmotor.
  *
- * BerÃ¸rte sider / routes:
+ * Berørte sider / routes:
  * - /katalog
  * - /objekt/[sourceKey]/[objectGroup]/[objectId]
  * - /relasjon/[relationType]/[relationKey]
  *
- * BerÃ¸rte DB-brytere / feature_keys:
+ * Berørte DB-brytere / feature_keys:
  * - catalog.view
  * - catalog.search
  * - catalog.filters
@@ -31,13 +31,13 @@
  * - collection.favorite.toggle
  * - collection.item.add
  *
- * BerÃ¸rte API-ruter:
+ * Berørte API-ruter:
  * - GET /api/catalog/search
  * - GET /api/catalog/filters
  * - GET /api/period86/row1/nodes
  * - GET /api/period86/row2/nodes
  *
- * BerÃ¸rte tabeller / views:
+ * Berørte tabeller / views:
  * - ct_v_catalog_objects_resolved
  * - ct_v_catalog_filter_counts
  * - ct_v_object_relations_resolved
@@ -70,7 +70,7 @@ import {
 
 const VIEW_OPTIONS: { value: CatalogView; label: string }[] = [
   { value: "horizontal", label: "Horisontal" },
-  { value: "standing", label: "StÃ¥ende" },
+  { value: "standing", label: "Stående" },
   { value: "list", label: "Liste" },
   { value: "museum", label: "Museum" },
 ];
@@ -86,7 +86,7 @@ const ROW1_TYPES: FilterOption[] = [
   { value: "dynasti", label: "Dynasti / kongehus" },
   { value: "union", label: "Union / maktstruktur" },
   { value: "okkupasjonsmakt", label: "Okkupasjonsmakt" },
-  { value: "lokal_hersker", label: "Lokal hersker / smÃ¥konge" },
+  { value: "lokal_hersker", label: "Lokal hersker / småkonge" },
 ];
 
 function normalizeObjects(payload: CatalogApiPayload): CatalogObject[] {
@@ -111,7 +111,7 @@ function objectTitle(object: CatalogObject): string {
       object.variant_type_raw_no,
     ]
       .filter(Boolean)
-      .join(" Â· ") ||
+      .join(" · ") ||
     "Objekt uten tittel"
   );
 }
@@ -277,11 +277,11 @@ export function CollectiumCatalog86Client() {
         <fieldset className={styles.filterGroup}>
           <legend>Masterfilter</legend>
           <label>
-            <span>SÃ¸k</span>
-            <input value={filters.q} onChange={(event) => updateFilter("q", event.target.value)} placeholder="SÃ¸k i katalog / objekt / relasjon" />
+            <span>Søk</span>
+            <input value={filters.q} onChange={(event) => updateFilter("q", event.target.value)} placeholder="Søk i katalog / objekt / relasjon" />
           </label>
           <label>
-            <span>Land / omrÃ¥de</span>
+            <span>Land / område</span>
             <input value={filters.masterCountry} onChange={(event) => updateFilter("masterCountry", event.target.value)} />
           </label>
           <label>
@@ -322,10 +322,10 @@ export function CollectiumCatalog86Client() {
         </fieldset>
 
         <fieldset className={`${styles.filterGroup} ${styles.periodGroup}`}>
-          <legend>Periodefilter Â· enkel</legend>
+          <legend>Periodefilter · enkel</legend>
           <div className={styles.periodRows}>
             <div className={styles.periodRow}>
-              <span>Rad 1 Â· Statsoverhode / maktstruktur</span>
+              <span>Rad 1 · Statsoverhode / maktstruktur</span>
               <div className={styles.chipRow}>
                 {ROW1_TYPES.map((option) => (
                   <button
@@ -348,7 +348,7 @@ export function CollectiumCatalog86Client() {
               </select>
             </div>
             <div className={styles.periodRow}>
-              <span>Rad 2 Â· Objektperiode / utgave / relasjon</span>
+              <span>Rad 2 · Objektperiode / utgave / relasjon</span>
               <select value={filters.periodRow2Node} onChange={(event) => updateFilter("periodRow2Node", event.target.value)}>
                 <option value="">Alle objektperioder</option>
                 {row2Nodes.map((option) => (
@@ -362,12 +362,12 @@ export function CollectiumCatalog86Client() {
         </fieldset>
 
         <fieldset className={`${styles.filterGroup} ${styles.advancedGroup}`}>
-          <legend>Avansert filter Â· samleobjekt</legend>
+          <legend>Avansert filter · samleobjekt</legend>
           <div className={styles.specGrid}>
-            <label><span>ValÃ¸r</span><input value={filters.denomination} onChange={(event) => updateFilter("denomination", event.target.value)} /></label>
-            <label><span>Ã…rstall</span><input value={filters.year} onChange={(event) => updateFilter("year", event.target.value)} /></label>
+            <label><span>Valør</span><input value={filters.denomination} onChange={(event) => updateFilter("denomination", event.target.value)} /></label>
+            <label><span>Årstall</span><input value={filters.year} onChange={(event) => updateFilter("year", event.target.value)} /></label>
             <label><span>Litra / nummer</span><input value={filters.litra} onChange={(event) => updateFilter("litra", event.target.value)} /></label>
-            <label><span>ValÃ¸rutgave / serie</span><input value={filters.issue} onChange={(event) => updateFilter("issue", event.target.value)} /></label>
+            <label><span>Valørutgave / serie</span><input value={filters.issue} onChange={(event) => updateFilter("issue", event.target.value)} /></label>
             <label><span>Variant / type</span><input value={filters.variant} onChange={(event) => updateFilter("variant", event.target.value)} /></label>
             <label><span>Signatur / personer</span><input value={filters.signature} onChange={(event) => updateFilter("signature", event.target.value)} /></label>
             <label><span>Konge / regent</span><input value={filters.ruler} onChange={(event) => updateFilter("ruler", event.target.value)} /></label>
@@ -561,8 +561,8 @@ function CatalogObjectCard({ object, segment, view }: { object: CatalogObject; s
         <a href={relations[0]?.href || `/relasjon/kilde/${object.source_key}`} className={styles.openButton}>
           ⌘ Se relasjon
         </a>
-        <button type="button" data-feature-key="collection.item.add">◎ Legg i samling</button>
-        <button type="button" aria-label="Flere handlinger">•••</button>
+        <button type="button" className={styles.openButton} data-feature-key="collection.item.add">◎ Legg i samling</button>
+        <button type="button" className={styles.openButton} aria-label="Flere handlinger">•••</button>
       </div>
     </article>
   );
@@ -593,6 +593,8 @@ function buildFallbackRelations(object: CatalogObject): CatalogRelation[] {
   add("kilde", object.source_key);
   return relations;
 }
+
+
 
 
 

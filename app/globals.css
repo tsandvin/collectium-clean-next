@@ -2474,7 +2474,59 @@ footer {
   }
 }
 
+/* COLLECTIUM CATALOG86 SMALL ACTION SWITCHES START */
+/*
+ * Global fallback for CSS module hashed classes.
+ */
 
+[class*="CollectiumCatalog86Client"][class*="actionArea"],
+[class*="CollectiumCatalog86Client"][class*="cardActions"],
+[class*="CollectiumCatalog86Client"][class*="bottomActions"],
+[class*="CollectiumCatalog86Client"][class*="cardStandingBottomActions"] {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-start !important;
+  justify-self: start !important;
+  align-items: center !important;
+  align-self: end !important;
+  gap: 5px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
+[class*="CollectiumCatalog86Client"][class*="actionArea"] a,
+[class*="CollectiumCatalog86Client"][class*="actionArea"] button,
+[class*="CollectiumCatalog86Client"][class*="cardActions"] a,
+[class*="CollectiumCatalog86Client"][class*="cardActions"] button,
+[class*="CollectiumCatalog86Client"][class*="bottomActions"] a,
+[class*="CollectiumCatalog86Client"][class*="bottomActions"] button,
+[class*="CollectiumCatalog86Client"][class*="cardStandingBottomActions"] a,
+[class*="CollectiumCatalog86Client"][class*="cardStandingBottomActions"] button,
+[class*="CollectiumCatalog86Client"][class*="openButton"],
+[class*="CollectiumCatalog86Client"][class*="softButton"],
+[class*="CollectiumCatalog86Client"][class*="activeButton"] {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: max-content !important;
+  min-height: 24px !important;
+  height: 24px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  border-radius: 999px !important;
+  font-size: 10.5px !important;
+  line-height: 1 !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+}
+
+/* COLLECTIUM CATALOG86 SMALL ACTION SWITCHES END */
 
 
