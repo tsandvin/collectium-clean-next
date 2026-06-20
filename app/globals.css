@@ -2262,4 +2262,97 @@ h6,
   font-family: var(--ct-font-head);
 }
 
+/* Collectium catalog view size lock test
+   Liste: 1 per rad, min ca. 800px
+   Museum: 1 per rad, min ca. 800px
+   Horisontal: maks 2 per rad
+   Stående: maks 3 per rad
+*/
+
+/* Horisontal: 2 brede kort per rad */
+[data-view="horizontal"] .catalog-results,
+[data-view="horizontal"] .catalogResults,
+[data-view="horizontal"] .resultsGrid,
+[data-view="horizontal"] .ct-catalog-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(620px, 1fr));
+  align-items: stretch;
+}
+
+/* Stående: maks 3 kort per rad */
+[data-view="standing"] .catalog-results,
+[data-view="standing"] .catalogResults,
+[data-view="standing"] .resultsGrid,
+[data-view="standing"] .ct-catalog-results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  align-items: stretch;
+}
+
+/* Liste og museum: ett bredt kort per rad */
+[data-view="list"] .catalog-results,
+[data-view="list"] .catalogResults,
+[data-view="list"] .resultsGrid,
+[data-view="list"] .ct-catalog-results,
+[data-view="museum"] .catalog-results,
+[data-view="museum"] .catalogResults,
+[data-view="museum"] .resultsGrid,
+[data-view="museum"] .ct-catalog-results {
+  display: grid;
+  grid-template-columns: minmax(800px, 1fr);
+  align-items: stretch;
+}
+
+/* Under 1350px blir horisontal 1 per rad */
+@media (max-width: 1350px) {
+  [data-view="horizontal"] .catalog-results,
+  [data-view="horizontal"] .catalogResults,
+  [data-view="horizontal"] .resultsGrid,
+  [data-view="horizontal"] .ct-catalog-results {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet: stående går til 2 per rad */
+@media (max-width: 1100px) {
+  [data-view="standing"] .catalog-results,
+  [data-view="standing"] .catalogResults,
+  [data-view="standing"] .resultsGrid,
+  [data-view="standing"] .ct-catalog-results {
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+  }
+
+  [data-view="list"] .catalog-results,
+  [data-view="list"] .catalogResults,
+  [data-view="list"] .resultsGrid,
+  [data-view="list"] .ct-catalog-results,
+  [data-view="museum"] .catalog-results,
+  [data-view="museum"] .catalogResults,
+  [data-view="museum"] .resultsGrid,
+  [data-view="museum"] .ct-catalog-results {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobil: alle visninger 1 per rad */
+@media (max-width: 720px) {
+  [data-view="horizontal"] .catalog-results,
+  [data-view="horizontal"] .catalogResults,
+  [data-view="horizontal"] .resultsGrid,
+  [data-view="horizontal"] .ct-catalog-results,
+  [data-view="standing"] .catalog-results,
+  [data-view="standing"] .catalogResults,
+  [data-view="standing"] .resultsGrid,
+  [data-view="standing"] .ct-catalog-results,
+  [data-view="list"] .catalog-results,
+  [data-view="list"] .catalogResults,
+  [data-view="list"] .resultsGrid,
+  [data-view="list"] .ct-catalog-results,
+  [data-view="museum"] .catalog-results,
+  [data-view="museum"] .catalogResults,
+  [data-view="museum"] .resultsGrid,
+  [data-view="museum"] .ct-catalog-results {
+    grid-template-columns: 1fr;
+  }
+}
 
