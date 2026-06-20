@@ -1,4 +1,4 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift: Periode 8.6 Rad 1 Noder API
@@ -78,18 +78,21 @@ export async function GET(request: Request) {
     }
 
     const broadTypes = new Set([
-      "all",
       "alle",
       "statsoverhode",
       "statsoverhoder",
       "maktstruktur",
       "herskere",
-      "hersker"
+      "hersker",
+      "konge",
+      "konger",
+      "regent",
+      "regenter"
     ]);
 
     const rows = await period86Query<NodeRow>(`
       select
-        node_key,
+        slug as node_key,
         label_no,
         start_year,
         coalesce(end_year, $2::integer) as end_year,
@@ -102,7 +105,7 @@ export async function GET(request: Request) {
         and (
           $5::boolean = true
           or type_key = $6
-          or type_group_key = $6
+          or group_key = $6
           or authority_role_no ilike '%' || $6 || '%'
           or label_no ilike '%' || $6 || '%'
         )
@@ -115,6 +118,5 @@ export async function GET(request: Request) {
     return jsonError("Kunne ikke hente Periode 8.6 Rad 1-noder.", 500, error);
   }
 }
-
 
 

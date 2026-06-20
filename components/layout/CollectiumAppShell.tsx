@@ -381,10 +381,12 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
   const isDarkSkin = skin === "museum" || skin === "finans";
 
   const isPeriodFilterTest = pathname === "/test/periodefilter" || pathname === "/periodefilter";
+  const isTopbarOnlyChrome = pathname === "/start" || pathname.startsWith("/start/");
 
   return (
     <div
       className={styles.shell}
+      data-chrome={isTopbarOnlyChrome ? "topbar-only" : "default"}
       data-screen-mode={activeScreenMode}
       data-sidebar-mode={sidebarMode}
       data-lane-mode={laneMode}
@@ -396,6 +398,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
         <div className={styles.backdrop} onClick={() => setIsMobileMenuOpen(false)} aria-hidden="true" />
       )}
 
+      {(!isTopbarOnlyChrome || sidebarMode !== "normal") && (
       <aside className={styles.sidebar} aria-label="Collectium navigasjon">
         <div className={styles.sidebarHeader}>
           <Link href="/" className={styles.brand} onClick={() => setIsMobileMenuOpen(false)} aria-label="Collectium startside">
@@ -456,6 +459,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
           })}
         </nav>
       </aside>
+      )}
 
       <div className={styles.mainColumn}>
         <header className={styles.topbar}>

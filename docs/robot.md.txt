@@ -590,6 +590,60 @@ periodegraf
 
 ---
 
+## 14b. Rad 2 og Rad 3 dropdown / brytere
+
+### Dynamiske innholdsfelt for brytere og segmenter
+
+Tidslinjen skal ikke bare flytte blokker visuelt. Den skal også fylle de dynamiske innholdsområdene under tidslinjen basert på:
+
+1. valgt Rad 1-bryter
+2. valgt Rad 2-bryter
+3. valgt Rad 3-bryter
+4. valgt segment: Samler / Historie / Finans
+5. valgt node/blokk i tidslinjen
+
+Det skal finnes en felles datamodell for dynamisk innhold, slik at UI ikke hardkoder tekstene (`type Period86DynamicContent`).
+
+### Dynamisk område 1: Historisk sammenheng
+
+Venstre dynamiske område under tidslinjen skal endre innhold etter valgt segment og brytere (Samlersammenheng, Historisk sammenheng, Finansiell sammenheng).
+Dette området skal forklare hvorfor de valgte radene sammenlignes.
+
+### Dynamisk område 2: Valgt tidslinjeinnhold
+
+Høyre dynamiske område under tidslinjen skal vise valgt blokk/node. Når bruker klikker på en tidslinjeblokk, skal dette området fylles med innhold fra valgt node (navn, typegruppe, fra-til år, kort sammendrag, historisk kontekst, samlerrelevans, finansrelevans, relation_href).
+
+### Segmentregler: Samler / Historie / Finans
+
+Segmentet skal styre hvilke innholdsfelt som prioriteres, ikke endre selve årsskalaen.
+- Samler: objekt-/utgiverperiode, samlerobjekter, sjeldenhet, samlingsrelevans, osv.
+- Historie: historisk kontekst, regent, krig/konflikt, hendelser, styreform.
+- Finans: finans/økonomi, pengehistorie, inflasjon, kriser, verdiutvikling.
+
+### Brytervalg skal ha egne beskrivelser
+
+Dropdown-verdier (switch options) for Rad 1, Rad 2 og Rad 3 skal defineres som `Period86SwitchOption` med key, label_no, description_no, row_key og preferred_segment.
+
+### Klikk og valgt node
+
+Når bruker klikker på en tidslinjeblokk:
+- sett `selectedNode`
+- sett `selectedLane`
+- sett `selectedSegment`
+- oppdater dynamisk område 2
+- oppdater dynamisk område 1 med sammenheng mellom valgte rader
+Hvis ingen blokk er valgt, skal dynamisk område 2 vise en oppsummering av valgt kombinasjon av brytere.
+
+### Fallback for dynamisk innhold
+
+Hvis API ikke returnerer ferdig dynamisk tekst, skal frontend bygge nøktern fallback fra nodefeltene (`label_no`, `type_group_label_no`, `start_year`, `end_year`, `relation_href`). Fallback skal være faktabasert og kort. Ikke finn opp historisk innhold i frontend.
+
+### Ekstra krav
+
+Dynamisk område 1 og Dynamisk område 2 skal ikke være statisk tekst. De skal reagere på brytervalg, segmentvalg og valgt tidslinjeblokk. Samler, Historie og Finans skal prioritere ulike innholdsfelt, men de skal aldri endre den felles årsskalaen.
+
+---
+
 ## 15. Visningskort
 
 Visningskort er objektets kompakte presentasjon.

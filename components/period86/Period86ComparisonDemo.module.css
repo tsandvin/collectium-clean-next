@@ -1,4 +1,4 @@
-﻿.page {
+.page {
   width: 100%;
   display: grid;
   gap: 10px;
@@ -507,7 +507,7 @@
   }
 
   .gridLines {
-    inset-left: 98px;
+    left: 98px;
   }
 
   .rowLabel {
@@ -521,4 +521,58 @@
   .bar span {
     font-size: 10px;
   }
+}
+
+/* Segment Switcher Tabs */
+.segmentTabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(60, 129, 203, 0.22);
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(5, 42, 86, 0.04);
+  width: fit-content;
+  margin-bottom: 12px;
+}
+
+.segmentTab {
+  border: none;
+  background: transparent;
+  color: #3b5c8a;
+  font-weight: 750;
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segmentTab:hover {
+  background: rgba(4, 66, 135, 0.05);
+  color: #063978;
+}
+
+.activeSegmentTab {
+  background: linear-gradient(135deg, #063f82, #042e61);
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(6, 63, 130, 0.28);
+}
+
+/* Timeline node pointer cursor & active glow */
+.bar {
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bar:hover {
+  transform: scale(1.02);
+  filter: brightness(1.08);
+}
+
+.activeNode {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #05336d, 0 12px 28px rgba(8, 48, 92, 0.32);
+  transform: scale(1.02) !important;
+  filter: brightness(1.05);
+  z-index: 10;
 }

@@ -82,8 +82,10 @@ export async function GET(request: Request) {
       where start_year <= $2
         and coalesce(end_year, $2) >= $1
         and (
-          type_key = $5
-          or $5 = 'alle'
+          $5 = 'alle'
+          or ($5 = 'krig_konflikt' and type_key in ('war_period', 'conflict_period'))
+          or ($5 = 'sykdom_krise' and type_key = 'health_period')
+          or ($5 = 'finans_okonomi' and type_key in ('economic_period', 'monetary_period'))
         )
       order by start_year nulls last, coalesce(end_year, $2), label_no
       limit $3 offset $4;

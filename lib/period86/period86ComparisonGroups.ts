@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -35,6 +35,191 @@
  * Versjon:
  * CT-PERIOD86-COMPARISON-GROUPS-0021
  */
+
+export type Period86SwitchOption = {
+  key: string;
+  label_no: string;
+  description_no: string;
+  api_type?: string;
+  row_key: 'row1' | 'row2' | 'row3';
+  preferred_segment?: 'samler' | 'historie' | 'finans';
+};
+
+export const ROW1_SWITCH_OPTIONS: Period86SwitchOption[] = [
+  {
+    key: 'herskere_statsoverhoder',
+    label_no: 'Herskere / statsoverhoder',
+    description_no: 'Vis hele maktstrukturen: konger, regenter, unioner, styreform, okkupasjon og kirkelig makt.',
+    api_type: 'all',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'konge_kongemakt',
+    label_no: 'Konge / kongemakt',
+    description_no: 'Vis konger og kongemakt på tidslinjen.',
+    api_type: 'konge',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'regent_fungerende_statsmakt',
+    label_no: 'Regent / fungerende statsmakt',
+    description_no: 'Vis regenter og fungerende statsmakt.',
+    api_type: 'regent',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'union',
+    label_no: 'Union',
+    description_no: 'Vis unioner og personalunioner som maktstruktur.',
+    api_type: 'union',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'styreform_maktstruktur',
+    label_no: 'Styreform / maktstruktur',
+    description_no: 'Vis riksråd, overgangsstyre, selvstendig stat og andre maktstrukturer.',
+    api_type: 'styreform',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'lokal_hersker_smakonge',
+    label_no: 'Lokal hersker / småkonge',
+    description_no: 'Vis lokale herskere, jarler og småkonger.',
+    api_type: 'lokal_hersker',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'okkuperende_makt',
+    label_no: 'Okkupasjonsmakt',
+    description_no: 'Vis okkupasjonsmakt og okkupasjonsadministrasjon.',
+    api_type: 'okkuperende_makt',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'kirkelig_makt',
+    label_no: 'Kirkelig makt',
+    description_no: 'Vis kirkelig maktstruktur og kristen institusjonell makt.',
+    api_type: 'kirkelig_makt',
+    row_key: 'row1',
+    preferred_segment: 'historie'
+  }
+];
+
+export const ROW2_SWITCH_OPTIONS: Period86SwitchOption[] = [
+  {
+    key: 'finans_okonomi',
+    label_no: 'Finans / økonomi',
+    description_no: 'Vis pengepolitikk, inflasjon, kriser og finanshistorisk kontekst.',
+    api_type: 'finans-okonomi',
+    row_key: 'row2',
+    preferred_segment: 'finans'
+  },
+  {
+    key: 'nasjonale_perioder',
+    label_no: 'Nasjonale perioder',
+    description_no: 'Vis nasjonale hovedperioder og overordnede historiske faser.',
+    api_type: 'nasjonale-perioder',
+    row_key: 'row2',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'krig_konflikt',
+    label_no: 'Krig / konflikt',
+    description_no: 'Vis kriger, konflikter og okkupasjonsperioder.',
+    api_type: 'krig-konflikt',
+    row_key: 'row2',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'sykdom_krise',
+    label_no: 'Sykdom / krise',
+    description_no: 'Vis sykdom, samfunnskrise og demografisk/historisk påvirkning.',
+    api_type: 'sykdom-krise',
+    row_key: 'row2',
+    preferred_segment: 'historie'
+  }
+];
+
+export const ROW3_SWITCH_OPTIONS: Period86SwitchOption[] = [
+  {
+    key: 'signatur_person',
+    label_no: 'Signatur / person',
+    description_no: 'Vis personer, signaturer og administrativ/personhistorisk relasjon.',
+    api_type: 'signatur-person',
+    row_key: 'row3',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'objekt_utgiver',
+    label_no: 'Objekt / utgiver',
+    description_no: 'Vis objektperiode, utgiverperiode og katalogrelasjon.',
+    api_type: 'objekt-utgiver',
+    row_key: 'row3',
+    preferred_segment: 'samler'
+  },
+  {
+    key: 'motiv',
+    label_no: 'Motiv',
+    description_no: 'Vis motivhistorie og motivrelasjoner.',
+    api_type: 'motiv',
+    row_key: 'row3',
+    preferred_segment: 'historie'
+  },
+  {
+    key: 'utgave_serie',
+    label_no: 'Utgave / serie',
+    description_no: 'Vis utgave, serie og produksjonsperiode.',
+    api_type: 'utgave-serie',
+    row_key: 'row3',
+    preferred_segment: 'samler'
+  }
+];
+
+export function getTimelineNodesForSwitch(switchKey: string): Period86TimelineNode[] {
+  switch (switchKey) {
+    case "herskere_statsoverhoder":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "ruler_issuer");
+    case "konge_kongemakt":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "ruler_issuer" && n.node_type === "ruler");
+    case "regent_fungerende_statsmakt":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "ruler_issuer" && (n.node_type === "ruler" || n.node_type === "regent"));
+    case "union":
+      return PERIOD86_DEMO_NODES.filter((n) => n.node_key.includes("union") || n.group_key === "national_period" && n.node_key === "union-med-sverige");
+    case "styreform_maktstruktur":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "national_period" && n.node_key !== "union-med-sverige");
+    case "lokal_hersker_smakonge":
+      return []; // empty for demo
+    case "okkuperende_makt":
+      return PERIOD86_DEMO_NODES.filter((n) => n.node_key.includes("okkupasjon"));
+    case "kirkelig_makt":
+      return []; // empty for demo
+    case "finans_okonomi":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "finance_economy");
+    case "nasjonale_perioder":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "national_period");
+    case "krig_konflikt":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "war_conflict");
+    case "sykdom_krise":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "disease_society");
+    case "signatur_person":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "signature_person");
+    case "objekt_utgiver":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "object_issue_period");
+    case "motiv":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "motif_symbol");
+    case "utgave_serie":
+      return PERIOD86_DEMO_NODES.filter((n) => n.group_key === "object_issue_period" && n.node_key.includes("utgave"));
+    default:
+      return [];
+  }
+}
 
 export type Period86GroupKey =
   | "ruler_issuer"
