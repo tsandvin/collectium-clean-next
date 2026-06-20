@@ -18,14 +18,15 @@
     "bcryptjs": "^3.0.3",
     "csv-parse": "^6.2.1",
     "dotenv": "^17.4.2",
+    "eslint-config-next": "^16.2.9",
     "lucide-react": "^1.21.0",
     "mariadb": "^3.5.2",
     "mysql2": "^3.22.5",
-    "next": "latest",
+    "next": "^16.2.9",
     "pg": "^8.21.0",
     "postgres": "^3.4.9",
-    "react": "latest",
-    "react-dom": "latest",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "typescript": "latest"
   },
   "devDependencies": {
