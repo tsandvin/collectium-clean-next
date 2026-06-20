@@ -5,9 +5,9 @@
  * CollectiumPeriodTimelineClient
  *
  * Definering / formål:
- * React client component for Tidslinjeperiode. Viser Masterfilter over innholdet,
- * fire periode-rader som samsvarer med tidslinjen, horisontal tidslinje med lanes,
- * dynamisk felt for valgt tidslinjenode, Samler/Historie/Finans-felt og katalogtreff.
+ * React client component for Tidslinjeperiode (Periode 8.6). Viser sammenligningsbasert
+ * tidstabell med 4 rader der dropdown velger gruppe og tidslinjen tegner noder under gruppen.
+ * Klikk på node fyller det dynamiske relasjonsfeltet.
  *
  * Bruksområde:
  * Brukes av /test/Periodetidslinje og alias /test/period-timeline.
@@ -17,22 +17,13 @@
  * - /test/period-timeline
  *
  * Berørte API-ruter:
- * - GET /api/test/period-timeline
- *
- * Berørte tabeller / views:
- * - ct_v_period_filter_options
- * - ct_v_catalog_period_relations når tilgjengelig
- * - ct_v_object_presentation_resolved når tilgjengelig
- *
- * Dataretning:
- * Neon -> API route -> React -> UI
- *
- * Logging:
- * log_category: test.period_timeline
- * log_action: interact
+ * - GET /api/period86/groups
+ * - GET /api/period86/timeline-nodes
+ * - GET /api/period86/node-detail
+ * - GET /api/test/period-timeline (for katalogtreff)
  *
  * Versjon:
- * CT-PERIOD-TIMELINE-V4
+ * CT-PERIOD-TIMELINE-V8.6
  */
 
 "use client";
@@ -55,37 +46,18 @@ import styles from "./CollectiumPeriodTimelineClient.module.css";
 type SegmentKey = "samler" | "historie" | "finans";
 type ViewMode = "timeline" | "table";
 type CardLayout = "horizontal" | "standing" | "list" | "museum";
-type PeriodRowKey = "row1" | "row2" | "row3" | "row4";
 
-type PeriodRowDefinition = {
-  key: PeriodRowKey;
-  label: string;
-  selectLabel: string;
-  emptyLabel: string;
-  helper: string;
-  className: "row1" | "row2" | "row3" | "row4";
-};
-
-type GroupedPeriods = {
-  label: string;
-  periods: PeriodRow[];
-};
-
-type PeriodRow = {
-  period_slug: string;
-  display_name_no: string;
-  period_type_key: string | null;
-  period_type_label_no: string | null;
-  period_level: number | null;
-  parent_period_slug: string | null;
-  start_year: number | null;
-  end_year: number | null;
-  summary_short_no: string | null;
-  collectium_relevance_no: string | null;
+type TimelineNode = {
+  node_key: string;
+  label_no: string;
+  from_year: number | null;
+  to_year: number | null;
+  year_label: string;
+  group_key: string;
+  group_label_no: string;
+  node_type: string;
   relation_href: string | null;
-  object_count: number | null;
-  relation_count: number | null;
-  timeline_group: string | null;
+  description_no?: string;
 };
 
 type CatalogHit = {
@@ -102,39 +74,26 @@ type CatalogHit = {
   relation_href?: string | null;
 };
 
-type TimelineResponse = {
-  ok: boolean;
-  source: string;
-  title: string;
-  rows: PeriodRow[];
-  summary: Record<string, number | string | null>;
-  relationTypes: string[];
-  catalogRows?: CatalogHit[];
-  warnings: string[];
-  error?: string;
-};
-
 type Filters = {
   country: string;
   objectType: string;
   yearFrom: number;
   yearTo: number;
-  row1: string;
-  row2: string;
-  row3: string;
-  row4: string;
 };
 
-const CURRENT_YEAR = 2024;
 const DEFAULT_FILTERS: Filters = {
-  country: "",
-  objectType: "Verdibrev",
+  country: "Norge",
+  objectType: "banknote",
   yearFrom: 1814,
   yearTo: 2024,
-  row1: "",
-  row2: "",
-  row3: "",
-  row4: "",
+};
+
+const GROUP_LABELS: Record<string, string> = {
+  ruler_head_of_state: "Herskere / statsoverhoder",
+  national_period: "Nasjonale perioder",
+  war_conflict: "Krig / konflikt",
+  disease_crisis: "Sykdom / krise",
+  finance_economy: "Finans / økonomi",
 };
 
 const SEGMENT_LABELS: Record<SegmentKey, string> = {
@@ -143,329 +102,28 @@ const SEGMENT_LABELS: Record<SegmentKey, string> = {
   finans: "Finans",
 };
 
-const PERIOD_ROW_DEFINITIONS: PeriodRowDefinition[] = [
-  {
-    key: "row1",
-    label: "Herskere / kongeperiode og nasjonal hovedperiode",
-    selectLabel: "Rad 1 · herskere, kongeperiode og nasjonale hovedperioder",
-    emptyLabel: "Velg hersker, statsoverhode eller nasjonal hovedperiode",
-    helper: "Regent, konge, keiser, president, statsminister, hersker og nasjonal ramme.",
-    className: "row1",
-  },
-  {
-    key: "row2",
-    label: "Sykdom / krig / finans / samfunnsperiode",
-    selectLabel: "Rad 2 · sykdom, krig, finans og samfunn",
-    emptyLabel: "Velg overlappende hendelses- eller samfunnsperiode",
-    helper: "Store hendelser og samfunnsperioder som kan overlappe hovedperioden.",
-    className: "row2",
-  },
-  {
-    key: "row3",
-    label: "Objektspesifikk periode / katalogperiode",
-    selectLabel: "Rad 3 · objektspesifikk periode",
-    emptyLabel: "Velg objekt-, katalog- eller relasjonsperiode",
-    helper: "Nærmeste kobling mot katalogtreff, utgaver, valører, varianter og relasjoner.",
-    className: "row3",
-  },
-  {
-    key: "row4",
-    label: "Valgfri periode",
-    selectLabel: "Rad 4 · valgfri periode",
-    emptyLabel: "Velg kryssperiode innen aktivt årsspenn",
-    helper: "Kryssfilter fra alle periodetyper som overlapper aktivt årsspenn.",
-    className: "row4",
-  },
-];
-
-const ROW4_GROUP_ORDER = [
-  "Herskere / statsoverhoder",
-  "Konge / regent",
-  "Nasjonale perioder",
-  "Krig / konflikt",
-  "Sykdom / krise",
-  "Finans / økonomi",
-  "Pengehistorie",
-  "Objektperioder",
-  "Kultur / samfunn",
-  "Funn / proveniens",
-  "Lokale perioder",
-  "Andre perioder",
-];
-
-const COUNTRY_ALIASES: Record<string, string[]> = {
-  Norge: ["norge", "norsk", "norway", "norwegian", "sverige-norge", "danmark-norge"],
-  Sverige: ["sverige", "svensk", "sweden", "swedish", "sverige-norge"],
-  Danmark: ["danmark", "dansk", "denmark", "danish", "danmark-norge"],
-  Skandinavia: ["skandinavia", "skandinavisk", "norden", "nordic", "norge", "sverige", "danmark"],
-};
-
-function normalizeText(value: string | null | undefined): string {
-  return (value || "").toLocaleLowerCase("nb");
+function normalizeEndYear(node: TimelineNode, yearTo: number): number {
+  if (typeof node.to_year === "number") return node.to_year;
+  if (typeof node.from_year === "number") return yearTo;
+  return yearTo;
 }
 
-function periodText(period: PeriodRow): string {
-  return [
-    period.period_slug,
-    period.display_name_no,
-    period.period_type_key,
-    period.period_type_label_no,
-    period.timeline_group,
-    period.summary_short_no,
-  ]
-    .map((value) => normalizeText(value))
-    .join(" ");
-}
-
-function normalizeEndYear(period: PeriodRow): number | null {
-  if (typeof period.end_year === "number") return period.end_year;
-  if (typeof period.start_year === "number") return CURRENT_YEAR;
-  return null;
-}
-
-function overlapsWindow(period: PeriodRow, from: number, to: number): boolean {
-  if (typeof period.start_year !== "number") return false;
-  const end = normalizeEndYear(period) ?? period.start_year;
-  return period.start_year <= to && end >= from;
-}
-
-function sortPeriods(a: PeriodRow, b: PeriodRow): number {
-  const aStart = a.start_year ?? Number.MAX_SAFE_INTEGER;
-  const bStart = b.start_year ?? Number.MAX_SAFE_INTEGER;
-  if (aStart !== bStart) return aStart - bStart;
-  const aEnd = normalizeEndYear(a) ?? Number.MAX_SAFE_INTEGER;
-  const bEnd = normalizeEndYear(b) ?? Number.MAX_SAFE_INTEGER;
-  if (aEnd !== bEnd) return aEnd - bEnd;
-  return a.display_name_no.localeCompare(b.display_name_no, "nb");
-}
-
-function matchesRow(period: PeriodRow, rowKey: PeriodRowKey): boolean {
-  if (rowKey === "row4") return true;
-
-  const text = periodText(period);
-  const key = normalizeText(period.period_type_key);
-  const label = normalizeText(period.period_type_label_no);
-
-  if (rowKey === "row1") {
-    return isRulerPeriod(period) || isNationalFramePeriod(period);
-  }
-
-  if (rowKey === "row2") {
-    return [
-      "war",
-      "krig",
-      "conflict",
-      "konflikt",
-      "health",
-      "sykdom",
-      "epidemi",
-      "disease",
-      "finance",
-      "finans",
-      "economic",
-      "økonomi",
-      "okonomi",
-      "crisis",
-      "krise",
-      "society",
-      "samfunn",
-      "market",
-      "marked",
-      "inflasjon",
-      "bankkrise",
-      "oljealder",
-      "gjenreisning",
-    ].some((needle) => text.includes(needle));
-  }
-
-  if (rowKey === "row3") {
-    return [
-      "object",
-      "objekt",
-      "catalog",
-      "katalog",
-      "banknote",
-      "seddel",
-      "coin",
-      "mynt",
-      "issue",
-      "utgave",
-      "series",
-      "serie",
-      "denomination",
-      "valør",
-      "valor",
-      "print",
-      "trykk",
-      "material",
-      "signature",
-      "signatur",
-      "variant",
-      "relation",
-      "relasjon",
-      "monetary",
-      "penge",
-    ].some((needle) => key.includes(needle) || label.includes(needle) || text.includes(needle));
-  }
-
-  return false;
-}
-
-function isRulerPeriod(period: PeriodRow): boolean {
-  const text = periodText(period);
-  return [
-      "regent",
-      "konge",
-      "king",
-      "queen",
-      "dronning",
-      "monark",
-      "monarchy",
-      "dynasty",
-      "dynasti",
-      "hierarki",
-      "pastor",
-      "person",
-      "motiv",
-      "keiser",
-      "emperor",
-      "hersker",
-      "ruler",
-      "president",
-      "statsminister",
-      "prime minister",
-      "statsoverhode",
-      "head of state",
-      "maktperson",
-      "fyrste",
-      "jarl",
-      "eneveldet",
-      "haakon",
-      "olav",
-      "harald",
-      "oscar",
-      "christian",
-      "frederik",
-      "carl",
-      "gustav",
-  ].some((needle) => text.includes(needle));
-}
-
-function isNationalFramePeriod(period: PeriodRow): boolean {
-  const text = periodText(period);
-  return [
-      "national",
-      "nasjonal",
-      "historical_main",
-      "hovedperiode",
-      "union",
-      "state",
-      "statsperiode",
-      "independence",
-      "selvstendig",
-      "viking",
-      "middelalder",
-      "dansketiden",
-      "1814",
-    ].some((needle) => text.includes(needle));
-}
-
-function countryMatchesPeriod(period: PeriodRow, country: string): boolean {
-  if (!country) return true;
-  const aliases = COUNTRY_ALIASES[country] || [country.toLocaleLowerCase("nb")];
-  const text = periodText(period);
-  return aliases.some((alias) => text.includes(alias));
-}
-
-function primaryRowForPeriod(period: PeriodRow): PeriodRowKey {
-  if (matchesRow(period, "row1")) return "row1";
-  if (matchesRow(period, "row2")) return "row2";
-  if (matchesRow(period, "row3")) return "row3";
-  return "row4";
-}
-
-function row4GroupForPeriod(period: PeriodRow): string {
-  const text = periodText(period);
-  if (isRulerPeriod(period)) return "Herskere / statsoverhoder";
-  if (matchesRow(period, "row1") && /regent|konge|king|dynasty|dynasti|oscar|haakon|olav|harald/.test(text)) return "Konge / regent";
-  if (matchesRow(period, "row1")) return "Nasjonale perioder";
-  if (/war|krig|conflict|konflikt/.test(text)) return "Krig / konflikt";
-  if (/health|sykdom|epidemi|disease|crisis|krise/.test(text)) return "Sykdom / krise";
-  if (/finance|finans|economic|økonomi|okonomi|market|marked|inflasjon|bankkrise/.test(text)) return "Finans / økonomi";
-  if (/monetary|penge|banknote|seddel|coin|mynt/.test(text)) return "Pengehistorie";
-  if (matchesRow(period, "row3")) return "Objektperioder";
-  if (/culture|kultur|society|samfunn/.test(text)) return "Kultur / samfunn";
-  if (/provenance|proveniens|funn|find/.test(text)) return "Funn / proveniens";
-  if (/local|lokal|kommune|sted/.test(text)) return "Lokale perioder";
-  return "Andre perioder";
-}
-
-function row1GroupForPeriod(period: PeriodRow): string {
-  if (isRulerPeriod(period)) return "Herskere / statsoverhoder";
-  if (isNationalFramePeriod(period)) return "Nasjonale perioder";
-  return row4GroupForPeriod(period);
-}
-
-function timelineStackIndex(period: PeriodRow, periods: PeriodRow[], index: number, span: number): number {
-  const start = period.start_year ?? 0;
-  const end = normalizeEndYear(period) ?? start;
+function timelineStackIndex(period: TimelineNode, periods: TimelineNode[], index: number, span: number, yearTo: number) {
+  const start = period.from_year ?? 0;
+  const end = normalizeEndYear(period, yearTo);
   const threshold = Math.max(2, Math.round(span * 0.025));
   let overlaps = 0;
 
   for (let previousIndex = 0; previousIndex < index; previousIndex += 1) {
     const previous = periods[previousIndex];
-    const previousStart = previous.start_year ?? 0;
-    const previousEnd = normalizeEndYear(previous) ?? previousStart;
+    const previousStart = previous.from_year ?? 0;
+    const previousEnd = normalizeEndYear(previous, yearTo);
     if (previousStart <= end + threshold && previousEnd >= start - threshold) {
       overlaps += 1;
     }
   }
 
   return overlaps % 4;
-}
-
-function groupPeriods(periods: PeriodRow[], groupForPeriod: (period: PeriodRow) => string): GroupedPeriods[] {
-  const grouped = new Map<string, PeriodRow[]>();
-  for (const period of periods) {
-    const group = groupForPeriod(period);
-    grouped.set(group, [...(grouped.get(group) || []), period]);
-  }
-
-  const knownGroups = ROW4_GROUP_ORDER.filter((group) => grouped.has(group));
-  const extraGroups = Array.from(grouped.keys())
-    .filter((group) => !ROW4_GROUP_ORDER.includes(group))
-    .sort((a, b) => a.localeCompare(b, "nb"));
-
-  return [...knownGroups, ...extraGroups].map((label) => ({
-    label,
-    periods: grouped.get(label) || [],
-  }));
-}
-
-function formatPeriodYears(period: PeriodRow): string {
-  if (typeof period.start_year !== "number") return "Ukjent";
-  if (period.end_year === null || typeof period.end_year === "undefined") return `${period.start_year}–`;
-  if (period.end_year === period.start_year) return `${period.start_year}`;
-  return `${period.start_year}–${period.end_year}`;
-}
-
-function buildQuery(filters: Filters, selectedPeriod: PeriodRow | null): string {
-  const params = new URLSearchParams();
-  params.set("country", filters.country);
-  params.set("object_type", filters.objectType);
-  params.set("year_from", String(filters.yearFrom));
-  params.set("year_to", String(filters.yearTo));
-  const selectedSlug = selectedPeriod?.period_slug || filters.row4 || filters.row3 || filters.row2 || filters.row1;
-  if (selectedSlug) params.set("period_slug", selectedSlug);
-  return params.toString();
-}
-
-function optionLabel(period: PeriodRow): string {
-  return `${period.display_name_no} · ${formatPeriodYears(period)}`;
-}
-
-function selectedSlugs(filters: Filters): string[] {
-  return [filters.row1, filters.row2, filters.row3, filters.row4].filter(Boolean);
 }
 
 function valueOrMissing(value: string | number | null | undefined, fallback = "Ikke registrert"): string {
@@ -477,19 +135,18 @@ function objectYearLabel(hit: CatalogHit): string {
   return valueOrMissing(hit.object_year_label || hit.publication_year_label);
 }
 
-function cardMetaText(hit: CatalogHit, period: PeriodRow | null): string {
+function cardMetaText(hit: CatalogHit, node: TimelineNode | null): string {
   return [
     valueOrMissing(hit.source_key, "Ukjent kilde"),
     valueOrMissing(hit.object_group, "Ukjent gruppe"),
     objectYearLabel(hit),
-    period?.display_name_no,
+    node?.label_no,
   ]
     .filter(Boolean)
     .join(" · ");
 }
 
 /* UI 8.5 Dynamic Card Helper Components */
-
 function DynamicBanknote({ isBanknote = false, list = false, title = "" }: { isBanknote?: boolean; list?: boolean; title?: string }) {
   if (isBanknote) {
     return (
@@ -596,13 +253,13 @@ function DynamicFacts({ hit, compact = false }: { hit: CatalogHit; compact?: boo
   );
 }
 
-function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: TimelineNode | null; segment: SegmentKey }) {
   return (
     <section className={`${styles.cardHistoryPanel} ${styles[`cardPanel_${segment}`]}`} aria-label="Dynamisk kortfelt">
       <div className={styles.cardHistoryHeader}>
         <span className={styles.cardBookIcon} aria-hidden="true"><BookOpenIcon /></span>
         <strong>{SEGMENT_LABELS[segment]}</strong>
-        <small>{segment === "historie" && period ? formatPeriodYears(period) : cardMetaText(hit, period)}</small>
+        <small>{segment === "historie" && period ? period.year_label : cardMetaText(hit, period)}</small>
       </div>
       <dl className={styles.cardHistoryGrid}>
         {segment === "samler" && (
@@ -637,7 +294,7 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: P
           <>
             <div className={styles.cardHistoryItem}>
               <dt>Regent / konge</dt>
-              <dd>{period && matchesRow(period, "row1") ? period.display_name_no : "Ikke registrert"}</dd>
+              <dd>{period && period.group_key === "ruler_head_of_state" ? period.label_no : "Ikke registrert"}</dd>
             </div>
             <div className={styles.cardHistoryItem}>
               <dt>Motiv / person</dt>
@@ -649,7 +306,7 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: P
             </div>
             <div className={styles.cardHistoryItem}>
               <dt>Historisk kontekst</dt>
-              <dd>{period?.summary_short_no || period?.display_name_no || "Ikke vurdert"}</dd>
+              <dd>{period?.description_no || period?.label_no || "Ikke vurdert"}</dd>
             </div>
             <div className={styles.cardHistoryItem}>
               <dt>Signatur</dt>
@@ -685,7 +342,7 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: P
             </div>
             <div className={styles.cardHistoryItem}>
               <dt>Indeksperiode</dt>
-              <dd>{period ? formatPeriodYears(period) : "Ikke valgt"}</dd>
+              <dd>{period ? period.year_label : "Ikke valgt"}</dd>
             </div>
           </>
         )}
@@ -694,7 +351,7 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: P
   );
 }
 
-function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period: TimelineNode | null; segment: SegmentKey }) {
   if (segment === "samler") {
     return (
       <div className={styles.cardListDynamic}>
@@ -716,12 +373,12 @@ function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period:
   return (
     <div className={styles.cardListDynamic}>
       <span>Historie</span>
-      <strong>{period?.display_name_no || "Ikke valgt"} · {objectYearLabel(hit)}</strong>
+      <strong>{period?.label_no || "Ikke valgt"} · {objectYearLabel(hit)}</strong>
     </div>
   );
 }
 
-function HorizontalCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+function HorizontalCard({ hit, period, segment }: { hit: CatalogHit; period: TimelineNode | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -752,7 +409,7 @@ function HorizontalCard({ hit, period, segment }: { hit: CatalogHit; period: Per
   );
 }
 
-function StandingCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+function StandingCard({ hit, period, segment }: { hit: CatalogHit; period: TimelineNode | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -777,7 +434,7 @@ function StandingCard({ hit, period, segment }: { hit: CatalogHit; period: Perio
   );
 }
 
-function MuseumCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+function MuseumCard({ hit, period, segment }: { hit: CatalogHit; period: TimelineNode | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -796,7 +453,7 @@ function MuseumCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodR
   );
 }
 
-function ListCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow | null; segment: SegmentKey }) {
+function ListCard({ hit, period, segment }: { hit: CatalogHit; period: TimelineNode | null; segment: SegmentKey }) {
   const isBanknote = hit.object_group === "banknote";
   const title = hit.title_no || hit.source_catalog_number || "Uten tittel";
   return (
@@ -841,9 +498,27 @@ function ListCard({ hit, period, segment }: { hit: CatalogHit; period: PeriodRow
 }
 
 export function CollectiumPeriodTimelineClient() {
-  const [data, setData] = useState<TimelineResponse | null>(null);
+  const [groups, setGroups] = useState<{ group_key: string; label_no: string }[]>([]);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodRow | null>(null);
+
+  // Rows selected groups states
+  const [row1Group, setRow1Group] = useState<string>("ruler_head_of_state");
+  const [row2Group, setRow2Group] = useState<string>("national_period");
+  const [row3Group, setRow3Group] = useState<string>("war_conflict");
+  const [row4Group, setRow4Group] = useState<string>("finance_economy");
+
+  // Loaded nodes for each row
+  const [row1Nodes, setRow1Nodes] = useState<TimelineNode[]>([]);
+  const [row2Nodes, setRow2Nodes] = useState<TimelineNode[]>([]);
+  const [row3Nodes, setRow3Nodes] = useState<TimelineNode[]>([]);
+  const [row4Nodes, setRow4Nodes] = useState<TimelineNode[]>([]);
+
+  // Selected node and detailed information
+  const [selectedNode, setSelectedNode] = useState<TimelineNode | null>(null);
+  const [nodeDetail, setNodeDetail] = useState<any | null>(null);
+
+  // Catalog items section
+  const [catalogRows, setCatalogRows] = useState<CatalogHit[]>([]);
   const [segment, setSegment] = useState<SegmentKey>("samler");
   const [cardSegment, setCardSegment] = useState<SegmentKey>("historie");
   const [viewMode, setViewMode] = useState<ViewMode>("timeline");
@@ -851,62 +526,84 @@ export function CollectiumPeriodTimelineClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async (nextFilters = filters, nextSelected = selectedPeriod) => {
+  // Load Groups list on component load
+  useEffect(() => {
+    fetch("/api/period86/groups")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.groups) {
+          setGroups(data.groups);
+        }
+      })
+      .catch((err) => console.error("Error loading groups:", err));
+  }, []);
+
+  // Fetch timeline nodes for the 4 rows when filters or selected groups change
+  const fetchTimelineData = async (nextFilters = filters) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/test/period-timeline?${buildQuery(nextFilters, nextSelected)}`, {
-        cache: "no-store",
-      });
-      const json = (await response.json()) as TimelineResponse;
-      if (!response.ok || !json.ok) {
-        throw new Error(json.error || "Kunne ikke hente periodetidslinje.");
+      const [r1, r2, r3, r4] = await Promise.all([
+        fetch(`/api/period86/timeline-nodes?country=${nextFilters.country}&group_key=${row1Group}&year_from=${nextFilters.yearFrom}&year_to=${nextFilters.yearTo}`),
+        fetch(`/api/period86/timeline-nodes?country=${nextFilters.country}&group_key=${row2Group}&year_from=${nextFilters.yearFrom}&year_to=${nextFilters.yearTo}`),
+        fetch(`/api/period86/timeline-nodes?country=${nextFilters.country}&group_key=${row3Group}&year_from=${nextFilters.yearFrom}&year_to=${nextFilters.yearTo}`),
+        fetch(`/api/period86/timeline-nodes?country=${nextFilters.country}&group_key=${row4Group}&year_from=${nextFilters.yearFrom}&year_to=${nextFilters.yearTo}`),
+      ]);
+
+      const [j1, j2, j3, j4] = await Promise.all([r1.json(), r2.json(), r3.json(), r4.json()]);
+
+      const nodes1 = j1.nodes || [];
+      const nodes2 = j2.nodes || [];
+      const nodes3 = j3.nodes || [];
+      const nodes4 = j4.nodes || [];
+
+      setRow1Nodes(nodes1);
+      setRow2Nodes(nodes2);
+      setRow3Nodes(nodes3);
+      setRow4Nodes(nodes4);
+
+      // Automatically select the first node of row 1 if nothing is selected or if previously selected is missing
+      const allNodes = [...nodes1, ...nodes2, ...nodes3, ...nodes4];
+      const match = allNodes.find((n) => n.node_key === selectedNode?.node_key);
+      if (match) {
+        handleTimelineSelect(match, nextFilters);
+      } else if (allNodes.length > 0) {
+        handleTimelineSelect(allNodes[0], nextFilters);
+      } else {
+        setSelectedNode(null);
+        setNodeDetail(null);
+        setCatalogRows([]);
       }
-      setData(json);
-      const rows = json.rows || [];
-      const currentSlug = nextSelected?.period_slug || nextFilters.row4 || nextFilters.row3 || nextFilters.row2 || nextFilters.row1;
-      const current = rows.find((row) => row.period_slug === currentSlug) || rows.find((row) => row.period_slug === "svensk-union") || rows.find((row) => overlapsWindow(row, nextFilters.yearFrom, nextFilters.yearTo)) || rows[0] || null;
-      setSelectedPeriod(current);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ukjent feil.");
+      setError(err instanceof Error ? err.message : "Kunne ikke hente periodetidslinje.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void fetchData(DEFAULT_FILTERS, null);
+    fetchTimelineData(filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filters.country, filters.yearFrom, filters.yearTo, row1Group, row2Group, row3Group, row4Group]);
 
-  const rows = data?.rows || [];
+  const handleTimelineSelect = async (node: TimelineNode, currentFilters = filters) => {
+    setSelectedNode(node);
+    try {
+      // 1. Fetch detailed metadata including relationships
+      const detailRes = await fetch(`/api/period86/node-detail?node_key=${node.node_key}&node_type=${node.node_type}`);
+      const detailJson = await detailRes.json();
+      setNodeDetail(detailJson);
 
-  const periodOptions = useMemo(() => {
-    return rows.filter((period) => overlapsWindow(period, filters.yearFrom, filters.yearTo)).sort(sortPeriods);
-  }, [rows, filters.yearFrom, filters.yearTo]);
-
-  const optionsByRow = useMemo(() => {
-    const rulerOptions = periodOptions.filter((period) => isRulerPeriod(period));
-    const row1Base = periodOptions.filter((period) => matchesRow(period, "row1"));
-    const row1AllCountries = rulerOptions.length > 0 ? rulerOptions : row1Base;
-    const row1CountryScoped = row1Base.filter((period) => countryMatchesPeriod(period, filters.country));
-
-    return {
-      row1: filters.country && row1CountryScoped.length > 0 ? row1CountryScoped : row1AllCountries,
-      row2: periodOptions.filter((period) => matchesRow(period, "row2")),
-      row3: periodOptions.filter((period) => matchesRow(period, "row3")),
-      row4: periodOptions,
-    };
-  }, [filters.country, periodOptions]);
-
-  const groupedOptionsByRow = useMemo(() => {
-    return {
-      row1: groupPeriods(optionsByRow.row1, (period) => row1GroupForPeriod(period)),
-      row2: groupPeriods(optionsByRow.row2, (period) => row4GroupForPeriod(period)),
-      row3: groupPeriods(optionsByRow.row3, (period) => row4GroupForPeriod(period)),
-      row4: groupPeriods(optionsByRow.row4, (period) => row4GroupForPeriod(period)),
-    };
-  }, [optionsByRow]);
+      // 2. Fetch catalog rows for catalog section linked to this node
+      const catalogRes = await fetch(
+        `/api/test/period-timeline?period_slug=${node.node_key}&year_from=${currentFilters.yearFrom}&year_to=${currentFilters.yearTo}&object_type=${currentFilters.objectType}`
+      );
+      const catalogJson = await catalogRes.json();
+      setCatalogRows(catalogJson.catalogRows || []);
+    } catch (e) {
+      console.error("Error fetching details for node:", e);
+    }
+  };
 
   const timelineWindow = useMemo(() => {
     return {
@@ -916,13 +613,12 @@ export function CollectiumPeriodTimelineClient() {
     };
   }, [filters.yearFrom, filters.yearTo]);
 
-  const timelineRows = useMemo(() => {
-    return PERIOD_ROW_DEFINITIONS.map((definition) => ({
-      ...definition,
-      periods: optionsByRow[definition.key],
-      selectedSlug: filters[definition.key],
-    }));
-  }, [filters, optionsByRow]);
+  const timelineRows = [
+    { key: "row1", label: GROUP_LABELS[row1Group], groupKey: row1Group, periods: row1Nodes, setGroup: setRow1Group, className: "row1" },
+    { key: "row2", label: GROUP_LABELS[row2Group], groupKey: row2Group, periods: row2Nodes, setGroup: setRow2Group, className: "row2" },
+    { key: "row3", label: GROUP_LABELS[row3Group], groupKey: row3Group, periods: row3Nodes, setGroup: setRow3Group, className: "row3" },
+    { key: "row4", label: GROUP_LABELS[row4Group], groupKey: row4Group, periods: row4Nodes, setGroup: setRow4Group, className: "row4" },
+  ];
 
   const yearTicks = useMemo(() => {
     const span = timelineWindow.span;
@@ -937,8 +633,6 @@ export function CollectiumPeriodTimelineClient() {
     return Array.from(new Set(ticks));
   }, [timelineWindow]);
 
-  const catalogRows = data?.catalogRows || [];
-
   function updateFilters(next: Partial<Filters>) {
     const merged = { ...filters, ...next };
     if (merged.yearTo < merged.yearFrom) {
@@ -948,26 +642,7 @@ export function CollectiumPeriodTimelineClient() {
   }
 
   function applyFilters() {
-    void fetchData(filters, selectedPeriod);
-  }
-
-  function handlePeriodRowChange(rowKey: PeriodRowKey, slug: string) {
-    const next = { ...filters, [rowKey]: slug };
-    const period = rows.find((item) => item.period_slug === slug) || null;
-    if (!period && selectedPeriod?.period_slug === filters[rowKey]) {
-      setSelectedPeriod(null);
-    }
-    setFilters(next);
-    setSelectedPeriod(period);
-    void fetchData(next, period);
-  }
-
-  function handleTimelineSelect(period: PeriodRow, rowKey: PeriodRowKey) {
-    setSelectedPeriod(period);
-    const targetRow = rowKey === "row4" ? "row4" : primaryRowForPeriod(period);
-    const next = { ...filters, [targetRow]: period.period_slug };
-    setFilters(next);
-    void fetchData(next, period);
+    void fetchTimelineData(filters);
   }
 
   function zoom(multiplier: number) {
@@ -980,34 +655,18 @@ export function CollectiumPeriodTimelineClient() {
       yearTo: center + Math.round(nextSpan / 2),
     };
     setFilters(nextFilters);
-    void fetchData(nextFilters, selectedPeriod);
+    void fetchTimelineData(nextFilters);
   }
 
   function setWindowSize(years: number) {
-    const start = selectedPeriod?.start_year ?? filters.yearFrom;
+    const start = selectedNode?.from_year ?? filters.yearFrom;
     const nextFilters = { ...filters, yearFrom: start, yearTo: start + years };
     setFilters(nextFilters);
-    void fetchData(nextFilters, selectedPeriod);
+    void fetchTimelineData(nextFilters);
   }
 
-  function renderGroupedOptions(rowKey: PeriodRowKey) {
-    return groupedOptionsByRow[rowKey].map((group) => (
-      <optgroup key={group.label} label={group.label}>
-        {group.periods.map((period) => (
-          <option key={period.period_slug} value={period.period_slug}>
-            {optionLabel(period)}
-          </option>
-        ))}
-      </optgroup>
-    ));
-  }
-
-  if (loading && !data) {
-    return <div className={styles.loadingState}>Laster Tidslinjeperiode fra Neon/API…</div>;
-  }
-
-  if (error && !data) {
-    return <div className={styles.errorState}>Feil: {error}</div>;
+  if (loading && !row1Nodes.length && !row2Nodes.length && !row3Nodes.length && !row4Nodes.length) {
+    return <div className={styles.loadingState}>Laster tidslinje fra Neon/API…</div>;
   }
 
   return (
@@ -1016,11 +675,11 @@ export function CollectiumPeriodTimelineClient() {
         <div>
           <p className={styles.eyebrow}>Collectium UI/UX 8.6 · tidslinje</p>
           <h1 className={styles.title}>Tidslinjeperiode</h1>
-          <p className={styles.subtitle}>Masterfilter, perioderader, tidslinjevalg og katalogtreff bygget fra Neon/API.</p>
+          <p className={styles.subtitle}>Sammenligningsbasert tidslinje med grupper i dropdowns og noder i tidslinjen hentet fra Neon/API.</p>
         </div>
         <div className={styles.heroStatus}>
-          <span>Datakilde</span>
-          <strong>{data?.source || "Neon/API"}</strong>
+          <span>Status</span>
+          <strong>Aktiv V8.6</strong>
         </div>
       </section>
 
@@ -1030,14 +689,13 @@ export function CollectiumPeriodTimelineClient() {
             <p className={styles.eyebrow}>Masterfilter</p>
             <h2>Filter over tidslinjeinnhold</h2>
           </div>
-          <button className={styles.primaryButton} type="button" onClick={applyFilters}>Oppdater</button>
+          <button className={`${styles.primaryButton} ct-btn ct-btn-primary`} type="button" onClick={applyFilters}>Oppdater</button>
         </div>
 
         <div className={styles.masterGrid}>
           <label className={styles.field}>
             <span>Land</span>
-            <select value={filters.country} onChange={(event) => updateFilters({ country: event.target.value })}>
-              <option value="">Alle land</option>
+            <select value={filters.country} onChange={(event) => updateFilters({ country: event.target.value })} className="ct-select">
               <option value="Norge">Norge</option>
               <option value="Skandinavia">Skandinavia</option>
               <option value="Sverige">Sverige</option>
@@ -1047,36 +705,21 @@ export function CollectiumPeriodTimelineClient() {
 
           <label className={styles.field}>
             <span>Type objekt</span>
-            <select value={filters.objectType} onChange={(event) => updateFilters({ objectType: event.target.value })}>
-              <option value="Verdibrev">Verdibrev</option>
+            <select value={filters.objectType} onChange={(event) => updateFilters({ objectType: event.target.value })} className="ct-select">
               <option value="banknote">Sedler</option>
               <option value="coin">Mynter</option>
-              <option value="document">Dokumenter</option>
             </select>
           </label>
 
           <label className={styles.field}>
             <span>År fra</span>
-            <input type="number" value={filters.yearFrom} onChange={(event) => updateFilters({ yearFrom: Number(event.target.value) })} />
+            <input type="number" value={filters.yearFrom} onChange={(event) => updateFilters({ yearFrom: Number(event.target.value) })} className="ct-input" />
           </label>
 
           <label className={styles.field}>
             <span>År til</span>
-            <input type="number" value={filters.yearTo} onChange={(event) => updateFilters({ yearTo: Number(event.target.value) })} />
+            <input type="number" value={filters.yearTo} onChange={(event) => updateFilters({ yearTo: Number(event.target.value) })} className="ct-input" />
           </label>
-        </div>
-
-        <div className={styles.periodRows}>
-          {PERIOD_ROW_DEFINITIONS.map((row) => (
-            <label key={row.key} className={`${styles.periodField} ${styles[row.className]}`}>
-              <span>{row.selectLabel}</span>
-              <select value={filters[row.key]} onChange={(event) => handlePeriodRowChange(row.key, event.target.value)}>
-                <option value="">{row.emptyLabel} ({filters.yearFrom}–{filters.yearTo})</option>
-                {renderGroupedOptions(row.key)}
-              </select>
-              <small className={styles.helperText}>{row.helper}</small>
-            </label>
-          ))}
         </div>
       </section>
 
@@ -1087,11 +730,11 @@ export function CollectiumPeriodTimelineClient() {
             <h2>{filters.yearFrom}–{filters.yearTo}</h2>
           </div>
           <div className={styles.toolbarButtons}>
-            <button type="button" onClick={() => zoom(1.4)}>Zoom ut</button>
-            <button type="button" onClick={() => zoom(0.7)}>Zoom inn</button>
-            <button type="button" onClick={() => setWindowSize(100)}>100 år</button>
-            <button className={viewMode === "timeline" ? styles.toolbarButtonActive : ""} type="button" onClick={() => setViewMode("timeline")}>Tidslinje</button>
-            <button className={viewMode === "table" ? styles.toolbarButtonActive : ""} type="button" onClick={() => setViewMode("table")}>Tabell</button>
+            <button type="button" onClick={() => zoom(1.4)} className="ct-btn">Zoom ut</button>
+            <button type="button" onClick={() => zoom(0.7)} className="ct-btn">Zoom inn</button>
+            <button type="button" onClick={() => setWindowSize(100)} className="ct-btn">100 år</button>
+            <button className={`${viewMode === "timeline" ? styles.toolbarButtonActive : ""} ct-btn`} type="button" onClick={() => setViewMode("timeline")}>Tidslinje</button>
+            <button className={`${viewMode === "table" ? styles.toolbarButtonActive : ""} ct-btn`} type="button" onClick={() => setViewMode("table")}>Tabell</button>
           </div>
         </div>
 
@@ -1110,32 +753,41 @@ export function CollectiumPeriodTimelineClient() {
               })}
               {timelineRows.map((lane) => (
                 <div className={`${styles.lane} ${styles[lane.className]}`} key={lane.key}>
-                  <div className={styles.laneLabel}>
-                    <strong>{lane.label}</strong>
-                    <span>{lane.selectedSlug ? rows.find((period) => period.period_slug === lane.selectedSlug)?.display_name_no || "Ingen valgt" : "Ingen valgt"}</span>
+                  <div className={styles.laneLabel} style={{ display: "flex", flexDirection: "column", alignItems: "stretch", padding: "4px", gap: "2px" }}>
+                    <span style={{ fontSize: "9px", fontWeight: "900", opacity: 0.6, letterSpacing: "0.05em" }}>{lane.key.toUpperCase()}</span>
+                    <select
+                      value={lane.groupKey}
+                      onChange={(e) => lane.setGroup(e.target.value)}
+                      className="ct-select"
+                      style={{ fontSize: "11px", padding: "4px", minHeight: "28px", width: "100%", borderRadius: "6px" }}
+                    >
+                      {Object.entries(GROUP_LABELS).map(([key, label]) => (
+                        <option key={key} value={key}>{label}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className={styles.laneTrack}>
                     {lane.periods.length === 0 ? (
                       <div className={styles.laneEmpty}>Ingen perioder i valgt årsspenn</div>
                     ) : lane.periods.map((period, index) => {
-                      const start = period.start_year ?? timelineWindow.start;
-                      const end = normalizeEndYear(period) ?? start;
+                      const start = period.from_year ?? timelineWindow.start;
+                      const end = normalizeEndYear(period, timelineWindow.end);
                       const left = Math.max(0, ((start - timelineWindow.start) / timelineWindow.span) * 100);
                       const width = Math.max(2, ((end - start || 1) / timelineWindow.span) * 100);
                       const isEvent = start === end;
-                      const active = selectedPeriod?.period_slug === period.period_slug;
-                      const stackTop = 8 + timelineStackIndex(period, lane.periods, index, timelineWindow.span) * 24;
+                      const active = selectedNode?.node_key === period.node_key;
+                      const stackTop = 8 + timelineStackIndex(period, lane.periods, index, timelineWindow.span, timelineWindow.end) * 24;
                       return (
                         <button
-                          key={period.period_slug}
+                          key={period.node_key}
                           type="button"
                           className={`${isEvent ? styles.eventMarker : styles.periodBlock} ${active ? styles.periodBlockActive : ""}`}
                           style={{ left: `${left}%`, top: `${stackTop}px`, width: isEvent ? undefined : `${width}%` }}
-                          title={`${period.display_name_no} ${formatPeriodYears(period)}`}
-                          onClick={() => handleTimelineSelect(period, lane.key)}
+                          title={`${period.label_no} ${period.year_label}`}
+                          onClick={() => handleTimelineSelect(period)}
                         >
-                          <strong>{period.display_name_no}</strong>
-                          <span>{formatPeriodYears(period)}</span>
+                          <strong>{period.label_no}</strong>
+                          <span>{period.year_label}</span>
                         </button>
                       );
                     })}
@@ -1151,21 +803,19 @@ export function CollectiumPeriodTimelineClient() {
                 <tr>
                   <th>Navn</th>
                   <th>Type</th>
-                  <th>Nivå</th>
                   <th>Fra</th>
                   <th>Til</th>
                   <th>Lenke</th>
                 </tr>
               </thead>
               <tbody>
-                {periodOptions.map((period) => (
-                  <tr key={period.period_slug} onClick={() => handleTimelineSelect(period, primaryRowForPeriod(period))}>
-                    <td>{period.display_name_no}</td>
-                    <td>{period.period_type_label_no || period.period_type_key}</td>
-                    <td>{period.period_level ?? "-"}</td>
-                    <td>{period.start_year ?? "-"}</td>
-                    <td>{period.end_year ?? "nå"}</td>
-                    <td>{period.relation_href || "-"}</td>
+                {[...row1Nodes, ...row2Nodes, ...row3Nodes, ...row4Nodes].map((node) => (
+                  <tr key={node.node_key} onClick={() => handleTimelineSelect(node)}>
+                    <td>{node.label_no}</td>
+                    <td>{node.group_label_no}</td>
+                    <td>{node.from_year ?? "-"}</td>
+                    <td>{node.to_year ?? "nå"}</td>
+                    <td>{node.relation_href || "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1183,53 +833,136 @@ export function CollectiumPeriodTimelineClient() {
             </div>
             <span className={styles.badge}>Tidslinje</span>
           </div>
-          {selectedPeriod ? (
-            <div className={styles.detailInfoList}>
+          {nodeDetail ? (
+            <div className={styles.detailInfoList} style={{ display: "grid", gap: "10px" }}>
               <div className={styles.detailRow}>
-                <span>Periode</span>
-                <strong>{selectedPeriod.display_name_no}</strong>
-              </div>
-              <div className={styles.detailRow}>
-                <span>År</span>
-                <strong>{formatPeriodYears(selectedPeriod)}</strong>
+                <span>Tittel</span>
+                <strong>{nodeDetail.title_no}</strong>
               </div>
               <div className={styles.detailRow}>
                 <span>Type</span>
-                <strong>{selectedPeriod.period_type_label_no || selectedPeriod.period_type_key || "Ikke definert"}</strong>
+                <strong>{nodeDetail.type_label_no}</strong>
               </div>
               <div className={styles.detailRow}>
-                <span>Nivå</span>
-                <strong>{selectedPeriod.period_level ?? "Ikke definert"}</strong>
+                <span>Periode</span>
+                <strong>{nodeDetail.year_label}</strong>
               </div>
               <div className={styles.detailRow}>
-                <span>Tilknyttede objekter</span>
-                <strong>{selectedPeriod.object_count ?? "Ikke tilgjengelig"}</strong>
+                <span>Land/område</span>
+                <strong>{nodeDetail.land_omrade}</strong>
               </div>
-              <div className={styles.detailRow}>
-                <span>Relasjoner</span>
-                <strong>{selectedPeriod.relation_count ?? "Ikke tilgjengelig"}</strong>
+              <div className={styles.detailRowBlock}>
+                <span>Beskrivelse / Historisk kontekst</span>
+                <p style={{ margin: "4px 0", fontSize: "13px", lineHeight: "1.4" }}>
+                  {nodeDetail.summary_no}
+                </p>
               </div>
-              <div className={styles.detailRow}>
-                <span>Forelder</span>
-                <strong>{selectedPeriod.parent_period_slug || "Ingen"}</strong>
+              <div className={styles.detailRowBlock}>
+                <span>Relevans for Collectium</span>
+                <p style={{ margin: "4px 0", fontSize: "13px", lineHeight: "1.4" }}>
+                  {nodeDetail.collectium_relevance_no}
+                </p>
               </div>
-              {selectedPeriod.relation_href && (
-                <div className={styles.detailRow}>
-                  <span>Relasjon</span>
-                  <Link href={selectedPeriod.relation_href} className={styles.relationLink}>
+
+              {nodeDetail.media && nodeDetail.media.length > 0 && (
+                <div className={styles.detailRowBlock}>
+                  <span>Media / Bilde</span>
+                  <div style={{ marginTop: "6px", display: "grid", gap: "8px" }}>
+                    {nodeDetail.media.map((img: any, idx: number) => (
+                      <div key={idx} style={{ display: "grid", gap: "4px" }}>
+                        <img 
+                          src={img.blob_url} 
+                          alt={img.alt_text_no || nodeDetail.title_no} 
+                          style={{ maxWidth: "100%", borderRadius: "8px", border: "1px solid var(--ct-border)" }}
+                        />
+                        {img.caption_no && (
+                          <small style={{ color: "var(--ct-muted)", fontSize: "11px" }}>{img.caption_no}</small>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {nodeDetail.relation_href && (
+                <div className={styles.detailRow} style={{ marginTop: "12px" }}>
+                  <span>Handling</span>
+                  <Link href={nodeDetail.relation_href} className={`${styles.relationLink} ct-btn ct-btn-primary`} style={{ textDecoration: "none", color: "var(--ct-card-bg)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                     <ExternalLinkIcon />
-                    <span>Åpne relasjon</span>
+                    <span>Se relasjon</span>
                   </Link>
                 </div>
               )}
-              <div className={styles.detailRowBlock}>
-                <span>Beskrivelse</span>
-                <p>{selectedPeriod.summary_short_no || "Mangler beskrivelse"}</p>
-              </div>
-              <div className={styles.detailRowBlock}>
-                <span>Collectium-relevans</span>
-                <p>{selectedPeriod.collectium_relevance_no || "Ikke vurdert"}</p>
-              </div>
+
+              {/* Relations sections */}
+              {nodeDetail.related_objects && nodeDetail.related_objects.length > 0 && (
+                <div className={styles.detailRowBlock} style={{ borderTop: "1px solid var(--ct-border)", paddingTop: "12px", marginTop: "12px" }}>
+                  <span>Relaterte objekter i katalogen</span>
+                  <ul style={{ margin: "6px 0", paddingLeft: "20px", fontSize: "13px" }}>
+                    {nodeDetail.related_objects.map((obj: any, idx: number) => (
+                      <li key={idx} style={{ marginBottom: "4px" }}>
+                        <Link href={`/objekt/${obj.source_key}/${obj.object_group}/${obj.object_id}`} style={{ color: "var(--ct-accent)", fontWeight: "bold" }}>
+                          {obj.title_no} ({obj.source_catalog_number || "Uten nr"}) · {obj.object_year_label || "Ukjent år"}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {nodeDetail.related_periods && nodeDetail.related_periods.length > 0 && (
+                <div className={styles.detailRowBlock} style={{ borderTop: "1px solid var(--ct-border)", paddingTop: "12px", marginTop: "12px" }}>
+                  <span>Relaterte perioder</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+                    {nodeDetail.related_periods.map((p: any, idx: number) => (
+                      <Link 
+                        key={idx} 
+                        href={p.relation_href || "#"} 
+                        className="ct-badge" 
+                        style={{ textDecoration: "none", fontSize: "11px", padding: "4px 8px", background: "var(--ct-panel-soft)", border: "1px solid var(--ct-border)", borderRadius: "12px" }}
+                      >
+                        {p.label_no} ({p.year_label})
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {nodeDetail.related_people && nodeDetail.related_people.length > 0 && (
+                <div className={styles.detailRowBlock} style={{ borderTop: "1px solid var(--ct-border)", paddingTop: "12px", marginTop: "12px" }}>
+                  <span>Relaterte personer / signaturer</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+                    {nodeDetail.related_people.map((p: any, idx: number) => (
+                      <Link 
+                        key={idx} 
+                        href={p.href} 
+                        className="ct-badge" 
+                        style={{ textDecoration: "none", fontSize: "11px", padding: "4px 8px", background: "var(--ct-panel-soft)", border: "1px solid var(--ct-border)", borderRadius: "12px" }}
+                      >
+                        {p.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {nodeDetail.related_motifs && nodeDetail.related_motifs.length > 0 && (
+                <div className={styles.detailRowBlock} style={{ borderTop: "1px solid var(--ct-border)", paddingTop: "12px", marginTop: "12px" }}>
+                  <span>Relaterte motiv / symboler</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+                    {nodeDetail.related_motifs.map((m: any, idx: number) => (
+                      <Link 
+                        key={idx} 
+                        href={m.href} 
+                        className="ct-badge" 
+                        style={{ textDecoration: "none", fontSize: "11px", padding: "4px 8px", background: "var(--ct-panel-soft)", border: "1px solid var(--ct-border)", borderRadius: "12px" }}
+                      >
+                        {m.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className={styles.emptyState}>Velg en periode i tidslinjen.</div>
@@ -1277,23 +1010,7 @@ export function CollectiumPeriodTimelineClient() {
                 </div>
                 <div className={styles.detailRow}>
                   <span>Objekttype</span>
-                  <strong>{filters.objectType}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Kilde</span>
-                  <strong>{catalogRows[0]?.source_key || "Ikke registrert"}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Variant</span>
-                  <strong>{catalogRows[0]?.variant_type_raw_no || "Ikke registrert"}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Sjeldenhet / kvalitet</span>
-                  <strong>Ikke vurdert</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Brukerstatus</span>
-                  <strong>Ikke registrert</strong>
+                  <strong>{filters.objectType === "banknote" ? "Sedler" : "Mynter"}</strong>
                 </div>
               </>
             )}
@@ -1301,40 +1018,15 @@ export function CollectiumPeriodTimelineClient() {
               <>
                 <div className={styles.detailRow}>
                   <span>Regent / konge</span>
-                  <strong>{selectedPeriod && matchesRow(selectedPeriod, "row1") ? selectedPeriod.display_name_no : "Ikke registrert"}</strong>
+                  <strong>{selectedNode && selectedNode.group_key === "ruler_head_of_state" ? selectedNode.label_no : "Ikke registrert"}</strong>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Periode</span>
-                  <strong>{selectedPeriod?.display_name_no || "Ikke valgt"}</strong>
+                  <strong>{selectedNode?.label_no || "Ikke valgt"}</strong>
                 </div>
                 <div className={styles.detailRow}>
                   <span>År</span>
-                  <strong>{selectedPeriod ? formatPeriodYears(selectedPeriod) : `${filters.yearFrom}–${filters.yearTo}`}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Hendelse</span>
-                  <strong>{selectedPeriod?.period_type_label_no || selectedPeriod?.period_type_key || "Ikke registrert"}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Person / signatur</span>
-                  <strong>Ikke registrert</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Motiv</span>
-                  <strong>{catalogRows[0]?.title_no || "Ikke registrert"}</strong>
-                </div>
-                {selectedPeriod?.relation_href && (
-                  <div className={styles.detailRow}>
-                    <span>Relasjon</span>
-                    <Link href={selectedPeriod.relation_href} className={styles.relationLink}>
-                      <ExternalLinkIcon />
-                      <span>Åpne relasjon</span>
-                    </Link>
-                  </div>
-                )}
-                <div className={styles.detailRowBlock}>
-                  <span>Kontekst</span>
-                  <p>{selectedPeriod?.summary_short_no || "Velg en tidslinjenode"}</p>
+                  <strong>{selectedNode ? selectedNode.year_label : `${filters.yearFrom}–${filters.yearTo}`}</strong>
                 </div>
               </>
             )}
@@ -1351,34 +1043,6 @@ export function CollectiumPeriodTimelineClient() {
                 <div className={styles.detailRow}>
                   <span>Trend</span>
                   <strong>Ikke vurdert</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Trend %</span>
-                  <strong>Ikke vurdert</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Trendperiode</span>
-                  <strong>{selectedPeriod ? formatPeriodYears(selectedPeriod) : "Ikke valgt"}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Likviditet</span>
-                  <strong>Ikke vurdert</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Auksjon</span>
-                  <strong>Ikke vurdert</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Nettbutikk</span>
-                  <strong>Ikke vurdert</strong>
-                </div>
-                <div className={styles.detailRowBlock}>
-                  <span>Indeksperiode</span>
-                  <p>
-                    {selectedPeriod?.period_type_key?.includes("economic") || selectedPeriod?.period_type_key?.includes("monetary")
-                      ? "Relevant for økonomisk periodeanalyse"
-                      : "Ikke vurdert"}
-                  </p>
                 </div>
               </>
             )}
@@ -1444,16 +1108,15 @@ export function CollectiumPeriodTimelineClient() {
         ) : (
           <div className={`${styles.catalogGrid} ${styles[`catalogGrid_${cardLayout}`]}`}>
             {catalogRows.map((hit, index) => {
-              if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
-              if (cardLayout === "standing") return <StandingCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
-              if (cardLayout === "list") return <ListCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
-              return <MuseumCard key={index} hit={hit} period={selectedPeriod} segment={cardSegment} />;
+              if (cardLayout === "horizontal") return <HorizontalCard key={index} hit={hit} period={selectedNode} segment={cardSegment} />;
+              if (cardLayout === "standing") return <StandingCard key={index} hit={hit} period={selectedNode} segment={cardSegment} />;
+              if (cardLayout === "list") return <ListCard key={index} hit={hit} period={selectedNode} segment={cardSegment} />;
+              return <MuseumCard key={index} hit={hit} period={selectedNode} segment={cardSegment} />;
             })}
           </div>
         )}
       </section>
 
-      {data?.warnings?.length ? <div className={styles.warningState}>Varsler: {data.warnings.join(" · ")}</div> : null}
       {error ? <div className={styles.errorState}>Siste oppdatering feilet: {error}</div> : null}
     </main>
   );
