@@ -1242,3 +1242,171 @@
     width: 100%;
   }
 }
+
+/* COLLECTIUM KATALOG 8.6 SWITCHABLE FILTER */
+
+.filterControlShell {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.filterControlShell[data-filter-placement="bottom"] {
+  order: 20;
+}
+
+.filterModeSwitch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--ct-border, #d8c9ad) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ct-card-bg, #fffdf7) 92%, transparent);
+}
+
+.collectorFilterDeck,
+.periodFilterShell {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--ct-border, #d8c9ad) 82%, transparent);
+  border-radius: var(--ct-radius-theme, 14px);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-card-bg, #fffdf7) 96%, white), color-mix(in srgb, var(--ct-bg, #f7f1e6) 18%, white));
+  box-shadow: var(--ct-shadow-soft, 0 12px 30px rgba(35, 30, 18, 0.08));
+}
+
+.collectorFilterHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.collectorFilterHeader p {
+  margin: 0 0 4px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ct-accent, #176b4c) 76%, #263b31);
+}
+
+.collectorFilterHeader h3 {
+  margin: 0;
+  font-size: clamp(16px, 1.35vw, 22px);
+  font-weight: 600;
+  color: var(--ct-text, #173d2f);
+}
+
+.collectorCheckboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: 10px;
+}
+
+.collectorCheckbox {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--ct-border, #d8c9ad) 78%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ct-card-bg, #fffdf7) 92%, white);
+  cursor: pointer;
+}
+
+.collectorCheckbox input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--ct-accent, #176b4c);
+}
+
+.collectorCheckbox span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.collectorCheckbox strong {
+  font-size: 13px;
+  color: var(--ct-text, #173d2f);
+}
+
+.collectorCheckbox em {
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--ct-text, #173d2f) 58%, transparent);
+}
+
+.periodTimelinePreview {
+  display: grid;
+  gap: 8px;
+}
+
+.periodTimelineRow {
+  display: grid;
+  grid-template-columns: 72px minmax(180px, 0.42fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ct-accent, #176b4c) 22%, var(--ct-border, #d8c9ad));
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--ct-accent, #176b4c) 8%, transparent), transparent);
+}
+
+.periodTimelineRow span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ct-accent, #176b4c) 12%, white);
+  color: var(--ct-accent, #176b4c);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.periodTimelineRow strong {
+  font-size: 13px;
+  color: var(--ct-text, #173d2f);
+}
+
+.periodTimelineRow em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: normal;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--ct-text, #173d2f) 60%, transparent);
+}
+
+@media (max-width: 780px) {
+  .filterModeSwitch {
+    border-radius: 14px;
+  }
+
+  .collectorFilterHeader {
+    flex-direction: column;
+  }
+
+  .periodTimelineRow {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .periodTimelineRow em {
+    white-space: normal;
+  }
+}

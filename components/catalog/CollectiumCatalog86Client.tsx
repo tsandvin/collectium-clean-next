@@ -100,6 +100,9 @@ function normalizeObjects(payload: CatalogApiPayload): CatalogObject[] {
 }
 
 function objectTitle(object: CatalogObject): string {
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
+
   return (
     object.collectium_title_no ||
     object.title_no ||
@@ -172,7 +175,10 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T | null
   try {
     const response = await fetch(url, { signal, headers: { Accept: "application/json" } });
     if (!response.ok) return null;
-    return (await response.json()) as T;
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
+
+  return (await response.json()) as T;
   } catch (error) {
     if ((error as Error).name === "AbortError") return null;
     return null;
@@ -182,6 +188,9 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T | null
 export function CollectiumCatalog86Client() {
   const [segment, setSegment] = useState<CatalogSegment>("samler");
   const [view, setView] = useState<CatalogView>("horizontal");
+  const [filterMode, setFilterMode] = useState<CatalogFilterMode>("samler");
+  const [filterPlacement, setFilterPlacement] = useState<CatalogFilterPlacement>("top");
+  const [collectorFilters, setCollectorFilters] = useState<CollectorFilterState>(EMPTY_COLLECTOR_FILTERS);
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_CATALOG_FILTERS);
   const [objects, setObjects] = useState<CatalogObject[]>([]);
   const [filterOptions, setFilterOptions] = useState<Record<string, FilterOption[]>>({});
@@ -212,7 +221,10 @@ export function CollectiumCatalog86Client() {
     }
 
     loadFilters();
-    return () => controller.abort();
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
+
+  return () => controller.abort();
   }, [filters.sourceKey, filters.objectGroup, filters.masterCountry]);
 
   useEffect(() => {
@@ -235,7 +247,10 @@ export function CollectiumCatalog86Client() {
     }
 
     loadPeriodRows();
-    return () => controller.abort();
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
+
+  return () => controller.abort();
   }, [filters.masterCountry, filters.periodRow1Type, filters.periodRow1Node, filters.sourceKey, filters.objectGroup]);
 
   useEffect(() => {
@@ -252,8 +267,13 @@ export function CollectiumCatalog86Client() {
     }
 
     loadCatalog();
-    return () => controller.abort();
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
+
+  return () => controller.abort();
   }, [queryString]);
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
 
   return (
     <section className={styles.catalogPage} data-view={view} data-segment={segment} aria-labelledby="collectium-katalog-title">
@@ -272,7 +292,88 @@ export function CollectiumCatalog86Client() {
         </div>
       </header>
 
-      <form className={styles.filterDeck} onSubmit={(event) => event.preventDefault()}>
+      <div className={styles.filterControlShell} data-filter-placement={filterPlacement}>
+        <div className={styles.filterModeSwitch} aria-label="Filtervalg">
+          <button
+            type="button"
+            className={filterMode === "samler" ? styles.activeButton : styles.softButton}
+            onClick={() => setFilterMode("samler")}
+          >
+            Samlerfilter
+            {activeCollectorFilterCount > 0 ? ` · ${activeCollectorFilterCount}` : ""}
+          </button>
+
+          <button
+            type="button"
+            className={filterMode === "periode" ? styles.activeButton : styles.softButton}
+            onClick={() => setFilterMode("periode")}
+          >
+            Periodefilter
+          </button>
+
+          <button
+            type="button"
+            className={styles.softButton}
+            onClick={() => setFilterPlacement(filterPlacement === "top" ? "bottom" : "top")}
+          >
+            {filterPlacement === "top" ? "Flytt filter ned" : "Flytt filter opp"}
+          </button>
+        </div>
+
+        {filterMode === "samler" ? (
+          <section className={styles.collectorFilterDeck} aria-label="Samlerfilter">
+            <div className={styles.collectorFilterHeader}>
+              <div>
+                <p>Samlerfilter</p>
+                <h3>Vis objekter etter samlerstatus og markedskanal</h3>
+              </div>
+
+              <button
+                type="button"
+                className={styles.softButton}
+                onClick={() => setCollectorFilters(EMPTY_COLLECTOR_FILTERS)}
+              >
+                Nullstill
+              </button>
+            </div>
+
+            <div className={styles.collectorCheckboxGrid}>
+              {COLLECTOR_FILTER_OPTIONS.map((option) => (
+                <label key={option.key} className={styles.collectorCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={collectorFilters[option.key]}
+                    onChange={(event) =>
+                      setCollectorFilters((current) => ({
+                        ...current,
+                        [option.key]: event.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <em>{option.description}</em>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className={styles.periodFilterShell} aria-label="Periodefilter med tidslinje">
+            <div className={styles.periodTimelinePreview}>
+              <div className={styles.periodTimelineRow}>
+                <span>Rad 1</span>
+                <strong>Statsoverhode / maktstruktur</strong>
+                <em>Konge · Regent · Union · Dynasti · Okkupasjonsmakt</em>
+              </div>
+
+              <div className={styles.periodTimelineRow}>
+                <span>Rad 2</span>
+                <strong>Objektperiode / utgave / relasjon</strong>
+                <em>Utgave · serie · år · historisk kontekst · samlerobjekt</em>
+              </div>
+            </div>
+          <form className={styles.filterDeck} onSubmit={(event) => event.preventDefault()}>
         <fieldset className={styles.filterGroup}>
           <legend>Masterfilter</legend>
           <label>
@@ -379,6 +480,10 @@ export function CollectiumCatalog86Client() {
           </div>
         </fieldset>
       </form>
+          </section>
+        )}
+      </div>
+
       <section className={styles.resultAreaHeader} aria-label="Katalogtreff og visningsvalg">
         <div className={styles.resultTitleRow}>
           <div>
@@ -434,7 +539,7 @@ export function CollectiumCatalog86Client() {
         </div>
       ) : (
         <div className={styles.results} data-view={view}>
-          {objects.map((object) => (
+          {visibleObjects.map((object) => (
             <CatalogObjectCard key={`${object.source_key}-${object.object_group}-${object.object_id}`} object={object} segment={segment} view={view} />
           ))}
         </div>
@@ -460,6 +565,8 @@ function CatalogObjectCard({ object, segment, view }: { object: CatalogObject; s
           : styles.ui85MuseumCard;
 
   const imageLabel = image ? title : "Bilde ikke registrert";
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
 
   return (
     <article className={`${styles.objectCard} ${styles.ui85Card} ${viewClass}`}>
@@ -539,11 +646,11 @@ function CatalogObjectCard({ object, segment, view }: { object: CatalogObject; s
         </div>
         <div className={`${styles.channelBox} ${styles.auctionBox}`}>
           <span>⚑ Auksjon</span>
-          <strong>{object.auction_count ?? 3}</strong>
+          <strong>{((object as { auction_count?: number }).auction_count ?? 3)}</strong>
         </div>
         <div className={`${styles.channelBox} ${styles.shopBox}`}>
           <span>◆ Nettbutikk</span>
-          <strong>{object.shop_count ?? 1}</strong>
+          <strong>{((object as { shop_count?: number }).shop_count ?? 1)}</strong>
         </div>
 
         <div className={styles.valueBox}>
@@ -569,6 +676,9 @@ function CatalogObjectCard({ object, segment, view }: { object: CatalogObject; s
 
 function Meta({ label, value }: { label: string; value?: string | number | null }) {
   if (value === null || value === undefined || value === "") return null;
+  const visibleObjects = objects.filter((object) => objectMatchesCollectorFilters(object, collectorFilters));
+  const activeCollectorFilterCount = getCollectorFilterCount(collectorFilters);
+
   return (
     <div>
       <span>{label}</span>
@@ -592,5 +702,6 @@ function buildFallbackRelations(object: CatalogObject): CatalogRelation[] {
   add("kilde", object.source_key);
   return relations;
 }
+
 
 
