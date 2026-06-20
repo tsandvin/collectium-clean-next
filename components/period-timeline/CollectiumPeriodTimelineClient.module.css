@@ -2517,137 +2517,328 @@
 }
 
 /* ============================================================
-   Period timeline / test/period-timeline layout correction
+   Period timeline desktop card width and list row correction
+   Scope: /test/period-timeline only
+   Goal:
+   - cards stay inside desktop viewport
+   - columns wrap to next row when there is not enough room
+   - list/museum are one wide row per object
+   - compact status badges match estimated price height
    ============================================================ */
 
-/* Katalog-header: tittel til venstre, treff-badge til høyre */
+/* Katalogfeltet må aldri lage horisontal overflow */
+.catalogPanel {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Header: tittel og treff */
 .catalogPanel .panelHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
+  width: 100%;
 }
 
-/* Kontrollrad under tittelen */
+/* Kontrollrad: Samler/Historie/Finans til venstre, visning til høyre */
 .catalogControlBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
   width: 100%;
+  max-width: 100%;
   margin: 10px 0 16px;
 }
 
-/* Samler / Historie / Finans helt til venstre */
+/* Samler / Historie / Finans */
 .cardSegmentTabs {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   flex: 1 1 auto;
+  min-width: 0;
   gap: 8px;
   margin-left: 0;
 }
 
-/* Visningsvalg til høyre */
+/* Horisontal / Stående / Liste / Museum */
 .viewSelectorsContainer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   gap: 8px;
 }
 
-/* Horisontal: maks 2 kort per rad */
+/* Ved trang bredde skal bryterne wrape, ikke presse siden bredere */
+.cardSegmentTabs,
+.viewSelectorsContainer {
+  flex-wrap: wrap;
+}
+
+/* Alle kataloggrid må holde seg innenfor panelbredden */
+.catalogGrid,
+.catalogGrid_horizontal,
+.catalogGrid_standing,
+.catalogGrid_list,
+.catalogGrid_museum {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Horisontal:
+   Bruk auto-fit så kort går ned på neste rad hvis det ikke er plass.
+   Dette stopper overflow på desktop.
+*/
 .catalogGrid_horizontal {
   display: grid;
-  grid-template-columns: repeat(2, minmax(620px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(620px, 100%), 1fr)) !important;
   align-items: stretch;
+  gap: 14px;
 }
 
-/* Stående: maks 3 kort per rad */
+/* Stående:
+   Maks 3 per rad på normal desktop, men wraper automatisk.
+*/
 .catalogGrid_standing {
   display: grid;
-  grid-template-columns: repeat(3, minmax(320px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)) !important;
   align-items: stretch;
+  gap: 14px;
 }
 
-/* Liste og museum: 1 bred rad per objekt */
+/* Liste og Museum:
+   Én bred rad per objekt, aldri flere kolonner.
+*/
 .catalogGrid_list,
 .catalogGrid_museum {
   display: grid;
-  grid-template-columns: minmax(800px, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   align-items: stretch;
+  gap: 12px;
 }
 
-/* Listekort: bred rad, ikke knust vertikal kolonne */
+/* Alle kort må aldri bli bredere enn container */
+.ui85Card,
+.ui85ListCard,
+.ui85MuseumCard,
+.ui85StandingCard,
+.ui85HorizontalCard {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Listekort:
+   Lavere, strammere og full bredde.
+   Bruk minmax(0, ...) for at radene holder seg innenfor skjerm.
+*/
 .ui85ListCard {
   width: 100%;
-  min-width: 800px;
+  min-width: 0;
+  max-width: 100%;
   display: grid !important;
   grid-template-columns:
-    150px
-    minmax(280px, 1.1fr)
-    minmax(260px, 0.9fr)
-    minmax(240px, 0.8fr)
-    128px
-    150px;
-  align-items: start;
-  column-gap: 18px;
+    132px
+    minmax(250px, 1.1fr)
+    minmax(230px, 0.9fr)
+    minmax(230px, 0.9fr)
+    124px
+    144px;
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 8px;
+  min-height: 118px;
+  padding: 12px 14px !important;
 }
 
-/* Hindre at liste-tittel brytes ord/bokstav for ord */
-.ui85ListCard h2,
-.cardListInfo h2 {
+/* Liste: bildeområdet skal være kompakt */
+.cardListMedia {
+  min-width: 0;
+  align-self: center;
+}
+
+.cardListMedia > * {
+  max-width: 118px;
+  max-height: 92px;
+}
+
+/* Liste: info må ikke bryte i smal vertikal kolonne */
+.cardListInfo {
+  min-width: 0;
+  align-self: center;
+}
+
+.cardListInfo h2,
+.ui85ListCard h2 {
   max-width: none;
+  margin: 0 0 7px;
   white-space: normal;
   word-break: normal;
   overflow-wrap: normal;
-  line-height: 1.15;
+  line-height: 1.1;
+  font-size: clamp(18px, 1.2vw, 22px);
 }
 
-/* Listespesifikasjoner må bruke bredde, ikke smal kolonne */
-.cardListInfo,
+/* Liste: mindre luft i spesifikasjoner */
 .cardListSpecs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+  gap: 5px 12px;
   min-width: 0;
 }
 
-.cardListSpecs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(110px, 1fr));
-  gap: 8px 14px;
+.cardListSpecs > div {
+  min-width: 0;
+  padding: 0 0 4px;
+}
+
+/* Liste: metadata skal ikke lage smal lang kolonne */
+.cardMeta {
+  max-width: 100%;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Segmentfelt i liste skal ligge som kompakt infoboks */
+.ui85ListCard .cardDynamicPanel,
+.cardListSegment,
+.cardListSummary {
+  min-width: 0;
+}
+
+/* Handlingsknapper i liste: kompakt 2x2-ish layout */
+.cardListActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+.cardListActions button,
+.cardListActions a {
+  min-height: 34px;
+  padding: 0 13px;
+  white-space: nowrap;
+}
+
+/* Hjerte/Stjerne/Auksjon/Nettbutikk:
+   Kompakt og symmetrisk med prisboksen.
+*/
+.cardListBadges {
+  align-self: center;
+  min-width: 0;
+  width: 124px;
+  max-width: 124px;
+}
+
+/* DynamicActionPanel wrapper */
+.cardListBadges > * {
+  display: grid !important;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  width: 100%;
+}
+
+/* Statusknapper/bokser inni statuspanelet */
+.cardListBadges button,
+.cardListBadges div,
+.cardListBadges article {
+  min-height: 26px;
+}
+
+/* De faktiske små statusboksene må være lave */
+.cardListBadges :where(button, a, div) {
+  border-radius: 9px;
+}
+
+/* Prisfelt: samme totalhøyde som statuskolonnen */
+.cardListPrice {
+  align-self: center;
+  min-width: 0;
+  width: 144px;
+  max-width: 144px;
+}
+
+.cardListPrice > * {
+  width: 100%;
+  min-height: 120px;
+  max-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Museum:
+   Én bred rad, men ikke bredere enn skjermen.
+*/
+.ui85MuseumCard {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  display: grid !important;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(360px, 1.15fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.cardMuseumLeft,
+.cardMuseumRight {
+  min-width: 0;
+}
+
+/* Museum bilde skal skalere, ikke presse raden bredere */
+.cardMuseumLeft > * {
+  max-width: 100%;
+}
+
+/* Desktop under ca. 1500px:
+   Liste må redusere kolonner før den lager overflow.
+*/
+@media (max-width: 1500px) {
+  .ui85ListCard {
+    grid-template-columns:
+      120px
+      minmax(230px, 1fr)
+      minmax(220px, 1fr)
+      124px
+      144px;
+  }
+}
+
+/* Smal desktop/tablet:
+   Legg handlinger på neste internrad, ikke utenfor skjermen.
+*/
+@media (max-width: 1250px) {
+  .ui85ListCard {
+    grid-template-columns:
+      118px
+      minmax(240px, 1fr)
+      minmax(240px, 1fr)
+      124px;
+  }
+
+  .cardListPrice {
+    width: 124px;
+    max-width: 124px;
+  }
+
+  .cardListPrice > * {
+    min-height: 108px;
+    max-height: 108px;
+  }
 }
 
 /* Tablet */
-@media (max-width: 1350px) {
-  .catalogGrid_horizontal {
-    grid-template-columns: 1fr !important;
-  }
-
-  .ui85ListCard {
-    grid-template-columns:
-      140px
-      minmax(240px, 1fr)
-      minmax(220px, 1fr)
-      minmax(220px, 1fr);
-  }
-}
-
-/* Smal tablet */
 @media (max-width: 1100px) {
-  .catalogGrid_standing {
-    grid-template-columns: repeat(2, minmax(300px, 1fr)) !important;
-  }
-
-  .catalogGrid_list,
-  .catalogGrid_museum {
-    grid-template-columns: 1fr !important;
-  }
-
-  .ui85ListCard {
-    min-width: 0;
-    grid-template-columns: 150px minmax(0, 1fr);
-  }
-
   .catalogControlBar {
     align-items: flex-start;
     flex-direction: column;
@@ -2656,8 +2847,31 @@
   .cardSegmentTabs,
   .viewSelectorsContainer {
     justify-content: flex-start;
-    flex-wrap: wrap;
     width: 100%;
+  }
+
+  .ui85ListCard {
+    grid-template-columns: 130px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .cardListBadges,
+  .cardListPrice {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .cardListBadges > * {
+    grid-template-columns: repeat(4, minmax(72px, 1fr));
+  }
+
+  .cardListPrice > * {
+    min-height: 86px;
+    max-height: none;
+  }
+
+  .ui85MuseumCard {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2671,12 +2885,16 @@
   }
 
   .ui85ListCard {
-    min-width: 0;
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .cardListSpecs {
     grid-template-columns: 1fr;
+  }
+
+  .cardListBadges > * {
+    grid-template-columns: repeat(2, minmax(72px, 1fr));
   }
 }
 
