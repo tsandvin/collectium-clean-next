@@ -1,16 +1,16 @@
-﻿/**
+/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift: Periode 8.6 Rad 1 Noder API
- * Definering / formal: Returnerer konkrete statsoverhoder/maktstruktur-noder for valgt master og type.
- * Bruksomrade: Rad 1 tidslinje i Periode 8.6.
- * Berorte sider / routes: /test/periodefilter, /katalog, /relasjon/[type]/[slug]
- * Berorte DB-brytere / feature_keys: period86.row1.nodes.view
- * Berorte API-ruter: GET /api/period86/row1/nodes
- * Berorte tabeller / views: ct_v_period86_ruler_timeline_resolved, ct_v_period_filter_options
+ * Definering / formål: Returnerer statsoverhode-/maktstruktur-noder for Periode 8.6.
+ * Bruksområde: Rad 1 nodevalg i Periode 8.6 tidslinje.
+ * Berørte sider / routes: /test/periodefilter, /katalog, /index
+ * Berørte DB-brytere / feature_keys: period86.row1.nodes.view
+ * Berørte API-ruter: GET /api/period86/row1/nodes
+ * Berørte tabeller / views: ct_v_period86_row1_statsoverhode_nodes, ct_v_period_filter_options
  * Dataretning: Neon -> API -> UI
  * Logging: log_category: period86, log_action: row1.nodes.view
- * Versjon: CT-PERIOD86-API-0005 / CHANGE-2026-06-20-0002
+ * Versjon: CT-PERIOD86-API-ROW1-0007 / CHANGE-2026-06-20-0002
  */
 
 import { jsonError, jsonOk, period86Query, toPositiveInt } from "@/lib/period86/period86Db";
@@ -20,138 +20,101 @@ export const dynamic = "force-dynamic";
 type NodeRow = {
   node_key: string;
   label_no: string;
-  title_no: string | null;
   start_year: number | null;
   end_year: number | null;
-  from_year?: number | null;
-  to_year?: number | null;
-  year_label?: string | null;
-  authority_role_no?: string | null;
-  historical_period_label_no?: string | null;
-  nickname_raw_no?: string | null;
   relation_href: string | null;
-  country_scope: string | null;
-  region_scope: string | null;
-  object_count: string;
-  truth_status?: string | null;
-  source_view?: string | null;
+  count: string;
+  source: string;
 };
+
+function toYear(value: string | null, fallback: number): number {
+  const parsed = Number.parseInt(value || "", 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeType(value: string | null): string {
+  return (value || "statsoverhode")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/-/g, "_");
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const master = url.searchParams.get("master") || "no";
-  const type = url.searchParams.get("type") || "king";
-  const limit = toPositiveInt(url.searchParams.get("limit"), 50, 200);
+
+  const type = normalizeType(url.searchParams.get("type") || url.searchParams.get("context"));
+  const fromYear = toYear(url.searchParams.get("from"), 1507);
+  const toYearParam = toYear(url.searchParams.get("to"), new Date().getFullYear());
+  const minYear = Math.min(fromYear, toYearParam);
+  const maxYear = Math.max(fromYear, toYearParam);
+  const limit = toPositiveInt(url.searchParams.get("limit"), 200, 500);
   const offset = Math.max(0, Number.parseInt(url.searchParams.get("offset") || "0", 10) || 0);
 
   try {
-    if (type === "union") {
+    if (type === "union" || type === "unioner") {
       const rows = await period86Query<NodeRow>(`
         select
           period_slug as node_key,
           display_name_no as label_no,
-          period_type_label_no as title_no,
           start_year,
-          end_year,
-          start_year as from_year,
-          end_year as to_year,
-          concat(start_year::text, '-', coalesce(end_year::text, '')) as year_label,
-          null::text as authority_role_no,
-          null::text as historical_period_label_no,
-          null::text as nickname_raw_no,
+          coalesce(end_year, $2::integer) as end_year,
           relation_href,
-          null::text as country_scope,
-          null::text as region_scope,
-          0::text as object_count,
-          'period_filter_options'::text as truth_status,
-          'ct_v_period_filter_options'::text as source_view
+          0::text as count,
+          'ct_v_period_filter_options'::text as source
         from ct_v_period_filter_options
-        where period_type_key = 'union_period'
-        order by start_year nulls last, display_name_no
-        limit $1 offset $2;
-      `, [limit, offset]);
+        where start_year <= $2
+          and coalesce(end_year, $2) >= $1
+          and (
+            period_type_key ilike '%union%'
+            or period_type_label_no ilike '%union%'
+            or display_name_no ilike '%union%'
+          )
+        order by start_year nulls last, coalesce(end_year, $2), display_name_no
+        limit $3 offset $4;
+      `, [minYear, maxYear, limit, offset]);
 
-      return jsonOk({ ok: true, master, type, nodes: rows, limit, offset });
+      return jsonOk({ ok: true, row: "row1", type, nodes: rows, limit, offset, from: minYear, to: maxYear });
     }
+
+    const broadTypes = new Set([
+      "alle",
+      "statsoverhode",
+      "statsoverhoder",
+      "maktstruktur",
+      "herskere",
+      "hersker",
+      "konge",
+      "konger",
+      "regent",
+      "regenter"
+    ]);
 
     const rows = await period86Query<NodeRow>(`
       select
-        node_key,
+        slug as node_key,
         label_no,
-        authority_role_no as title_no,
-        from_year as start_year,
-        to_year as end_year,
-        from_year,
-        to_year,
-        year_label,
-        authority_role_no,
-        historical_period_label_no,
-        nickname_raw_no,
+        start_year,
+        coalesce(end_year, $2::integer) as end_year,
         relation_href,
-        null::text as country_scope,
-        'ct_sn'::text as region_scope,
-        0::text as object_count,
-        truth_status,
-        source_view
-      from ct_v_period86_ruler_timeline_resolved
-      where
-        (
-          $2 = 'king'
-          and (
-            lower(coalesce(authority_role_no, '')) like '%konge%'
-            or lower(coalesce(authority_role_no, '')) like '%king%'
-          )
+        0::text as count,
+        'ct_v_period86_row1_statsoverhode_nodes'::text as source
+      from ct_v_period86_row1_statsoverhode_nodes
+      where start_year <= $2
+        and coalesce(end_year, $2) >= $1
+        and (
+          $5::boolean = true
+          or type_key = $6
+          or group_key = $6
+          or authority_role_no ilike '%' || $6 || '%'
+          or label_no ilike '%' || $6 || '%'
         )
-        or (
-          $2 = 'regent'
-          and lower(coalesce(authority_role_no, '')) like '%regent%'
-        )
-        or (
-          $2 = 'local_ruler'
-          and (
-            lower(coalesce(authority_role_no, '')) like '%lokal%'
-            or lower(coalesce(authority_role_no, '')) like '%smakonge%'
-            or lower(coalesce(authority_role_no, '')) like '%ladejarl%'
-            or lower(coalesce(authority_role_no, '')) like '%jarl%'
-            or lower(coalesce(authority_role_no, '')) like '%motkonge%'
-          )
-        )
-        or (
-          $2 = 'christian_ruler'
-          and (
-            lower(coalesce(label_no, '')) like '%olav%'
-            or lower(coalesce(nickname_raw_no, '')) like '%hellig%'
-            or lower(coalesce(nickname_raw_no, '')) like '%krist%'
-          )
-        )
-        or (
-          $2 not in ('king','regent','local_ruler','christian_ruler')
-          and lower(coalesce(authority_role_no, '')) = lower($2)
-        )
-      order by
-        from_year nulls last,
-        to_year nulls last,
-        label_no
-      limit $2 offset $3;
-    `, [type, limit, offset]);
+      order by start_year nulls last, coalesce(end_year, $2), label_no
+      limit $3 offset $4;
+    `, [minYear, maxYear, limit, offset, broadTypes.has(type), type]);
 
-    return jsonOk({ ok: true, master, type, nodes: rows, limit, offset });
+    return jsonOk({ ok: true, row: "row1", type, nodes: rows, limit, offset, from: minYear, to: maxYear });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : typeof error === "string"
-          ? error
-          : JSON.stringify(error);
-
-    return jsonError(
-      `Could not load Period 8.6 row 1 nodes. ${message}`,
-      500,
-      error
-    );
+    return jsonError("Kunne ikke hente Periode 8.6 Rad 1-noder.", 500, error);
   }
 }
-
-
-
-
