@@ -1,4 +1,4 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
@@ -1410,3 +1410,226 @@
     white-space: normal;
   }
 }
+
+/* COLLECTIUM CATALOG86 SAFE SYMMETRY FIX START */
+/*
+ * CHANGE: Catalog86 safe symmetry fix
+ *
+ * Formaal:
+ * - Retter kun kjente Catalog86-kortklasser.
+ * - Unngaar brede globale selectors.
+ * - Beholder data, API, DB og React-logikk urort.
+ * - Hindrer bokstavvis tekstbryting i Historie / relasjonsfelt.
+ */
+
+/* Felles kortkontroll */
+.ui85HorizontalCard,
+.ui85StandingCard,
+.ui85ListCard,
+.ui85MuseumCard,
+.ui85Card,
+.objectCard {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.ui85HorizontalCard *,
+.ui85StandingCard *,
+.ui85ListCard *,
+.ui85MuseumCard *,
+.ui85Card *,
+.objectCard * {
+  box-sizing: border-box;
+}
+
+/* Felles soner */
+.imageArea,
+.identityArea,
+.metaGrid,
+.specGrid,
+.relationArea,
+.relationGrid,
+.relationChips,
+.marketArea,
+.valueBox,
+.actionArea {
+  min-width: 0;
+}
+
+/* Tekst skal ikke brytes bokstavvis */
+.identityArea,
+.identityArea *,
+.metaGrid,
+.metaGrid *,
+.specGrid,
+.specGrid *,
+.relationArea,
+.relationArea *,
+.relationGrid,
+.relationGrid *,
+.relationChips,
+.relationChips *,
+.marketArea,
+.marketArea *,
+.valueBox,
+.valueBox * {
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+/* Historie / relasjon skal aldri kollapse */
+.relationArea,
+.relationGrid,
+.relationChips {
+  width: 100%;
+  min-width: min(100%, 220px);
+}
+
+/* Marked/status skal ha rolig minimumsbredde */
+.marketArea,
+.valueBox {
+  min-width: min(100%, 160px);
+}
+
+/* Handlinger skal være jevne */
+.actionArea {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.actionArea button,
+.actionArea a,
+.openButton,
+.softButton,
+.activeButton {
+  width: 100%;
+  min-height: 42px;
+}
+
+/* Horisontal: bilde | innhold | historie/marked */
+.ui85HorizontalCard {
+  display: grid;
+  grid-template-columns: minmax(150px, 185px) minmax(260px, 1fr) minmax(240px, 340px);
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* Staaende: alt nedover, historie full bredde */
+.ui85StandingCard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.ui85StandingCard .relationArea,
+.ui85StandingCard .relationGrid,
+.ui85StandingCard .relationChips {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Liste: kompakt rad med nok plass til historie og marked */
+.ui85ListCard {
+  display: grid;
+  grid-template-columns: minmax(72px, 112px) minmax(320px, 1fr) minmax(220px, 310px) minmax(150px, 190px) minmax(220px, 320px);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.ui85ListCard .relationArea,
+.ui85ListCard .relationGrid,
+.ui85ListCard .relationChips {
+  min-width: 220px;
+}
+
+/* Museum: bilde venstre, innhold hoeyre */
+.ui85MuseumCard {
+  display: grid;
+  grid-template-columns: minmax(86px, 124px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.ui85MuseumCard .relationArea,
+.ui85MuseumCard .relationGrid,
+.ui85MuseumCard .relationChips {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Hvis view ligger paa container, ikke paa kortklasse */
+:global([data-view="horizontal"]) .ui85Card,
+:global([data-ct-catalog-view="horizontal"]) .ui85Card,
+:global([data-catalog-view="horizontal"]) .ui85Card {
+  display: grid;
+  grid-template-columns: minmax(150px, 185px) minmax(260px, 1fr) minmax(240px, 340px);
+  gap: 14px;
+}
+
+:global([data-view="standing"]) .ui85Card,
+:global([data-ct-catalog-view="standing"]) .ui85Card,
+:global([data-catalog-view="standing"]) .ui85Card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+:global([data-view="list"]) .ui85Card,
+:global([data-ct-catalog-view="list"]) .ui85Card,
+:global([data-catalog-view="list"]) .ui85Card {
+  display: grid;
+  grid-template-columns: minmax(72px, 112px) minmax(320px, 1fr) minmax(220px, 310px) minmax(150px, 190px) minmax(220px, 320px);
+  gap: 14px;
+}
+
+:global([data-view="museum"]) .ui85Card,
+:global([data-ct-catalog-view="museum"]) .ui85Card,
+:global([data-catalog-view="museum"]) .ui85Card {
+  display: grid;
+  grid-template-columns: minmax(86px, 124px) minmax(0, 1fr);
+  gap: 14px;
+}
+
+/* Tablet / fold */
+@media (max-width: 1100px) {
+  .ui85HorizontalCard,
+  .ui85ListCard,
+  .ui85MuseumCard,
+  .ui85Card {
+    grid-template-columns: minmax(96px, 150px) minmax(0, 1fr);
+  }
+
+  .relationArea,
+  .relationGrid,
+  .relationChips {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* Mobil */
+@media (max-width: 719px) {
+  .ui85HorizontalCard,
+  .ui85StandingCard,
+  .ui85ListCard,
+  .ui85MuseumCard,
+  .ui85Card,
+  .objectCard {
+    grid-template-columns: 1fr;
+  }
+
+  .relationArea,
+  .relationGrid,
+  .relationChips,
+  .marketArea,
+  .valueBox,
+  .actionArea {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* COLLECTIUM CATALOG86 SAFE SYMMETRY FIX END */
