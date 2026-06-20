@@ -658,3 +658,587 @@
     flex: 0 0 auto;
   }
 }
+
+/* COLLECTIUM KATALOG 8.6 UI85 VIEW CARDS */
+
+.catalogPage {
+  --k86-bg: var(--ct-card-bg, #fffdf7);
+  --k86-panel: var(--ct-card-bg, #fffdf7);
+  --k86-soft: color-mix(in srgb, var(--ct-card-bg, #fffdf7) 88%, #eef5ed);
+  --k86-line: var(--ct-border, #dacdaf);
+  --k86-green: var(--ct-accent, #176b4c);
+  --k86-text: var(--ct-text, #173d2f);
+  --k86-muted: color-mix(in srgb, var(--ct-text, #173d2f) 52%, transparent);
+}
+
+.results {
+  display: grid;
+  gap: 14px;
+  align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.results[data-view="horizontal"] {
+  grid-template-columns: repeat(auto-fit, minmax(min(620px, 100%), 1fr));
+}
+
+.results[data-view="standing"] {
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+.results[data-view="list"] {
+  grid-template-columns: 1fr;
+}
+
+.results[data-view="museum"] {
+  grid-template-columns: 1fr;
+}
+
+.ui85Card {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--k86-text);
+  border: 1px solid var(--k86-line);
+  border-radius: var(--ct-radius-theme, 14px);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--k86-panel) 98%, #fff), color-mix(in srgb, var(--k86-panel) 92%, #eef5ed));
+  box-shadow: var(--ct-shadow-soft, 0 14px 34px rgba(50, 39, 20, 0.08));
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  will-change: transform, box-shadow;
+}
+
+.ui85Card:hover {
+  box-shadow: var(--pt-hover-shadow, 0 18px 42px rgba(39, 62, 47, 0.14));
+  transform: translateY(-1px);
+}
+
+.ui85Card::after {
+  content: "Collectium";
+  position: absolute;
+  right: 18px;
+  bottom: 9px;
+  font-size: 8px;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--k86-muted) 70%, transparent);
+  pointer-events: none;
+}
+
+.ui85HorizontalCard {
+  display: grid;
+  grid-template-columns: minmax(155px, 210px) minmax(250px, 1.05fr) minmax(260px, 1fr) minmax(150px, 0.48fr);
+  grid-template-areas:
+    "image identity relation market"
+    "image actions actions market";
+  gap: 14px;
+  padding: 14px 14px 22px;
+}
+
+.ui85StandingCard {
+  display: grid;
+  grid-template-columns: 1fr minmax(136px, 0.43fr);
+  grid-template-areas:
+    "image image"
+    "identity identity"
+    "relation market"
+    "actions actions";
+  gap: 10px;
+  padding: 14px 14px 24px;
+}
+
+.ui85ListCard {
+  display: grid;
+  grid-template-columns: minmax(110px, 210px) minmax(280px, 1fr) minmax(260px, 0.8fr) minmax(135px, 0.36fr) minmax(150px, 0.42fr);
+  grid-template-areas: "image identity relation market actions";
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px 18px;
+}
+
+.ui85MuseumCard {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.75fr) minmax(420px, 1fr);
+  grid-template-areas:
+    "image identity"
+    "image relation"
+    "image actions";
+  gap: 14px 18px;
+  padding: 14px 14px 26px;
+}
+
+.ui85MuseumCard .marketArea {
+  display: none;
+}
+
+.imageArea {
+  grid-area: image;
+  position: relative;
+  min-width: 0;
+  min-height: 126px;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--k86-line);
+  border-radius: calc(var(--ct-radius-theme, 14px) - 3px);
+  background: #fbf8ef;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ui85StandingCard .imageArea {
+  min-height: 150px;
+}
+
+.ui85ListCard .imageArea {
+  min-height: 96px;
+}
+
+.ui85MuseumCard .imageArea {
+  min-height: 310px;
+}
+
+.imageArea img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.banknotePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg, rgba(23, 107, 76, 0.055) 0 3px, transparent 3px 13px),
+    linear-gradient(180deg, #fffdf7, #f4efe3);
+}
+
+.banknotePlaceholder::after {
+  content: "";
+  position: absolute;
+  right: 9%;
+  top: 34%;
+  width: 19%;
+  height: 38%;
+  border-radius: 999px 999px 0 0;
+  background: radial-gradient(circle at 50% 18%, #efe4d1, #e2d5bd 68%, transparent 69%);
+  opacity: 0.86;
+}
+
+.banknotePlaceholder::before {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 18%;
+  bottom: 20%;
+  border-bottom: 2px solid rgba(23, 61, 47, 0.08);
+}
+
+.banknoteNumber {
+  position: absolute;
+  left: 6%;
+  top: 7%;
+  font-size: clamp(72px, 12vw, 128px);
+  line-height: 0.9;
+  font-family: Georgia, "Times New Roman", serif;
+  color: rgba(23, 61, 47, 0.13);
+}
+
+.ui85StandingCard .banknoteNumber {
+  font-size: 90px;
+}
+
+.ui85ListCard .banknoteNumber {
+  font-size: 82px;
+}
+
+.ui85MuseumCard .banknoteNumber {
+  font-size: clamp(120px, 14vw, 180px);
+}
+
+.banknoteBank {
+  position: absolute;
+  left: 8%;
+  bottom: 14%;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(23, 61, 47, 0.62);
+}
+
+.identityArea {
+  grid-area: identity;
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.cardHeaderLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--k86-muted);
+}
+
+.cardHeaderLine p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identityArea h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 1.55vw, 30px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--k86-text);
+}
+
+.ui85StandingCard .identityArea h2 {
+  font-size: clamp(20px, 2vw, 26px);
+}
+
+.ui85ListCard .identityArea h2 {
+  font-size: clamp(20px, 1.55vw, 28px);
+}
+
+.ui85MuseumCard .identityArea h2 {
+  font-size: clamp(24px, 2vw, 34px);
+}
+
+.identityArea h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.identityArea h2 a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.metaGrid div,
+.relationGrid div {
+  min-width: 0;
+  padding: 7px 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--k86-line) 64%, transparent);
+}
+
+.metaGrid span,
+.relationGrid span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--k86-green) 74%, #43564a);
+}
+
+.metaGrid strong,
+.relationGrid strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.15;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--k86-text);
+  overflow-wrap: anywhere;
+}
+
+.sourceLine {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--k86-muted) 58%, transparent);
+  font-size: 12px;
+}
+
+.relationArea {
+  grid-area: relation;
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--k86-green) 34%, var(--k86-line));
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(239, 247, 239, 0.82), rgba(251, 253, 247, 0.92));
+}
+
+.ui85ListCard .relationArea {
+  padding: 10px 12px;
+}
+
+.relationHeading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.relationHeading strong {
+  font-size: 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.relationHeading small {
+  font-size: 10px;
+  color: var(--k86-muted);
+}
+
+.relationIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--k86-green) 12%, white);
+  color: var(--k86-green);
+  font-size: 15px;
+}
+
+.relationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.ui85ListCard .relationGrid {
+  grid-template-columns: 1fr;
+}
+
+.relationChips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.relationChips a {
+  border: 1px solid color-mix(in srgb, var(--k86-green) 35%, var(--k86-line));
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  color: var(--k86-text);
+  background: color-mix(in srgb, var(--k86-green) 7%, var(--k86-panel));
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+
+.marketArea {
+  grid-area: market;
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.channelBox,
+.valueBox {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--k86-line);
+}
+
+.channelBox span {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--k86-text);
+}
+
+.channelBox strong {
+  font-size: 13px;
+}
+
+.wishlistBox {
+  background: #fde8e4;
+  border-color: #ed9c93;
+}
+
+.favoriteBox {
+  background: #fff5d6;
+  border-color: #e9c76e;
+}
+
+.auctionBox {
+  background: #e5f1fb;
+  border-color: #9dc7e8;
+}
+
+.shopBox {
+  background: #e7f4e8;
+  border-color: #99caa0;
+}
+
+.valueBox {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  min-height: 96px;
+  background: linear-gradient(180deg, #edf8ee, #f8fcf5);
+  border-color: color-mix(in srgb, var(--k86-green) 32%, var(--k86-line));
+  text-align: center;
+}
+
+.valueBox span {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--k86-green) 70%, #44584a);
+}
+
+.valueBox strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(20px, 1.6vw, 30px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.valueBox em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--k86-green) 72%, #44584a);
+}
+
+.actionArea {
+  grid-area: actions;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-content: end;
+  align-items: center;
+}
+
+.actionArea button,
+.openButton {
+  min-height: 42px;
+  border: 1px solid var(--k86-line);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: color-mix(in srgb, var(--k86-panel) 94%, white);
+  color: var(--k86-text);
+  box-shadow: 0 10px 22px rgba(35, 35, 20, 0.08);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.actionArea button:hover,
+.openButton:hover {
+  border-color: color-mix(in srgb, var(--k86-green) 45%, var(--k86-line));
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1280px) {
+  .ui85HorizontalCard {
+    grid-template-columns: minmax(150px, 190px) minmax(240px, 1fr) minmax(240px, 1fr);
+    grid-template-areas:
+      "image identity market"
+      "relation relation market"
+      "actions actions market";
+  }
+
+  .ui85ListCard {
+    grid-template-columns: minmax(100px, 160px) minmax(240px, 1fr) minmax(130px, 0.5fr);
+    grid-template-areas:
+      "image identity market"
+      "relation relation market"
+      "actions actions actions";
+  }
+}
+
+@media (max-width: 900px) {
+  .ui85HorizontalCard,
+  .ui85StandingCard,
+  .ui85ListCard,
+  .ui85MuseumCard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "image"
+      "identity"
+      "relation"
+      "market"
+      "actions";
+  }
+
+  .ui85MuseumCard .marketArea {
+    display: grid;
+  }
+
+  .ui85MuseumCard .imageArea {
+    min-height: 220px;
+  }
+
+  .metaGrid,
+  .relationGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionArea {
+    align-content: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .ui85Card {
+    border-radius: 12px;
+  }
+
+  .ui85HorizontalCard,
+  .ui85StandingCard,
+  .ui85ListCard,
+  .ui85MuseumCard {
+    padding: 10px 10px 22px;
+  }
+
+  .imageArea {
+    min-height: 150px;
+  }
+
+  .actionArea {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .actionArea button,
+  .openButton {
+    width: 100%;
+  }
+}

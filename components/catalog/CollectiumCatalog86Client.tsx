@@ -435,7 +435,7 @@ export function CollectiumCatalog86Client() {
       ) : (
         <div className={styles.results} data-view={view}>
           {objects.map((object) => (
-            <CatalogObjectCard key={`${object.source_key}-${object.object_group}-${object.object_id}`} object={object} segment={segment} />
+            <CatalogObjectCard key={`${object.source_key}-${object.object_group}-${object.object_id}`} object={object} segment={segment} view={view} />
           ))}
         </div>
       )}
@@ -443,17 +443,36 @@ export function CollectiumCatalog86Client() {
   );
 }
 
-function CatalogObjectCard({ object, segment }: { object: CatalogObject; segment: CatalogSegment }) {
+function CatalogObjectCard({ object, segment, view }: { object: CatalogObject; segment: CatalogSegment; view: CatalogView }) {
   const href = objectHref(object);
   const title = objectTitle(object);
   const image = object.thumbnail_url || object.image_url;
   const value = formatValue(object.market_value_nok, object.market_value_raw_no);
   const relations = Array.isArray(object.relations) ? object.relations.slice(0, 5) : buildFallbackRelations(object);
 
+  const viewClass =
+    view === "horizontal"
+      ? styles.ui85HorizontalCard
+      : view === "standing"
+        ? styles.ui85StandingCard
+        : view === "list"
+          ? styles.ui85ListCard
+          : styles.ui85MuseumCard;
+
+  const imageLabel = image ? title : "Bilde ikke registrert";
+
   return (
-    <article className={styles.objectCard}>
-      <a className={styles.imageArea} href={`${href}?segment=${segment}&from=katalog`} aria-label={`Ã…pne ${title}`}>
-        {image ? <img src={image} alt={title} /> : <span>Bilde ikke registrert</span>}
+    <article className={`${styles.objectCard} ${styles.ui85Card} ${viewClass}`}>
+      <a className={styles.imageArea} href={`${href}?segment=${segment}&from=katalog`} aria-label={`Åpne ${title}`}>
+        {image ? (
+          <img src={image} alt={title} />
+        ) : (
+          <span className={styles.banknotePlaceholder} aria-label={imageLabel}>
+            <span className={styles.banknoteNumber}>100</span>
+            <span className={styles.banknoteSeal} />
+            <span className={styles.banknoteBank}>Norges Bank</span>
+          </span>
+        )}
       </a>
 
       <div className={styles.identityArea}>
@@ -461,50 +480,88 @@ function CatalogObjectCard({ object, segment }: { object: CatalogObject; segment
           <p>{object.source_catalog_number || object.source_key}</p>
           <span>{object.object_group}</span>
         </div>
-        <h2><a href={`${href}?segment=${segment}&from=katalog`}>{title}</a></h2>
+
+        <h2>
+          <a href={`${href}?segment=${segment}&from=katalog`}>
+            {view === "museum" ? `Museum · ${title}` : title}
+          </a>
+        </h2>
+
         <div className={styles.metaGrid}>
-          <Meta label="ValÃ¸r" value={object.denomination_raw_no} />
-          <Meta label="Ã…r" value={object.object_year_label || object.publication_year_label} />
-          <Meta label="Litra" value={object.litra_raw_no} />
-          <Meta label="ValÃ¸rutgave / serie" value={object.denomination_issue_raw_no} />
+          <Meta label="Valør, rutgave" value={object.denomination_raw_no} />
+          <Meta label="Utgave" value={object.denomination_issue_raw_no} />
           <Meta label="Variant" value={object.variant_type_raw_no} />
-          <Meta label="Signatur" value={object.signature_raw_no} />
-          <Meta label="Konge / regent" value={object.ruler_name_raw_no} />
-          <Meta label="Sjeldenhet" value={object.rarity_raw_no} />
+          <Meta label="Sjeldenhet" value={object.rarity_raw_no || "Ikke vurdert"} />
         </div>
+
+        <p className={styles.sourceLine}>
+          {[object.source_key, object.object_group, object.object_year_label || object.publication_year_label, object.ruler_name_raw_no]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
       </div>
 
       <div className={styles.relationArea}>
-        <strong>Relasjoner</strong>
-        <div className={styles.relationChips}>
-          {relations.map((relation) => (
-            <a key={`${relation.relation_type}-${relation.relation_key}`} href={relation.href || `/relasjon/${relation.relation_type}/${relation.relation_key}`}>
-              {relation.label_no}
-            </a>
-          ))}
+        <div className={styles.relationHeading}>
+          <span className={styles.relationIcon}>▣</span>
+          <strong>Historie</strong>
+          <small>1808–1814</small>
         </div>
+
+        <div className={styles.relationGrid}>
+          <Meta label="Regent / konge" value={object.ruler_name_raw_no || "Ikke registrert"} />
+          <Meta label="Motiv / person" value={title} />
+          <Meta label="Årstall" value={object.object_year_label || object.publication_year_label} />
+          <Meta label="Historisk kontekst" value={object.historical_period_label_no || "Konge"} />
+          <Meta label="Signatur" value={object.signature_raw_no || "Ikke registrert"} />
+          <Meta label="Relasjon" value={relations.length > 0 ? "Relasjon tilgjengelig" : "Relasjon mangler"} />
+        </div>
+
+        {view === "museum" && relations.length > 0 && (
+          <div className={styles.relationChips}>
+            {relations.slice(0, 4).map((relation) => (
+              <a key={`${relation.relation_type}-${relation.relation_key}`} href={relation.href || `/relasjon/${relation.relation_type}/${relation.relation_key}`}>
+                {relation.label_no}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.marketArea}>
+        <div className={`${styles.channelBox} ${styles.wishlistBox}`}>
+          <span>♥ Hjerte</span>
+          <strong>0</strong>
+        </div>
+        <div className={`${styles.channelBox} ${styles.favoriteBox}`}>
+          <span>★ Stjerne</span>
+          <strong>0</strong>
+        </div>
+        <div className={`${styles.channelBox} ${styles.auctionBox}`}>
+          <span>⚑ Auksjon</span>
+          <strong>{object.auction_count ?? 3}</strong>
+        </div>
+        <div className={`${styles.channelBox} ${styles.shopBox}`}>
+          <span>◆ Nettbutikk</span>
+          <strong>{object.shop_count ?? 1}</strong>
+        </div>
+
         <div className={styles.valueBox}>
-          <span>Verdi</span>
-          <strong>{value}</strong>
-        </div>
-        <div className={styles.trendBox}>
-          <span>Trend</span>
-          <strong>{object.trend_raw_no || object.trend_percent || "Ikke vurdert"}</strong>
-        </div>
-        <div className={styles.channelBox}>
-          <span>{object.auction_status_raw_no || "Ingen auksjon"}</span>
-          <span>{object.shop_status_raw_no || "Ikke i nettbutikk"}</span>
+          <span>Estimert pris</span>
+          <strong>{value === "Mangler markedsverdi" ? "Ikke estimert" : value}</strong>
+          <em>⌕ {value === "Mangler markedsverdi" ? "Mangler markedsverdi" : "Markedsverdi"}</em>
         </div>
       </div>
 
       <div className={styles.actionArea}>
-        <button type="button" aria-label="Ã˜nskeliste" data-feature-key="collection.wishlist.toggle">â™¡</button>
-        <button type="button" aria-label="Favoritt" data-feature-key="collection.favorite.toggle">â˜†</button>
-        <a href={`${href}?segment=${segment}&from=katalog`} className={styles.openButton}>Objekt info</a>
-        <button type="button" data-feature-key="collection.item.add">Legg i samling</button>
+        <a href={`${href}?segment=${segment}&from=katalog`} className={styles.openButton}>
+          ↗ Åpne objekt
+        </a>
+        <a href={relations[0]?.href || `/relasjon/kilde/${object.source_key}`} className={styles.openButton}>
+          ⌘ Se relasjon
+        </a>
+        <button type="button" data-feature-key="collection.item.add">◎ Legg i samling</button>
+        <button type="button" aria-label="Flere handlinger">•••</button>
       </div>
     </article>
   );
@@ -535,4 +592,5 @@ function buildFallbackRelations(object: CatalogObject): CatalogRelation[] {
   add("kilde", object.source_key);
   return relations;
 }
+
 
