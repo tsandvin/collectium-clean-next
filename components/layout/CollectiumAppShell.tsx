@@ -531,7 +531,8 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
             </button>
           )}
         </div>
-        <nav className={styles.nav}>
+
+        <nav className={styles.nav}>
           {(["Hoved", "Bruker", "Marked", "System"] as const).map((groupName) => {
             const items = collectiumSidebarItems
               .filter((item) => item.group === groupName)
@@ -895,14 +896,26 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
             </header>
 
             <div className={styles.mobileMegaMenuGrid}>
-                        >
-                          <span>{menuItem.label}</span>
-                          <span aria-hidden="true">â€º</span>
-                        </a>
-                      ))}
-                    </div>
-                  </section>
-                ))}
+              <a href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>Index</span>
+                <span aria-hidden="true">&rsaquo;</span>
+              </a>
+              <a href="/katalog" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>Katalog</span>
+                <span aria-hidden="true">&rsaquo;</span>
+              </a>
+              <a href="/periodefilter" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>Periodefilter</span>
+                <span aria-hidden="true">&rsaquo;</span>
+              </a>
+              <a href="/min-side" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>Min side</span>
+                <span aria-hidden="true">&rsaquo;</span>
+              </a>
+              <a href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>Login</span>
+                <span aria-hidden="true">&rsaquo;</span>
+              </a>
             </div>
           </section>
         </div>
