@@ -1,4 +1,4 @@
-* {
+﻿* {
   box-sizing: border-box;
 }
 
@@ -114,11 +114,11 @@ html[data-theme="collectium"] {
   --ct-hover: rgba(20, 92, 56, 0.08);
   
   --ct-font-display: var(--font-collectium-display), Georgia, "Times New Roman", serif;
-  --ct-font-body: var(--font-historic-text), Georgia, "Times New Roman", serif;
+  --ct-font-body: var(--font-ct-body), sans-serif;
   --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-font-head: var(--ct-font-display);
+  --ct-font-head: var(--font-ct-head), sans-serif;
   --ct-font-serif: var(--ct-font-display);
-  --ct-font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-ui: var(--font-ct-body), sans-serif;
   --ct-radius-theme: 8px;
   --ct-radius: var(--ct-radius-theme);
   --ct-radius-card: var(--ct-radius-theme);
@@ -184,11 +184,11 @@ html[data-theme="samler"] {
   --ct-hover: rgba(30, 90, 154, 0.08);
   
   --ct-font-display: var(--font-samler-display), "Comfortaa", ui-sans-serif, system-ui, sans-serif;
-  --ct-font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-body: var(--font-ct-body), sans-serif;
   --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-font-head: var(--ct-font-display);
+  --ct-font-head: var(--font-ct-head), sans-serif;
   --ct-font-serif: var(--ct-font-display);
-  --ct-font-ui: var(--ct-font-body);
+  --ct-font-ui: var(--font-ct-body), sans-serif;
   --ct-radius-theme: 12px;
   --ct-radius: var(--ct-radius-theme);
   --ct-radius-card: var(--ct-radius-theme);
@@ -254,11 +254,11 @@ html[data-theme="museum"] {
   --ct-hover: rgba(185, 154, 85, 0.12);
   
   --ct-font-display: var(--font-museum-display), Georgia, "Times New Roman", serif;
-  --ct-font-body: var(--font-historic-text), Georgia, "Times New Roman", serif;
+  --ct-font-body: var(--font-ct-body), sans-serif;
   --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-font-head: var(--ct-font-display);
+  --ct-font-head: var(--font-ct-head), sans-serif;
   --ct-font-serif: var(--ct-font-display);
-  --ct-font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-ui: var(--font-ct-body), sans-serif;
   --ct-radius-theme: 4px;
   --ct-radius: var(--ct-radius-theme);
   --ct-radius-card: var(--ct-radius-theme);
@@ -324,11 +324,11 @@ html[data-theme="finans"] {
   --ct-hover: rgba(39, 167, 119, 0.12);
   
   --ct-font-display: var(--font-finance-sans), ui-sans-serif, system-ui, sans-serif;
-  --ct-font-body: var(--font-finance-sans), ui-sans-serif, system-ui, sans-serif;
+  --ct-font-body: var(--font-ct-body), sans-serif;
   --ct-font-mono: var(--font-finance-mono), SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  --ct-font-head: var(--ct-font-display);
+  --ct-font-head: var(--font-ct-head), sans-serif;
   --ct-font-serif: var(--ct-font-display);
-  --ct-font-ui: var(--ct-font-body);
+  --ct-font-ui: var(--font-ct-body), sans-serif;
   --ct-radius-theme: 2px;
   --ct-radius: var(--ct-radius-theme);
   --ct-radius-card: var(--ct-radius-theme);
@@ -2236,3 +2236,28 @@ html[data-ct-chrome="topbar-only"] .ct-start-page {
   transform: none !important;
 }
 
+/* Collectium Google Font binding */
+body {
+  font-family: var(--ct-font-body);
+  color: var(--ct-text);
+  background: var(--ct-app-bg);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--ct-font-ui);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ct-heading,
+.ct-title,
+.ct-headline {
+  font-family: var(--ct-font-head);
+}

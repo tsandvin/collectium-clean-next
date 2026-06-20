@@ -1,18 +1,23 @@
 ﻿import CollectiumTvMenuBridge from "@/components/layout/CollectiumTvMenuBridge";
 import CollectiumDesignPersistence from "@/components/layout/CollectiumDesignPersistence";
 import type { Metadata } from "next";
-import {
-  Cinzel,
-  Comfortaa,
-  Cormorant_Garamond,
-  IBM_Plex_Mono,
-  IBM_Plex_Sans,
-  Inter,
-  Libre_Baskerville,
-} from "next/font/google";
+import { Source_Sans_3, Merriweather_Sans } from "next/font/google";
 import "./globals.css";
 import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
 
+
+
+const ctBodyFont = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-ct-body",
+  display: "swap",
+});
+
+const ctHeadFont = Merriweather_Sans({
+  subsets: ["latin"],
+  variable: "--font-ct-head",
+  display: "swap",
+});
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "600", "700", "800", "900"],
@@ -81,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="nb"
-      className={fontVariables}
+      className={`${ctBodyFont.variable} ${ctHeadFont.variable} ${`${ctBodyFont.variable}`} ${ctHeadFont.variable} ${fontVariables}`}
       data-template="collectium"
       data-skin="collectium"
       data-theme="collectium"
