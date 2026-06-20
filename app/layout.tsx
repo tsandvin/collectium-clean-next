@@ -1,7 +1,7 @@
 ﻿import CollectiumTvMenuBridge from "@/components/layout/CollectiumTvMenuBridge";
 import CollectiumDesignPersistence from "@/components/layout/CollectiumDesignPersistence";
 import type { Metadata } from "next";
-import { Source_Sans_3, Merriweather_Sans } from "next/font/google";
+import { Source_Sans_3, Merriweather_Sans, Inter, Libre_Baskerville, Comfortaa, Cinzel, Cormorant_Garamond, Playfair_Display, Roboto_Mono, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import "./globals.css";
 import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
 
@@ -125,3 +125,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+
+
+
+

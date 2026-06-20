@@ -1,4 +1,4 @@
-﻿* {
+﻿:where(*, *::before, *::after) {
   box-sizing: border-box;
 }
 
@@ -2261,3 +2261,5 @@ h6,
 .ct-headline {
   font-family: var(--ct-font-head);
 }
+
+
