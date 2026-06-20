@@ -53,27 +53,37 @@ const mobileBottomItems = [
     key: "min-side",
     label: "Min side",
     href: "/min-side",
+    icon: iconMap["account"],
+    requiresAuth: false,
   },
   {
     key: "min-samling",
     label: "Min samling",
     href: "/samling",
+    icon: iconMap["account"],
+    requiresAuth: false,
   },
   {
     key: "menu",
     label: "Meny",
     href: undefined,
+    icon: Menu,
     elevated: true,
+    requiresAuth: false,
   },
   {
     key: "katalog",
     label: "Katalog",
     href: "/katalog",
+    icon: iconMap["catalog"],
+    requiresAuth: false,
   },
   {
     key: "auksjon",
     label: "Auksjon",
     href: "/auksjon",
+    icon: iconMap["auction"],
+    requiresAuth: false,
   },
 ];
 
@@ -386,10 +396,10 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
     if (!item.href) return false;
     if (item.key === "menu") return isMobileMenuOpen;
     if (item.key === "index") return pathname === "/";
-    if (item.key === "catalog") return pathname.startsWith("/katalog");
+    if (item.key === "catalog" || item.key === "katalog") return pathname.startsWith("/katalog");
     if (item.key === "period-filter") return pathname === "/test/periodefilter" || pathname === "/periodefilter";
     if (item.key === "period-search") return pathname.startsWith("/test/period-timeline");
-    if (item.key === "account") return pathname.startsWith("/min-side");
+    if (item.key === "account" || item.key === "min-side") return pathname.startsWith("/min-side");
     if (item.key === "admin-neon") return pathname.startsWith("/admin/neon");
     if (item.key === "admin") return pathname === "/admin" || (pathname.startsWith("/admin") && !pathname.startsWith("/admin/neon"));
     return pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -441,7 +451,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
           {(["Hoved", "Bruker", "Marked", "System"] as const).map((groupName) => {
             const items = collectiumSidebarItems
               .filter((item) => item.group === groupName)
-              .filter((item) => canShowMenuItem(item, session));
+              .filter((item) => canShowMenuItem(item as { requiresAuth?: boolean; requiresAdmin?: boolean }, session));
             return (
               <div key={groupName} className={styles.navGroup}>
                 <div className={styles.navGroupHeader}>{groupName}</div>
@@ -774,7 +784,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
 
       <nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
         {mobileBottomItems
-          .filter((item) => canShowMenuItem(item, session))
+          .filter((item) => canShowMenuItem(item as { requiresAuth?: boolean; requiresAdmin?: boolean }, session))
           .map((item) => {
             const IconComponent = item.icon;
             const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
@@ -821,6 +831,10 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
+
+
+
 
 
 
