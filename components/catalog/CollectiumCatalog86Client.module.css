@@ -1411,18 +1411,70 @@
   }
 }
 
-/* COLLECTIUM CATALOG86 SAFE SYMMETRY FIX START */
+/* COLLECTIUM CATALOG86 COMPACT VIEW FIX START */
 /*
- * CHANGE: Catalog86 safe symmetry fix
+ * CHANGE: Compact Catalog86 view layout
  *
  * Formaal:
- * - Retter kun kjente Catalog86-kortklasser.
- * - Unngaar brede globale selectors.
- * - Beholder data, API, DB og React-logikk urort.
- * - Hindrer bokstavvis tekstbryting i Historie / relasjonsfelt.
+ * - Horisontal, Liste og Museum skal ligge ett kort per rad.
+ * - Staaende skal ligge to kort per rad paa desktop.
+ * - Reduserer ekstra luft, hoyde, padding og gap.
+ * - Retter bryterstorrelse og feltstorrelse uten aa endre data/API/DB.
+ *
+ * Dataregel:
+ * - Kortene viser fortsatt API-data.
+ * - Objektidentitet er fortsatt source_key + object_group + object_id.
  */
 
-/* Felles kortkontroll */
+/* ------------------------------------------------------------
+   1. Resultat-grid: riktig antall kort per rad
+------------------------------------------------------------ */
+
+.results {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+}
+
+/* Horisontal, Liste og Museum = ett kort per rad */
+:global([data-view="horizontal"]) .results,
+:global([data-ct-catalog-view="horizontal"]) .results,
+:global([data-catalog-view="horizontal"]) .results,
+:global([data-view="list"]) .results,
+:global([data-ct-catalog-view="list"]) .results,
+:global([data-catalog-view="list"]) .results,
+:global([data-view="museum"]) .results,
+:global([data-ct-catalog-view="museum"]) .results,
+:global([data-catalog-view="museum"]) .results {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Staaende = to kort per rad paa desktop */
+:global([data-view="standing"]) .results,
+:global([data-ct-catalog-view="standing"]) .results,
+:global([data-catalog-view="standing"]) .results {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Hvis view ligger paa samme container/side uten data-view global */
+.resultsHorizontal,
+.resultsList,
+.resultsMuseum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.resultsStanding {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------
+   2. Felles kompakt kortkontroll
+------------------------------------------------------------ */
+
 .ui85HorizontalCard,
 .ui85StandingCard,
 .ui85ListCard,
@@ -1431,6 +1483,10 @@
 .objectCard {
   min-width: 0;
   box-sizing: border-box;
+  padding: 10px 10px 9px;
+  gap: 10px;
+  border-radius: 10px;
+  align-items: stretch;
 }
 
 .ui85HorizontalCard *,
@@ -1442,7 +1498,6 @@
   box-sizing: border-box;
 }
 
-/* Felles soner */
 .imageArea,
 .identityArea,
 .metaGrid,
@@ -1452,51 +1507,373 @@
 .relationChips,
 .marketArea,
 .valueBox,
-.actionArea {
+.actionArea,
+.cardHeaderLine,
+.resultMetaLine,
+.resultTitleRow {
   min-width: 0;
 }
 
-/* Tekst skal ikke brytes bokstavvis */
-.identityArea,
-.identityArea *,
+/* ------------------------------------------------------------
+   3. Horisontal: ett kompakt kort per rad
+   Bilde | info/fakta/historie | status/marked
+------------------------------------------------------------ */
+
+.ui85HorizontalCard {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr) minmax(132px, 165px);
+  grid-template-areas:
+    "image identity state"
+    "image meta state"
+    "history history market"
+    "actions actions actions";
+  column-gap: 10px;
+  row-gap: 8px;
+}
+
+.ui85HorizontalCard .imageArea {
+  grid-area: image;
+}
+
+.ui85HorizontalCard .identityArea {
+  grid-area: identity;
+}
+
+.ui85HorizontalCard .metaGrid,
+.ui85HorizontalCard .specGrid {
+  grid-area: meta;
+}
+
+.ui85HorizontalCard .relationArea,
+.ui85HorizontalCard .relationGrid,
+.ui85HorizontalCard .relationChips {
+  grid-area: history;
+}
+
+.ui85HorizontalCard .marketArea,
+.ui85HorizontalCard .valueBox {
+  grid-area: market;
+}
+
+.ui85HorizontalCard .actionArea {
+  grid-area: actions;
+}
+
+/* ------------------------------------------------------------
+   4. Liste: ett kort per rad, lavere og tettere
+------------------------------------------------------------ */
+
+.ui85ListCard {
+  display: grid;
+  grid-template-columns: minmax(82px, 116px) minmax(250px, 1fr) minmax(210px, 280px) minmax(128px, 155px);
+  grid-template-areas:
+    "image identity history state"
+    "image meta history market"
+    "image actions actions actions";
+  column-gap: 10px;
+  row-gap: 7px;
+  padding: 9px 10px;
+}
+
+.ui85ListCard .imageArea {
+  grid-area: image;
+}
+
+.ui85ListCard .identityArea {
+  grid-area: identity;
+}
+
+.ui85ListCard .metaGrid,
+.ui85ListCard .specGrid {
+  grid-area: meta;
+}
+
+.ui85ListCard .relationArea,
+.ui85ListCard .relationGrid,
+.ui85ListCard .relationChips {
+  grid-area: history;
+}
+
+.ui85ListCard .marketArea,
+.ui85ListCard .valueBox {
+  grid-area: market;
+}
+
+.ui85ListCard .actionArea {
+  grid-area: actions;
+}
+
+/* ------------------------------------------------------------
+   5. Museum: ett kort per rad, men ikke stort/luftig
+------------------------------------------------------------ */
+
+.ui85MuseumCard {
+  display: grid;
+  grid-template-columns: minmax(220px, 340px) minmax(0, 1fr);
+  grid-template-areas:
+    "image identity"
+    "image history"
+    "image actions";
+  column-gap: 12px;
+  row-gap: 8px;
+  padding: 10px;
+}
+
+.ui85MuseumCard .imageArea {
+  grid-area: image;
+}
+
+.ui85MuseumCard .identityArea {
+  grid-area: identity;
+}
+
+.ui85MuseumCard .relationArea,
+.ui85MuseumCard .relationGrid,
+.ui85MuseumCard .relationChips {
+  grid-area: history;
+}
+
+.ui85MuseumCard .actionArea {
+  grid-area: actions;
+}
+
+/* ------------------------------------------------------------
+   6. Staaende: to kort per rad, kompakte kort
+------------------------------------------------------------ */
+
+.ui85StandingCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(126px, 148px);
+  grid-template-areas:
+    "image image"
+    "identity identity"
+    "meta meta"
+    "history state"
+    "actions actions";
+  column-gap: 9px;
+  row-gap: 8px;
+  padding: 10px;
+}
+
+.ui85StandingCard .imageArea {
+  grid-area: image;
+}
+
+.ui85StandingCard .identityArea {
+  grid-area: identity;
+}
+
+.ui85StandingCard .metaGrid,
+.ui85StandingCard .specGrid {
+  grid-area: meta;
+}
+
+.ui85StandingCard .relationArea,
+.ui85StandingCard .relationGrid,
+.ui85StandingCard .relationChips {
+  grid-area: history;
+}
+
+.ui85StandingCard .marketArea,
+.ui85StandingCard .valueBox {
+  grid-area: state;
+}
+
+.ui85StandingCard .actionArea {
+  grid-area: actions;
+}
+
+/* ------------------------------------------------------------
+   7. Bildehoyder: mindre luft
+------------------------------------------------------------ */
+
+.imageArea {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.ui85HorizontalCard .imageArea {
+  min-height: 118px;
+  max-height: 150px;
+}
+
+.ui85ListCard .imageArea {
+  min-height: 86px;
+  max-height: 112px;
+}
+
+.ui85MuseumCard .imageArea {
+  min-height: 150px;
+  max-height: 205px;
+}
+
+.ui85StandingCard .imageArea {
+  min-height: 132px;
+  max-height: 174px;
+}
+
+.imageArea img,
+.imageArea svg,
+.imageArea canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* ------------------------------------------------------------
+   8. Kompakt tekst, felt og metadata
+------------------------------------------------------------ */
+
+.identityArea {
+  margin: 0;
+}
+
+.identityArea h1,
+.identityArea h2,
+.identityArea h3,
+.resultTitleRow,
+.resultTitleRow h2,
+.resultTitleRow h3 {
+  margin: 0 0 5px;
+  line-height: 1.08;
+  font-size: clamp(18px, 1.25vw, 25px);
+}
+
+.ui85ListCard .identityArea h1,
+.ui85ListCard .identityArea h2,
+.ui85ListCard .identityArea h3,
+.ui85ListCard .resultTitleRow,
+.ui85ListCard .resultTitleRow h2,
+.ui85ListCard .resultTitleRow h3 {
+  font-size: clamp(17px, 1.1vw, 22px);
+}
+
 .metaGrid,
-.metaGrid *,
-.specGrid,
-.specGrid *,
+.specGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 10px;
+  row-gap: 5px;
+}
+
+.metaGrid > *,
+.specGrid > * {
+  min-width: 0;
+  padding-block: 0;
+  margin: 0;
+}
+
+.resultMetaLine {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 11px;
+  opacity: 0.72;
+}
+
+/* ------------------------------------------------------------
+   9. Historie/relasjon: kompakt, ikke bokstavbrutt
+------------------------------------------------------------ */
+
 .relationArea,
-.relationArea *,
 .relationGrid,
-.relationGrid *,
-.relationChips,
-.relationChips *,
-.marketArea,
-.marketArea *,
-.valueBox,
-.valueBox * {
+.relationChips {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  border-radius: 8px;
+  line-height: 1.18;
   word-break: normal;
   overflow-wrap: break-word;
   hyphens: none;
 }
 
-/* Historie / relasjon skal aldri kollapse */
-.relationArea,
-.relationGrid,
-.relationChips {
-  width: 100%;
-  min-width: min(100%, 220px);
+.relationArea *,
+.relationGrid *,
+.relationChips * {
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
 }
 
-/* Marked/status skal ha rolig minimumsbredde */
+.ui85HorizontalCard .relationArea,
+.ui85HorizontalCard .relationGrid,
+.ui85HorizontalCard .relationChips {
+  min-height: 92px;
+}
+
+.ui85ListCard .relationArea,
+.ui85ListCard .relationGrid,
+.ui85ListCard .relationChips {
+  min-height: 74px;
+}
+
+.ui85MuseumCard .relationArea,
+.ui85MuseumCard .relationGrid,
+.ui85MuseumCard .relationChips {
+  min-height: 96px;
+}
+
+.ui85StandingCard .relationArea,
+.ui85StandingCard .relationGrid,
+.ui85StandingCard .relationChips {
+  min-height: 178px;
+}
+
+/* ------------------------------------------------------------
+   10. Status, marked og verdi: lavere og strammere
+------------------------------------------------------------ */
+
 .marketArea,
 .valueBox {
-  min-width: min(100%, 160px);
+  min-width: 0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  min-height: 72px;
+  line-height: 1.12;
 }
 
-/* Handlinger skal være jevne */
-.actionArea {
+.ui85HorizontalCard .marketArea,
+.ui85HorizontalCard .valueBox,
+.ui85ListCard .marketArea,
+.ui85ListCard .valueBox {
+  min-height: 68px;
+}
+
+.ui85StandingCard .marketArea,
+.ui85StandingCard .valueBox {
+  min-height: 92px;
+}
+
+/* Treffer/statuspiller */
+.statusPanel,
+.statePanel,
+.userStatePanel,
+.userStateList,
+.objectStateList {
   display: grid;
-  gap: 10px;
-  align-content: start;
+  gap: 6px;
+}
+
+.statusPanel > *,
+.statePanel > *,
+.userStatePanel > *,
+.userStateList > *,
+.objectStateList > * {
+  min-height: 36px;
+  padding: 7px 9px;
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------
+   11. Handlinger/knapper: mindre og mer presise
+------------------------------------------------------------ */
+
+.actionArea {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  align-content: center;
+  margin: 0;
 }
 
 .actionArea button,
@@ -1504,121 +1881,127 @@
 .openButton,
 .softButton,
 .activeButton {
-  width: 100%;
-  min-height: 42px;
+  min-height: 34px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  line-height: 1;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
-/* Horisontal: bilde | innhold | historie/marked */
-.ui85HorizontalCard {
-  display: grid;
-  grid-template-columns: minmax(150px, 185px) minmax(260px, 1fr) minmax(240px, 340px);
-  gap: 14px;
-  align-items: stretch;
+.ui85StandingCard .actionArea button,
+.ui85StandingCard .actionArea a,
+.ui85StandingCard .openButton,
+.ui85StandingCard .softButton,
+.ui85StandingCard .activeButton {
+  min-height: 36px;
+  height: 36px;
 }
 
-/* Staaende: alt nedover, historie full bredde */
-.ui85StandingCard {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  align-items: stretch;
+/* ------------------------------------------------------------
+   12. Segment- og view-brytere: kompakte
+------------------------------------------------------------ */
+
+.segmentSwitch,
+.viewSwitch,
+.resultControlRow {
+  gap: 7px;
 }
 
-.ui85StandingCard .relationArea,
-.ui85StandingCard .relationGrid,
-.ui85StandingCard .relationChips {
-  min-width: 0;
-  width: 100%;
+.segmentSwitch button,
+.viewSwitch button,
+.resultControlRow button {
+  min-height: 34px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
 }
 
-/* Liste: kompakt rad med nok plass til historie og marked */
-.ui85ListCard {
-  display: grid;
-  grid-template-columns: minmax(72px, 112px) minmax(320px, 1fr) minmax(220px, 310px) minmax(150px, 190px) minmax(220px, 320px);
-  gap: 14px;
-  align-items: stretch;
+/* ------------------------------------------------------------
+   13. Fjern ekstra luft i resultatseksjonen
+------------------------------------------------------------ */
+
+.resultAreaHeader,
+.resultControlRow,
+.cardHeaderLine {
+  margin-bottom: 8px;
 }
 
-.ui85ListCard .relationArea,
-.ui85ListCard .relationGrid,
-.ui85ListCard .relationChips {
-  min-width: 220px;
+.resultAreaHeader {
+  padding: 0;
 }
 
-/* Museum: bilde venstre, innhold hoeyre */
-.ui85MuseumCard {
-  display: grid;
-  grid-template-columns: minmax(86px, 124px) minmax(0, 1fr);
-  gap: 14px;
-  align-items: stretch;
+.objectCard + .objectCard,
+.ui85Card + .ui85Card,
+.ui85HorizontalCard + .ui85HorizontalCard,
+.ui85ListCard + .ui85ListCard,
+.ui85MuseumCard + .ui85MuseumCard,
+.ui85StandingCard + .ui85StandingCard {
+  margin-top: 0;
 }
 
-.ui85MuseumCard .relationArea,
-.ui85MuseumCard .relationGrid,
-.ui85MuseumCard .relationChips {
-  min-width: 0;
-  width: 100%;
-}
+/* ------------------------------------------------------------
+   14. Tablet og mindre skjermer
+------------------------------------------------------------ */
 
-/* Hvis view ligger paa container, ikke paa kortklasse */
-:global([data-view="horizontal"]) .ui85Card,
-:global([data-ct-catalog-view="horizontal"]) .ui85Card,
-:global([data-catalog-view="horizontal"]) .ui85Card {
-  display: grid;
-  grid-template-columns: minmax(150px, 185px) minmax(260px, 1fr) minmax(240px, 340px);
-  gap: 14px;
-}
+@media (max-width: 1180px) {
+  :global([data-view="standing"]) .results,
+  :global([data-ct-catalog-view="standing"]) .results,
+  :global([data-catalog-view="standing"]) .results,
+  .resultsStanding {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-:global([data-view="standing"]) .ui85Card,
-:global([data-ct-catalog-view="standing"]) .ui85Card,
-:global([data-catalog-view="standing"]) .ui85Card {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-:global([data-view="list"]) .ui85Card,
-:global([data-ct-catalog-view="list"]) .ui85Card,
-:global([data-catalog-view="list"]) .ui85Card {
-  display: grid;
-  grid-template-columns: minmax(72px, 112px) minmax(320px, 1fr) minmax(220px, 310px) minmax(150px, 190px) minmax(220px, 320px);
-  gap: 14px;
-}
-
-:global([data-view="museum"]) .ui85Card,
-:global([data-ct-catalog-view="museum"]) .ui85Card,
-:global([data-catalog-view="museum"]) .ui85Card {
-  display: grid;
-  grid-template-columns: minmax(86px, 124px) minmax(0, 1fr);
-  gap: 14px;
-}
-
-/* Tablet / fold */
-@media (max-width: 1100px) {
   .ui85HorizontalCard,
   .ui85ListCard,
-  .ui85MuseumCard,
-  .ui85Card {
-    grid-template-columns: minmax(96px, 150px) minmax(0, 1fr);
-  }
-
-  .relationArea,
-  .relationGrid,
-  .relationChips {
-    min-width: 0;
-    width: 100%;
+  .ui85MuseumCard {
+    grid-template-columns: minmax(116px, 160px) minmax(0, 1fr);
+    grid-template-areas:
+      "image identity"
+      "image meta"
+      "history history"
+      "market market"
+      "actions actions";
   }
 }
 
-/* Mobil */
 @media (max-width: 719px) {
+  .results,
+  .resultsHorizontal,
+  .resultsStanding,
+  .resultsList,
+  .resultsMuseum {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
   .ui85HorizontalCard,
   .ui85StandingCard,
   .ui85ListCard,
   .ui85MuseumCard,
   .ui85Card,
   .objectCard {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "image"
+      "identity"
+      "meta"
+      "history"
+      "market"
+      "actions";
+    padding: 9px;
+    gap: 8px;
+  }
+
+  .ui85HorizontalCard .imageArea,
+  .ui85StandingCard .imageArea,
+  .ui85ListCard .imageArea,
+  .ui85MuseumCard .imageArea {
+    min-height: 120px;
+    max-height: 160px;
   }
 
   .relationArea,
@@ -1632,4 +2015,4 @@
   }
 }
 
-/* COLLECTIUM CATALOG86 SAFE SYMMETRY FIX END */
+/* COLLECTIUM CATALOG86 COMPACT VIEW FIX END */
