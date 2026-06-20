@@ -88,3 +88,24 @@ Bronse · **Sølv** (hevet, «Beste valg») · Gull + gratis-felt over. Priser v
 kampanjepris (−50 %) via `half()`; full pris er overstrøket. mnd/år-bryter.
 Platinum (kun årlig) og Forhandler (obligatorisk Gull) som callouts under.
 Tall/priser ligger i `TIERS`/`ERAS` øverst i `StartClient.tsx`.
+
+## Bakgrunnsvariasjon, vannmerker og felt-toning (oppdatert)
+- Seksjonene veksler mellom skin-baserte bånd: `.soft`, `.panel`, `.tint`,
+  `.deep`, `.veil` og `.ctaPhoto` — ingen to nabofelt er like.
+- Hvert felt/kort har nå svak skin-tonet bakgrunn (`--s-card` = ~5 % accent over
+  panel). Juster styrken ett sted i `.page`-blokken (`--s-card` / `--s-card-soft`).
+- Vannmerker: store svake display-tall («2022», «800») via `.sectionWm > .wm`,
+  ANNO 2022-stempelet (`AnnoStamp`) bak quote-feltet, og gull-C-merket som svakt
+  bilde-vannmerke bak målsetting-feltet. Alle ligger bak innholdet (z-index 0).
+
+## Merkevare-assets (i `public/collectium/`)
+| Fil | Bruk |
+|-----|------|
+| `mark-gold.png` | Gull C-merke: hero-brand, footer, CTA, vannmerke. |
+| `logo-black.png` | Ordmerke for lyse tema (Collectium/Samler). |
+| `logo-white.png` | Ordmerke for mørke tema (Museum/Finans). Byttes via `[data-theme]`. |
+| `family.jpg` | Familiebilde — falmet bakgrunn i slutt-CTA (`.ctaPhoto`). |
+
+Logo-bytte skjer i CSS: på Museum/Finans vises `logo-white`, ellers `logo-black`.
+Familiebildet legges over med en `--s-bg`-tonet gradient, så teksten er lesbar i
+alle fire tema. Bytt bildeutsnitt med `background-position` i `.ctaPhoto`.

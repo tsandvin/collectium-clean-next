@@ -126,12 +126,18 @@ export default function StartClient() {
   }
 
   return (
-    <main ref={rootRef} className={`${s.page} ct-start-page`}>
-      {/* ============================================================= 1 · HERO + PERIODESÃ˜K */}
+    <main ref={rootRef} className={s.page}>
+      {/* ============================================================= 1 · HERO + PERIODESØK */}
       <section className={`${s.section} ${s.soft}`}>
+        <div className={s.sectionWm} aria-hidden="true">
+          <span className={s.wm} style={{ top: "-4%", right: "2%", fontSize: "clamp(7rem, 22vw, 17rem)" }}>2022</span>
+        </div>
         <div className={`${s.hero} ${s.reveal}`} data-reveal>
           <div className={s.heroCopy}>
-            <span className={s.eyebrow}>Collectium · katalog &amp; relasjoner</span>
+            <span className={s.brandRow}>
+              <img className={s.markInline} src="/collectium/mark-gold.png" alt="Collectium" />
+              <span className={s.eyebrow}>Katalog &amp; relasjoner</span>
+            </span>
             <h1 className={s.heroTitle}>
               Søk samlingen <em>gjennom tiden</em>
             </h1>
@@ -200,7 +206,7 @@ export default function StartClient() {
                     className={s.linkInline}
                     href={`/katalog?periode=${activeEra.id}`}
                   >
-                    Ã…pne i katalog <span className={s.arrow}>→</span>
+                    Åpne i katalog <span className={s.arrow}>→</span>
                   </Link>
                 </>
               ) : (
@@ -215,7 +221,7 @@ export default function StartClient() {
       </section>
 
       {/* ============================================================= 2 · DATA + RELASJONER (+ ekte objekt) */}
-      <section className={s.section}>
+      <section className={`${s.section} ${s.panel}`}>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <div className={s.dataGrid}>
             <div>
@@ -265,7 +271,7 @@ export default function StartClient() {
                   className={`${s.btn} ${s.btnPrimary}`}
                   href="/objekt/norske_sedler/banknote/9"
                 >
-                  Ã…pne objektpresentasjon <span className={s.arrow}>→</span>
+                  Åpne objektpresentasjon <span className={s.arrow}>→</span>
                 </Link>
                 <Link className={s.linkInline} href="/relasjon/regent/olav-v">
                   Se relasjonsside
@@ -277,7 +283,7 @@ export default function StartClient() {
       </section>
 
       {/* ============================================================= 3 · MEDLEMSKAP (fullbredde) */}
-      <section id="medlemskap" className={`${s.section} ${s.soft}`}>
+      <section id="medlemskap" className={`${s.section} ${s.tint}`}>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <div className={s.memberHead}>
             <div>
@@ -372,7 +378,7 @@ export default function StartClient() {
           {/* Platinum (årlig) + Forhandler */}
           <div className={s.extraGrid}>
             <article className={`ct-surface ${s.extra}`}>
-              <span className={s.extraTag}>Ã…rlig nivå</span>
+              <span className={s.extraTag}>Årlig nivå</span>
               <h3 className={s.h3}>Platinum</h3>
               <p className={s.p}>
                 25 000+ objekter og 500 GB–2 TB etter avtale.{" "}
@@ -400,7 +406,10 @@ export default function StartClient() {
       </section>
 
       {/* ============================================================= 4 · QUOTE (morsom) */}
-      <section className={s.section}>
+      <section className={`${s.section} ${s.deep} ${s.stampField}`}>
+        <div className={`${s.stamp} ${s.stampLeft}`} aria-hidden="true">
+          <AnnoStamp />
+        </div>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <div className={s.quoteWrap}>
             <figure className={s.quoteFig}>
@@ -419,7 +428,7 @@ export default function StartClient() {
       </section>
 
       {/* ============================================================= 5 · HAR DU EN SAMLING */}
-      <section className={`${s.section} ${s.deep}`}>
+      <section className={`${s.section} ${s.veil}`}>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <div className={s.narrow}>
             <span className={s.eyebrow}>Medlemskap</span>
@@ -458,6 +467,9 @@ export default function StartClient() {
 
       {/* ============================================================= 6 · HVA VIL DU UTFORSKE */}
       <section className={`${s.section} ${s.soft}`}>
+        <div className={s.sectionWm} aria-hidden="true">
+          <span className={s.wm} style={{ bottom: "-6%", left: "1%", fontSize: "clamp(8rem, 26vw, 20rem)" }}>800</span>
+        </div>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <span className={s.eyebrow}>Tre perspektiver</span>
           <h2 className={s.h2}>Samme katalog, tre perspektiver</h2>
@@ -507,7 +519,7 @@ export default function StartClient() {
       </section>
 
       {/* ============================================================= 7 · KOMME I GANG */}
-      <section className={s.section}>
+      <section className={`${s.section} ${s.panel}`}>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <span className={s.eyebrow}>Kom i gang</span>
           <h2 className={s.h2}>Så enkelt er det å starte</h2>
@@ -538,8 +550,12 @@ export default function StartClient() {
         </div>
       </section>
 
-      {/* ============================================================= 8 · MÃ…LSETTING */}
+      {/* ============================================================= 8 · MÅLSETTING */}
       <section className={`${s.section} ${s.deep}`}>
+        <div className={s.sectionWm} aria-hidden="true">
+          <img className={s.wmMark} src="/collectium/mark-gold.png" alt=""
+               style={{ width: "min(40vw, 360px)", right: "-3%", top: "12%" }} />
+        </div>
         <div className={`${s.inner} ${s.reveal}`} data-reveal>
           <span className={s.eyebrow}>Hvor vi er på vei</span>
           <h2 className={s.h2}>Mer enn en katalog</h2>
@@ -574,12 +590,10 @@ export default function StartClient() {
         </div>
       </section>
 
-      {/* ============================================================= 9 · SLUTT-CTA (ANNO 2022) */}
-      <section className={`${s.section} ${s.tint} ${s.stampField}`}>
-        <div className={s.stamp} aria-hidden="true">
-          <AnnoStamp />
-        </div>
+      {/* ============================================================= 9 · SLUTT-CTA (familiebilde) */}
+      <section className={`${s.section} ${s.ctaPhoto}`}>
         <div className={`${s.narrow} ${s.finalCta} ${s.reveal}`} data-reveal>
+          <img className={s.ctaMark} src="/collectium/mark-gold.png" alt="Collectium" />
           <span className={s.eyebrow}>Registrer deg i dag</span>
           <h2 className={s.h2}>Bli med på å bygge katalogen</h2>
           <p className={s.philanthrope}>
@@ -597,6 +611,51 @@ export default function StartClient() {
           </div>
         </div>
       </section>
+
+      {/* ============================================================= FOOTER */}
+      <footer className={s.footer}>
+        <div className={s.footerInner}>
+          <div>
+            <div className={s.brandLock}>
+              <img className={s.footMark} src="/collectium/mark-gold.png" alt="" />
+              <img className={`${s.logoImg} ${s.logoBlack}`} src="/collectium/logo-black.png" alt="Collectium" />
+              <img className={`${s.logoImg} ${s.logoWhite}`} src="/collectium/logo-white.png" alt="Collectium" />
+            </div>
+            <p className={s.footTagline}>
+              Relasjonskatalog for samlere — sedler, mynter og historien bak hvert objekt.
+            </p>
+          </div>
+          <div className={s.footCol}>
+            <h4>Utforsk</h4>
+            <ul>
+              <li><Link href="/katalog">Katalog</Link></li>
+              <li><Link href="/samler">Samler</Link></li>
+              <li><Link href="/historie">Historie</Link></li>
+              <li><Link href="/finans">Finans</Link></li>
+            </ul>
+          </div>
+          <div className={s.footCol}>
+            <h4>Medlemskap</h4>
+            <ul>
+              <li><Link href="/registrer">Bli medlem</Link></li>
+              <li><Link href="/medlemskap">Se nivåer</Link></li>
+              <li><Link href="/medlemskap">Forhandler</Link></li>
+            </ul>
+          </div>
+          <div className={s.footCol}>
+            <h4>Collectium</h4>
+            <ul>
+              <li><Link href="/om">Om oss</Link></li>
+              <li><Link href="/kontakt">Kontakt</Link></li>
+              <li><Link href="/vilkar">Vilkår</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className={s.footBar}>
+          <span>© {new Date().getFullYear()} Collectium · ANNO 2022</span>
+          <span>Bygd på data — relasjoner, periode og marked.</span>
+        </div>
+      </footer>
     </main>
   );
 }

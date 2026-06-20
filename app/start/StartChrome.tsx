@@ -1,43 +1,29 @@
 /**
  * COLLECTIUM FILE HEADER
  *
- * Filnavn: app/start/StartChrome.tsx
- * Definering / formål:
- * Setter global chrome-modus for /start slik at startsiden vises med toppmeny,
- * men uten sidemeny.
- *
- * Bruksområde:
- * Brukes av app/start/layout.tsx.
- *
- * Berørte sider / routes:
- * - /start
- *
- * Berørte DB-brytere / feature_keys:
- * - Ingen. Dette er lokal layout/chrome-kontroll.
- *
- * DB-kobling:
- * Ingen.
+ * Filnavn:      app/start/StartChrome.tsx
+ * Definering:   Liten klienthjelper som markerer at /start skal vises uten
+ *               sidemeny (kun toppmeny).
+ * Formaal:      Setter data-ct-chrome="topbar-only" paa <html> mens startsiden
+ *               er aktiv, og rydder opp naar man navigerer bort. CollectiumAppShell
+ *               (eller globals.css) leser dette og skjuler sidemenyen. Se README.
+ * Designkobling: app/start/layout.tsx, CollectiumAppShell.
+ * DB-kobling:   Ingen.
+ * Tags:         collectium, start, layout, toppmeny, ingen-sidemeny
  */
-
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
-export default function StartChrome({ children }: { children: ReactNode }) {
+export default function StartChrome() {
   useEffect(() => {
-    const root = document.documentElement;
-    const previous = root.getAttribute("data-ct-chrome");
-
-    root.setAttribute("data-ct-chrome", "topbar-only");
-
+    const el = document.documentElement;
+    const prev = el.getAttribute("data-ct-chrome");
+    el.setAttribute("data-ct-chrome", "topbar-only");
     return () => {
-      if (previous) {
-        root.setAttribute("data-ct-chrome", previous);
-      } else {
-        root.removeAttribute("data-ct-chrome");
-      }
+      if (prev === null) el.removeAttribute("data-ct-chrome");
+      else el.setAttribute("data-ct-chrome", prev);
     };
   }, []);
-
-  return <>{children}</>;
+  return null;
 }
