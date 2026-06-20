@@ -1360,3 +1360,131 @@
     min-width: 0 !important;
   }
 }
+
+/* ============================================================
+   Collectium mobile bottom mega menu
+   Controlled by bottom navigation "Meny" button.
+   This is intentionally separate from desktop/sidebar drawer.
+   ============================================================ */
+
+.mobileMegaMenuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(7, 20, 18, 0.36);
+  backdrop-filter: blur(6px);
+}
+
+.mobileMegaMenuSheet {
+  width: min(100%, 760px);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  padding: 18px 18px calc(82px + env(safe-area-inset-bottom));
+  border: 1px solid rgba(43, 91, 77, 0.22);
+  border-radius: 26px 26px 0 0;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(245, 240, 229, 0.98));
+  box-shadow: 0 -24px 70px rgba(13, 34, 30, 0.28);
+}
+
+.mobileMegaMenuHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 4px 2px 16px;
+  border-bottom: 1px solid rgba(43, 91, 77, 0.14);
+}
+
+.mobileMegaMenuKicker {
+  margin: 0 0 4px;
+  color: rgba(20, 54, 47, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mobileMegaMenuTitle {
+  margin: 0;
+  color: rgb(14, 47, 40);
+  font-size: 28px;
+  line-height: 1.05;
+  font-weight: 800;
+}
+
+.mobileMegaMenuClose {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(43, 91, 77, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: rgb(14, 47, 40);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(13, 34, 30, 0.12);
+}
+
+.mobileMegaMenuGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding-top: 16px;
+}
+
+.mobileMegaMenuGroup {
+  padding: 14px;
+  border: 1px solid rgba(126, 168, 207, 0.26);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.52);
+}
+
+.mobileMegaMenuGroupTitle {
+  margin: 0 0 10px;
+  color: rgba(20, 54, 47, 0.64);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mobileMegaMenuLinks {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.mobileMegaMenuLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(43, 91, 77, 0.12);
+  border-radius: 14px;
+  background: rgba(247, 250, 248, 0.88);
+  color: rgb(15, 64, 53);
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.mobileMegaMenuLink:hover,
+.mobileMegaMenuLink:focus-visible {
+  border-color: rgba(43, 91, 77, 0.34);
+  background: rgba(225, 239, 231, 0.92);
+  outline: none;
+}
+
+@media (min-width: 760px) {
+  .mobileMegaMenuGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

@@ -152,6 +152,88 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
       }
     }
     void fetchSession();
+  const ctSession = session as unknown as {
+    user?: {
+      role?: string;
+      roles?: string[];
+      isAdmin?: boolean;
+      isDealer?: boolean;
+      membership?: string;
+      membershipLevel?: string;
+    };
+    role?: string;
+    roles?: string[];
+    isAdmin?: boolean;
+    isDealer?: boolean;
+  };
+
+  const ctUser = ctSession?.user ?? ctSession;
+
+  const isAdminUser = Boolean(
+    ctUser?.isAdmin ||
+      ctUser?.role === "admin" ||
+      ctUser?.role === "collectiumbro" ||
+      ctUser?.membership === "CollectiumBro" ||
+      ctUser?.membershipLevel === "CollectiumBro" ||
+      ctUser?.roles?.includes("admin") ||
+      ctUser?.roles?.includes("collectiumbro")
+  );
+
+  const isDealerUser = Boolean(
+    ctUser?.isDealer ||
+      ctUser?.role === "dealer" ||
+      ctUser?.role === "forhandler" ||
+      ctUser?.roles?.includes("dealer") ||
+      ctUser?.roles?.includes("forhandler")
+  );
+
+  const mobileMegaGroups = [
+    {
+      title: "Hoved",
+      items: [
+        { label: "Index", href: "/" },
+        { label: "Katalog", href: "/katalog" },
+        { label: "Periodefilter", href: "/test/periodefilter" },
+        { label: "Periode søk", href: "/test/period-timeline" },
+        { label: "Objekt", href: "/objekt" },
+        { label: "Relasjoner", href: "/relasjoner" },
+      ],
+    },
+    {
+      title: "Bruker",
+      items: [
+        { label: "Min side", href: "/min-side" },
+        { label: "Min samling", href: "/min-side?panel=samling" },
+        { label: "Meldinger", href: "/min-side?panel=meldinger" },
+        { label: "Varsler", href: "/min-side?panel=varsler" },
+        { label: "Prosesser", href: "/min-side?panel=prosesser" },
+      ],
+    },
+    {
+      title: "Marked",
+      items: [
+        { label: "Auksjon", href: "/auksjon" },
+        { label: "Nettbutikk", href: "/nettbutikk" },
+      ],
+    },
+    {
+      title: "Forhandler",
+      requiresDealer: true,
+      items: [
+        { label: "Forhandlerpanel", href: "/forhandler" },
+      ],
+    },
+    {
+      title: "System / admin",
+      requiresAdmin: true,
+      items: [
+        { label: "CollectiumBro", href: "/admin" },
+        { label: "Neon kontroll", href: "/admin/neon" },
+        { label: "MariaDB / Neon", href: "/admin/system/mariadb-neon" },
+      ],
+    },
+  ];
+
     return () => {
       active = false;
     };
@@ -782,12 +864,69 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
         <main className={styles.content}>{children}</main>
       </div>
 
-      <nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
+            {isMobileMegaMenuOpen ? (
+        <div
+          className={styles.mobileMegaMenuOverlay}
+          role="presentation"
+          onClick={() => setIsMobileMegaMenuOpen(false)}
+        >
+          <section
+            className={styles.mobileMegaMenuSheet}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobil megameny"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.mobileMegaMenuHeader}>
+              <div>
+                <p className={styles.mobileMegaMenuKicker}>Collectium</p>
+                <h2 className={styles.mobileMegaMenuTitle}>Meny</h2>
+              </div>
+              <button
+                type="button"
+                className={styles.mobileMegaMenuClose}
+                onClick={() => setIsMobileMegaMenuOpen(false)}
+                aria-label="Lukk meny"
+              >
+                ×
+              </button>
+            </header>
+
+            <div className={styles.mobileMegaMenuGrid}>
+              {mobileMegaGroups
+                .filter((group) => {
+                  if (group.requiresAdmin && !isAdminUser) return false;
+                  if (group.requiresDealer && !isDealerUser && !isAdminUser) return false;
+                  return true;
+                })
+                .map((group) => (
+                  <section className={styles.mobileMegaMenuGroup} key={group.title}>
+                    <h3 className={styles.mobileMegaMenuGroupTitle}>{group.title}</h3>
+                    <div className={styles.mobileMegaMenuLinks}>
+                      {group.items.map((menuItem) => (
+                        <a
+                          key={`${group.title}-${menuItem.href}`}
+                          href={menuItem.href}
+                          className={styles.mobileMegaMenuLink}
+                          onClick={() => setIsMobileMegaMenuOpen(false)}
+                        >
+                          <span>{menuItem.label}</span>
+                          <span aria-hidden="true">›</span>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+            </div>
+          </section>
+        </div>
+      ) : null}
+<nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
         {mobileBottomItems
           .filter((item) => canShowMenuItem(item as { requiresAuth?: boolean; requiresAdmin?: boolean }, session))
           .map((item) => {
             const IconComponent = item.icon;
-            const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
+            const isActive = item.key === "menu" ? isMobileMegaMenuOpen : checkMobileBottomActive(item);
             
             if (item.key === "menu") {
               return (
@@ -795,8 +934,8 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                   key={item.key}
                   type="button"
                   className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  aria-expanded={isMobileMenuOpen}
+                  onClick={() => setIsMobileMegaMenuOpen(!isMobileMegaMenuOpen)}
+                  aria-expanded={isMobileMegaMenuOpen}
                   aria-label="Ã…pne eller lukk hovedmeny"
                   style={{ background: "none", border: "none", cursor: "pointer" }}
                 >
@@ -812,7 +951,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                 href={item.href || "#"}
                 className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
                 aria-current={isActive ? "page" : undefined}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => setIsMobileMegaMenuOpen(false)}
               >
                 <IconComponent size={20} strokeWidth={1.8} />
                 <span>{item.label}</span>
@@ -831,6 +970,7 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
 
 
 
