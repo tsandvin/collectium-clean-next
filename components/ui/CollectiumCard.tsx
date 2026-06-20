@@ -1,9 +1,9 @@
-import React from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 interface CollectiumCardProps {
   title: string;
-  children: React.ReactNode;
-  style?: React.CSSProperties;
+  children: ReactNode;
+  style?: CSSProperties;
   className?: string;
 }
 
@@ -11,18 +11,16 @@ export default function CollectiumCard({
   title,
   children,
   style,
-  className = "",
+  className,
 }: CollectiumCardProps) {
+  const rootClassName = className
+    ? `collectium-card ${className}`
+    : "collectium-card";
+
   return (
-    <div className={`collectium-card collectium-panel ${className}`} style={style}>
-      <div className="collectium-muted" style={{
-        fontSize: "0.8rem",
-        textTransform: "uppercase",
-        marginBottom: "8px",
-      }}>
-        {title}
-      </div>
+    <section className={rootClassName} style={style}>
+      <h2>{title}</h2>
       {children}
-    </div>
+    </section>
   );
 }
