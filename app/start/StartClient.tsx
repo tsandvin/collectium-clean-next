@@ -126,7 +126,7 @@ export default function StartClient() {
   }
 
   return (
-    <main ref={rootRef} className={s.page}>
+    <main ref={rootRef} className={`ct-start-page ${s.page}`}>
       {/* ============================================================= 1 · HERO + PERIODESØK */}
       <section className={`${s.section} ${s.soft}`}>
         <div className={s.sectionWm} aria-hidden="true">

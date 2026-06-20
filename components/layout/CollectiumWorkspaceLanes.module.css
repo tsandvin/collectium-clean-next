@@ -1,21 +1,24 @@
 .lanesContainer {
-  display: flex;
-  flex-direction: row;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.7fr);
+  gap: clamp(18px, 2vw, 36px);
   width: 100%;
-  overflow-x: auto;
+  max-width: 100%;
+  height: calc(100dvh - var(--ct-topbar-height, 72px) - 72px);
+  min-height: 0;
+  overflow: hidden;
   align-items: stretch;
-  padding: 4px 4px 18px 4px;
+  padding: 0;
   box-sizing: border-box;
-  scroll-snap-type: x mandatory;
 }
 
 .laneItem {
-  flex: 0 0 var(--ct-workspace-lane-width, 1000px);
-  width: var(--ct-workspace-lane-width, 1000px);
-  max-width: calc(100vw - 48px);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  overflow: auto;
   box-sizing: border-box;
-  scroll-snap-align: start;
 }
 
 .tvContainer {
@@ -34,7 +37,21 @@
 
 .singleContainer {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+@media (max-width: 1100px) {
+  .lanesContainer {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .laneItem {
+    overflow: visible;
+  }
 }
