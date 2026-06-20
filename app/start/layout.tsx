@@ -14,13 +14,27 @@
  */
 
 import type { ReactNode } from "react";
+import { Playfair_Display, Inter } from "next/font/google";
 import StartChrome from "./StartChrome";
+
+// Lokale fonter kun for /start: serif til overskrifter, sans til brodtekst.
+const startDisplay = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--start-font-display",
+});
+
+const startBody = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--start-font-body",
+});
 
 export default function StartLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <div className={`${startDisplay.variable} ${startBody.variable}`}>
       <StartChrome />
       {children}
-    </>
+    </div>
   );
 }

@@ -39,8 +39,8 @@
   --s-watermark:     var(--ct-watermark, color-mix(in srgb, var(--ct-accent, #145c38) 60%, transparent));
   --s-card:          color-mix(in srgb, var(--ct-accent, #145c38) 5%, var(--s-surface));
   --s-card-soft:     color-mix(in srgb, var(--ct-accent, #145c38) 3%, var(--s-surface));
-  --s-display:       var(--ct-font-display, var(--ct-font-head, Georgia, "Times New Roman", serif));
-  --s-body:          var(--ct-font-body, ui-sans-serif, system-ui, sans-serif);
+  --s-display:       var(--start-font-display, var(--ct-font-display, var(--ct-font-head, Georgia, "Times New Roman", serif)));
+  --s-body:          var(--start-font-body, var(--ct-font-body, ui-sans-serif, system-ui, sans-serif));
 
   /* Periodefilter-kategorifarger fra det globale tidslinje-settet */
   --s-tl-national:   var(--ct-timeline-national, #1e5a9a);
