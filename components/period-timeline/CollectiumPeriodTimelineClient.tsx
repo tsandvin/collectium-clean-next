@@ -664,12 +664,7 @@ export function CollectiumPeriodTimelineClient() {
     setFilters(nextFilters);
     void fetchTimelineData(nextFilters);
   }
-
-  if (loading && !row1Nodes.length && !row2Nodes.length && !row3Nodes.length && !row4Nodes.length) {
-    return <div className={styles.loadingState}>Laster tidslinje fra Neon/APIâ€¦</div>;
-  }
-
-  const apiOnline = !loading && !error;
+const apiOnline = !loading && !error;
 
 return (
   <main className={styles.page}>
@@ -679,10 +674,19 @@ return (
           <h1 className={styles.title}>Tidslinjeperiode</h1>
           <p className={styles.subtitle}>Sammenligningsbasert tidslinje med grupper i dropdowns og noder i tidslinjen hentet fra Neon/API.</p>
         </div>
-        <div className={styles.heroStatus}>
-          <span>Status</span>
-          <strong>Aktiv V8.6</strong>
+        <div
+        className={`${styles.heroStatus} ${apiOnline ? styles.heroStatusOnline : styles.heroStatusOffline}`}
+        aria-live="polite"
+      >
+        <span>Status</span>
+        <strong>Aktiv V8.6</strong>
+        <div className={styles.apiStatusLine}>
+          <span className={styles.apiStatusOrb} aria-hidden="true" />
+          <span className={styles.apiStatusText}>
+            {apiOnline ? "Online" : "Offline"}
+          </span>
         </div>
+      </div>
       </section>
 
       <section className={styles.masterFilter} aria-label="Masterfilter">
