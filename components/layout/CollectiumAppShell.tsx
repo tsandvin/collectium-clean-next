@@ -189,7 +189,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
       ctUser?.roles?.includes("forhandler")
   );
 
-  const megaGroups = [
+  const mobileMegaGroups = [
     {
       title: "Hoved",
       items: [
@@ -895,7 +895,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
             </header>
 
             <div className={styles.mobileMegaMenuGrid}>
-              {megaGroups
+              {mobileMegaGroups
                 .filter((group) => {
                   if (group.requiresAdmin && !isAdminUser) return false;
                   if (group.requiresDealer && !isDealerUser && !isAdminUser) return false;
@@ -972,6 +972,7 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
 
 
 
