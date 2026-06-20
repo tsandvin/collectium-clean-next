@@ -1,57 +1,39 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Periodefilter testside UI/UX 8.6 - sanne Neon-data
+ * Periodefilter Test Page - Comparison Groups v21
  *
- * Definering / formal:
- * Viser testflate for periodefilterets tre rader: Nasjonal hovedperiode,
- * Hovedperiode / tematisk periode og Objektperiode / konkret relasjon.
+ * Definering / formål:
+ * Testside for Periode 8.6 sammenligning. Filter/rullegardin viser grupper.
+ * Tidslinjen viser verdier/noder under valgt gruppe.
  *
- * Bruksomrade:
- * Apnes pa /test/periodefilter for a kontrollere periodefiltermodellen mot Neon/API.
+ * Bruksområde:
+ * Brukes for å teste sammenligning mellom konge/regent, nasjonal periode,
+ * krig/konflikt, finans/økonomi, objektutgivelser, sykdom, motiv og proveniens.
  *
- * Berorte sider / routes:
+ * Berørte sider / routes:
  * - /test/periodefilter
  *
- * Berorte DB-brytere / feature_keys:
- * - filter.period.simple.view
- * - filter.period.advanced.view
- * - filter.master.resolve
+ * Berørte API-ruter:
+ * - GET /api/period86/comparison-demo
  *
- * Berorte API-ruter:
- * - GET /api/filter/period/options
- * - GET /api/test/period-catalog
- *
- * Berorte tabeller / views:
- * - ct_period_filter_registry
- * - ct_period_filter_value_registry
- * - ct_v_period_filter_options
- * - ct_v_period_filter_registry_active
- * - ct_catalog_period_relations
- * - ct_v_catalog_period_relations
- * - ct_sn_period_relation
- * - ct_sn_period_relation_links
- * - ct_sn_period_type_registry
- * - ct_v_period_filter_find_relations
- * - ct_v_object_relations_resolved
- * - ct_v_object_presentation_resolved
+ * Berørte DB-brytere / feature_keys:
+ * - period86.comparison.view
+ * - period86.timeline.view
+ * - period86.group_filter.view
  *
  * Dataretning:
- * MariaDB/Neon -> API/backend -> Next.js -> React -> UI
- *
- * Logging:
- * log_category: filter
- * log_action: period_test_page_view
+ * API -> komponent -> UI
  *
  * Versjon:
- * CT-FILE-PERIOD-UI86-0003 / CHANGE-2026-06-19-0001
+ * CT-PERIODEFILTER-COMPARISON-GROUPS-0021
  */
 
-import CollectiumPeriodFilterClient from "@/components/period-filter/CollectiumPeriodFilterClient";
+import Period86ComparisonDemo from "@/components/period86/Period86ComparisonDemo";
 
 export const dynamic = "force-dynamic";
 
-export default function PeriodFilterTestPage() {
-  return <CollectiumPeriodFilterClient />;
+export default function PeriodefilterTestPage() {
+  return <Period86ComparisonDemo />;
 }
