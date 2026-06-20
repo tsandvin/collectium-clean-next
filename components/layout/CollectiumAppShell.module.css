@@ -229,6 +229,7 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   overflow-x: clip;
 }
 
@@ -275,6 +276,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: 100%;
+  justify-content: flex-end;
 }
 
 .skinLabel {
@@ -311,6 +316,7 @@
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
 .loginButton::before {
@@ -350,6 +356,8 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .menuButton {
@@ -432,9 +440,11 @@
 }
 
 .shell[data-sidebar-mode="hidden"] .mainColumn {
-  width: 100%;
-  max-width: 100%;
-  margin-left: 0;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  left: 0 !important;
+  transform: none !important;
 }
 
 /* Compact/Fold mode: Tablet fold 720-980px */
@@ -491,7 +501,18 @@
 }
 
 .shell[data-screen-mode="mobile"] .content {
-  padding: 12px;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  overflow-x: hidden;
+}
+
+.shell[data-screen-mode="mobile"] .content > *,
+.shell[data-screen-mode="tablet"] .content > * {
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 /* TV Modus presentasjon */
@@ -512,9 +533,11 @@
   }
 
   .mainColumn {
-    width: 100%;
-    max-width: 100%;
-    margin-left: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    left: 0 !important;
+    transform: none !important;
     overflow-x: clip;
   }
 
@@ -530,8 +553,8 @@
   }
 
   .content {
-    width: 100%;
-    max-width: 100%;
+    width: auto !important;
+    max-width: none !important;
     min-width: 0;
     overflow-x: clip;
     padding: 12px;
@@ -595,9 +618,32 @@
   padding-right: 10px;
 }
 
-.mobileBottomItem {
+.shell[data-screen-mode="mobile"] .topbarLeft {
+  flex: 1 1 auto;
+}
+
+.shell[data-screen-mode="mobile"] .searchWrap {
+  min-width: 0;
+  width: auto;
+  flex: 1 1 auto;
+}
+
+.shell[data-screen-mode="mobile"] .topActions {
   flex: 0 0 auto;
-  min-width: 72px;
+  gap: 6px;
+}
+
+.shell[data-screen-mode="mobile"] .designMenuButton {
+  padding: 0 12px;
+}
+
+.shell[data-screen-mode="mobile"] .loginButton {
+  padding: 0 14px;
+}
+
+.mobileBottomItem {
+  flex: 1 1 0;
+  min-width: 0;
   padding: 4px 6px;
   display: grid;
   place-items: center;
@@ -683,6 +729,9 @@
   cursor: pointer;
   box-shadow: var(--ct-shadow-soft);
   transition: all 0.2s ease;
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .designMenuButton:hover {

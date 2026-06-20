@@ -72,16 +72,10 @@ export function CollectiumLayoutModeProvider({ children }: { children: React.Rea
   // Determine sidebar mode
   const sidebarMode = useMemo<CollectiumSidebarMode>(() => {
     if (activeScreenMode === "mobile") return "hidden";
-    if (activeScreenMode === "tablet") {
-      // 720-980px fold-open can be compact if layout supports it, otherwise stacked (hidden)
-      if (actualScreenWidth >= 720 && actualScreenWidth <= 980) {
-        return "compact";
-      }
-      return "hidden";
-    }
+    if (activeScreenMode === "tablet") return "hidden";
     if (activeScreenMode === "tv") return "hidden";
     return "normal";
-  }, [activeScreenMode, actualScreenWidth]);
+  }, [activeScreenMode]);
 
   // Determine lane mode
   const laneMode = useMemo<CollectiumLaneMode>(() => {

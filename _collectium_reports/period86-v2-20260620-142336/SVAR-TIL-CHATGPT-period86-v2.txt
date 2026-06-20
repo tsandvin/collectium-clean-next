@@ -1,0 +1,42 @@
+﻿COLLECTIUM PERIOD86 V2 REPORT
+
+Project root:
+C:\Users\Bruker\Pictures\Collectium clean rebuild\collectium-clean-next
+
+Files:
+
+Path                                                                 Exists
+----                                                                 ------
+app\api\period86\row1\nodes\route.ts                                   True
+app\api\period86\row2\nodes\route.ts                                   True
+app\api\period86\row3\nodes\route.ts                                  False
+app\api\period86\timeline\route.ts                                    False
+components\period-timeline\CollectiumPeriodTimelineClient.tsx          True
+components\period-timeline\CollectiumPeriodTimelineClient.module.css   True
+
+
+
+
+Findings:
+
+Area                                 Status Detail                              
+----                                 ------ ------                              
+row1                                 exists app\api\period86\row1\nodes\route.ts
+row1_has_start_year                  True                                       
+row1_has_end_year                    True                                       
+row1_uses_ruler_view                 True                                       
+app\api\period86\row3\nodes\route.ts False                                      
+app\api\period86\timeline\route.ts   False                                      
+
+
+
+
+Created:
+C:\Users\Bruker\Pictures\Collectium clean rebuild\collectium-clean-next\_collectium_reports\period86-v2-20260620-142336\sql\period86-neon-inspection.sql
+C:\Users\Bruker\Pictures\Collectium clean rebuild\collectium-clean-next\_collectium_reports\period86-v2-20260620-142336\patch\period86-api-test-v2.ps1
+C:\Users\Bruker\Pictures\Collectium clean rebuild\collectium-clean-next\_collectium_reports\period86-v2-20260620-142336\patch\period86-timeline-math.ts
+
+Important:
+- Run SQL only in Neon SQL Editor, not in PowerShell.
+- Current live API result already showed row1 konge/statsoverhode gives 500, union works, row3/timeline gives 404.
+- This means route.ts for row3 and timeline are missing/not deployed, and row1 query fails for some type filters.

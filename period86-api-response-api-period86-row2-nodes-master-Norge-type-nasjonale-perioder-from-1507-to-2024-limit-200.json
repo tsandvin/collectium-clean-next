@@ -1,0 +1,53 @@
+﻿{
+    "ok":  true,
+    "context":  "war_conflict",
+    "nodes":  [
+                  {
+                      "node_key":  "borgerkrigstiden",
+                      "label_no":  "Borgerkrigstiden",
+                      "start_year":  1130,
+                      "end_year":  1240,
+                      "relation_href":  "/relasjon/periode/borgerkrigstiden",
+                      "count":  "0",
+                      "source":  "ct_v_period_filter_options"
+                  },
+                  {
+                      "node_key":  "den-store-nordiske-krig",
+                      "label_no":  "Den store nordiske krig",
+                      "start_year":  1700,
+                      "end_year":  1721,
+                      "relation_href":  "/relasjon/periode/den-store-nordiske-krig",
+                      "count":  "0",
+                      "source":  "ct_v_period_filter_options"
+                  },
+                  {
+                      "node_key":  "napoleonskrigene-statsbankerott",
+                      "label_no":  "Napoleonskrigene og statsbankerott",
+                      "start_year":  1807,
+                      "end_year":  1814,
+                      "relation_href":  "/relasjon/periode/napoleonskrigene-statsbankerott",
+                      "count":  "0",
+                      "source":  "ct_v_period_filter_options"
+                  },
+                  {
+                      "node_key":  "forste-verdenskrig-norge",
+                      "label_no":  "FÃ¸rste verdenskrig i norsk kontekst",
+                      "start_year":  1914,
+                      "end_year":  1918,
+                      "relation_href":  "/relasjon/periode/forste-verdenskrig-norge",
+                      "count":  "0",
+                      "source":  "ct_v_period_filter_options"
+                  },
+                  {
+                      "node_key":  "andre-verdenskrig-okkupasjon",
+                      "label_no":  "Andre verdenskrig og okkupasjon",
+                      "start_year":  1940,
+                      "end_year":  1945,
+                      "relation_href":  "/relasjon/periode/andre-verdenskrig-okkupasjon",
+                      "count":  "0",
+                      "source":  "ct_v_period_filter_options"
+                  }
+              ],
+    "limit":  200,
+    "offset":  0
+}
