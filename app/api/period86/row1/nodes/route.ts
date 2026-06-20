@@ -140,3 +140,4 @@ export async function GET(request: Request) {
     return jsonError("Could not load Period 8.6 row 1 nodes.", 500, error);
   }
 }
+
