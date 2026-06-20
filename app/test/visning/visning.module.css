@@ -1,0 +1,546 @@
+:root {
+  color-scheme: light;
+}
+
+.page {
+  --ct-bg: #f7f4eb;
+  --ct-panel: #fffdf8;
+  --ct-panel-soft: #f8fbf4;
+  --ct-ink: #173f32;
+  --ct-muted: #799084;
+  --ct-line: #d7cdb9;
+  --ct-line-strong: #9fbaa4;
+  --ct-shadow: 0 16px 34px rgba(44, 54, 42, 0.12);
+  --ct-radius: 10px;
+  --ct-radius-soft: 12px;
+  --ct-green: #2f7e63;
+  --ct-red: #f26969;
+  --ct-yellow: #d7a72d;
+  --ct-blue: #3d86c6;
+  --ct-shop: #3a9b78;
+  min-height: 100vh;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(205, 185, 138, 0.20), transparent 32%),
+    linear-gradient(180deg, #faf8f0 0%, #f2efe6 100%);
+  color: var(--ct-ink);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.pageHeader,
+.skinHeader {
+  max-width: 1480px;
+  margin: 0 auto 18px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.pageHeader p,
+.skinHeader p {
+  margin: 0 0 4px;
+  font: 700 11px/1.2 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ct-muted);
+}
+
+.pageHeader h1,
+.skinHeader h2 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 46px);
+  line-height: 1;
+}
+
+.pageHeader span {
+  display: block;
+  margin-top: 8px;
+  color: var(--ct-muted);
+  font-size: 14px;
+}
+
+.skinLegend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.skinLegend a {
+  color: var(--ct-ink);
+  text-decoration: none;
+  border: 1px solid var(--ct-line);
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.04);
+  font: 700 12px/1 ui-sans-serif, system-ui, sans-serif;
+}
+
+.skinSection {
+  --ct-bg: #f7f4eb;
+  --ct-panel: #fffdf8;
+  --ct-panel-soft: #f8fbf4;
+  --ct-ink: #173f32;
+  --ct-muted: #718a7e;
+  --ct-line: #d7cdb9;
+  --ct-line-strong: #9fbaa4;
+  --ct-shadow: 0 16px 34px rgba(44, 54, 42, 0.12);
+  max-width: 1480px;
+  margin: 0 auto 32px;
+  padding: 18px;
+  border: 1px solid rgba(160, 145, 110, 0.32);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ct-bg) 84%, white 16%);
+}
+
+.skinSection[data-skin="samler"] {
+  --ct-bg: #f1f6f1;
+  --ct-panel: #fbfff9;
+  --ct-panel-soft: #edf8ef;
+  --ct-ink: #113e32;
+  --ct-muted: #5f8774;
+  --ct-line: #c8ddcb;
+  --ct-line-strong: #76a987;
+  --ct-shadow: 0 16px 36px rgba(24, 89, 66, 0.12);
+}
+
+.skinSection[data-skin="museum"] {
+  --ct-bg: #f5f0e5;
+  --ct-panel: #fffaf0;
+  --ct-panel-soft: #f8f1df;
+  --ct-ink: #3f3020;
+  --ct-muted: #927d5f;
+  --ct-line: #d9c59b;
+  --ct-line-strong: #a88950;
+  --ct-shadow: 0 18px 38px rgba(87, 62, 28, 0.15);
+}
+
+.skinSection[data-skin="finans"] {
+  --ct-bg: #eaf1f4;
+  --ct-panel: #f8fcff;
+  --ct-panel-soft: #edf7fb;
+  --ct-ink: #102d42;
+  --ct-muted: #627f90;
+  --ct-line: #bed4df;
+  --ct-line-strong: #5f98b5;
+  --ct-shadow: 0 18px 42px rgba(20, 57, 78, 0.16);
+}
+
+.cardGrid {
+  display: grid;
+  gap: 18px;
+}
+
+.cardGrid > div {
+  min-width: 0;
+}
+
+.cardGrid h3 {
+  margin: 0 0 8px 4px;
+  color: var(--ct-muted);
+  font: 800 11px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.objectCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ct-line);
+  border-radius: var(--ct-radius-soft);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42)),
+    var(--ct-panel);
+  box-shadow: var(--ct-shadow);
+  color: var(--ct-ink);
+}
+
+.objectCard::before,
+.objectCard::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.42;
+}
+
+.objectCard::before {
+  top: 8px;
+  right: 34px;
+  width: 146px;
+  height: 1px;
+  background: var(--ct-line);
+}
+
+.objectCard::after {
+  right: 16px;
+  bottom: 12px;
+  width: 90px;
+  height: 1px;
+  background: var(--ct-line-strong);
+}
+
+.horizontalCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 218px;
+  gap: 12px;
+  padding: 14px;
+}
+
+.leftColumn {
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.leftColumn .historyPanel,
+.leftColumn .actions {
+  grid-column: 1 / -1;
+}
+
+.listCard {
+  display: grid;
+  grid-template-columns: 34% minmax(260px, 1fr) 280px 136px 174px;
+  align-items: center;
+  gap: 18px;
+  padding: 8px;
+}
+
+.museumCard {
+  display: grid;
+  grid-template-columns: 42% minmax(0, 1fr);
+  gap: 20px;
+  padding: 12px;
+}
+
+.standingCard {
+  width: min(390px, 100%);
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.standingMiddle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.noteImage {
+  position: relative;
+  min-height: 144px;
+  border: 1px solid var(--ct-line);
+  border-radius: 6px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg, rgba(89, 115, 105, 0.06) 0 3px, transparent 3px 11px),
+    linear-gradient(135deg, #fffdf4 0%, #f6f1e5 100%);
+}
+
+.noteImageWide {
+  min-height: 178px;
+}
+
+.noteNumber {
+  position: absolute;
+  top: 6px;
+  left: 16px;
+  color: color-mix(in srgb, var(--ct-ink) 18%, transparent);
+  font-size: clamp(72px, 9vw, 142px);
+  line-height: 0.9;
+  letter-spacing: -0.09em;
+}
+
+.noteBank {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  font: 900 11px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.22em;
+  color: color-mix(in srgb, var(--ct-ink) 64%, transparent);
+}
+
+.noteSeal {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 64px;
+  height: 78px;
+  transform: translateY(-50%);
+  border-radius: 999px 999px 4px 4px;
+  background: radial-gradient(circle at 35% 35%, #fff6df, #eadcc6 72%);
+  opacity: 0.86;
+}
+
+.noteLine {
+  position: absolute;
+  left: 84px;
+  right: 96px;
+  bottom: 38px;
+  height: 1px;
+  background: var(--ct-line);
+}
+
+.identityBlock h2,
+.museumContent h2 {
+  margin: 0 0 8px;
+  font-size: clamp(23px, 2.4vw, 28px);
+  line-height: 1.05;
+  color: var(--ct-ink);
+}
+
+.identityGrid,
+.historyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+}
+
+.field {
+  padding: 8px 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--ct-line) 76%, transparent);
+}
+
+.fieldLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--ct-ink) 72%, white 28%);
+  font: 900 10px/1.1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.fieldValue {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.metaLine {
+  margin: 10px 0 0;
+  color: color-mix(in srgb, var(--ct-muted) 72%, transparent);
+  font-size: 12px;
+}
+
+.historyPanel {
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 8px;
+  padding: 10px 11px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ct-panel-soft) 78%, white 22%), rgba(255, 255, 255, 0.52));
+}
+
+.historyPanelCompact {
+  padding: 9px 11px;
+}
+
+.historyPanelCompact .historyGrid {
+  grid-template-columns: 1fr;
+}
+
+.historyPanelCompact .field:nth-child(n + 3) {
+  display: none;
+}
+
+.historyHeader {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+  font-size: 17px;
+}
+
+.historyHeader small {
+  color: var(--ct-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.historyIcon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ct-green) 14%, white 86%);
+  color: var(--ct-green);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.statusStack {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.statusStackCompact {
+  gap: 7px;
+}
+
+.statusPill {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 24px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 2px 8px;
+  min-height: 48px;
+  padding: 7px 10px;
+  border: 1px solid var(--ct-line);
+  border-radius: 10px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.statusPill span {
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.statusPill strong {
+  font-size: 13px;
+}
+
+.statusPill em {
+  font-size: 10px;
+  color: var(--ct-muted);
+  font-style: normal;
+}
+
+.statusPill b {
+  grid-row: 1 / 3;
+  grid-column: 3;
+  font-size: 13px;
+  text-align: right;
+}
+
+.heart { background: color-mix(in srgb, var(--ct-red) 12%, white 88%); border-color: color-mix(in srgb, var(--ct-red) 50%, white 50%); }
+.star { background: color-mix(in srgb, var(--ct-yellow) 15%, white 85%); border-color: color-mix(in srgb, var(--ct-yellow) 48%, white 52%); }
+.auction { background: color-mix(in srgb, var(--ct-blue) 14%, white 86%); border-color: color-mix(in srgb, var(--ct-blue) 44%, white 56%); }
+.shop { background: color-mix(in srgb, var(--ct-shop) 14%, white 86%); border-color: color-mix(in srgb, var(--ct-shop) 44%, white 56%); }
+
+.priceBox {
+  display: grid;
+  place-items: center;
+  min-height: 110px;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 9px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ct-panel-soft) 74%, white 26%), rgba(255, 255, 255, 0.7));
+  text-align: center;
+  padding: 12px;
+}
+
+.priceBox span,
+.priceBox em {
+  font: 900 10px/1.2 ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--ct-ink) 70%, white 30%);
+}
+
+.priceBox strong {
+  font-size: 26px;
+  line-height: 0.95;
+  font-weight: 500;
+}
+
+.priceBox em {
+  font-style: normal;
+  letter-spacing: 0.16em;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--ct-line) 70%, white 30%);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.actions button {
+  border: 1px solid var(--ct-line);
+  border-radius: 999px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 20px rgba(30, 37, 31, 0.08);
+  color: var(--ct-ink);
+  cursor: pointer;
+  font: 800 13px/1 ui-sans-serif, system-ui, sans-serif;
+}
+
+.signature {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  color: color-mix(in srgb, var(--ct-muted) 55%, transparent);
+  font-style: italic;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+@media (max-width: 1180px) {
+  .listCard {
+    grid-template-columns: 260px minmax(260px, 1fr) 220px;
+  }
+
+  .listCard .statusStack {
+    grid-column: 2 / 4;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .page { padding: 12px; }
+  .pageHeader { display: grid; }
+  .horizontalCard,
+  .museumCard,
+  .listCard {
+    grid-template-columns: 1fr;
+  }
+  .leftColumn,
+  .standingMiddle {
+    grid-template-columns: 1fr;
+  }
+  .listCard .statusStack,
+  .statusStack {
+    grid-template-columns: 1fr;
+  }
+  .standingCard { width: 100%; }
+  .identityGrid,
+  .historyGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .page { padding: 7px; }
+  .skinSection { padding: 8px; }
+  .objectCard { border-radius: 9px; }
+  .identityGrid,
+  .historyGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 8px;
+  }
+  .fieldLabel { font-size: 8px; letter-spacing: 0.1em; }
+  .fieldValue { font-size: 15px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .actions button { padding: 12px 10px; font-size: 12px; }
+  .priceBox strong { font-size: 24px; }
+  .noteImage { min-height: 142px; }
+}
