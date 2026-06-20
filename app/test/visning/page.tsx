@@ -4,7 +4,7 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Test Visning Live Editor 8.6 v4
+ * Test Visning Live Editor 8.6 v5
  *
  * Definering / formål:
  * Én selvstendig Next.js/React-side for /test/visning. Siden tester global skin,
@@ -51,7 +51,7 @@
  * Ingen produksjonslogging. Testside.
  *
  * Versjon:
- * UI86-TEST-VISNING-LIVE-EDITOR-V4-ONEFILE
+ * UI86-TEST-VISNING-LIVE-EDITOR-V5-ONEFILE
  */
 
 import React, { useMemo, useRef, useState } from "react";
@@ -133,16 +133,17 @@ const cssTree: CssNode[] = [
   },
   {
     id: "layout",
-    title: "Page/layout: 5% desktop-margin og split-screen",
+    title: "Page/layout: full innholdsbredde med 5% margin og split-screen",
     selector: ".ctCanvasWrap, .ctSplitActive",
     file: "app/test/visning/page.tsx :: PAGE_LAYOUT_CSS",
     feature: "test.visning.layout.preview",
     api: "Ingen",
     view: "Ingen",
     code: `.ctCanvasWrap {
-  width: min(90vw, 2200px);
-  margin: 0 auto;
-  padding: 22px 0 80px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 22px 5% 80px;
 }
 .ctSplitActive {
   display: grid;
@@ -532,8 +533,11 @@ export default function TestVisningLiveEditorPage() {
 const staticCss = `
 .ctLivePage * { box-sizing: border-box; }
 .ctLivePage button { font: inherit; cursor: pointer; }
-.ctPreviewPane { min-width: 0; }
+.ctPreviewPane { min-width: 0; width: 100%; overflow-x: hidden; }
+.ctLivePage { width: 100%; }
+.ctLivePage:not(.ctSplitActive) .ctPreviewPane { width: 100%; }
 .ctFullSplit { position: fixed; inset: 0; z-index: 9999; background: var(--ct-bg); }
+.ctFullSplit .ctCanvasWrap { width: 100%; max-width: none; margin: 0; padding-left: 5%; padding-right: 5%; }
 .ctTopBar { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px; align-items: center; padding: 12px 0; backdrop-filter: blur(14px); }
 .ctTopBar h1 { margin: 0; font-size: clamp(22px, 3vw, 42px); letter-spacing: -0.03em; }
 .ctTopBar p, .ctTopBar button, .ctFilterGroup span, .ctTimeline span, .ctApiList span { color: var(--ct-muted); }
@@ -553,6 +557,7 @@ const staticCss = `
 .ctSection h2 { font-size: 26px; margin: 0 0 12px; }
 .ctSection h3 { margin: 18px 0 8px; color: var(--ct-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; }
 .ctCardGrid { display: grid; gap: 14px; margin-bottom: 12px; }
+.ctCardGrid > [data-inspect-id] { min-width: 0; }
 .ctHorizontalCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ctListCards { grid-template-columns: 1fr; }
 .ctMuseumCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
