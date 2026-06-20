@@ -4,19 +4,19 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Test Visning Live Editor 8.6 v2
+ * Test Visning Live Editor 8.6 v4
  *
  * Definering / formål:
- * En selvstendig Next.js/React testside for visningskort, objektpresentasjon,
- * relasjonspresentasjon, brukerkort, filterrad, periodefilter og live CSS-editor.
- * Siden er laget som en test-/designflate og bruker statisk eksempeldata.
+ * Én selvstendig Next.js/React-side for /test/visning. Siden tester global skin,
+ * visningskort, objektpresentasjon, relasjonspresentasjon, periode/tidslinje,
+ * filterrad og live CSS-editor med inspect/right-click, split-screen, resize og reset.
  *
  * Bruksområde:
- * Route: /test/visning
- * Brukes for å sammenligne global skin, originalkode og redigert kode med split-screen.
+ * - /test/visning
+ * - Intern UI/UX 8.6 testflate før komponenter splittes til egne filer.
  *
  * Berørte sider / routes:
- * - /test/visning
+ * - app/test/visning/page.tsx
  *
  * Berørte DB-brytere / feature_keys:
  * - test.visning.view
@@ -25,6 +25,8 @@
  * - object.presentation.view
  * - object.relations.view
  * - object.market.view
+ * - object.user_state.view
+ * - period86.timeline.view
  *
  * Berørte API-ruter:
  * - GET /api/catalog/search
@@ -32,1201 +34,578 @@
  * - GET /api/object/relations
  * - GET /api/object/market
  * - GET /api/object/user-state
+ * - GET /api/period86/timeline
  *
  * Berørte tabeller / views:
  * - ct_v_catalog_objects_resolved
- * - ct_v_object_presentation_resolved
  * - ct_v_no_banknote_object_presentation
  * - ct_v_object_relations_resolved
  * - ct_v_object_market_resolved
  * - ct_v_object_user_state_resolved
+ * - ct_v_period_filter_options
  *
  * Dataretning:
- * Statisk testdata -> Next.js page -> React client state -> UI preview
+ * Statisk testdata -> Next.js page -> React client state -> CSS editor -> UI preview
  *
  * Logging:
  * Ingen produksjonslogging. Testside.
  *
  * Versjon:
- * UI86-TEST-VISNING-LIVE-EDITOR-V2-ONEFILE
+ * UI86-TEST-VISNING-LIVE-EDITOR-V4-ONEFILE
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
-type SkinKey = "collectium" | "samler" | "museum" | "finans";
-type PreviewMode = "cards" | "object" | "relation" | "user" | "switches";
-type CodeTarget = "global" | "page" | "layout" | "cards" | "object" | "relation" | "api";
+type Skin = "collectium" | "samler" | "museum" | "finans";
+type ViewMode = "cards" | "object" | "relation" | "user" | "all";
+type TimelineMode = "object" | "relation" | "period" | "index";
 
-type InspectInfo = {
+type CssNode = {
+  id: string;
   title: string;
-  file: string;
   selector: string;
+  file: string;
   feature: string;
   api: string;
   view: string;
-  href: string;
+  code: string;
+  children?: CssNode[];
+};
+
+type InspectState = {
+  id: string;
+  title: string;
+  selector: string;
+  file: string;
+  feature: string;
+  api: string;
+  view: string;
   x: number;
   y: number;
 };
 
-const skins: { key: SkinKey; label: string }[] = [
-  { key: "collectium", label: "Collectium" },
-  { key: "samler", label: "Samler" },
-  { key: "museum", label: "Museum" },
-  { key: "finans", label: "Finans" },
-];
+type SizeMap = Record<string, { width?: number; height?: number }>;
 
-const modes: { key: PreviewMode; label: string }[] = [
-  { key: "cards", label: "Visningskort" },
-  { key: "object", label: "Objektpresentasjon" },
-  { key: "relation", label: "Relasjonpresentasjon" },
-  { key: "user", label: "Brukerkort" },
-  { key: "switches", label: "Brytere / linker" },
-];
-
-const codeTargets: { key: CodeTarget; label: string; file: string }[] = [
-  { key: "global", label: "Global CSS", file: "app/test/visning/page.tsx :: ORIGINAL_GLOBAL_CSS" },
-  { key: "page", label: "Page", file: "app/test/visning/page.tsx :: TestVisningLiveEditorPage" },
-  { key: "layout", label: "Layout", file: "components/layout/CollectiumAppShell.tsx + app/layout.tsx" },
-  { key: "cards", label: "Visningskort", file: "app/test/visning/page.tsx :: ViewCards" },
-  { key: "object", label: "Objektpresentasjon", file: "app/test/visning/page.tsx :: ObjectPresentation" },
-  { key: "relation", label: "Relasjon", file: "app/test/visning/page.tsx :: RelationPresentation" },
-  { key: "api", label: "API / views", file: "app/api/object/* + Neon resolved views" },
-];
-
-const ORIGINAL_GLOBAL_CSS = `
-/* Collectium /test/visning live editor CSS v2 */
-.ct86-page {
-  --ct-bg: #f7f4ec;
-  --ct-surface: rgba(255, 255, 250, 0.92);
-  --ct-surface-2: rgba(247, 251, 246, 0.92);
-  --ct-text: #153c30;
-  --ct-muted: #779083;
-  --ct-border: rgba(30, 82, 63, 0.26);
-  --ct-line: rgba(177, 146, 97, 0.34);
-  --ct-accent: #2e7a5d;
-  --ct-accent-2: #c9a44f;
-  --ct-danger: #e67b72;
-  --ct-blue: #4c8fc8;
-  --ct-shadow: 0 18px 44px rgba(25, 48, 38, 0.11);
-  --ct-radius: 16px;
-  --ct-font-main: Georgia, "Times New Roman", serif;
-  --ct-font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+const cssTree: CssNode[] = [
+  {
+    id: "global",
+    title: "Global kode for testsiden",
+    selector: ".ctLivePage",
+    file: "app/test/visning/page.tsx :: GLOBAL_TEST_CSS",
+    feature: "test.visning.view",
+    api: "Ingen produksjons-API",
+    view: "Ingen DB-view",
+    code: `.ctLivePage {
+  --ct-bg: #f7f3eb;
+  --ct-panel: rgba(255, 253, 247, 0.92);
+  --ct-ink: #173d31;
+  --ct-muted: #6b8b7e;
+  --ct-line: rgba(27, 78, 60, 0.23);
+  --ct-soft: rgba(45, 108, 78, 0.08);
+  --ct-gold: #c8a34f;
+  --ct-radius: 14px;
+  --ct-shadow: 0 18px 42px rgba(29, 54, 42, 0.12);
   min-height: 100vh;
-  padding: 28px;
-  color: var(--ct-text);
-  background:
-    radial-gradient(circle at top left, rgba(204, 171, 101, 0.14), transparent 28rem),
-    linear-gradient(135deg, var(--ct-bg), #ffffff 62%, #eff5ee);
-  font-family: var(--ct-font-ui);
-}
-
-.ct86-page[data-skin="museum"] {
+  background: var(--ct-bg);
+  color: var(--ct-ink);
+}`,
+    children: [
+      {
+        id: "global-skins",
+        title: "Skin tokens",
+        selector: ".ctLivePage[data-skin='museum']",
+        file: "app/test/visning/page.tsx :: SKIN_TOKENS",
+        feature: "template.skin.view",
+        api: "GET /api/account/preferences senere",
+        view: "ct_user_preferences / global token registry senere",
+        code: `.ctLivePage[data-skin='museum'] {
   --ct-bg: #11110f;
-  --ct-surface: rgba(31, 31, 31, 0.95);
-  --ct-surface-2: rgba(25, 25, 25, 0.92);
-  --ct-text: #f3eee2;
-  --ct-muted: #a89b82;
-  --ct-border: rgba(204, 164, 84, 0.36);
-  --ct-line: rgba(204, 164, 84, 0.35);
-  --ct-accent: #c9a44f;
-  --ct-accent-2: #8a6a2f;
-  --ct-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
-  background: linear-gradient(135deg, #0b0b0a, #151515 55%, #090909);
+  --ct-panel: rgba(31, 31, 30, 0.94);
+  --ct-ink: #fff7df;
+  --ct-muted: #b8ad91;
+  --ct-line: rgba(214, 178, 90, 0.32);
+  --ct-soft: rgba(214, 178, 90, 0.08);
+  --ct-gold: #d0aa55;
+  --ct-shadow: 0 22px 52px rgba(0, 0, 0, 0.28);
+}`,
+      },
+    ],
+  },
+  {
+    id: "layout",
+    title: "Page/layout: 5% desktop-margin og split-screen",
+    selector: ".ctCanvasWrap, .ctSplitActive",
+    file: "app/test/visning/page.tsx :: PAGE_LAYOUT_CSS",
+    feature: "test.visning.layout.preview",
+    api: "Ingen",
+    view: "Ingen",
+    code: `.ctCanvasWrap {
+  width: min(90vw, 2200px);
+  margin: 0 auto;
+  padding: 22px 0 80px;
 }
-
-.ct86-page[data-skin="samler"] {
-  --ct-bg: #f2f8f3;
-  --ct-surface: rgba(250, 255, 251, 0.96);
-  --ct-surface-2: rgba(238, 250, 240, 0.92);
-  --ct-text: #113d2a;
-  --ct-muted: #658575;
-  --ct-border: rgba(52, 126, 88, 0.26);
-  --ct-accent: #28704c;
-  --ct-accent-2: #7ebf8c;
-}
-
-.ct86-page[data-skin="finans"] {
-  --ct-bg: #07111f;
-  --ct-surface: rgba(10, 24, 42, 0.96);
-  --ct-surface-2: rgba(7, 32, 46, 0.94);
-  --ct-text: #e8f7ff;
-  --ct-muted: #88abc1;
-  --ct-border: rgba(80, 168, 218, 0.34);
-  --ct-line: rgba(72, 155, 195, 0.28);
-  --ct-accent: #55b6e8;
-  --ct-accent-2: #8ee3bd;
-  --ct-shadow: 0 18px 52px rgba(0, 21, 44, 0.4);
-  background: linear-gradient(135deg, #05101b, #0b1c2d 62%, #07131d);
-}
-
-.ct86-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: start;
-  padding: 14px;
-  margin-bottom: 18px;
-  border: 1px solid var(--ct-border);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--ct-surface) 92%, transparent);
-  box-shadow: var(--ct-shadow);
-  backdrop-filter: blur(12px);
-}
-
-.ct86-title h1 {
-  margin: 0;
-  font-family: var(--ct-font-main);
-  font-size: clamp(26px, 3vw, 48px);
-  letter-spacing: -0.03em;
-}
-
-.ct86-title p,
-.ct86-title small {
-  color: var(--ct-muted);
-  margin: 4px 0 0;
-}
-
-.ct86-toolbar,
-.ct86-filter-row,
-.ct86-period-row,
-.ct86-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.ct86-pill,
-.ct86-toolbar button,
-.ct86-code-link,
-.ct86-action {
-  min-height: 34px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--ct-border);
-  color: var(--ct-text);
-  background: color-mix(in srgb, var(--ct-surface) 72%, transparent);
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.ct86-pill[data-active="true"],
-.ct86-toolbar button[data-active="true"],
-.ct86-period[data-active="true"] {
-  color: #fff;
-  background: var(--ct-accent);
-  border-color: color-mix(in srgb, var(--ct-accent) 70%, #fff);
-}
-
-.ct86-main[data-split="true"] {
+.ctSplitActive {
   display: grid;
   grid-template-columns: 450px minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
+  gap: 0;
+  min-height: 100vh;
 }
-
-.ct86-code-panel {
-  display: none;
-  position: sticky;
-  top: 110px;
-  height: calc(100vh - 130px);
-  min-height: 560px;
-  border: 1px solid var(--ct-border);
-  border-radius: 18px;
-  overflow: hidden;
-  background: #0f1117;
-  color: #e8edf7;
-  box-shadow: var(--ct-shadow);
-}
-
-.ct86-main[data-split="true"] .ct86-code-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.ct86-code-panel header {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.13);
-  background: rgba(255,255,255,0.06);
-}
-
-.ct86-code-panel textarea {
-  flex: 1;
-  width: 100%;
-  resize: none;
-  border: 0;
-  outline: 0;
-  padding: 14px;
-  color: #dbe8ff;
-  background: #0b0d12;
-  font-family: "IBM Plex Mono", Consolas, monospace;
-  font-size: 12px;
-  line-height: 1.48;
-}
-
-.ct86-preview {
-  min-width: 0;
-}
-
-.ct86-panel,
-.ct86-card,
-.ct86-object,
-.ct86-relation,
-.ct86-user-card {
-  position: relative;
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-radius);
-  background: var(--ct-surface);
-  box-shadow: var(--ct-shadow);
-}
-
-.ct86-panel::after,
-.ct86-card::after,
-.ct86-object::after,
-.ct86-relation::after,
-.ct86-user-card::after {
-  content: "________ Collectium";
-  position: absolute;
-  right: 14px;
-  bottom: 8px;
-  color: color-mix(in srgb, var(--ct-accent) 58%, transparent);
-  font-family: var(--ct-font-main);
-  font-size: 8px;
-  font-style: italic;
-  pointer-events: none;
-}
-
-.ct86-filter-panel {
-  padding: 14px;
-  margin-bottom: 16px;
-}
-
-.ct86-filter-grid {
+.ctCodeRail {
+  width: 450px;
+  border-right: 1px solid var(--ct-line);
+  background: rgba(10, 12, 11, 0.96);
+}`,
+  },
+  {
+    id: "filters",
+    title: "Masterfilter / samler / forhandler / objekt / periode",
+    selector: ".ctFilterDeck",
+    file: "app/test/visning/page.tsx :: FILTER_CSS",
+    feature: "filter.master.view",
+    api: "GET /api/catalog/filters",
+    view: "ct_v_catalog_filter_counts + ct_v_period_filter_options",
+    code: `.ctFilterDeck {
   display: grid;
   grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 10px;
+  margin: 14px 0 12px;
 }
-
-.ct86-filter-box {
+.ctFilterGroup {
+  border: 1px solid var(--ct-line);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel);
   padding: 10px;
-  border: 1px solid var(--ct-border);
-  border-radius: 14px;
-  background: var(--ct-surface-2);
-}
-
-.ct86-filter-box strong,
-.ct86-section-title,
-.ct86-label {
-  display: block;
-  color: var(--ct-accent);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.ct86-period-table {
-  margin-top: 12px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.ct86-period {
-  padding: 10px 12px;
-  text-align: left;
-  border: 1px solid var(--ct-border);
-  border-radius: 14px;
-  background: var(--ct-surface);
-  color: var(--ct-text);
-  cursor: pointer;
-}
-
-.ct86-code-links {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(120px, 1fr));
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.ct86-card-grid {
-  display: grid;
-  gap: 14px;
-}
-
-.ct86-view-row {
-  display: grid;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.ct86-view-row[data-view="horizontal"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.ct86-view-row[data-view="list"] {
-  grid-template-columns: 1fr;
-}
-
-.ct86-view-row[data-view="museum"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.ct86-view-row[data-view="standing"] {
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
-}
-
-.ct86-card {
+}`,
+  },
+  {
+    id: "timeline",
+    title: "Periodefilter / tidslinje med 4 valg",
+    selector: ".ctTimeline",
+    file: "app/test/visning/page.tsx :: TIMELINE_CSS",
+    feature: "period86.timeline.view",
+    api: "GET /api/period86/timeline",
+    view: "ct_v_period_filter_options",
+    code: `.ctTimeline {
+  border: 1px solid var(--ct-line);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel);
   padding: 14px;
-  overflow: hidden;
+  margin: 10px 0 24px;
 }
-
-.ct86-horizontal-card {
-  display: grid;
-  grid-template-columns: 172px minmax(0, 1fr) 170px;
-  gap: 12px;
-}
-
-.ct86-list-card {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr) 330px 170px;
-  gap: 12px;
-  align-items: stretch;
-  min-height: 148px;
-}
-
-.ct86-museum-card {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
-  gap: 14px;
-}
-
-.ct86-standing-card {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.ct86-note {
+.ctTimelineTrack {
   position: relative;
-  min-height: 132px;
-  border: 1px solid color-mix(in srgb, var(--ct-border) 74%, #fff);
-  border-radius: 10px;
-  overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.4), transparent),
-    repeating-linear-gradient(135deg, rgba(76,111,94,0.08) 0 3px, transparent 3px 15px),
-    color-mix(in srgb, var(--ct-surface-2) 88%, #fff);
-}
-
-.ct86-note[data-wide="true"] {
-  min-height: 178px;
-}
-
-.ct86-note-number {
-  position: absolute;
-  left: 18px;
-  top: 12px;
-  font-family: var(--ct-font-main);
-  font-size: clamp(60px, 8vw, 118px);
-  line-height: 0.8;
-  color: color-mix(in srgb, var(--ct-text) 16%, transparent);
-}
-
-.ct86-note-bank {
-  position: absolute;
-  left: 20px;
-  bottom: 18px;
-  color: color-mix(in srgb, var(--ct-text) 64%, transparent);
-  letter-spacing: 0.28em;
-  font-weight: 900;
-  font-size: 11px;
-}
-
-.ct86-note-seal {
-  position: absolute;
-  right: 22px;
-  top: 42px;
-  width: 54px;
-  height: 82px;
-  border-radius: 999px 999px 12px 12px;
-  background: radial-gradient(circle at 40% 30%, rgba(255,255,255,0.55), transparent 28%), color-mix(in srgb, var(--ct-accent-2) 34%, #fff);
-  filter: blur(0.2px);
-}
-
-.ct86-card h3,
-.ct86-object h2,
-.ct86-relation h2 {
-  margin: 0 0 8px;
-  font-family: var(--ct-font-main);
-  font-size: clamp(22px, 2.2vw, 36px);
-  line-height: 0.98;
-}
-
-.ct86-mini-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 12px;
-}
-
-.ct86-field {
-  border-bottom: 1px dashed var(--ct-line);
-  padding: 6px 0;
-  cursor: context-menu;
-}
-
-.ct86-field label {
-  display: block;
-  color: color-mix(in srgb, var(--ct-accent) 82%, var(--ct-text));
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.ct86-field strong {
-  display: block;
-  margin-top: 3px;
-  font-family: var(--ct-font-main);
-  font-size: 15px;
-}
-
-.ct86-history {
-  padding: 10px;
-  border: 1px solid var(--ct-border);
-  border-radius: 12px;
-  background: var(--ct-surface-2);
-}
-
-.ct86-status {
-  display: grid;
-  gap: 7px;
-}
-
-.ct86-status-item,
-.ct86-price {
-  display: grid;
-  grid-template-columns: 28px 1fr auto;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 8px;
-  border: 1px solid var(--ct-border);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--ct-surface-2) 86%, transparent);
-}
-
-.ct86-status-item span {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ct-accent) 15%, transparent);
-  color: var(--ct-accent);
-  font-weight: 900;
-}
-
-.ct86-status-item small,
-.ct86-meta {
-  display: block;
-  color: var(--ct-muted);
-  font-size: 11px;
-}
-
-.ct86-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.ct86-object-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 16px;
-  align-items: start;
-}
-
-.ct86-object-hero {
-  display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
-  gap: 18px;
-  padding: 18px;
-}
-
-.ct86-segment-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
-  margin-top: 14px;
+  padding-top: 22px;
 }
-
-.ct86-segment-card,
-.ct86-side-box {
-  padding: 14px;
-  border: 1px solid var(--ct-border);
-  border-radius: 14px;
-  background: var(--ct-surface);
-}
-
-.ct86-relation,
-.ct86-user-card {
-  padding: 16px;
-}
-
-.ct86-relation-list {
-  display: grid;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.ct86-relation-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--ct-border);
-  border-radius: 14px;
-  background: var(--ct-surface-2);
-}
-
-.ct86-inspector {
-  position: fixed;
-  z-index: 80;
-  width: min(340px, calc(100vw - 24px));
-  padding: 12px;
-  border: 1px solid var(--ct-border);
-  border-radius: 16px;
-  background: var(--ct-surface);
-  color: var(--ct-text);
-  box-shadow: 0 28px 70px rgba(0,0,0,0.28);
-}
-
-.ct86-inspector code {
-  display: block;
-  padding: 6px;
-  margin-top: 5px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--ct-surface-2) 80%, transparent);
-  word-break: break-word;
-}
-
-.ct86-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  display: grid;
-  place-items: center;
-  padding: 22px;
-  background: rgba(0,0,0,0.56);
-}
-
-.ct86-modal-body {
-  width: min(1180px, 100%);
-  height: min(820px, calc(100vh - 44px));
-  border: 1px solid var(--ct-border);
-  border-radius: 20px;
+.ctTimelineTrack::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 36px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ct-gold), transparent);
+}`,
+  },
+  {
+    id: "cards",
+    title: "Visningskort: horisontal/liste/museum/stående",
+    selector: ".ctObjectCard",
+    file: "app/test/visning/page.tsx :: CARD_CSS",
+    feature: "catalog.object.open",
+    api: "GET /api/catalog/search",
+    view: "ct_v_catalog_objects_resolved",
+    code: `.ctObjectCard {
+  position: relative;
+  border: 1px solid var(--ct-line);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel);
+  box-shadow: var(--ct-shadow);
   overflow: hidden;
-  background: #0d1017;
-  color: #e9eef9;
-  box-shadow: 0 40px 90px rgba(0,0,0,0.45);
+}
+.ctHorizontalCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ctMuseumCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ctStandingCards { grid-template-columns: repeat(2, minmax(260px, 1fr)); }`,
+  },
+  {
+    id: "object",
+    title: "Objektpresentasjon",
+    selector: ".ctObjectPresentation",
+    file: "app/test/visning/page.tsx :: OBJECT_PRESENTATION_CSS",
+    feature: "object.presentation.view",
+    api: "GET /api/object/presentation",
+    view: "ct_v_no_banknote_object_presentation",
+    code: `.ctObjectPresentation {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+  gap: 24px;
+  border: 1px solid var(--ct-line);
+  border-radius: calc(var(--ct-radius) + 4px);
+  background: var(--ct-panel);
+  padding: 24px;
+}`,
+  },
+  {
+    id: "relation",
+    title: "Relasjonpresentasjon",
+    selector: ".ctRelationPresentation",
+    file: "app/test/visning/page.tsx :: RELATION_PRESENTATION_CSS",
+    feature: "object.relations.view",
+    api: "GET /api/object/relations",
+    view: "ct_v_object_relations_resolved",
+    code: `.ctRelationPresentation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 18px;
+  border: 1px solid var(--ct-line);
+  border-radius: var(--ct-radius);
+  background: var(--ct-panel);
+  padding: 18px;
+}`,
+  },
+  {
+    id: "inspector",
+    title: "Inspector / høyreklikk / resize-håndtak",
+    selector: ".ctSelectedInspect",
+    file: "app/test/visning/page.tsx :: INSPECTOR_CSS",
+    feature: "test.visning.css_edit.preview",
+    api: "Ingen",
+    view: "Ingen",
+    code: `.ctSelectedInspect {
+  outline: 2px solid #44a3ff !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(68, 163, 255, 0.18), var(--ct-shadow) !important;
 }
+.ctResizeHandle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #44a3ff;
+  border: 2px solid white;
+  border-radius: 999px;
+  z-index: 30;
+}`,
+  },
+];
 
-.ct86-modal-body header {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.ct86-modal-body textarea {
-  border: 0;
-  resize: none;
-  outline: 0;
-  padding: 14px;
-  background: #090b10;
-  color: #e6eeff;
-  font-family: Consolas, "IBM Plex Mono", monospace;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-@media (max-width: 1200px) {
-  .ct86-main[data-split="true"] { grid-template-columns: 1fr; }
-  .ct86-code-panel { position: relative; top: auto; height: 520px; }
-  .ct86-filter-grid,
-  .ct86-view-row[data-view="horizontal"],
-  .ct86-view-row[data-view="museum"],
-  .ct86-view-row[data-view="standing"],
-  .ct86-object-grid,
-  .ct86-object-hero,
-  .ct86-list-card { grid-template-columns: 1fr; }
-  .ct86-code-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 720px) {
-  .ct86-page { padding: 12px; }
-  .ct86-topbar { grid-template-columns: 1fr; }
-  .ct86-period-table,
-  .ct86-filter-grid,
-  .ct86-segment-grid { grid-template-columns: 1fr; }
-  .ct86-horizontal-card,
-  .ct86-list-card,
-  .ct86-museum-card { grid-template-columns: 1fr; }
-}
-`;
-
-const PAGE_CODE = `export default function TestVisningLiveEditorPage() {
-  const [skin, setSkin] = useState<SkinKey>("collectium");
-  const [mode, setMode] = useState<PreviewMode>("cards");
-  const [split, setSplit] = useState(false);
-  const [editedCss, setEditedCss] = useState(ORIGINAL_GLOBAL_CSS);
-
-  return (
-    <main className="ct86-page" data-skin={skin}>
-      <style>{editedCss}</style>
-      <Topbar />
-      <FilterAndTimeline />
-      <main className="ct86-main" data-split={split}>
-        <CodePanel />
-        <Preview />
-      </main>
-    </main>
-  );
-}`;
-
-const LAYOUT_CODE = `// Globalt skall rundt siden ligger fortsatt i prosjektets vanlige layout.
-// Denne testfilen skal ikke lage egen sidebar/topbar for produksjon.
-
-app/layout.tsx
-components/layout/CollectiumAppShell.tsx
-components/layout/CollectiumAppShell.module.css
-
-/test/visning er en testflate inne i globalt Collectium-skall.
-Skin-testen her er lokal preview av tokens, ikke sann global skinmotor.`;
-
-const CARD_CODE = `.ct86-horizontal-card { grid-template-columns: 172px minmax(0, 1fr) 170px; }
-.ct86-list-card { grid-template-columns: 300px minmax(0, 1fr) 330px 170px; }
-.ct86-museum-card { grid-template-columns: minmax(220px, .9fr) minmax(0, 1.1fr); }
-.ct86-view-row[data-view="museum"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.ct86-view-row[data-view="standing"] { grid-template-columns: repeat(2, minmax(280px, 1fr)); }`;
-
-const OBJECT_CODE = `ObjectPresentation
-- route: /objekt/[sourceKey]/[objectGroup]/[objectId]
-- feature: object.presentation.view
-- api: GET /api/object/presentation
-- view: ct_v_object_presentation_resolved
-- source view: ct_v_no_banknote_object_presentation`;
-
-const RELATION_CODE = `RelationPresentation
-- route: /relasjon/[relationType]/[slug]
-- feature: object.relations.view
-- api: GET /api/object/relations
-- view: ct_v_object_relations_resolved
-- href source: relation_href`;
-
-const API_CODE = `KILDE / BRYTER / FELT
-catalog.object.open -> GET /objekt/[sourceKey]/[objectGroup]/[objectId]
-object.presentation.view -> GET /api/object/presentation -> ct_v_object_presentation_resolved
-object.relations.view -> GET /api/object/relations -> ct_v_object_relations_resolved
-object.market.view -> GET /api/object/market -> ct_v_object_market_resolved
-object.user_state.view -> GET /api/object/user-state -> ct_v_object_user_state_resolved
-catalog.search -> GET /api/catalog/search -> ct_v_catalog_objects_resolved`;
+const flatNodes = (nodes: CssNode[]): CssNode[] => nodes.flatMap((n) => [n, ...(n.children ? flatNodes(n.children) : [])]);
+const allNodes = flatNodes(cssTree);
+const baseCss = allNodes.map((n) => `/* ${n.title} */\n${n.code}`).join("\n\n");
 
 const objectData = {
-  title: "1 øre · 1876 · Bronse · 1",
-  museumTitle: "Museum · 1 øre · 1876 · Bronse · 1",
-  largeTitle: "100 kroner · 1. utgave · 1877 · Seddelpapir",
-  value: "1 øre",
-  issue: "1876–1902",
-  variant: "Ikke registrert",
-  rarity: "Ikke vurdert",
-  source: "norske_mynter · coin · 1876 · Frederik VI",
-  regent: "Frederik VI",
-  year: "1876",
-  context: "Konge",
-  relation: "Relasjon tilgjengelig",
-  estimate: "Ikke estimert",
+  title: "100 kroner · 1. utgave · 1877 · Seddelpapir",
+  titleSmall: "1 øre · 1876 · Bronse · 1",
+  source: "norske_sedler · banknote · NS 1 459",
+  market: "15 000 kr",
+  trend: "+4,2 %",
+  rarity: "RRR",
+  regent: "Oscar II",
+  period: "1872–1905",
+  motif: "Riksvåpen",
+  signature: "Winge / Getz",
 };
 
-function getCode(target: CodeTarget, editedCss: string) {
-  if (target === "global") return editedCss;
-  if (target === "page") return PAGE_CODE;
-  if (target === "layout") return LAYOUT_CODE;
-  if (target === "cards") return CARD_CODE;
-  if (target === "object") return OBJECT_CODE;
-  if (target === "relation") return RELATION_CODE;
-  return API_CODE;
+const timelineItems = [
+  { year: "1877", title: "1. utgave", text: "Objektår / publisering" },
+  { year: "1905", title: "Unionsbrudd", text: "Relasjon til maktstruktur" },
+  { year: "1940", title: "Krig / okkupasjon", text: "Historisk kontekst" },
+  { year: "1969", title: "Oljealder", text: "Finanshistorisk lag" },
+  { year: "2000", title: "Ny markedsfase", text: "Index / samleraktivitet" },
+  { year: "2026", title: "Collectium", text: "Digital relasjonskatalog" },
+];
+
+const fieldInfo: Record<string, Partial<InspectState>> = {
+  "master-filter": { title: "Master filter", selector: ".ctFilterDeck .ctFilterGroup", file: "app/test/visning/page.tsx", feature: "filter.master.view", api: "GET /api/catalog/filters", view: "ct_v_catalog_filter_counts" },
+  timeline: { title: "Periode tidslinje", selector: ".ctTimeline", file: "app/test/visning/page.tsx", feature: "period86.timeline.view", api: "GET /api/period86/timeline", view: "ct_v_period_filter_options" },
+  horizontal: { title: "Horisontalt visningskort", selector: ".ctHorizontalCards .ctObjectCard", file: "app/test/visning/page.tsx", feature: "catalog.object.open", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
+  list: { title: "Listevisningskort", selector: ".ctListCards .ctObjectCard", file: "app/test/visning/page.tsx", feature: "catalog.object.open", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
+  museum: { title: "Museum visningskort", selector: ".ctMuseumCards .ctObjectCard", file: "app/test/visning/page.tsx", feature: "catalog.object.open", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
+  standing: { title: "Stående visningskort", selector: ".ctStandingCards .ctObjectCard", file: "app/test/visning/page.tsx", feature: "catalog.object.open", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
+  object: { title: "Objektpresentasjon", selector: ".ctObjectPresentation", file: "app/test/visning/page.tsx", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation" },
+  relation: { title: "Relasjonpresentasjon", selector: ".ctRelationPresentation", file: "app/test/visning/page.tsx", feature: "object.relations.view", api: "GET /api/object/relations", view: "ct_v_object_relations_resolved" },
+  user: { title: "Bruker/I min samling", selector: ".ctUserPanel", file: "app/test/visning/page.tsx", feature: "object.user_state.view", api: "GET /api/object/user-state", view: "ct_v_object_user_state_resolved" },
+};
+
+function NoteImage({ compact = false }: { compact?: boolean }) {
+  return <div className={compact ? "ctNote ctNoteCompact" : "ctNote"} data-inspect-id="horizontal"><b>100</b><span>NORGES BANK</span><i /></div>;
 }
 
-function useInspect(setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>>) {
-  return (event: React.MouseEvent<HTMLElement>, info: Omit<InspectInfo, "x" | "y">) => {
-    event.preventDefault();
-    setInspect({ ...info, x: event.clientX, y: event.clientY });
-  };
+function Signature() { return <span className="ctSignature">Collectium</span>; }
+
+function ResizeHandles({ id, active, onStart }: { id: string; active: boolean; onStart: (id: string, corner: string, event: React.MouseEvent) => void }) {
+  if (!active) return null;
+  return <>
+    {['nw','ne','sw','se'].map((corner) => <button key={corner} className={`ctResizeHandle ctResize${corner.toUpperCase()}`} onMouseDown={(e) => onStart(id, corner, e)} aria-label={`Resize ${corner}`} />)}
+  </>;
 }
 
-function DataField({
-  label,
-  value,
-  selector,
-  setInspect,
-}: {
-  label: string;
-  value: string;
-  selector: string;
-  setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>>;
-}) {
-  const inspect = useInspect(setInspect);
-  return (
-    <div
-      className="ct86-field"
-      onContextMenu={(event) =>
-        inspect(event, {
-          title: label,
-          file: "app/test/visning/page.tsx",
-          selector,
-          feature: "object.presentation.view",
-          api: "GET /api/object/presentation",
-          view: "ct_v_object_presentation_resolved",
-          href: `/relasjon/felt/${label.toLowerCase().replaceAll(" ", "-")}`,
-        })
-      }
-    >
-      <label>{label}</label>
-      <strong>{value}</strong>
-    </div>
-  );
+function InspectBox({ id, children, className = "", style, selectedId, resizeEnabled, onResizeStart }: { id: string; children: React.ReactNode; className?: string; style?: React.CSSProperties; selectedId: string | null; resizeEnabled: boolean; onResizeStart: (id: string, corner: string, event: React.MouseEvent) => void }) {
+  return <div data-inspect-id={id} className={`${className} ${selectedId === id ? "ctSelectedInspect" : ""}`} style={style}>
+    {children}
+    <ResizeHandles id={id} active={selectedId === id && resizeEnabled} onStart={onResizeStart} />
+  </div>;
 }
 
-function NoteImage({ wide = false }: { wide?: boolean }) {
-  return (
-    <div className="ct86-note" data-wide={wide}>
-      <span className="ct86-note-number">100</span>
-      <span className="ct86-note-bank">NORGES BANK</span>
-      <span className="ct86-note-seal" />
-    </div>
-  );
-}
-
-function StatusColumn({ setInspect }: { setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>> }) {
-  const inspect = useInspect(setInspect);
-  const items = [
-    ["♥", "Hjerte", "Ønskeliste", "0", "collection.wishlist.toggle"],
-    ["★", "Stjerne", "Favoritt", "0", "collection.favorite.toggle"],
-    ["⚑", "Auksjon", "Aktive treff", "3", "auction.object.view"],
-    ["◆", "Nettbutikk", "Aktive salg", "1", "shop.object.view"],
+function FilterDeck({ timelineMode, setTimelineMode }: { timelineMode: TimelineMode; setTimelineMode: (m: TimelineMode) => void }) {
+  const rows = [
+    ["Master filter", "Land · Kilde · Objektgruppe · Marked"],
+    ["Samler filter", "Hjerte · Stjerne · Min samling · Deling"],
+    ["Forhandler filter", "Auksjon · Nettbutikk · Innlevering · Fee"],
+    ["Objektfilter", "Valør · År · Litra · Serie · Variant"],
   ];
-  return (
-    <aside className="ct86-status">
-      {items.map(([icon, title, sub, count, feature]) => (
-        <div
-          key={title}
-          className="ct86-status-item"
-          onContextMenu={(event) =>
-            inspect(event, {
-              title,
-              file: "app/test/visning/page.tsx :: StatusColumn",
-              selector: ".ct86-status-item",
-              feature,
-              api: feature.includes("auction") ? "GET /api/auction/object" : "GET /api/object/user-state",
-              view: feature.includes("auction") ? "ct_v_auction_objects_resolved" : "ct_v_object_user_state_resolved",
-              href: `/api-info/${feature}`,
-            })
-          }
-        >
-          <span>{icon}</span>
-          <div>
-            <strong>{title}</strong>
-            <small>{sub}</small>
-          </div>
-          <b>{count}</b>
-        </div>
-      ))}
-      <div className="ct86-price">
-        <span>⌁</span>
-        <div>
-          <strong>Estimert pris</strong>
-          <small>Mangler markedsverdi</small>
-        </div>
-        <b>{objectData.estimate}</b>
-      </div>
-    </aside>
-  );
-}
-
-function HistoryBox({ setInspect }: { setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>> }) {
-  return (
-    <section className="ct86-history">
-      <strong className="ct86-section-title">Historie · 1808–1814</strong>
-      <div className="ct86-mini-grid">
-        <DataField label="Regent / konge" value={objectData.regent} selector=".ct86-history .regent" setInspect={setInspect} />
-        <DataField label="Motiv / person" value={objectData.title} selector=".ct86-history .motif" setInspect={setInspect} />
-        <DataField label="Årstall" value={objectData.year} selector=".ct86-history .year" setInspect={setInspect} />
-        <DataField label="Historisk kontekst" value={objectData.context} selector=".ct86-history .context" setInspect={setInspect} />
-        <DataField label="Signatur" value="Ikke registrert" selector=".ct86-history .signature" setInspect={setInspect} />
-        <DataField label="Relasjon" value={objectData.relation} selector=".ct86-history .relation" setInspect={setInspect} />
-      </div>
+  return <>
+    <section className="ctFilterDeck" data-inspect-id="master-filter">
+      {rows.map(([a, b]) => <div className="ctFilterGroup" key={a}><strong>{a}</strong><span>{b}</span><button>Åpne</button></div>)}
     </section>
-  );
-}
-
-function Actions() {
-  return (
-    <div className="ct86-actions">
-      <button className="ct86-action" type="button">↗ Åpne objekt</button>
-      <button className="ct86-action" type="button">⌘ Se relasjon</button>
-      <button className="ct86-action" type="button">◎ Legg i samling</button>
-      <button className="ct86-action" type="button">•••</button>
+    <div className="ctAreaRow" data-inspect-id="master-filter">
+      <b>Område</b><button>Norge</button><button>Sedler</button><button>Norske sedler</button><button>Standardutgave</button><button>1877</button>
     </div>
-  );
-}
-
-function Identity({ setInspect }: { setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>> }) {
-  return (
-    <section>
-      <h3>{objectData.title}</h3>
-      <div className="ct86-mini-grid">
-        <DataField label="Valør / utgave" value={objectData.value} selector=".ct86-mini-grid .value" setInspect={setInspect} />
-        <DataField label="Utgave" value={objectData.issue} selector=".ct86-mini-grid .issue" setInspect={setInspect} />
-        <DataField label="Variant" value={objectData.variant} selector=".ct86-mini-grid .variant" setInspect={setInspect} />
-        <DataField label="Sjeldenhet" value={objectData.rarity} selector=".ct86-mini-grid .rarity" setInspect={setInspect} />
-      </div>
-      <p className="ct86-meta">{objectData.source}</p>
-    </section>
-  );
-}
-
-function ViewCards({ setInspect }: { setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>> }) {
-  return (
-    <section className="ct86-card-grid">
-      <div>
-        <h2 className="ct86-label">Horisontal · kompakt · to i bredden</h2>
-        <div className="ct86-view-row" data-view="horizontal">
-          {[0, 1].map((index) => (
-            <article className="ct86-card ct86-horizontal-card" key={`h-${index}`}>
-              <NoteImage />
-              <div>
-                <Identity setInspect={setInspect} />
-                <HistoryBox setInspect={setInspect} />
-                <Actions />
-              </div>
-              <StatusColumn setInspect={setInspect} />
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h2 className="ct86-label">Liste · kompakt</h2>
-        <div className="ct86-view-row" data-view="list">
-          <article className="ct86-card ct86-list-card">
-            <NoteImage wide />
-            <Identity setInspect={setInspect} />
-            <HistoryBox setInspect={setInspect} />
-            <StatusColumn setInspect={setInspect} />
-          </article>
-        </div>
-      </div>
-
-      <div>
-        <h2 className="ct86-label">Museum · stablet to</h2>
-        <div className="ct86-view-row" data-view="museum">
-          {[0, 1].map((index) => (
-            <article className="ct86-card ct86-museum-card" key={`m-${index}`}>
-              <NoteImage wide />
-              <div>
-                <h3>{objectData.museumTitle}</h3>
-                <HistoryBox setInspect={setInspect} />
-                <Actions />
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h2 className="ct86-label">Stående · to i bredden</h2>
-        <div className="ct86-view-row" data-view="standing">
-          {[0, 1].map((index) => (
-            <article className="ct86-card ct86-standing-card" key={`s-${index}`}>
-              <NoteImage />
-              <Identity setInspect={setInspect} />
-              <div className="ct86-mini-grid">
-                <HistoryBox setInspect={setInspect} />
-                <StatusColumn setInspect={setInspect} />
-              </div>
-              <Actions />
-            </article>
-          ))}
-        </div>
+    <section className="ctTimeline" data-inspect-id="timeline">
+      <header><div><b>Periodefilter / tidslinje</b><span>4 valg styrer kontekst for visningskort, objektpresentasjon og relasjon.</span></div><nav>{[
+        ["object", "Objektpresentasjon"], ["relation", "Relasjonpresentasjon"], ["period", "Periode 8.6"], ["index", "Index / Finans"]
+      ].map(([key, label]) => <button key={key} onClick={() => setTimelineMode(key as TimelineMode)} className={timelineMode === key ? "isActive" : ""}>{label}</button>)}</nav></header>
+      <div className="ctTimelineTrack">
+        {timelineItems.map((item) => <article key={item.year} className={timelineMode === "period" && Number(item.year) < 1940 ? "isHot" : ""}><strong>{item.year}</strong><b>{item.title}</b><span>{item.text}</span></article>)}
       </div>
     </section>
-  );
+  </>;
 }
 
-function ObjectPresentation({ setInspect }: { setInspect: React.Dispatch<React.SetStateAction<InspectInfo | null>> }) {
-  return (
-    <section className="ct86-object">
-      <div className="ct86-object-hero">
-        <NoteImage wide />
-        <div>
-          <span className="ct86-pill">Norge · Seddel · Norske sedler · Standardutgave</span>
-          <h2>{objectData.largeTitle}</h2>
-          <p>Tidlig hovedvalør fra den norske seddelhistorien. Sjelden i alle kvaliteter, ekstremt sjelden over 45 XF.</p>
-          <div className="ct86-mini-grid">
-            <DataField label="Markedsverdi" value="15 000 kr" selector=".ct86-object .market" setInspect={setInspect} />
-            <DataField label="Trend 12 mnd" value="↗ 4,2 %" selector=".ct86-object .trend" setInspect={setInspect} />
-            <DataField label="Sjeldenhet" value="RRR" selector=".ct86-object .rarity" setInspect={setInspect} />
-            <DataField label="Konge" value="Oscar II" selector=".ct86-object .king" setInspect={setInspect} />
-          </div>
-        </div>
-      </div>
-      <div className="ct86-object-grid">
-        <div>
-          <div className="ct86-chip-row">
-            <button className="ct86-pill" data-active="true">I Samler</button>
-            <button className="ct86-pill">II Historie</button>
-            <button className="ct86-pill">III Finans</button>
-            <button className="ct86-pill">IV I min samling</button>
-          </div>
-          <div className="ct86-segment-grid">
-            <div className="ct86-segment-card"><strong>Identitet</strong><DataField label="Katalognummer" value="NS 1 459" selector=".ct86-segment-card .catalog" setInspect={setInspect} /><DataField label="Valør" value="100 kroner" selector=".ct86-segment-card .value" setInspect={setInspect} /></div>
-            <div className="ct86-segment-card"><strong>Historie</strong><DataField label="Regent" value="Oscar II" selector=".ct86-segment-card .regent" setInspect={setInspect} /><DataField label="Signatur" value="Winge / Getz" selector=".ct86-segment-card .signature" setInspect={setInspect} /></div>
-            <div className="ct86-segment-card"><strong>Finans</strong><DataField label="Sist solgt" value="19 200 kr · sept 2025" selector=".ct86-segment-card .sold" setInspect={setInspect} /><DataField label="Likviditet" value="Moderat" selector=".ct86-segment-card .liquidity" setInspect={setInspect} /></div>
-          </div>
-        </div>
-        <aside className="ct86-side-box">
-          <strong>Status</strong>
-          <StatusColumn setInspect={setInspect} />
-          <strong className="ct86-section-title">Del visning</strong>
-          <div className="ct86-chip-row"><button className="ct86-pill">6t</button><button className="ct86-pill" data-active="true">12t</button><button className="ct86-pill">18t</button><button className="ct86-pill">24t</button></div>
-        </aside>
-      </div>
+function ObjectCard({ kind }: { kind: "horizontal" | "list" | "museum" | "standing" }) {
+  const inspectId = kind;
+  return <article className={`ctObjectCard ctCard${kind}`} data-inspect-id={inspectId}>
+    <NoteImage compact={kind === "list"} />
+    <section className="ctCardText">
+      <h3>{kind === "museum" ? `Museum · ${objectData.titleSmall}` : objectData.titleSmall}</h3>
+      <div className="ctSpecGrid"><span>Valør</span><b>1 øre</b><span>Utgave</span><b>1876–1902</b><span>Variant</span><b>Ikke registrert</b><span>Sjeldenhet</span><b>Ikke vurdert</b></div>
+      <p>{objectData.source}</p>
+      <div className="ctHistoryMini"><b>Historie</b><span>Frederik VI · 1808–1814</span><span>Relasjon tilgjengelig</span></div>
+      <nav><button>Åpne objekt</button><button>Se relasjon</button><button>Legg i samling</button></nav>
     </section>
-  );
+    <aside className="ctStatusMini"><span>♥ Hjerte 0</span><span>★ Stjerne 0</span><span>⚑ Auksjon 3</span><span>◆ Nettbutikk 1</span><b>Ikke estimert</b></aside>
+    <Signature />
+  </article>;
 }
 
-function RelationPresentation() {
-  return (
-    <section className="ct86-relation">
-      <span className="ct86-pill">Relasjon / regent / Oscar II</span>
-      <h2>Oscar II</h2>
-      <p>Regentperiode, unionstid, relaterte sedler, mynter, personer, signaturer og historiske hendelser.</p>
-      <div className="ct86-relation-list">
-        {[
-          ["Konge · Oscar II", "Vis konge, periode og objekter gruppert etter type"],
-          ["Signatur · Winge/Getz", "Vis signaturperiode og objekter med samme signatur"],
-          ["Motiv · Riksvåpen", "Vis motiv/person og egne objektlister"],
-          ["Utgave · 1. utgave", "Vis alle objekter i samme utgave"],
-        ].map(([title, sub]) => (
-          <div className="ct86-relation-row" key={title}><div><strong>{title}</strong><small>{sub}</small></div><button className="ct86-pill">→</button></div>
-        ))}
-      </div>
-    </section>
-  );
+function CardsSection({ selectedId, resizeEnabled, sizes, onResizeStart }: { selectedId: string | null; resizeEnabled: boolean; sizes: SizeMap; onResizeStart: (id: string, corner: string, e: React.MouseEvent) => void }) {
+  const styleOf = (id: string): React.CSSProperties => ({ width: sizes[id]?.width, height: sizes[id]?.height });
+  return <section className="ctSection">
+    <h2>Visningskort</h2>
+    <h3>Horisontal · kompakt · to i bredden</h3>
+    <div className="ctCardGrid ctHorizontalCards"><InspectBox id="horizontal" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={styleOf("horizontal")}><ObjectCard kind="horizontal" /></InspectBox><InspectBox id="horizontal-2" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart}><ObjectCard kind="horizontal" /></InspectBox></div>
+    <h3>Liste · kompakt</h3>
+    <div className="ctCardGrid ctListCards"><InspectBox id="list" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={styleOf("list")}><ObjectCard kind="list" /></InspectBox></div>
+    <h3>Museum · stablet to i bredden</h3>
+    <div className="ctCardGrid ctMuseumCards"><InspectBox id="museum" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={styleOf("museum")}><ObjectCard kind="museum" /></InspectBox><InspectBox id="museum-2" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart}><ObjectCard kind="museum" /></InspectBox></div>
+    <h3>Stående · to i bredden</h3>
+    <div className="ctCardGrid ctStandingCards"><InspectBox id="standing" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={styleOf("standing")}><ObjectCard kind="standing" /></InspectBox><InspectBox id="standing-2" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart}><ObjectCard kind="standing" /></InspectBox></div>
+  </section>;
 }
 
-function UserCard() {
-  return (
-    <section className="ct86-user-card">
-      <h2>Brukerkort / I min samling</h2>
-      <div className="ct86-segment-grid">
-        <div className="ct86-segment-card"><strong>Kjøp</strong><p>Dato, sted, av, pris og dokumentasjon.</p></div>
-        <div className="ct86-segment-card"><strong>Kvalitet</strong><p>Min kvalitet, gradering, plassering og privat synlighet.</p></div>
-        <div className="ct86-segment-card"><strong>Deling</strong><p>6t, 12t, 18t, 24t og 48t lenker.</p></div>
-      </div>
-    </section>
-  );
+function ObjectPresentation({ selectedId, resizeEnabled, sizes, onResizeStart }: { selectedId: string | null; resizeEnabled: boolean; sizes: SizeMap; onResizeStart: (id: string, corner: string, e: React.MouseEvent) => void }) {
+  return <InspectBox id="object" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={{ width: sizes.object?.width, height: sizes.object?.height }} className="ctObjectPresentation">
+    <div className="ctObjectHero"><NoteImage /><div className="ctObjectTabs"><button>Forside</button><button>Bakside</button><button>Gjennomlysning</button><button>Variant</button><button>Detalj</button></div></div>
+    <div className="ctObjectInfo"><p className="ctBreadcrumb">Norge · Seddel · Norske sedler · Standardutgave</p><h1>{objectData.title}</h1><p>Tidlig hovedvalør fra den norske seddelhistorien — utgitt under Oscar II i unionstiden. Sjelden i alle kvaliteter, ekstremt sjelden over 45 XF.</p><div className="ctMetricRow"><span><em>Markedsverdi</em><b>{objectData.market}</b></span><span><em>Trend 12 mnd</em><b>{objectData.trend}</b></span><span><em>Sjeldenhet</em><b>{objectData.rarity}</b></span><span><em>Konge</em><b>{objectData.regent}</b></span></div></div>
+    <Signature />
+  </InspectBox>;
 }
 
-function SwitchesAndLinks() {
-  return (
-    <section className="ct86-panel" style={{ padding: 16 }}>
-      <h2>Brytere / linker / API / views</h2>
-      <div className="ct86-relation-list">
-        {[
-          ["catalog.object.open", "GET /objekt/[sourceKey]/[objectGroup]/[objectId]", "ct_app_pages + ct_feature_action_routes"],
-          ["object.presentation.view", "GET /api/object/presentation", "ct_v_object_presentation_resolved"],
-          ["object.relations.view", "GET /api/object/relations", "ct_v_object_relations_resolved"],
-          ["object.market.view", "GET /api/object/market", "ct_v_object_market_resolved"],
-          ["object.user_state.view", "GET /api/object/user-state", "ct_v_object_user_state_resolved"],
-        ].map(([feature, api, view]) => (
-          <div className="ct86-relation-row" key={feature}>
-            <div><strong>{feature}</strong><small>{api}</small><small>{view}</small></div>
-            <button className="ct86-pill">Åpne</button>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+function RelationPresentation({ selectedId, resizeEnabled, sizes, onResizeStart }: { selectedId: string | null; resizeEnabled: boolean; sizes: SizeMap; onResizeStart: (id: string, corner: string, e: React.MouseEvent) => void }) {
+  return <InspectBox id="relation" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={{ width: sizes.relation?.width, height: sizes.relation?.height }} className="ctRelationPresentation">
+    <section><p className="ctBreadcrumb">Relasjon · Regent · Skandinavia</p><h2>Oscar II</h2><p>Regentperiode 1872–1905. Knytter norske sedler, unionstid, motiv, signaturer, kongemakt og historiske hendelser.</p><div className="ctRelationList">{["Relaterte sedler", "Relaterte mynter", "Unionstid", "Winge / Getz", "Riksvåpen", "Publiseringsår 1877"].map((x) => <button key={x}>{x} →</button>)}</div></section>
+    <aside className="ctRelationAside"><b>API og view</b><span>GET /api/object/relations</span><span>ct_v_object_relations_resolved</span><span>relation_href: /relasjon/regent/oscar-ii</span></aside>
+    <Signature />
+  </InspectBox>;
 }
 
-function FiltersAndTimeline({
-  activePeriod,
-  setActivePeriod,
-  openCode,
-}: {
-  activePeriod: string;
-  setActivePeriod: (value: string) => void;
-  openCode: (target: CodeTarget, modal?: boolean) => void;
-}) {
-  const filters = [
-    ["Master filter", "Norge · Norske sedler · mynter · verdipapir"],
-    ["Samler filter", "Hjerte · stjerne · min samling · kvalitet"],
-    ["Forhandler filter", "Auksjon · nettbutikk · forhandler · status"],
-    ["Objektfilter", "Valør · år · litra · utgave · variant"],
+function UserPanel({ selectedId, resizeEnabled, sizes, onResizeStart }: { selectedId: string | null; resizeEnabled: boolean; sizes: SizeMap; onResizeStart: (id: string, corner: string, e: React.MouseEvent) => void }) {
+  return <InspectBox id="user" selectedId={selectedId} resizeEnabled={resizeEnabled} onResizeStart={onResizeStart} style={{ width: sizes.user?.width, height: sizes.user?.height }} className="ctUserPanel">
+    <h2>I min samling / brukerkort</h2><div className="ctUserGrid"><article><b>Kjøp</b><span>Dato: Ikke registrert</span><span>Pris: Ikke registrert</span></article><article><b>Kvalitet</b><span>Min kvalitet: Ikke vurdert</span><span>Synlighet: Privat</span></article><article><b>Status</b><button>♥ Hjerte</button><button>★ Stjerne</button><button>+ Legg i samling</button></article><article><b>Deling</b><button>6t</button><button>12t</button><button>24t</button><button>48t</button></article></div><Signature />
+  </InspectBox>;
+}
+
+function CodeRail({ selectedNode, setSelectedNode, code, setCode, onReset, fullSplit, setFullSplit }: { selectedNode: CssNode; setSelectedNode: (n: CssNode) => void; code: string; setCode: (v: string) => void; onReset: () => void; fullSplit: boolean; setFullSplit: (v: boolean) => void }) {
+  const renderNode = (node: CssNode, depth = 0) => <div key={node.id}><button className={selectedNode.id === node.id ? "isActive" : ""} style={{ paddingLeft: 10 + depth * 14 }} onClick={() => setSelectedNode(node)}>▸ {node.title}</button>{node.children?.map((c) => renderNode(c, depth + 1))}</div>;
+  return <aside className="ctCodeRail">
+    <header><b>CSS / kodefelt</b><button onClick={() => setFullSplit(!fullSplit)}>{fullSplit ? "Lukk full split" : "Full split"}</button></header>
+    <div className="ctCodeMeta"><span>Fil: {selectedNode.file}</span><span>Selector: {selectedNode.selector}</span><span>Feature: {selectedNode.feature}</span><span>API: {selectedNode.api}</span><span>View: {selectedNode.view}</span></div>
+    <div className="ctCodeTree">{cssTree.map((n) => renderNode(n))}</div>
+    <textarea value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} />
+    <footer><button onClick={onReset}>Reset original kode</button><button onClick={() => navigator.clipboard?.writeText(code)}>Kopier</button></footer>
+  </aside>;
+}
+
+function ApiList() {
+  const rows = [
+    ["Kilde", "norske_sedler / norske_mynter", "source_key"],
+    ["Bryter", "catalog.object.open", "GET /api/catalog/search"],
+    ["Objektpresentasjon", "object.presentation.view", "ct_v_no_banknote_object_presentation"],
+    ["Relasjon", "object.relations.view", "ct_v_object_relations_resolved"],
+    ["Marked", "object.market.view", "ct_v_object_market_resolved"],
+    ["Periode", "period86.timeline.view", "ct_v_period_filter_options"],
   ];
-  const periods = ["Objektpresentasjon", "Relasjonpresentasjon", "Periode 8.6", "Index / Finans"];
-  return (
-    <section className="ct86-panel ct86-filter-panel">
-      <div className="ct86-filter-grid">
-        {filters.map(([title, value]) => (
-          <div className="ct86-filter-box" key={title}><strong>{title}</strong><span>{value}</span></div>
-        ))}
-      </div>
-      <div className="ct86-filter-row" style={{ marginTop: 10 }}>
-        <span className="ct86-pill">Område: Norge</span>
-        <span className="ct86-pill">Kilde: Norske sedler</span>
-        <span className="ct86-pill">Object group: banknote</span>
-        <span className="ct86-pill">source_key: norske_sedler</span>
-      </div>
-      <div className="ct86-period-table">
-        {periods.map((period) => (
-          <button key={period} className="ct86-period" data-active={activePeriod === period} onClick={() => setActivePeriod(period)} type="button">
-            <strong>{period}</strong><br /><small>Åpne tidslinje / periodevalg</small>
-          </button>
-        ))}
-      </div>
-      <div className="ct86-code-links">
-        {codeTargets.map((target) => (
-          <button className="ct86-code-link" key={target.key} onClick={() => openCode(target.key, true)} type="button">
-            {target.label}<br /><small>{target.file}</small>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function Inspector({ inspect, onClose }: { inspect: InspectInfo; onClose: () => void }) {
-  return (
-    <aside className="ct86-inspector" style={{ left: Math.min(inspect.x, window.innerWidth - 360), top: Math.min(inspect.y, window.innerHeight - 300) }}>
-      <button className="ct86-pill" style={{ float: "right" }} type="button" onClick={onClose}>×</button>
-      <strong>{inspect.title}</strong>
-      <code>Fil: {inspect.file}</code>
-      <code>CSS: {inspect.selector}</code>
-      <code>Bryter: {inspect.feature}</code>
-      <code>API: {inspect.api}</code>
-      <code>View: {inspect.view}</code>
-      <code>Link: {inspect.href}</code>
-    </aside>
-  );
+  return <section className="ctApiList"><h2>Kilde · bryter · felt · API · view</h2>{rows.map(([a, b, c]) => <div key={a} data-inspect-id="relation"><b>{a}</b><span>{b}</span><code>{c}</code></div>)}</section>;
 }
 
 export default function TestVisningLiveEditorPage() {
-  const [skin, setSkin] = useState<SkinKey>("collectium");
-  const [mode, setMode] = useState<PreviewMode>("cards");
+  const [skin, setSkin] = useState<Skin>("collectium");
+  const [mode, setMode] = useState<ViewMode>("all");
+  const [timelineMode, setTimelineMode] = useState<TimelineMode>("object");
   const [split, setSplit] = useState(false);
-  const [fullscreenSplit, setFullscreenSplit] = useState(false);
-  const [activePeriod, setActivePeriod] = useState("Objektpresentasjon");
-  const [codeTarget, setCodeTarget] = useState<CodeTarget>("global");
-  const [editedCss, setEditedCss] = useState(ORIGINAL_GLOBAL_CSS);
-  const [showModal, setShowModal] = useState(false);
-  const [inspect, setInspect] = useState<InspectInfo | null>(null);
+  const [fullSplit, setFullSplit] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<CssNode>(allNodes[0]);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const [inspect, setInspect] = useState<InspectState | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [resizeEnabled, setResizeEnabled] = useState(false);
+  const [sizes, setSizes] = useState<SizeMap>({});
+  const drag = useRef<{ id: string; startX: number; startY: number; width: number; height: number } | null>(null);
 
-  const activeCode = useMemo(() => getCode(codeTarget, editedCss), [codeTarget, editedCss]);
-  const activeTarget = codeTargets.find((target) => target.key === codeTarget) ?? codeTargets[0];
+  const currentCode = edits[selectedNode.id] ?? selectedNode.code;
+  const liveCss = useMemo(() => `${baseCss}\n\n/* LIVE EDITS */\n${Object.entries(edits).map(([id, css]) => `/* edited:${id} */\n${css}`).join("\n\n")}`, [edits]);
 
-  function openCode(target: CodeTarget, modal = false) {
-    setCodeTarget(target);
-    if (modal) setShowModal(true);
+  function openInspector(id: string, x: number, y: number) {
+    const f = fieldInfo[id] ?? fieldInfo[id.replace(/-2$/, "")] ?? fieldInfo.horizontal;
+    setSelectedId(id);
+    setInspect({ id, x, y, title: f.title ?? id, selector: f.selector ?? ".ctObjectCard", file: f.file ?? "app/test/visning/page.tsx", feature: f.feature ?? "test.visning.view", api: f.api ?? "Ingen", view: f.view ?? "Ingen" });
+    const node = allNodes.find((n) => n.selector === f.selector || n.id === id || n.id === id.replace(/-2$/, ""));
+    if (node) setSelectedNode(node);
+    setSplit(true);
   }
 
-  function updateActiveCode(value: string) {
-    if (codeTarget === "global") setEditedCss(value);
+  function handleContextMenu(e: React.MouseEvent) {
+    const target = (e.target as HTMLElement).closest("[data-inspect-id]") as HTMLElement | null;
+    if (!target) return;
+    e.preventDefault();
+    openInspector(target.dataset.inspectId ?? "horizontal", e.clientX, e.clientY);
   }
 
-  function renderPreview() {
-    if (mode === "object") return <ObjectPresentation setInspect={setInspect} />;
-    if (mode === "relation") return <RelationPresentation />;
-    if (mode === "user") return <UserCard />;
-    if (mode === "switches") return <SwitchesAndLinks />;
-    return <ViewCards setInspect={setInspect} />;
+  function startResize(id: string, _corner: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const el = (e.currentTarget as HTMLElement).parentElement;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    drag.current = { id, startX: e.clientX, startY: e.clientY, width: rect.width, height: rect.height };
+    window.addEventListener("mousemove", moveResize);
+    window.addEventListener("mouseup", stopResize);
   }
 
-  return (
-    <main className="ct86-page" data-skin={skin}>
-      <style>{editedCss}</style>
-      <header className="ct86-topbar">
-        <div className="ct86-title">
-          <small>app/test/visning/page.tsx · live editor · originalkode + editert kode</small>
-          <h1>Collectium test / visning</h1>
-          <p>Global skin følger siden. Split-screen gir 450px kodefelt til venstre og forhåndsvisning på resten av skjermen.</p>
+  function moveResize(e: MouseEvent) {
+    const d = drag.current;
+    if (!d) return;
+    setSizes((prev) => ({ ...prev, [d.id]: { width: Math.max(220, d.width + e.clientX - d.startX), height: Math.max(120, d.height + e.clientY - d.startY) } }));
+  }
+
+  function stopResize() {
+    drag.current = null;
+    window.removeEventListener("mousemove", moveResize);
+    window.removeEventListener("mouseup", stopResize);
+  }
+
+  const show = (m: ViewMode) => mode === "all" || mode === m;
+  const chromeClass = `${split || fullSplit ? "ctSplitActive" : ""} ${fullSplit ? "ctFullSplit" : ""}`;
+
+  return <main className="ctLivePage" data-skin={skin} onContextMenu={handleContextMenu}>
+    <style>{liveCss}</style>
+    <style>{staticCss}</style>
+    <div className={chromeClass}>
+      {(split || fullSplit) && <CodeRail selectedNode={selectedNode} setSelectedNode={(n) => { setSelectedNode(n); setEdits((p) => ({ ...p, [n.id]: p[n.id] ?? n.code })); }} code={currentCode} setCode={(v) => setEdits((p) => ({ ...p, [selectedNode.id]: v }))} onReset={() => setEdits((p) => ({ ...p, [selectedNode.id]: selectedNode.code }))} fullSplit={fullSplit} setFullSplit={setFullSplit} />}
+      <div className="ctPreviewPane">
+        <div className="ctCanvasWrap">
+          <header className="ctTopBar"><div><p>Collectium UI/UX 8.6</p><h1>Test / Visning live editor</h1></div><nav>{(["collectium", "samler", "museum", "finans"] as Skin[]).map((s) => <button key={s} onClick={() => setSkin(s)} className={skin === s ? "isActive" : ""}>{s}</button>)}</nav><nav>{(["all", "cards", "object", "relation", "user"] as ViewMode[]).map((m) => <button key={m} onClick={() => setMode(m)} className={mode === m ? "isActive" : ""}>{m}</button>)}</nav><button onClick={() => setSplit(!split)}>Global CSS / split</button></header>
+          <FilterDeck timelineMode={timelineMode} setTimelineMode={setTimelineMode} />
+          {show("cards") && <CardsSection selectedId={selectedId} resizeEnabled={resizeEnabled} sizes={sizes} onResizeStart={startResize} />}
+          {show("object") && <section className="ctSection"><h2>Objektpresentasjon</h2><ObjectPresentation selectedId={selectedId} resizeEnabled={resizeEnabled} sizes={sizes} onResizeStart={startResize} /></section>}
+          {show("relation") && <section className="ctSection"><h2>Relasjonpresentasjon</h2><RelationPresentation selectedId={selectedId} resizeEnabled={resizeEnabled} sizes={sizes} onResizeStart={startResize} /></section>}
+          {show("user") && <section className="ctSection"><UserPanel selectedId={selectedId} resizeEnabled={resizeEnabled} sizes={sizes} onResizeStart={startResize} /></section>}
+          <ApiList />
         </div>
-        <div className="ct86-toolbar">
-          {skins.map((item) => <button type="button" key={item.key} data-active={skin === item.key} onClick={() => setSkin(item.key)}>{item.label}</button>)}
-          <button type="button" data-active={split} onClick={() => setSplit(!split)}>Splitt koder</button>
-          <button type="button" data-active={fullscreenSplit} onClick={() => { setSplit(true); setFullscreenSplit(!fullscreenSplit); }}>Full screen split</button>
-          <button type="button" onClick={() => openCode("global", true)}>Global CSS</button>
-        </div>
-      </header>
-
-      <FiltersAndTimeline activePeriod={activePeriod} setActivePeriod={setActivePeriod} openCode={openCode} />
-
-      <div className="ct86-chip-row" style={{ marginBottom: 14 }}>
-        {modes.map((item) => <button className="ct86-pill" data-active={mode === item.key} key={item.key} type="button" onClick={() => setMode(item.key)}>{item.label}</button>)}
-        <span className="ct86-pill">Aktiv periode: {activePeriod}</span>
       </div>
-
-      <section
-        className="ct86-main"
-        data-split={split || fullscreenSplit}
-        style={fullscreenSplit ? { position: "fixed", inset: 0, zIndex: 70, padding: 18, background: "var(--ct-bg)", overflow: "auto" } : undefined}
-      >
-        <aside className="ct86-code-panel">
-          <header>
-            <strong>{activeTarget.label}</strong>
-            <small style={{ display: "block", opacity: 0.76 }}>{activeTarget.file}</small>
-            <div className="ct86-chip-row" style={{ marginTop: 8 }}>
-              {codeTargets.map((target) => <button className="ct86-pill" type="button" key={target.key} data-active={codeTarget === target.key} onClick={() => setCodeTarget(target.key)}>{target.label}</button>)}
-              <button className="ct86-pill" type="button" onClick={() => setEditedCss(ORIGINAL_GLOBAL_CSS)}>Reset original CSS</button>
-              {fullscreenSplit ? <button className="ct86-pill" type="button" onClick={() => setFullscreenSplit(false)}>Lukk full screen</button> : null}
-            </div>
-          </header>
-          <textarea value={activeCode} onChange={(event) => updateActiveCode(event.target.value)} readOnly={codeTarget !== "global"} spellCheck={false} />
-        </aside>
-        <section className="ct86-preview">{renderPreview()}</section>
-      </section>
-
-      {inspect ? <Inspector inspect={inspect} onClose={() => setInspect(null)} /> : null}
-
-      {showModal ? (
-        <div className="ct86-modal" role="dialog" aria-modal="true">
-          <div className="ct86-modal-body">
-            <header>
-              <div>
-                <strong>{activeTarget.label}</strong>
-                <small style={{ display: "block", opacity: 0.7 }}>{activeTarget.file}</small>
-              </div>
-              <div className="ct86-chip-row">
-                <button className="ct86-pill" type="button" onClick={() => setEditedCss(ORIGINAL_GLOBAL_CSS)}>Reset original CSS</button>
-                <button className="ct86-pill" type="button" onClick={() => { setShowModal(false); setSplit(true); }}>Åpne i split screen</button>
-                <button className="ct86-pill" type="button" onClick={() => setShowModal(false)}>Lukk</button>
-              </div>
-            </header>
-            <textarea value={activeCode} onChange={(event) => updateActiveCode(event.target.value)} readOnly={codeTarget !== "global"} spellCheck={false} />
-          </div>
-        </div>
-      ) : null}
-    </main>
-  );
+    </div>
+    {inspect && <div className="ctContextMenu" style={{ left: inspect.x, top: inspect.y }}><b>{inspect.title}</b><button onClick={() => { setSplit(true); setInspect(null); }}>Vis CSS i kodefelt</button><button onClick={() => { setResizeEnabled(true); setInspect(null); }}>Endre størrelse</button><button onClick={() => { setResizeEnabled(false); setInspect(null); }}>Slå av resize</button><span>Fil: {inspect.file}</span><span>Selector: {inspect.selector}</span><span>API: {inspect.api}</span><span>View: {inspect.view}</span></div>}
+  </main>;
 }
+
+const staticCss = `
+.ctLivePage * { box-sizing: border-box; }
+.ctLivePage button { font: inherit; cursor: pointer; }
+.ctPreviewPane { min-width: 0; }
+.ctFullSplit { position: fixed; inset: 0; z-index: 9999; background: var(--ct-bg); }
+.ctTopBar { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px; align-items: center; padding: 12px 0; backdrop-filter: blur(14px); }
+.ctTopBar h1 { margin: 0; font-size: clamp(22px, 3vw, 42px); letter-spacing: -0.03em; }
+.ctTopBar p, .ctTopBar button, .ctFilterGroup span, .ctTimeline span, .ctApiList span { color: var(--ct-muted); }
+.ctTopBar nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.ctTopBar button, .ctObjectTabs button, .ctObjectCard button, .ctTimeline button, .ctAreaRow button, .ctFilterGroup button { border: 1px solid var(--ct-line); background: var(--ct-soft); color: var(--ct-ink); border-radius: 999px; padding: 7px 12px; }
+.ctTopBar button.isActive, .ctTimeline button.isActive, .ctObjectTabs button:first-child { background: var(--ct-gold); color: #fff7df; }
+.ctFilterGroup { display: grid; gap: 8px; min-height: 92px; }
+.ctFilterGroup strong { text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
+.ctAreaRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px dashed var(--ct-line); border-radius: var(--ct-radius); padding: 10px; margin-bottom: 10px; }
+.ctTimeline header { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.ctTimeline header nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.ctTimelineTrack article { position: relative; z-index: 1; border: 1px solid var(--ct-line); background: var(--ct-bg); border-radius: 12px; padding: 14px 10px; min-height: 112px; }
+.ctTimelineTrack article strong { display: block; color: var(--ct-gold); font-size: 20px; }
+.ctTimelineTrack article b { display: block; margin: 6px 0; }
+.ctTimelineTrack article.isHot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-gold) 28%, transparent); }
+.ctSection { margin-top: 28px; }
+.ctSection h2 { font-size: 26px; margin: 0 0 12px; }
+.ctSection h3 { margin: 18px 0 8px; color: var(--ct-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; }
+.ctCardGrid { display: grid; gap: 14px; margin-bottom: 12px; }
+.ctHorizontalCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ctListCards { grid-template-columns: 1fr; }
+.ctMuseumCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ctStandingCards { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+.ctObjectCard { display: grid; grid-template-columns: 190px minmax(0, 1fr) 150px; gap: 12px; min-height: 220px; padding: 12px; }
+.ctCardlist { min-height: 132px; }
+.ctCardlist, .ctCardlist .ctObjectCard { grid-template-columns: 320px minmax(0, 1fr) 200px; }
+.ctCardmuseum .ctObjectCard, .ctCardstanding .ctObjectCard { grid-template-columns: 1fr; }
+.ctNote { min-height: 180px; border: 1px solid var(--ct-line); border-radius: 10px; background: repeating-linear-gradient(-35deg, rgba(255,255,255,.06) 0 8px, transparent 8px 16px), var(--ct-soft); position: relative; overflow: hidden; padding: 18px; }
+.ctNoteCompact { min-height: 120px; }
+.ctNote b { font-size: 62px; opacity: .28; }
+.ctNote span { position: absolute; left: 18px; bottom: 18px; letter-spacing: .18em; font-weight: 800; }
+.ctNote i { position: absolute; right: 24px; top: 42%; width: 54px; height: 72px; border-radius: 35px 35px 8px 8px; background: radial-gradient(circle at 40% 30%, #fff3d0, var(--ct-gold)); opacity: .74; }
+.ctCardText h3 { margin: 0 0 8px; font-size: 22px; }
+.ctSpecGrid { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 6px 10px; border-bottom: 1px dashed var(--ct-line); padding-bottom: 8px; }
+.ctSpecGrid span { color: var(--ct-muted); text-transform: uppercase; font-size: 10px; }
+.ctHistoryMini { display: grid; gap: 4px; margin: 8px 0; padding: 9px; border: 1px solid var(--ct-line); border-radius: 10px; background: var(--ct-soft); }
+.ctCardText nav { display: flex; flex-wrap: wrap; gap: 7px; }
+.ctStatusMini { display: grid; gap: 6px; align-content: start; }
+.ctStatusMini span, .ctStatusMini b { border: 1px solid var(--ct-line); border-radius: 10px; padding: 8px; background: var(--ct-soft); }
+.ctSignature { position: absolute; right: 18px; bottom: 8px; color: var(--ct-muted); font-style: italic; font-size: 11px; opacity: .75; }
+.ctObjectHero { display: grid; gap: 10px; }
+.ctObjectTabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.ctBreadcrumb { display: inline-flex; border: 1px solid var(--ct-line); border-radius: 999px; color: var(--ct-gold); padding: 6px 12px; letter-spacing: .12em; text-transform: uppercase; font-size: 11px; }
+.ctObjectInfo h1 { margin: 10px 0 12px; font-size: clamp(34px, 4vw, 62px); line-height: .95; }
+.ctMetricRow { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--ct-line); margin-top: 18px; }
+.ctMetricRow span { padding: 12px; border-right: 1px solid var(--ct-line); display: grid; gap: 5px; }
+.ctMetricRow em { color: var(--ct-muted); text-transform: uppercase; font-size: 10px; }
+.ctMetricRow b { font-size: 20px; }
+.ctRelationList { display: grid; gap: 8px; margin-top: 14px; }
+.ctRelationList button { text-align: left; border: 1px solid var(--ct-line); border-radius: 10px; background: var(--ct-soft); color: var(--ct-ink); padding: 12px; }
+.ctRelationAside { display: grid; gap: 10px; align-content: start; border: 1px solid var(--ct-line); border-radius: 12px; padding: 12px; background: var(--ct-soft); }
+.ctUserGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ctUserGrid article { display: grid; gap: 8px; border: 1px solid var(--ct-line); border-radius: 12px; padding: 12px; background: var(--ct-soft); }
+.ctApiList { margin-top: 30px; display: grid; gap: 8px; }
+.ctApiList div { display: grid; grid-template-columns: 190px 1fr 1fr; gap: 12px; border: 1px solid var(--ct-line); border-radius: 10px; padding: 10px; background: var(--ct-panel); }
+.ctCodeRail { position: sticky; top: 0; height: 100vh; overflow: auto; padding: 12px; color: #f7f3eb; }
+.ctCodeRail header, .ctCodeRail footer { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.ctCodeRail button { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #f7f3eb; border-radius: 8px; padding: 7px 10px; }
+.ctCodeRail button.isActive { background: #c8a34f; color: #191815; }
+.ctCodeMeta { display: grid; gap: 4px; font-size: 11px; color: #bdb6a4; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 8px; margin: 10px 0; }
+.ctCodeTree { display: grid; gap: 3px; margin-bottom: 10px; }
+.ctCodeTree button { text-align: left; width: 100%; }
+.ctCodeRail textarea { width: 100%; min-height: 50vh; resize: vertical; background: #070807; color: #f4eddc; border: 1px solid rgba(255,255,255,.16); border-radius: 10px; padding: 12px; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.ctContextMenu { position: fixed; z-index: 10000; display: grid; gap: 6px; width: 320px; border: 1px solid var(--ct-line); border-radius: 12px; background: var(--ct-panel); color: var(--ct-ink); box-shadow: var(--ct-shadow); padding: 10px; }
+.ctContextMenu button { border: 1px solid var(--ct-line); background: var(--ct-soft); border-radius: 8px; padding: 8px; color: var(--ct-ink); text-align: left; }
+.ctContextMenu span { font-size: 11px; color: var(--ct-muted); word-break: break-word; }
+.ctSelectedInspect { position: relative; }
+.ctResizeNW { left: -7px; top: -7px; cursor: nwse-resize; }
+.ctResizeNE { right: -7px; top: -7px; cursor: nesw-resize; }
+.ctResizeSW { left: -7px; bottom: -7px; cursor: nesw-resize; }
+.ctResizeSE { right: -7px; bottom: -7px; cursor: nwse-resize; }
+.ctLivePage[data-skin='samler'] { --ct-bg: #f5f7f2; --ct-panel: #ffffff; --ct-ink: #163f31; --ct-muted: #6a8c7c; --ct-line: rgba(24, 91, 67, .22); --ct-soft: rgba(55, 132, 92, .08); --ct-gold: #6e9b74; }
+.ctLivePage[data-skin='finans'] { --ct-bg: #09121a; --ct-panel: rgba(9, 21, 31, .96); --ct-ink: #e9f6ff; --ct-muted: #91aac0; --ct-line: rgba(68, 158, 220, .28); --ct-soft: rgba(68, 158, 220, .1); --ct-gold: #38c690; }
+@media (max-width: 1200px) { .ctFilterDeck, .ctHorizontalCards, .ctMuseumCards, .ctStandingCards, .ctUserGrid { grid-template-columns: 1fr; } .ctObjectPresentation, .ctRelationPresentation, .ctObjectCard { grid-template-columns: 1fr; } .ctSplitActive { grid-template-columns: 1fr; } .ctCodeRail { position: relative; width: auto; height: auto; } .ctTimelineTrack { grid-template-columns: repeat(2, 1fr); } }
+`;
