@@ -907,44 +907,6 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
           </section>
         </div>
       ) : null}
-<nav className={styles.mobileBottomNav} aria-label="Mobil hovednavigasjon">
-        {mobileBottomItems
-          .filter((item) => canShowMenuItem(item as { requiresAuth?: boolean; requiresAdmin?: boolean }, session))
-          .map((item) => {
-            const IconComponent = item.icon;
-            const isActive = item.key === "menu" ? isMobileMenuOpen : checkMobileBottomActive(item);
-            
-            if (item.key === "menu") {
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  aria-expanded={isMobileMenuOpen}
-                  aria-label="Ãƒâ€¦pne eller lukk hovedmeny"
-                  style={{ background: "none", border: "none", cursor: "pointer" }}
-                >
-                  <IconComponent size={20} strokeWidth={1.8} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            }
-
-            return (
-              <Link
-                key={item.key}
-                href={item.href || "#"}
-                className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-                aria-current={isActive ? "page" : undefined}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <IconComponent size={20} strokeWidth={1.8} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-      </nav>
     </div>
   );
 }
@@ -956,6 +918,7 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
 
 
 
