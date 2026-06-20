@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -870,7 +870,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
         <div
           className={styles.mobileMegaMenuOverlay}
           role="presentation"
-          onClick={() => setisMobileMenuOpen(false)}
+          onClick={() => setIsMobileMenuOpen(false)}
         >
           <section
             className={styles.mobileMegaMenuSheet}
@@ -887,7 +887,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
               <button
                 type="button"
                 className={styles.mobileMegaMenuClose}
-                onClick={() => setisMobileMenuOpen(false)}
+                onClick={() => setIsMobileMenuOpen(false)}
                 aria-label="Lukk meny"
               >
                 ×
@@ -910,7 +910,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                           key={`${group.title}-${menuItem.href}`}
                           href={menuItem.href}
                           className={styles.mobileMegaMenuLink}
-                          onClick={() => setisMobileMenuOpen(false)}
+                          onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <span>{menuItem.label}</span>
                           <span aria-hidden="true">›</span>
@@ -936,7 +936,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                   key={item.key}
                   type="button"
                   className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
-                  onClick={() => setisMobileMenuOpen(!isMobileMenuOpen)}
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   aria-expanded={isMobileMenuOpen}
                   aria-label="Ã…pne eller lukk hovedmeny"
                   style={{ background: "none", border: "none", cursor: "pointer" }}
@@ -953,7 +953,7 @@ function CollectiumAppShellInner({ children }: CollectiumAppShellProps) {
                 href={item.href || "#"}
                 className={`${styles.mobileBottomItem} ${isActive ? styles.mobileBottomItemActive : ""}`}
                 aria-current={isActive ? "page" : undefined}
-                onClick={() => setisMobileMenuOpen(false)}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 <IconComponent size={20} strokeWidth={1.8} />
                 <span>{item.label}</span>
@@ -972,6 +972,7 @@ export function CollectiumAppShell({ children }: CollectiumAppShellProps) {
     </CollectiumLayoutModeProvider>
   );
 }
+
 
 
 
