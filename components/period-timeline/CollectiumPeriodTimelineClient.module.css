@@ -3277,3 +3277,126 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035), 0 12px 30px rgba(0,0,0,0.18);
 }
 
+/* ============================================================
+   Period timeline API status hero indicator
+   Scope: /test/period-timeline
+   Purpose:
+   - Page renders before API is finished
+   - Status box shows Offline/Online
+   - Offline = red spinner
+   - Online = green pulsing 3D orb with black 1px ring
+   ============================================================ */
+
+.heroStatus {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 6px;
+  min-width: 150px;
+  padding: 12px 16px;
+}
+
+.heroStatus > span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.heroStatus > strong {
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.apiStatusLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.apiStatusText {
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.apiStatusOrb {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #000000;
+  border-radius: 999px;
+  box-sizing: border-box;
+}
+
+/* Offline: rød spinner frem til API er ferdig */
+.heroStatusOffline .apiStatusText {
+  color: #c73535;
+}
+
+.heroStatusOffline .apiStatusOrb {
+  border-color: #000000;
+  border-top-color: #c73535;
+  border-right-color: #c73535;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.85), rgba(199,53,53,0.28) 42%, rgba(199,53,53,0.08) 72%);
+  animation: ctApiSpinner 0.85s linear infinite;
+}
+
+/* Online: grønn pulserende 3D-sirkel med svart 1px ring */
+.heroStatusOnline .apiStatusText {
+  color: #21845a;
+}
+
+.heroStatusOnline .apiStatusOrb {
+  border-color: #000000;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(149,236,190,0.92) 22%, rgba(33,132,90,0.96) 58%, rgba(11,70,46,1) 100%);
+  box-shadow:
+    inset -2px -3px 5px rgba(0,0,0,0.28),
+    inset 2px 2px 4px rgba(255,255,255,0.62),
+    0 0 0 0 rgba(33,132,90,0.42);
+  animation: ctApiPulse 1.55s ease-in-out infinite;
+}
+
+@keyframes ctApiSpinner {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ctApiPulse {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      inset -2px -3px 5px rgba(0,0,0,0.28),
+      inset 2px 2px 4px rgba(255,255,255,0.62),
+      0 0 0 0 rgba(33,132,90,0.42);
+  }
+
+  55% {
+    transform: scale(1.12);
+    box-shadow:
+      inset -2px -3px 5px rgba(0,0,0,0.28),
+      inset 2px 2px 4px rgba(255,255,255,0.62),
+      0 0 0 7px rgba(33,132,90,0.08);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow:
+      inset -2px -3px 5px rgba(0,0,0,0.28),
+      inset 2px 2px 4px rgba(255,255,255,0.62),
+      0 0 0 0 rgba(33,132,90,0);
+  }
+}
+

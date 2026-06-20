@@ -669,8 +669,10 @@ export function CollectiumPeriodTimelineClient() {
     return <div className={styles.loadingState}>Laster tidslinje fra Neon/APIâ€¦</div>;
   }
 
-  return (
-    <main className={styles.page}>
+  const apiOnline = !loading && !error;
+
+return (
+  <main className={styles.page}>
       <section className={styles.hero}>
         <div>
           <p className={styles.eyebrow}>Collectium UI/UX 8.6 Â· tidslinje</p>
@@ -1132,4 +1134,5 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
 
