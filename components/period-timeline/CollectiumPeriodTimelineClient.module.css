@@ -2898,3 +2898,141 @@
   }
 }
 
+/* ============================================================
+   Period timeline panel width alignment
+   Scope: /test/period-timeline
+   Goal:
+   - katalogtreff/visningskort skal ha samme bredde som feltene over
+   - ingen paneler skal gå bredere enn sideinnholdet
+   - innvendig grid skal ikke presse panelbredden
+   ============================================================ */
+
+/* Hele siden får én felles innholdsbredde */
+.page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Alle hovedpaneler skal følge samme bredde og kantlinje */
+.hero,
+.masterFilter,
+.timelinePanel,
+.dynamicGrid,
+.catalogPanel,
+.errorState {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* DynamicGrid ligger som to felt over katalogen.
+   Den skal ikke bli smalere enn katalogfeltet eller skape ulik høyrekant.
+*/
+.dynamicGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* Panelene inne i dynamicGrid må ikke presse bredde */
+.detailPanel,
+.segmentPanel {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Katalogpanelet skal ha samme innvendige bredde som panelene over */
+.catalogPanel {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Header og kontrollrad må holde seg inne i katalogpanelet */
+.catalogPanel .panelHeader,
+.catalogControlBar {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Den lange avrundede kontrollstripen skal ikke presse visningsknappene ut */
+.catalogControlBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+/* Segmentfanene ligger i venstre felt og får lov å bruke all ledig plass */
+.cardSegmentTabs {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* View-knappene ligger i høyre felt, men skal kunne bryte ved trang plass */
+.viewSelectorsContainer {
+  min-width: 0;
+  max-width: 100%;
+  justify-self: end;
+}
+
+/* Kataloggrid skal følge katalogpanelets innvendige bredde */
+.catalogGrid {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Liste- og museumskort skal ikke lage bredde utover catalogGrid */
+.catalogGrid_list,
+.catalogGrid_museum,
+.catalogGrid_horizontal,
+.catalogGrid_standing {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Kortene skal alltid ligge innenfor sin gridcelle */
+.ui85Card,
+.ui85HorizontalCard,
+.ui85StandingCard,
+.ui85ListCard,
+.ui85MuseumCard {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Store interne kolonner får krympe før de presser kortet bredere */
+.ui85ListCard > *,
+.ui85MuseumCard > *,
+.ui85HorizontalCard > *,
+.ui85StandingCard > * {
+  min-width: 0;
+}
+
+/* På smalere desktop/tablet: dynamicGrid går til én kolonne */
+@media (max-width: 1100px) {
+  .dynamicGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogControlBar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .viewSelectorsContainer {
+    justify-self: start;
+  }
+}
+
