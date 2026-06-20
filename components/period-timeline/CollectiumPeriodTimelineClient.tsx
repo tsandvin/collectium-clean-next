@@ -1,22 +1,22 @@
-/**
+﻿/**
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
  * CollectiumPeriodTimelineClient
  *
- * Definering / formål:
+ * Definering / formÃ¥l:
  * React client component for Tidslinjeperiode (Periode 8.6). Viser sammenligningsbasert
  * tidstabell med 4 rader der dropdown velger gruppe og tidslinjen tegner noder under gruppen.
- * Klikk på node fyller det dynamiske relasjonsfeltet.
+ * Klikk pÃ¥ node fyller det dynamiske relasjonsfeltet.
  *
- * Bruksområde:
+ * BruksomrÃ¥de:
  * Brukes av /test/Periodetidslinje og alias /test/period-timeline.
  *
- * Berørte sider / routes:
+ * BerÃ¸rte sider / routes:
  * - /test/Periodetidslinje
  * - /test/period-timeline
  *
- * Berørte API-ruter:
+ * BerÃ¸rte API-ruter:
  * - GET /api/period86/groups
  * - GET /api/period86/timeline-nodes
  * - GET /api/period86/node-detail
@@ -93,7 +93,7 @@ const GROUP_LABELS: Record<string, string> = {
   national_period: "Nasjonale perioder",
   war_conflict: "Krig / konflikt",
   disease_crisis: "Sykdom / krise",
-  finance_economy: "Finans / økonomi",
+  finance_economy: "Finans / Ã¸konomi",
 };
 
 const SEGMENT_LABELS: Record<SegmentKey, string> = {
@@ -143,7 +143,7 @@ function cardMetaText(hit: CatalogHit, node: TimelineNode | null): string {
     node?.label_no,
   ]
     .filter(Boolean)
-    .join(" · ");
+    .join(" Â· ");
 }
 
 /* UI 8.5 Dynamic Card Helper Components */
@@ -171,7 +171,7 @@ function DynamicActionButtons({ hit }: { hit: CatalogHit }) {
     <div className={styles.cardActionButtonsRow} aria-label="Kortkommandoer">
       <Link href={detailHref} className={styles.cardBtnAction}>
         <span className={styles.cardBtnActionIcon}><ExternalLinkIcon /></span>
-        <span>Åpne objekt</span>
+        <span>Ã…pne objekt</span>
       </Link>
       <Link href={hit.relation_href || "/katalog/kontroll"} className={styles.cardBtnAction}>
         <span className={styles.cardBtnActionIcon}><GitBranchIcon /></span>
@@ -190,7 +190,7 @@ function DynamicActionButtons({ hit }: { hit: CatalogHit }) {
 
 function DynamicActionPanel({ listMode = false, compact = false }: { listMode?: boolean; compact?: boolean }) {
   const badges = [
-    { label: "Hjerte", meta: "Ønskeliste", count: "0" },
+    { label: "Hjerte", meta: "Ã˜nskeliste", count: "0" },
     { label: "Stjerne", meta: "Favoritt", count: "0" },
     { label: "Auksjon", meta: "Aktive treff", count: "3" },
     { label: "Nettbutikk", meta: "Aktive salg", count: "1" },
@@ -229,7 +229,7 @@ function DynamicPriceBox({ listMode = false, compact = false }: { listMode?: boo
 
 function DynamicFacts({ hit, compact = false }: { hit: CatalogHit; compact?: boolean }) {
   const hitFacts = [
-    { label: "Valørutgave", value: valueOrMissing(hit.denomination_raw_no), icon: TagIcon },
+    { label: "ValÃ¸rutgave", value: valueOrMissing(hit.denomination_raw_no), icon: TagIcon },
     { label: "Utgave", value: valueOrMissing(hit.denomination_issue_raw_no), icon: CalendarIcon },
     { label: "Variant", value: valueOrMissing(hit.variant_type_raw_no), icon: LayersIcon },
     { label: "Sjeldenhet", value: "Ikke vurdert", icon: ShieldIcon },
@@ -282,11 +282,11 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: T
             </div>
             <div className={styles.cardHistoryItem}>
               <dt>Kilde / type</dt>
-              <dd>{valueOrMissing(hit.source_key)} · {valueOrMissing(hit.object_group)}</dd>
+              <dd>{valueOrMissing(hit.source_key)} Â· {valueOrMissing(hit.object_group)}</dd>
             </div>
             <div className={styles.cardHistoryItem}>
               <dt>Variant / status</dt>
-              <dd>{valueOrMissing(hit.variant_type_raw_no)} · Ikke vurdert</dd>
+              <dd>{valueOrMissing(hit.variant_type_raw_no)} Â· Ikke vurdert</dd>
             </div>
           </>
         )}
@@ -301,7 +301,7 @@ function DynamicCardPanel({ hit, period, segment }: { hit: CatalogHit; period: T
               <dd>{valueOrMissing(hit.title_no || hit.source_catalog_number)}</dd>
             </div>
             <div className={styles.cardHistoryItem}>
-              <dt>Årstall</dt>
+              <dt>Ã…rstall</dt>
               <dd>{objectYearLabel(hit)}</dd>
             </div>
             <div className={styles.cardHistoryItem}>
@@ -356,7 +356,7 @@ function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period:
     return (
       <div className={styles.cardListDynamic}>
         <span>Samler</span>
-        <strong>Hjerte 0 · Stjerne 0 · Ikke i samling</strong>
+        <strong>Hjerte 0 Â· Stjerne 0 Â· Ikke i samling</strong>
       </div>
     );
   }
@@ -365,7 +365,7 @@ function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period:
     return (
       <div className={styles.cardListDynamic}>
         <span>Finans</span>
-        <strong>Ikke estimert · Mangler markedsverdi</strong>
+        <strong>Ikke estimert Â· Mangler markedsverdi</strong>
       </div>
     );
   }
@@ -373,7 +373,7 @@ function ListSegmentSummary({ hit, period, segment }: { hit: CatalogHit; period:
   return (
     <div className={styles.cardListDynamic}>
       <span>Historie</span>
-      <strong>{period?.label_no || "Ikke valgt"} · {objectYearLabel(hit)}</strong>
+      <strong>{period?.label_no || "Ikke valgt"} Â· {objectYearLabel(hit)}</strong>
     </div>
   );
 }
@@ -443,7 +443,7 @@ function MuseumCard({ hit, period, segment }: { hit: CatalogHit; period: Timelin
         <DynamicBanknote isBanknote={isBanknote} title={title} />
       </div>
       <div className={styles.cardMuseumRight}>
-        <h2>Museum · {title}</h2>
+        <h2>Museum Â· {title}</h2>
         <DynamicCardPanel hit={hit} period={period} segment={segment} />
         <div className={styles.cardMuseumActions}>
           <DynamicActionButtons hit={hit} />
@@ -465,7 +465,7 @@ function ListCard({ hit, period, segment }: { hit: CatalogHit; period: TimelineN
         <h2>{title}</h2>
         <div className={styles.cardListSpecs}>
           <div>
-            <span>Valørutgave</span>
+            <span>ValÃ¸rutgave</span>
             <strong>{valueOrMissing(hit.denomination_raw_no)}</strong>
           </div>
           <div>
@@ -666,14 +666,14 @@ export function CollectiumPeriodTimelineClient() {
   }
 
   if (loading && !row1Nodes.length && !row2Nodes.length && !row3Nodes.length && !row4Nodes.length) {
-    return <div className={styles.loadingState}>Laster tidslinje fra Neon/API…</div>;
+    return <div className={styles.loadingState}>Laster tidslinje fra Neon/APIâ€¦</div>;
   }
 
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>Collectium UI/UX 8.6 · tidslinje</p>
+          <p className={styles.eyebrow}>Collectium UI/UX 8.6 Â· tidslinje</p>
           <h1 className={styles.title}>Tidslinjeperiode</h1>
           <p className={styles.subtitle}>Sammenligningsbasert tidslinje med grupper i dropdowns og noder i tidslinjen hentet fra Neon/API.</p>
         </div>
@@ -712,12 +712,12 @@ export function CollectiumPeriodTimelineClient() {
           </label>
 
           <label className={styles.field}>
-            <span>År fra</span>
+            <span>Ã…r fra</span>
             <input type="number" value={filters.yearFrom} onChange={(event) => updateFilters({ yearFrom: Number(event.target.value) })} className="ct-input" />
           </label>
 
           <label className={styles.field}>
-            <span>År til</span>
+            <span>Ã…r til</span>
             <input type="number" value={filters.yearTo} onChange={(event) => updateFilters({ yearTo: Number(event.target.value) })} className="ct-input" />
           </label>
         </div>
@@ -727,12 +727,12 @@ export function CollectiumPeriodTimelineClient() {
         <div className={styles.timelineToolbar}>
           <div>
             <p className={styles.eyebrow}>Periodens tidslinje</p>
-            <h2>{filters.yearFrom}–{filters.yearTo}</h2>
+            <h2>{filters.yearFrom}â€“{filters.yearTo}</h2>
           </div>
           <div className={styles.toolbarButtons}>
             <button type="button" onClick={() => zoom(1.4)} className="ct-btn">Zoom ut</button>
             <button type="button" onClick={() => zoom(0.7)} className="ct-btn">Zoom inn</button>
-            <button type="button" onClick={() => setWindowSize(100)} className="ct-btn">100 år</button>
+            <button type="button" onClick={() => setWindowSize(100)} className="ct-btn">100 Ã¥r</button>
             <button className={`${viewMode === "timeline" ? styles.toolbarButtonActive : ""} ct-btn`} type="button" onClick={() => setViewMode("timeline")}>Tidslinje</button>
             <button className={`${viewMode === "table" ? styles.toolbarButtonActive : ""} ct-btn`} type="button" onClick={() => setViewMode("table")}>Tabell</button>
           </div>
@@ -768,7 +768,7 @@ export function CollectiumPeriodTimelineClient() {
                   </div>
                   <div className={styles.laneTrack}>
                     {lane.periods.length === 0 ? (
-                      <div className={styles.laneEmpty}>Ingen perioder i valgt årsspenn</div>
+                      <div className={styles.laneEmpty}>Ingen perioder i valgt Ã¥rsspenn</div>
                     ) : lane.periods.map((period, index) => {
                       const start = period.from_year ?? timelineWindow.start;
                       const end = normalizeEndYear(period, timelineWindow.end);
@@ -814,7 +814,7 @@ export function CollectiumPeriodTimelineClient() {
                     <td>{node.label_no}</td>
                     <td>{node.group_label_no}</td>
                     <td>{node.from_year ?? "-"}</td>
-                    <td>{node.to_year ?? "nå"}</td>
+                    <td>{node.to_year ?? "nÃ¥"}</td>
                     <td>{node.relation_href || "-"}</td>
                   </tr>
                 ))}
@@ -848,7 +848,7 @@ export function CollectiumPeriodTimelineClient() {
                 <strong>{nodeDetail.year_label}</strong>
               </div>
               <div className={styles.detailRow}>
-                <span>Land/område</span>
+                <span>Land/omrÃ¥de</span>
                 <strong>{nodeDetail.land_omrade}</strong>
               </div>
               <div className={styles.detailRowBlock}>
@@ -902,7 +902,7 @@ export function CollectiumPeriodTimelineClient() {
                     {nodeDetail.related_objects.map((obj: any, idx: number) => (
                       <li key={idx} style={{ marginBottom: "4px" }}>
                         <Link href={`/objekt/${obj.source_key}/${obj.object_group}/${obj.object_id}`} style={{ color: "var(--ct-accent)", fontWeight: "bold" }}>
-                          {obj.title_no} ({obj.source_catalog_number || "Uten nr"}) · {obj.object_year_label || "Ukjent år"}
+                          {obj.title_no} ({obj.source_catalog_number || "Uten nr"}) Â· {obj.object_year_label || "Ukjent Ã¥r"}
                         </Link>
                       </li>
                     ))}
@@ -1025,8 +1025,8 @@ export function CollectiumPeriodTimelineClient() {
                   <strong>{selectedNode?.label_no || "Ikke valgt"}</strong>
                 </div>
                 <div className={styles.detailRow}>
-                  <span>År</span>
-                  <strong>{selectedNode ? selectedNode.year_label : `${filters.yearFrom}–${filters.yearTo}`}</strong>
+                  <span>Ã…r</span>
+                  <strong>{selectedNode ? selectedNode.year_label : `${filters.yearFrom}â€“${filters.yearTo}`}</strong>
                 </div>
               </>
             )}
@@ -1052,58 +1052,60 @@ export function CollectiumPeriodTimelineClient() {
 
       <section className={styles.catalogPanel}>
         <div className={styles.panelHeader}>
-          <div>
-            <p className={styles.eyebrow}>Katalogtreff</p>
-            <h2>Katalogtreff {filters.yearFrom}–{filters.yearTo}</h2>
-          </div>
-          <div className={styles.catalogHeaderControls}>
-            <div className={styles.cardSegmentTabs} aria-label="Dynamisk kortfelt">
-              {(Object.keys(SEGMENT_LABELS) as SegmentKey[]).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={cardSegment === key ? styles.segmentButtonActive : styles.segmentButton}
-                  aria-pressed={cardSegment === key}
-                  onClick={() => setCardSegment(key)}
-                >
-                  {SEGMENT_LABELS[key]}
-                </button>
-              ))}
-            </div>
-            <div className={styles.viewSelectorsContainer}>
-              <button
-                type="button"
-                className={cardLayout === "horizontal" ? styles.viewSelectorActive : styles.viewSelector}
-                onClick={() => setCardLayout("horizontal")}
-              >
-                Horisontal
-              </button>
-              <button
-                type="button"
-                className={cardLayout === "standing" ? styles.viewSelectorActive : styles.viewSelector}
-                onClick={() => setCardLayout("standing")}
-              >
-                Stående
-              </button>
-              <button
-                type="button"
-                className={cardLayout === "list" ? styles.viewSelectorActive : styles.viewSelector}
-                onClick={() => setCardLayout("list")}
-              >
-                Liste
-              </button>
-              <button
-                type="button"
-                className={cardLayout === "museum" ? styles.viewSelectorActive : styles.viewSelector}
-                onClick={() => setCardLayout("museum")}
-              >
-                Museum
-              </button>
-            </div>
-          </div>
-          <span className={styles.badge}>{catalogRows.length} treff</span>
+        <div>
+          <p className={styles.eyebrow}>Katalogtreff</p>
+          <h2>Katalogtreff {filters.yearFrom}–{filters.yearTo}</h2>
         </div>
-        {catalogRows.length === 0 ? (
+        <span className={styles.badge}>{catalogRows.length} treff</span>
+      </div>
+
+      <div className={styles.catalogControlBar}>
+        <div className={styles.cardSegmentTabs} aria-label="Dynamisk kortfelt">
+          {(Object.keys(SEGMENT_LABELS) as SegmentKey[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={cardSegment === key ? styles.segmentButtonActive : styles.segmentButton}
+              aria-pressed={cardSegment === key}
+              onClick={() => setCardSegment(key)}
+            >
+              {SEGMENT_LABELS[key]}
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.viewSelectorsContainer}>
+          <button
+            type="button"
+            className={cardLayout === "horizontal" ? styles.viewSelectorActive : styles.viewSelector}
+            onClick={() => setCardLayout("horizontal")}
+          >
+            Horisontal
+          </button>
+          <button
+            type="button"
+            className={cardLayout === "standing" ? styles.viewSelectorActive : styles.viewSelector}
+            onClick={() => setCardLayout("standing")}
+          >
+            Stående
+          </button>
+          <button
+            type="button"
+            className={cardLayout === "list" ? styles.viewSelectorActive : styles.viewSelector}
+            onClick={() => setCardLayout("list")}
+          >
+            Liste
+          </button>
+          <button
+            type="button"
+            className={cardLayout === "museum" ? styles.viewSelectorActive : styles.viewSelector}
+            onClick={() => setCardLayout("museum")}
+          >
+            Museum
+          </button>
+        </div>
+      </div>
+      {catalogRows.length === 0 ? (
           <div className={styles.emptyState}>Ingen katalogtreff returnert fra API for dette valget.</div>
         ) : (
           <div className={`${styles.catalogGrid} ${styles[`catalogGrid_${cardLayout}`]}`}>
@@ -1130,3 +1132,4 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

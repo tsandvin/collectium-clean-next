@@ -2516,111 +2516,88 @@
   }
 }
 
-
 /* ============================================================
    Period timeline / test/period-timeline layout correction
-   Applies only to period timeline component.
    ============================================================ */
 
-/* Kontrollrad: segmentfaner helt til venstre */
-.resultToolbar,
-.toolbar,
-.controls,
-.controlRow,
-.headerControls,
-.viewControls,
-.segmentControls {
+/* Katalog-header: tittel til venstre, treff-badge til høyre */
+.catalogPanel .panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+/* Kontrollrad under tittelen */
+.catalogControlBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  margin: 10px 0 16px;
+}
+
+/* Samler / Historie / Finans helt til venstre */
+.cardSegmentTabs {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  width: 100%;
-}
-
-/* Hvis segment og visning ligger i samme rad: ikke sentrer hele gruppen */
-.segmentSwitch,
-.segmentTabs,
-.segmentControls {
-  justify-content: flex-start;
-  margin-left: 0;
-  margin-right: 12px;
-}
-
-/* Visningsknapper kan ligge etter segmentfanene */
-.viewSwitch,
-.viewTabs,
-.viewControls {
-  justify-content: flex-start;
+  flex: 1 1 auto;
+  gap: 8px;
   margin-left: 0;
 }
 
-/* Samler / Historie / Finans som faner */
-.segmentSwitch button,
-.segmentTabs button,
-.segmentControls button {
-  min-height: 34px;
-  padding: 0 18px;
-  border-radius: 999px;
-  white-space: nowrap;
+/* Visningsvalg til høyre */
+.viewSelectorsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  gap: 8px;
 }
 
-/* Resultatområde: horisontal maks 2 */
-:global([data-view="horizontal"]) .resultsGrid,
-:global([data-view="horizontal"]) .catalogResults,
-:global([data-view="horizontal"]) .catalog-results,
-:global([data-view="horizontal"]) .ct-catalog-results,
-:global([data-view="horizontal"]) .resultGrid {
+/* Horisontal: maks 2 kort per rad */
+.catalogGrid_horizontal {
   display: grid;
-  grid-template-columns: repeat(2, minmax(620px, 1fr));
+  grid-template-columns: repeat(2, minmax(620px, 1fr)) !important;
   align-items: stretch;
 }
 
-/* Stående maks 3 */
-:global([data-view="standing"]) .resultsGrid,
-:global([data-view="standing"]) .catalogResults,
-:global([data-view="standing"]) .catalog-results,
-:global([data-view="standing"]) .ct-catalog-results,
-:global([data-view="standing"]) .resultGrid {
+/* Stående: maks 3 kort per rad */
+.catalogGrid_standing {
   display: grid;
-  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, minmax(320px, 1fr)) !important;
   align-items: stretch;
 }
 
-/* Liste og museum: 1 bred rad */
-:global([data-view="list"]) .resultsGrid,
-:global([data-view="list"]) .catalogResults,
-:global([data-view="list"]) .catalog-results,
-:global([data-view="list"]) .ct-catalog-results,
-:global([data-view="list"]) .resultGrid,
-:global([data-view="museum"]) .resultsGrid,
-:global([data-view="museum"]) .catalogResults,
-:global([data-view="museum"]) .catalog-results,
-:global([data-view="museum"]) .ct-catalog-results,
-:global([data-view="museum"]) .resultGrid {
+/* Liste og museum: 1 bred rad per objekt */
+.catalogGrid_list,
+.catalogGrid_museum {
   display: grid;
-  grid-template-columns: minmax(800px, 1fr);
+  grid-template-columns: minmax(800px, 1fr) !important;
   align-items: stretch;
 }
 
-/* Listekort skal ikke bli stående/smalt kort som bare strekkes */
-:global([data-view="list"]) .resultCard,
-:global([data-view="list"]) .catalogCard,
-:global([data-view="list"]) .objectCard,
-:global([data-view="list"]) .card {
+/* Listekort: bred rad, ikke knust vertikal kolonne */
+.ui85ListCard {
   width: 100%;
   min-width: 800px;
-  display: grid;
-  grid-template-columns: 170px minmax(260px, 1fr) minmax(260px, 1fr) 160px;
+  display: grid !important;
+  grid-template-columns:
+    150px
+    minmax(280px, 1.1fr)
+    minmax(260px, 0.9fr)
+    minmax(240px, 0.8fr)
+    128px
+    150px;
   align-items: start;
   column-gap: 18px;
 }
 
-/* I listevisning: hindre at tittelen brytes bokstav/ord for ord */
-:global([data-view="list"]) h2,
-:global([data-view="list"]) h3,
-:global([data-view="list"]) .title,
-:global([data-view="list"]) .cardTitle,
-:global([data-view="list"]) .objectTitle {
+/* Hindre at liste-tittel brytes ord/bokstav for ord */
+.ui85ListCard h2,
+.cardListInfo h2 {
   max-width: none;
   white-space: normal;
   word-break: normal;
@@ -2628,75 +2605,78 @@
   line-height: 1.15;
 }
 
-/* På mindre skjerm skal alt gå til 1 kolonne */
+/* Listespesifikasjoner må bruke bredde, ikke smal kolonne */
+.cardListInfo,
+.cardListSpecs {
+  min-width: 0;
+}
+
+.cardListSpecs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 8px 14px;
+}
+
+/* Tablet */
 @media (max-width: 1350px) {
-  :global([data-view="horizontal"]) .resultsGrid,
-  :global([data-view="horizontal"]) .catalogResults,
-  :global([data-view="horizontal"]) .catalog-results,
-  :global([data-view="horizontal"]) .ct-catalog-results,
-  :global([data-view="horizontal"]) .resultGrid {
-    grid-template-columns: 1fr;
+  .catalogGrid_horizontal {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ui85ListCard {
+    grid-template-columns:
+      140px
+      minmax(240px, 1fr)
+      minmax(220px, 1fr)
+      minmax(220px, 1fr);
   }
 }
 
+/* Smal tablet */
 @media (max-width: 1100px) {
-  :global([data-view="standing"]) .resultsGrid,
-  :global([data-view="standing"]) .catalogResults,
-  :global([data-view="standing"]) .catalog-results,
-  :global([data-view="standing"]) .ct-catalog-results,
-  :global([data-view="standing"]) .resultGrid {
-    grid-template-columns: repeat(2, minmax(300px, 1fr));
+  .catalogGrid_standing {
+    grid-template-columns: repeat(2, minmax(300px, 1fr)) !important;
   }
 
-  :global([data-view="list"]) .resultCard,
-  :global([data-view="list"]) .catalogCard,
-  :global([data-view="list"]) .objectCard,
-  :global([data-view="list"]) .card {
+  .catalogGrid_list,
+  .catalogGrid_museum {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ui85ListCard {
     min-width: 0;
-    grid-template-columns: 160px minmax(0, 1fr);
+    grid-template-columns: 150px minmax(0, 1fr);
   }
-}
 
-@media (max-width: 720px) {
-  .resultToolbar,
-  .toolbar,
-  .controls,
-  .controlRow,
-  .headerControls,
-  .viewControls,
-  .segmentControls {
-    flex-wrap: wrap;
+  .catalogControlBar {
     align-items: flex-start;
+    flex-direction: column;
   }
 
-  :global([data-view="horizontal"]) .resultsGrid,
-  :global([data-view="horizontal"]) .catalogResults,
-  :global([data-view="horizontal"]) .catalog-results,
-  :global([data-view="horizontal"]) .ct-catalog-results,
-  :global([data-view="horizontal"]) .resultGrid,
-  :global([data-view="standing"]) .resultsGrid,
-  :global([data-view="standing"]) .catalogResults,
-  :global([data-view="standing"]) .catalog-results,
-  :global([data-view="standing"]) .ct-catalog-results,
-  :global([data-view="standing"]) .resultGrid,
-  :global([data-view="list"]) .resultsGrid,
-  :global([data-view="list"]) .catalogResults,
-  :global([data-view="list"]) .catalog-results,
-  :global([data-view="list"]) .ct-catalog-results,
-  :global([data-view="list"]) .resultGrid,
-  :global([data-view="museum"]) .resultsGrid,
-  :global([data-view="museum"]) .catalogResults,
-  :global([data-view="museum"]) .catalog-results,
-  :global([data-view="museum"]) .ct-catalog-results,
-  :global([data-view="museum"]) .resultGrid {
-    grid-template-columns: 1fr;
+  .cardSegmentTabs,
+  .viewSelectorsContainer {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+
+/* Mobil */
+@media (max-width: 720px) {
+  .catalogGrid_horizontal,
+  .catalogGrid_standing,
+  .catalogGrid_list,
+  .catalogGrid_museum {
+    grid-template-columns: 1fr !important;
   }
 
-  :global([data-view="list"]) .resultCard,
-  :global([data-view="list"]) .catalogCard,
-  :global([data-view="list"]) .objectCard,
-  :global([data-view="list"]) .card {
+  .ui85ListCard {
     min-width: 0;
     grid-template-columns: 1fr;
   }
+
+  .cardListSpecs {
+    grid-template-columns: 1fr;
+  }
 }
+
