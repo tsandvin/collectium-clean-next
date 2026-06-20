@@ -1,4 +1,4 @@
-﻿import CollectiumTvMenuBridge from "@/components/layout/CollectiumTvMenuBridge";
+import CollectiumTvMenuBridge from "@/components/layout/CollectiumTvMenuBridge";
 import CollectiumDesignPersistence from "@/components/layout/CollectiumDesignPersistence";
 import type { Metadata } from "next";
 import {
@@ -9,6 +9,12 @@ import {
   IBM_Plex_Sans,
   Inter,
   Libre_Baskerville,
+  Lora,
+  Merriweather,
+  Space_Grotesk,
+  Fira_Sans,
+  Lato,
+  PT_Sans,
 } from "next/font/google";
 import "./globals.css";
 import { CollectiumAppShell } from "@/components/layout/CollectiumAppShell";
@@ -62,6 +68,48 @@ const financeMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-lora",
+  display: "swap",
+});
+
+const merriweather = Merriweather({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-merriweather",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const firaSans = Fira_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-fira-sans",
+  display: "swap",
+});
+
+const latoFont = Lato({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-lato",
+  display: "swap",
+});
+
+const ptSans = PT_Sans({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-pt-sans",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Collectium",
   description: "Collectium UI/UX 8.6",
@@ -76,6 +124,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     historicText.variable,
     financeSans.variable,
     financeMono.variable,
+    lora.variable,
+    merriweather.variable,
+    spaceGrotesk.variable,
+    firaSans.variable,
+    latoFont.variable,
+    ptSans.variable,
   ].join(" ");
 
   return (
