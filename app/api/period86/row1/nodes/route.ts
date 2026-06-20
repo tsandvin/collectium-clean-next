@@ -132,12 +132,25 @@ export async function GET(request: Request) {
         from_year nulls last,
         to_year nulls last,
         label_no
-      limit $3 offset $4;
-    `, [master, type, limit, offset]);
+      limit $2 offset $3;
+    `, [type, limit, offset]);
 
     return jsonOk({ ok: true, master, type, nodes: rows, limit, offset });
   } catch (error) {
-    return jsonError("Could not load Period 8.6 row 1 nodes.", 500, error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : JSON.stringify(error);
+
+    return jsonError(
+      `Could not load Period 8.6 row 1 nodes. ${message}`,
+      500,
+      error
+    );
   }
 }
+
+
 
