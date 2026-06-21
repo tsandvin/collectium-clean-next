@@ -2529,4 +2529,386 @@ footer {
 
 /* COLLECTIUM CATALOG86 SMALL ACTION SWITCHES END */
 
+/* COLLECTIUM PATCH: period timeline soft gray top edge and selected icons START */
+/*
+  Formål:
+  - Svak grå øverste kant på status-/bryterkort.
+  - Mer 3D uten kraftig blank/metallisk effekt.
+  - Større ikoner.
+  - Ikke valgt ikon = ramme/outline.
+  - Valgt ikon = sterkere fargefyll.
+
+  Berørt side:
+  - /test/period-timeline
+
+  Berørte filer:
+  - app/globals.css
+  - components/period-timeline/CollectiumPeriodTimelineClient.module.css
+
+  Merk:
+  Patchen er globalt lagt i globals.css, men scoper seg mot
+  CollectiumPeriodTimelineClient CSS-module-klasser.
+*/
+
+/* ------------------------------------------------------------
+   1. Kort / brytere: svak grå 3D-toppkant
+------------------------------------------------------------ */
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button,
+  [role="button"],
+  a,
+  [class*="card"],
+  [class*="Card"],
+  [class*="tile"],
+  [class*="Tile"],
+  [class*="stat"],
+  [class*="Stat"],
+  [class*="metric"],
+  [class*="Metric"],
+  [class*="summary"],
+  [class*="Summary"],
+  [class*="switch"],
+  [class*="Switch"],
+  [class*="toggle"],
+  [class*="Toggle"],
+  [class*="chip"],
+  [class*="Chip"]
+) {
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+  Svak grå kant:
+  - kort høyde
+  - lav opacity
+  - avslutter tidlig inn mot midten
+  - ingen kraftig hvit refleks
+*/
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button,
+  [role="button"],
+  a,
+  [class*="card"],
+  [class*="Card"],
+  [class*="tile"],
+  [class*="Tile"],
+  [class*="stat"],
+  [class*="Stat"],
+  [class*="metric"],
+  [class*="Metric"],
+  [class*="summary"],
+  [class*="Summary"],
+  [class*="switch"],
+  [class*="Switch"],
+  [class*="toggle"],
+  [class*="Toggle"],
+  [class*="chip"],
+  [class*="Chip"]
+)::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 1px;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  pointer-events: none;
+  border-radius: inherit;
+  border-top: 1px solid rgba(168, 174, 182, 0.34);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(178, 184, 192, 0.18) 0%,
+      rgba(178, 184, 192, 0.075) 44%,
+      rgba(178, 184, 192, 0.00) 100%
+    );
+  opacity: 0.72;
+  clip-path: inset(0 0 46% 0);
+}
+
+/*
+  Svak 3D-dybde.
+  Ikke for markant: bare litt indre kant og skygge.
+*/
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button,
+  [role="button"],
+  a,
+  [class*="card"],
+  [class*="Card"],
+  [class*="tile"],
+  [class*="Tile"],
+  [class*="stat"],
+  [class*="Stat"],
+  [class*="metric"],
+  [class*="Metric"],
+  [class*="summary"],
+  [class*="Summary"]
+) {
+  box-shadow:
+    inset 0 1px 0 rgba(220, 226, 235, 0.075),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 7px 16px rgba(0, 0, 0, 0.18);
+}
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button:hover,
+  [role="button"]:hover,
+  a:hover,
+  [class*="card"]:hover,
+  [class*="Card"]:hover,
+  [class*="tile"]:hover,
+  [class*="Tile"]:hover,
+  [class*="stat"]:hover,
+  [class*="Stat"]:hover,
+  [class*="metric"]:hover,
+  [class*="Metric"]:hover,
+  [class*="summary"]:hover,
+  [class*="Summary"]:hover
+)::before {
+  border-top-color: rgba(188, 194, 202, 0.42);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(188, 194, 202, 0.22) 0%,
+      rgba(188, 194, 202, 0.085) 38%,
+      rgba(188, 194, 202, 0.00) 100%
+    );
+  opacity: 0.82;
+}
+
+/* ------------------------------------------------------------
+   2. Store ikoner
+------------------------------------------------------------ */
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  [class*="icon"],
+  [class*="Icon"],
+  [class*="symbol"],
+  [class*="Symbol"],
+  [class*="badge"],
+  [class*="Badge"]
+) {
+  width: clamp(28px, 2.1vw, 38px);
+  height: clamp(28px, 2.1vw, 38px);
+  min-width: clamp(28px, 2.1vw, 38px);
+  min-height: clamp(28px, 2.1vw, 38px);
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: clamp(15px, 1.05vw, 20px);
+  line-height: 1;
+  transform: translateZ(0);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+/* SVG / ikon inni ikonfelt */
+[class*="CollectiumPeriodTimelineClient"] :is(
+  [class*="icon"],
+  [class*="Icon"],
+  [class*="symbol"],
+  [class*="Symbol"],
+  [class*="badge"],
+  [class*="Badge"]
+) :is(svg, img) {
+  width: 68%;
+  height: 68%;
+  display: block;
+}
+
+/* ------------------------------------------------------------
+   3. Ikke valgt ikon = rammeikon / outline
+------------------------------------------------------------ */
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button,
+  [role="button"],
+  a,
+  [class*="card"],
+  [class*="Card"],
+  [class*="tile"],
+  [class*="Tile"],
+  [class*="stat"],
+  [class*="Stat"],
+  [class*="metric"],
+  [class*="Metric"],
+  [class*="summary"],
+  [class*="Summary"],
+  [class*="switch"],
+  [class*="Switch"],
+  [class*="toggle"],
+  [class*="Toggle"],
+  [class*="chip"],
+  [class*="Chip"]
+):not([aria-pressed="true"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-active="true"]):not([class*="active"]):not([class*="Active"]):not([class*="selected"]):not([class*="Selected"])
+:is(
+  [class*="icon"],
+  [class*="Icon"],
+  [class*="symbol"],
+  [class*="Symbol"],
+  [class*="badge"],
+  [class*="Badge"]
+) {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.00) 100%
+    );
+  border: 1.35px solid color-mix(in srgb, currentColor 58%, rgba(255, 255, 255, 0.20));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24);
+  opacity: 0.86;
+}
+
+/* SVG i ikke valgt ikon: kun strek/ramme når mulig */
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button,
+  [role="button"],
+  a,
+  [class*="card"],
+  [class*="Card"],
+  [class*="tile"],
+  [class*="Tile"],
+  [class*="stat"],
+  [class*="Stat"],
+  [class*="metric"],
+  [class*="Metric"],
+  [class*="summary"],
+  [class*="Summary"],
+  [class*="switch"],
+  [class*="Switch"],
+  [class*="toggle"],
+  [class*="Toggle"],
+  [class*="chip"],
+  [class*="Chip"]
+):not([aria-pressed="true"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-active="true"]):not([class*="active"]):not([class*="Active"]):not([class*="selected"]):not([class*="Selected"])
+:is(
+  [class*="icon"],
+  [class*="Icon"],
+  [class*="symbol"],
+  [class*="Symbol"],
+  [class*="badge"],
+  [class*="Badge"]
+) svg {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.26));
+}
+
+/* ------------------------------------------------------------
+   4. Valgt ikon = sterkere fargefyll
+------------------------------------------------------------ */
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button[aria-pressed="true"],
+  button[aria-selected="true"],
+  button[data-selected="true"],
+  button[data-active="true"],
+  [role="button"][aria-pressed="true"],
+  [role="button"][aria-selected="true"],
+  [role="button"][data-selected="true"],
+  [role="button"][data-active="true"],
+  a[aria-current="page"],
+  [class*="active"],
+  [class*="Active"],
+  [class*="selected"],
+  [class*="Selected"]
+)
+:is(
+  [class*="icon"],
+  [class*="Icon"],
+  [class*="symbol"],
+  [class*="Symbol"],
+  [class*="badge"],
+  [class*="Badge"]
+) {
+  background:
+    radial-gradient(
+      circle at 35% 24%,
+      color-mix(in srgb, currentColor 58%, white 16%) 0%,
+      color-mix(in srgb, currentColor 44%, transparent) 44%,
+      color-mix(in srgb, currentColor 26%, black 12%) 100%
+    );
+  border: 1.4px solid color-mix(in srgb, currentColor 72%, white 18%);
+  color: color-mix(in srgb, currentColor 88%, white 12%);
+  opacity: 1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.30),
+    0 0 0 1px color-mix(in srgb, currentColor 18%, transparent),
+    0 5px 12px color-mix(in srgb, currentColor 22%, transparent);
+  transform: translateY(-1px);
+}
+
+/* SVG i valgt ikon: fylt sterkere */
+[class*="CollectiumPeriodTimelineClient"] :is(
+  button[aria-pressed="true"],
+  button[aria-selected="true"],
+  button[data-selected="true"],
+  button[data-active="true"],
+  [role="button"][aria-pressed="true"],
+  [role="button"][aria-selected="true"],
+  [role="button"][data-selected="true"],
+  [role="button"][data-active="true"],
+  a[aria-current="page"],
+  [class*="active"],
+  [class*="Active"],
+  [class*="selected"],
+  [class*="Selected"]
+)
+:is(
+  [class*="icon"],
+  [class*="Icon"],
+  [class*="symbol"],
+  [class*="Symbol"],
+  [class*="badge"],
+  [class*="Badge"]
+) svg {
+  fill: currentColor;
+  stroke: color-mix(in srgb, currentColor 72%, white 22%);
+  stroke-width: 1.15;
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.36))
+    drop-shadow(0 0 5px color-mix(in srgb, currentColor 34%, transparent));
+}
+
+/* ------------------------------------------------------------
+   5. Tall / tekst: litt mer løftet, men ikke tungt
+------------------------------------------------------------ */
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  [class*="count"],
+  [class*="Count"],
+  [class*="number"],
+  [class*="Number"],
+  [class*="value"],
+  [class*="Value"]
+) {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.30);
+}
+
+[class*="CollectiumPeriodTimelineClient"] :is(
+  [class*="title"],
+  [class*="Title"],
+  [class*="label"],
+  [class*="Label"]
+) {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 3px rgba(0, 0, 0, 0.24);
+}
+/* COLLECTIUM PATCH: period timeline soft gray top edge and selected icons END */
 
