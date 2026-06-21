@@ -2318,3 +2318,83 @@
     inset 0 0 0 1px color-mix(in srgb, var(--ct-accent, var(--gold)) 20%, transparent),
     0 12px 24px color-mix(in srgb, var(--ct-accent, var(--gold)) 10%, transparent) !important;
 }
+
+/* v13: status switches - very weak row frame, large outlined/filled icons, smaller text */
+.action {
+  min-height: 72px !important;
+  margin: 0 0 14px !important;
+  padding: 13px 16px !important;
+  gap: 15px !important;
+  border-width: 0.8px !important;
+  border-style: solid !important;
+  border-radius: max(13px, var(--ct-radius-md, 10px)) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 94%, var(--action-tint, var(--ct-accent, var(--gold))) 4%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 97%, var(--action-tint, var(--ct-accent, var(--gold))) 2%)
+    ) !important;
+  border-color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 15%, var(--ct-border, var(--line)) 85%) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 5%, transparent) !important;
+}
+.action:hover,
+.action:focus-visible {
+  transform: translateY(-2px) !important;
+  border-color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 32%, var(--ct-border, var(--line)) 68%) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 89%, var(--action-tint, var(--ct-accent, var(--gold))) 7%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 95%, var(--action-tint, var(--ct-accent, var(--gold))) 3%)
+    ) !important;
+  box-shadow:
+    0 12px 24px color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 10%, transparent),
+    var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.12)) !important;
+}
+.action .icon,
+.icon {
+  width: 54px !important;
+  height: 54px !important;
+  flex: 0 0 54px !important;
+  border-radius: 14px !important;
+  border: 1px solid color-mix(in srgb, var(--action-tint, currentColor) 55%, var(--ct-border, var(--line)) 45%) !important;
+  background: transparent !important;
+  color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 88%, var(--ct-text, var(--text)) 12%) !important;
+  font-size: 33px !important;
+  font-weight: 850 !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 4%, transparent) !important;
+}
+.action[data-active="true"] .icon {
+  background: var(--action-tint, var(--ct-accent, var(--gold))) !important;
+  border-color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 72%, var(--ct-border, var(--line)) 28%) !important;
+  color: var(--ct-on-accent, #ffffff) !important;
+  text-shadow: none !important;
+}
+.actionText {
+  font-size: clamp(14px, 0.82vw, 16px) !important;
+  line-height: 1.08 !important;
+  font-weight: 840 !important;
+  font-style: italic !important;
+  letter-spacing: -0.01em !important;
+}
+.actionText small {
+  margin-top: 4px !important;
+  font-size: clamp(10px, 0.62vw, 11px) !important;
+  line-height: 1.15 !important;
+  font-weight: 650 !important;
+  font-style: italic !important;
+  opacity: 0.82 !important;
+}
+.actionCount {
+  min-width: 26px !important;
+  font-size: clamp(15px, 0.82vw, 17px) !important;
+  font-weight: 860 !important;
+  font-style: italic !important;
+}
+.action[data-action="heart"] { --action-tint: #c94a46; }
+.action[data-action="star"] { --action-tint: #b99331; }
+.action[data-action="collect"] { --action-tint: #2a8c62; }
+.action[data-action="auction"] { --action-tint: #2f77a9; }
+.action[data-action="shop"] { --action-tint: #2a8c62; }
+.action[data-action="share"] { --action-tint: var(--ct-accent, var(--gold)); }
+.action[data-action="compare"] { --action-tint: color-mix(in srgb, var(--ct-accent, var(--gold)) 64%, #7b66ce 36%); }

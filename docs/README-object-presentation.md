@@ -169,3 +169,15 @@ Tallene er UI-forberedelse for antall brukere/objekter med tilsvarende status, o
 - Aktivt hjerte/stjerne/samling fyller selve ikonet, ikke hele raden.
 - Hover gir lett løft og skygge.
 - Det er lagt inn mer luft/mellomrom mellom statusbryterne.
+
+## v13 status switch design correction
+
+Denne versjonen demper statusbryterne etter designkravet:
+
+- svak ramme som følger skin/global design
+- litt sterkere ramme først ved hover/focus
+- større ikonfelt
+- ikon er selve markøren og har tynn ramme
+- aktiv status fyller ikonet, ikke hele bryteren
+- mindre tekst i bryterne
+- mer luft mellom bryterne
