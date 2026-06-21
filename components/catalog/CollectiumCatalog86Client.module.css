@@ -2470,3 +2470,171 @@
 }
 
 /* COLLECTIUM CATALOG86 SMALL ACTION SWITCHES END */
+
+/* COLLECTIUM PATCH: estimated market box size START */
+/*
+  Formål:
+  Gjør høyre "Estimert pris / Ikke estimert / Mangler markedsverdi"-boks
+  større og mer symmetrisk med dynamisk/historie-feltet i katalogkortet.
+
+  Berørt komponent:
+  - components/catalog/CollectiumCatalog86Client.module.css
+  - components/catalog/CollectiumCatalogObjectCard.tsx
+
+  Avgrensning:
+  - Endrer bare pris-/marked-/estimatboksen i høyre sidefelt.
+  - Endrer ikke statusbryterne Hjerte/Stjerne/Auksjon/Nettbutikk.
+  - Endrer ikke hovedkort, historiefelt, bilde, eller handlingsknapper.
+*/
+
+.estimatedPriceCard,
+.estimatePriceCard,
+.estimatedMarketCard,
+.marketEstimateCard,
+.marketValueCard,
+.marketValueBox,
+.marketSummaryCard,
+.marketSummaryBox,
+.priceEstimateCard,
+.priceEstimateBox,
+.valueEstimateCard,
+.valueEstimateBox,
+.valuationCard,
+.valuationBox,
+.sideMarketCard,
+.sideMarketBox,
+.rightMarketCard,
+.rightMarketBox {
+  min-height: clamp(104px, 6.4vw, 132px);
+  height: auto;
+  padding-top: clamp(14px, 1vw, 18px);
+  padding-bottom: clamp(14px, 1vw, 18px);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+}
+
+/* Dersom boksen ligger som siste panel i høyre rail etter statusbryterne */
+.objectCardAside > :is(
+  .estimatedPriceCard,
+  .estimatePriceCard,
+  .estimatedMarketCard,
+  .marketEstimateCard,
+  .marketValueCard,
+  .marketValueBox,
+  .marketSummaryCard,
+  .marketSummaryBox,
+  .priceEstimateCard,
+  .priceEstimateBox,
+  .valueEstimateCard,
+  .valueEstimateBox,
+  .valuationCard,
+  .valuationBox,
+  .sideMarketCard,
+  .sideMarketBox,
+  .rightMarketCard,
+  .rightMarketBox
+),
+.cardAside > :is(
+  .estimatedPriceCard,
+  .estimatePriceCard,
+  .estimatedMarketCard,
+  .marketEstimateCard,
+  .marketValueCard,
+  .marketValueBox,
+  .marketSummaryCard,
+  .marketSummaryBox,
+  .priceEstimateCard,
+  .priceEstimateBox,
+  .valueEstimateCard,
+  .valueEstimateBox,
+  .valuationCard,
+  .valuationBox,
+  .sideMarketCard,
+  .sideMarketBox,
+  .rightMarketCard,
+  .rightMarketBox
+),
+.rightRail > :is(
+  .estimatedPriceCard,
+  .estimatePriceCard,
+  .estimatedMarketCard,
+  .marketEstimateCard,
+  .marketValueCard,
+  .marketValueBox,
+  .marketSummaryCard,
+  .marketSummaryBox,
+  .priceEstimateCard,
+  .priceEstimateBox,
+  .valueEstimateCard,
+  .valueEstimateBox,
+  .valuationCard,
+  .valuationBox,
+  .sideMarketCard,
+  .sideMarketBox,
+  .rightMarketCard,
+  .rightMarketBox
+),
+.sideRail > :is(
+  .estimatedPriceCard,
+  .estimatePriceCard,
+  .estimatedMarketCard,
+  .marketEstimateCard,
+  .marketValueCard,
+  .marketValueBox,
+  .marketSummaryCard,
+  .marketSummaryBox,
+  .priceEstimateCard,
+  .priceEstimateBox,
+  .valueEstimateCard,
+  .valueEstimateBox,
+  .valuationCard,
+  .valuationBox,
+  .sideMarketCard,
+  .sideMarketBox,
+  .rightMarketCard,
+  .rightMarketBox
+) {
+  min-height: clamp(108px, 6.8vw, 138px);
+}
+
+/*
+  Teksten inne i estimatboksen får litt bedre vertikal balanse
+  når boksen blir større.
+*/
+.estimatedPriceCard :is(h3, strong, b, span, p),
+.estimatePriceCard :is(h3, strong, b, span, p),
+.estimatedMarketCard :is(h3, strong, b, span, p),
+.marketEstimateCard :is(h3, strong, b, span, p),
+.marketValueCard :is(h3, strong, b, span, p),
+.marketValueBox :is(h3, strong, b, span, p),
+.marketSummaryCard :is(h3, strong, b, span, p),
+.marketSummaryBox :is(h3, strong, b, span, p),
+.priceEstimateCard :is(h3, strong, b, span, p),
+.priceEstimateBox :is(h3, strong, b, span, p),
+.valueEstimateCard :is(h3, strong, b, span, p),
+.valueEstimateBox :is(h3, strong, b, span, p),
+.valuationCard :is(h3, strong, b, span, p),
+.valuationBox :is(h3, strong, b, span, p),
+.sideMarketCard :is(h3, strong, b, span, p),
+.sideMarketBox :is(h3, strong, b, span, p),
+.rightMarketCard :is(h3, strong, b, span, p),
+.rightMarketBox :is(h3, strong, b, span, p) {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/*
+  Hvis prisboksen er bygget som siste child i høyre rail uten egen klasse,
+  bruk forsiktig fallback: bare siste element i høyre rail, ikke hele kortet.
+*/
+.objectCardAside > :last-child,
+.cardAside > :last-child,
+.rightRail > :last-child,
+.sideRail > :last-child {
+  min-height: clamp(104px, 6.4vw, 132px);
+  display: grid;
+  align-content: center;
+}
+/* COLLECTIUM PATCH: estimated market box size END */
+
