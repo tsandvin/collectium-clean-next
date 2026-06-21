@@ -628,34 +628,7 @@ function Field({
   href?: string;
 }) {
   const allowed = canSee(membership, required);
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
-  }
+}
   return (
     <div className={styles.field}>
       <span>{label}</span>
@@ -690,34 +663,7 @@ function EditableField({
   placeholder?: string;
 }) {
   const allowed = canSee(membership, required);
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
-  }
+}
   return (
     <label
       className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
@@ -751,34 +697,7 @@ function SelectField({
   helper?: string;
 }) {
   const allowed = canSee(membership, required);
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
-  }
+}
   return (
     <label
       className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
@@ -811,34 +730,7 @@ function DemoSelector({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
-  }
+}
   return (
     <section className={styles.demoStrip}>
       <div className={styles.demoHeader}>
@@ -1006,54 +898,14 @@ export default function CollectiumObjectPresentationClient({
     }
 
     void loadStatusCounts();
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
-  }
+}
   return () => {
       cancelled = true;
     };
   }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
 
   const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
-
-  const selectedObjectCatalogFields = selectedObject as typeof selectedObject & {
-    catalogNumber?: string;
-    sourceCatalogNumber?: string;
-    localCatalogNumber?: string;
-  };
-
-  const objectCatalogLabel =
-    selectedObjectCatalogFields.catalogNumber ||
-    selectedObjectCatalogFields.sourceCatalogNumber ||
-    selectedObjectCatalogFields.localCatalogNumber ||
-    `NS ${selectedObject.objectId}`;
-
-  useEffect(() => {
+useEffect(() => {
     let cancelled = false;
 
     async function loadShareRecipients() {
@@ -1147,35 +999,23 @@ export default function CollectiumObjectPresentationClient({
       if (!response.ok) {
         throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
       }
+}
+  function buildObjectCatalogLabel() {
+    const objectFields = selectedObject as typeof selectedObject & {
+      catalogNumber?: string;
+      sourceCatalogNumber?: string;
+      localCatalogNumber?: string;
+    };
 
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
+    return (
+      objectFields.catalogNumber ||
+      objectFields.sourceCatalogNumber ||
+      objectFields.localCatalogNumber ||
+      `NS ${selectedObject.objectId}`
+    );
   }
+
+  const objectCatalogLabel = buildObjectCatalogLabel();
   const isDemo = mode === "demo";
   const hasAccess = isDemo || isLoggedIn || isSharedLink;
   const effectiveMembership: Membership =
@@ -1310,34 +1150,7 @@ export default function CollectiumObjectPresentationClient({
           ["Regent", selectedObject.regent, selectedObject.regentPeriod],
           ["Objektnøkkel", selectedObject.objectId, "source + group + id"],
         ];
-      const result = await response.json();
-
-      const link =
-        result?.share_url ??
-        result?.shareUrl ??
-        result?.url ??
-        result?.link ??
-        result?.data?.share_url ??
-        result?.data?.shareUrl ??
-        "";
-
-      if (!link) {
-        throw new Error("API returnerte ikke share_url.");
-      }
-
-      setGeneratedShareLink(link);
-      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
-    } catch (error) {
-      console.warn("Collectium: share-create API mangler eller feilet", error);
-
-      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
-
-      setGeneratedShareLink(fallback);
-      setShareStatus(
-        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
-      );
-    }
-  }
+}
   return (
     <div className={styles.shell} data-view={viewMode}>
       <main className={styles.main}>
@@ -2403,7 +2216,7 @@ export default function CollectiumObjectPresentationClient({
                     </div>
                     <div className={styles.field}>
                       <span>Katalog</span>
-                      <strong>{selectedObject.catalogNumber}</strong>
+                      <strong>{objectCatalogLabel}</strong>
                     </div>
                     <div className={styles.field}>
                       <span>Tilgang</span>
@@ -2505,6 +2318,7 @@ export default function CollectiumObjectPresentationClient({
     </div>
   );
 }
+
 
 
 
