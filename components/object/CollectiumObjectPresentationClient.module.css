@@ -193,3 +193,149 @@
   .timelineHeader{align-items:flex-start;flex-direction:column}
   .timelineHelp{margin-left:0}
 }
+
+/* v6: Global skin alignment, information-field contrast and exact timeline scale */
+.content {
+  background: transparent !important;
+}
+.hero,
+.keyrow,
+.timeline,
+.panel,
+.demoStrip,
+.authNotice {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel)) 94%, var(--ct-app-bg) 6%) 0%, color-mix(in srgb, var(--ct-panel-soft, var(--ct-panel)) 90%, var(--ct-app-bg) 10%) 100%) !important;
+  border-color: color-mix(in srgb, var(--ct-border, var(--line)) 88%, var(--ct-accent) 12%) !important;
+  color: var(--ct-text, var(--text)) !important;
+}
+.panel,
+.key,
+.mini,
+.field,
+.fallback,
+.lockedText,
+.listItem,
+.tech,
+.periodBadge,
+.action,
+.selectLike {
+  background: color-mix(in srgb, var(--ct-panel-soft, var(--ct-panel)) 82%, var(--ct-accent) 6%) !important;
+}
+.field,
+.key,
+.mini {
+  border: 1px solid color-mix(in srgb, var(--ct-border, var(--line)) 76%, transparent) !important;
+  border-radius: max(6px, var(--ct-radius-sm, 6px));
+  padding-inline: 12px;
+}
+.field + .field {
+  margin-top: 6px;
+}
+.field strong,
+.value,
+.title,
+.panel h3 {
+  color: var(--ct-text, var(--text)) !important;
+}
+.label,
+.sub,
+.field span,
+.muted,
+.inlineNote,
+.timelineHelp,
+.timelineRange {
+  color: var(--ct-muted, var(--muted)) !important;
+}
+.pill,
+.mode,
+.tab,
+.topButton,
+.timelineYearLink,
+.timelineControls button {
+  border-color: var(--ct-border, var(--line)) !important;
+  background: color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel)) 88%, var(--ct-accent) 4%) !important;
+  color: var(--ct-text, var(--text)) !important;
+}
+.pillActive,
+.modeActive,
+.tabActive,
+.topButtonPrimary,
+.action.primary,
+.timelineControls button:hover {
+  background: var(--ct-accent, var(--gold)) !important;
+  color: var(--ct-on-accent, #fff) !important;
+  border-color: var(--ct-accent, var(--gold)) !important;
+}
+.timeline {
+  overflow: visible !important;
+}
+.timelineHeader {
+  align-items: flex-start;
+}
+.timelineRange {
+  margin: 6px 0 0;
+  font-size: 12px;
+}
+.timelineControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.timelineControls button {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 800;
+  line-height: 1;
+}
+.timelineTicks {
+  margin-left: 138px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  color: var(--ct-muted, var(--muted));
+  opacity: 0.78;
+}
+.timelineTicks span {
+  text-align: center;
+}
+.timelineLane {
+  background: color-mix(in srgb, var(--ct-panel-soft, var(--panel)) 86%, var(--ct-text) 5%) !important;
+  border-color: color-mix(in srgb, var(--ct-border, var(--line)) 70%, transparent) !important;
+}
+.timelineBar,
+.timelineBarGreen,
+.timelineBarFinance,
+.timelineBarPurple {
+  background: color-mix(in srgb, var(--ct-accent, var(--gold)) 34%, var(--ct-panel-soft, var(--panel)) 66%) !important;
+  color: var(--ct-text, var(--text)) !important;
+  opacity: 0.55;
+  border: 1px solid color-mix(in srgb, var(--ct-accent, var(--gold)) 26%, transparent);
+  box-shadow: none;
+}
+.timelineBarGreen {
+  background: color-mix(in srgb, var(--ct-timeline-period, var(--ct-accent)) 34%, var(--ct-panel-soft, var(--panel)) 66%) !important;
+}
+.timelineBarFinance {
+  background: color-mix(in srgb, var(--ct-timeline-historical, var(--ct-accent-2, var(--ct-accent))) 34%, var(--ct-panel-soft, var(--panel)) 66%) !important;
+}
+.timelineBarPurple {
+  background: color-mix(in srgb, var(--ct-timeline-century, #8a70a8) 36%, var(--ct-panel-soft, var(--panel)) 64%) !important;
+}
+.timelineBarCurrent {
+  opacity: 1 !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ct-accent, var(--gold)) 92%, #fff 8%), var(--ct-accent, var(--gold))) !important;
+  color: var(--ct-on-accent, #fff) !important;
+  border-color: color-mix(in srgb, var(--ct-accent, var(--gold)) 80%, #fff 20%) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ct-accent, var(--gold)) 32%, transparent), 0 12px 28px rgb(0 0 0 / 24%) !important;
+}
+.timelineBar:hover {
+  opacity: 1;
+  transform: scaleY(1.1) translateY(-1px);
+}
+@media(max-width:760px){
+  .timelineControls{width:100%;justify-content:flex-start}
+  .timelineTicks{margin-left:0}
+}

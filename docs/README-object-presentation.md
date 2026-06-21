@@ -1,42 +1,38 @@
-# Collectium object presentation v5 - global skin fix
+# Collectium objektpresentasjon v6 - global design og tidslinjeskala
 
-## Formål
-Denne pakken retter objektpresentasjon slik at siden arver Collectium globalt design/skinn fra `globals.css`, `themes.css`, `layout.tsx` og `CollectiumSkinProvider.tsx`.
+## Endringsformål
+Denne pakken bygger videre på v5 og retter objektpresentasjonen slik at siden arver global Collectium-design fra `globals.css`, `themes.css` og `CollectiumSkinProvider`.
 
-## Viktig endring
-Komponenten setter ikke lenger lokal `data-skin` og viser ikke egen lokal skinnvelger. Globalt designpanel/topbar bestemmer aktivt skinn via `html[data-skin]` / `html[data-theme]`.
+## Hovedendringer
 
-## Filer
+- Lokal skinbar og lokal skin-state er ikke innført igjen.
+- Siden bruker globale `--ct-*` tokens for panel, tekst, bakgrunn, border, shadow, accent og timeline-farger.
+- Informasjonsfelt, bokser og låste felt har fått svak skin-relatert bakgrunn, slik at de skiller seg fra sidebakgrunnen.
+- Tidslinjen bruker samme årsskala på alle rader.
+- `+` og `-` endrer tidshorisont rundt objektets publiseringsår.
+- Timeline barer beregnes fra `startYear` og `endYear`, ikke faste prosenter.
+- Ikke-gjeldende perioder er svake, gjeldende objektperiode er sterkere og lysere.
+- Klikk på år, regent, historisk periode, finansperiode og objekt-/utgiverperiode går til relasjonsrute.
+
+## Berørte filer
+
 - `app/objektpresentasjon/page.tsx`
 - `app/objekt/[sourceKey]/[objectGroup]/[objectId]/page.tsx`
 - `components/object/CollectiumObjectPresentationClient.tsx`
 - `components/object/CollectiumObjectPresentationClient.module.css`
+- `docs/README-object-presentation.md`
 
-## Routes
-- `/objektpresentasjon` - offentlig demo for nye brukere. Dummyvelger med 10 objekter vises kun i gjest/demo-modus.
-- `/objekt/[sourceKey]/[objectGroup]/[objectId]` - ekte objektpresentasjon. Ingen dummyvelger.
+## Designkilde
 
-## Global design
-CSS-modulen bruker disse globale tokenene:
-- `--ct-app-bg`
-- `--ct-page-bg`
-- `--ct-panel`, `--ct-panel-solid`, `--ct-panel-soft`
-- `--ct-border`, `--ct-border-strong`
-- `--ct-text`, `--ct-muted`, `--ct-text-soft`
-- `--ct-accent`, `--ct-accent-2`
-- `--ct-font-body`, `--ct-font-head`, `--ct-font-ui`
-- `--ct-radius-*`
-- `--ct-shadow-*`
-- `--ct-timeline-*`
+Globalt design styres av eksisterende Collectium shell og globale CSS-variabler. Objektpresentasjon skal ikke legge egen sidebar, toppbar eller egen skin-state.
 
-## Tilgang
-- Gjest/demo: viser presentasjonsmodus og 10 dummyobjekter.
-- Free: kjerneinformasjon.
-- Bronze+: samlerfelt og Min samling.
-- Silver+: finans-/markedfelt.
-- Delt lenke: begrenset objektvisning.
+## Ruter
 
-## API/views som siden er forberedt for
+- `/objektpresentasjon` offentlig demo/presentasjon
+- `/objekt/[sourceKey]/[objectGroup]/[objectId]` objektpresentasjon for valgt objekt
+
+## API / view-forberedelse
+
 - `GET /api/object/presentation`
 - `GET /api/object/relations`
 - `GET /api/object/market`
