@@ -47,6 +47,16 @@ type Tab = "samler" | "historie" | "finans" | "samling" | "relasjoner";
 type Mode = "objekt" | "museum" | "kompakt" | "finans";
 type Membership = "guest" | "free" | "bronze" | "silver" | "gold" | "platinum";
 
+type TimelineItem = {
+  label: string;
+  sub: string;
+  left: string;
+  width: string;
+  href: string;
+  lane: "regent" | "history" | "finance" | "object";
+  match: (item: ObjectItem) => boolean;
+};
+
 type ObjectItem = {
   objectId: string;
   sourceKey: string;
@@ -99,6 +109,18 @@ const skinOptions: { key: Skin; label: string; color?: string }[] = [
   { key: "finans", label: "Finans", color: "#42c46e" },
 ];
 
+const timelineItems: TimelineItem[] = [
+  { label: "Oscar II", sub: "1872-1905 · svensk-norsk union", left: "0%", width: "28%", href: "/relasjon/regent/oscar-ii", lane: "regent", match: (item) => item.regent === "Oscar II" },
+  { label: "Haakon VII", sub: "1905-1957 · selvstendig Norge", left: "28%", width: "38%", href: "/relasjon/regent/haakon-vii", lane: "regent", match: (item) => item.regent === "Haakon VII" },
+  { label: "Olav V", sub: "1957-1991 · etterkrig/oljealder", left: "66%", width: "20%", href: "/relasjon/regent/olav-v", lane: "regent", match: (item) => item.regent === "Olav V" },
+  { label: "Harald V", sub: "1991- · moderne Norge", left: "86%", width: "14%", href: "/relasjon/regent/harald-v", lane: "regent", match: (item) => item.regent === "Harald V" },
+  { label: "Unionstid", sub: "1814-1905 · politisk periode", left: "0%", width: "28%", href: "/relasjon/periode/unionstid", lane: "history", match: (item) => Number(item.year) <= 1905 },
+  { label: "Selvstendig Norge", sub: "1905- · nasjonal periode", left: "28%", width: "72%", href: "/relasjon/periode/selvstendig-norge", lane: "history", match: (item) => Number(item.year) > 1905 },
+  { label: "Bank- og pengehistorie", sub: "1816-1905", left: "5%", width: "32%", href: "/relasjon/finans/bank-og-pengehistorie", lane: "finance", match: (item) => Number(item.year) < 1905 },
+  { label: "Mellomkrig / krigsøkonomi", sub: "1918-1945", left: "40%", width: "20%", href: "/relasjon/finans/krigsokonomi", lane: "finance", match: (item) => Number(item.year) >= 1918 && Number(item.year) <= 1945 },
+  { label: "Olje- og velferdsperiode", sub: "1969-1990", left: "70%", width: "20%", href: "/relasjon/finans/oljealder", lane: "finance", match: (item) => Number(item.year) >= 1969 && Number(item.year) < 1991 },
+];
+
 const membershipRank: Record<Membership, number> = {
   guest: 0,
   free: 1,
@@ -148,7 +170,7 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
   const [skin, setSkin] = useState<Skin>("museum");
   const [tab, setTab] = useState<Tab>("samler");
   const [viewMode, setViewMode] = useState<Mode>("objekt");
-  const [membership, setMembership] = useState<Membership>(mode === "demo" ? "bronze" : isLoggedIn ? "bronze" : "guest");
+  const [membership, setMembership] = useState<Membership>(mode === "demo" ? "guest" : isLoggedIn ? "bronze" : "guest");
   const [selectedId, setSelectedId] = useState(routeObject?.objectId ?? "9");
   const [savedStates, setSavedStates] = useState<Record<string, boolean>>({});
 
@@ -174,7 +196,7 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
     : [["Valør", selectedObject.denomination, selectedObject.objectGroup], ["Utgave", selectedObject.issue, selectedObject.year], ["Variant", selectedObject.litra, selectedObject.catalogNumber], ["Signatur", selectedObject.signatures, "signaturgruppe"], ["Regent", selectedObject.regent, selectedObject.regentPeriod], ["Objektnøkkel", selectedObject.objectId, "source + group + id"]];
 
   return (
-    <div className={styles.shell} data-skin={skin}>
+    <div className={styles.shell} data-skin={skin} data-view={viewMode}>
       <main className={styles.main}>
         <div className={styles.content}>
           <div className={styles.modeBar}>
@@ -187,9 +209,9 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
               ))}
             </div>
             <div className={styles.membershipSelect}>
-              <span className={styles.inlineNote}>Tilgang:</span>
+              <span className={styles.inlineNote}>{mode === "demo" ? "Test tilgang:" : "Tilgang:"}</span>
               <select className={styles.selectLike} value={membership} onChange={(event) => setMembership(event.target.value as Membership)}>
-                <option value="guest">Gjest</option>
+                <option value="guest">Gjest / demo</option>
                 <option value="free">Free</option>
                 <option value="bronze">Bronze</option>
                 <option value="silver">Silver</option>
@@ -199,7 +221,7 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
             </div>
           </div>
 
-          {isDemo ? <DemoSelector selectedId={selectedId} onSelect={setSelectedId} /> : null}
+          {isDemo && membership === "guest" ? <DemoSelector selectedId={selectedId} onSelect={setSelectedId} /> : null}
 
           {!hasAccess ? (
             <section className={styles.authNotice}>
@@ -246,11 +268,11 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
 
               <div className={styles.tabsRow}>
                 <div className={styles.leftTabs}>
-                  {[["samler","I Samler"],["historie","II Historie"],["finans","III Finans"]].map(([key, label]) => <button key={key} className={`${styles.tab} ${tab === key ? styles.tabActive : ""}`} type="button" onClick={() => setTab(key as Tab)}>{label}</button>)}
+                  {[["samler","I Samler"],["historie","II Historie"],["finans","III Finans"]].map(([key, label]) => <button key={key} className={`${styles.tab} ${tab === key ? styles.tabActive : ""}`} type="button" aria-pressed={tab === key} onClick={() => setTab(key as Tab)}>{label}</button>)}
                 </div>
                 <div className={styles.rightTabs}>
-                  {[["samling","IV I min samling"],["relasjoner","V Relasjon objekter"]].map(([key, label]) => <button key={key} className={`${styles.tab} ${tab === key ? styles.tabActive : ""}`} type="button" onClick={() => setTab(key as Tab)}>{label}</button>)}
-                  {[["objekt","Objekt info"],["museum","Museum"],["kompakt","Kompakt"],["finans","Finans"]].map(([key, label]) => <button key={key} className={`${styles.mode} ${viewMode === key ? styles.modeActive : ""}`} type="button" onClick={() => { setViewMode(key as Mode); if (key === "finans") setTab("finans"); }}>{label}</button>)}
+                  {[["samling","IV I min samling"],["relasjoner","V Relasjon objekter"]].map(([key, label]) => <button key={key} className={`${styles.tab} ${tab === key ? styles.tabActive : ""}`} type="button" aria-pressed={tab === key} onClick={() => setTab(key as Tab)}>{label}</button>)}
+                  {[["objekt","Objekt info"],["museum","Museum"],["kompakt","Kompakt"],["finans","Finans"]].map(([key, label]) => <button key={key} className={`${styles.mode} ${viewMode === key ? styles.modeActive : ""}`} type="button" aria-pressed={viewMode === key} onClick={() => { setViewMode(key as Mode); if (key === "finans") setTab("finans"); }}>{label}</button>)}
                 </div>
               </div>
 
@@ -261,14 +283,39 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
               </section>
 
               <section className={styles.timeline}>
-                <h2>Periodefilter · tidslinje</h2>
+                <div className={styles.timelineHeader}>
+                  <div>
+                    <span className={styles.timelineKicker}>Periodefilter · relasjonstidslinje</span>
+                    <h2>Tidslinje for {selectedObject.year}</h2>
+                  </div>
+                  <a className={styles.timelineYearLink} href={`/relasjon/publiseringsar/${selectedObject.year}`} title={`Åpne publiseringsår ${selectedObject.year}`}>{selectedObject.year}</a>
+                </div>
                 <div className={styles.timelineTicks}><span>1870</span><span>1905</span><span>1940</span><span>1969</span><span>1991</span><span>2024</span></div>
                 <div className={styles.timelineGrid}>
-                  <div className={styles.timelineLabel}>Konge / regent</div><div className={styles.timelineLane}><span className={styles.timelineBar} style={{ left:'0%', width:'28%' }}>Oscar II</span><span className={styles.timelineBar} style={{ left:'28%', width:'38%' }}>Haakon VII</span><span className={styles.timelineBar} style={{ left:'66%', width:'20%' }}>Olav V</span></div>
-                  <div className={styles.timelineLabel}>Historisk periode</div><div className={styles.timelineLane}><span className={`${styles.timelineBar} ${styles.timelineBarGreen}`} style={{ left:'0%', width:'28%' }}>Unionstid</span><span className={`${styles.timelineBar} ${styles.timelineBarGreen}`} style={{ left:'28%', width:'72%' }}>Selvstendig Norge</span></div>
-                  <div className={styles.timelineLabel}>Finans / økonomi</div><div className={styles.timelineLane}><span className={`${styles.timelineBar} ${styles.timelineBarGreen}`} style={{ left:'10%', width:'36%' }}>Bank- og pengehistorie</span><span className={`${styles.timelineBar} ${styles.timelineBarGreen}`} style={{ left:'70%', width:'22%' }}>Oljealder</span></div>
-                  <div className={styles.timelineLabel}>Objekt / utgiver</div><div className={styles.timelineLane}><span className={`${styles.timelineBar} ${styles.timelineBarPurple}`} style={{ left:'64%', width:'18%' }}>{selectedObject.issue}</span></div>
+                  <div className={styles.timelineLabel}>Konge / regent</div>
+                  <div className={styles.timelineLane}>
+                    {timelineItems.filter((item) => item.lane === "regent").map((item) => (
+                      <a key={item.label} href={item.href} title={`${item.label}: ${item.sub}. Klikk for relasjonskort.`} className={`${styles.timelineBar} ${item.match(selectedObject) ? styles.timelineBarCurrent : ""}`} style={{ left: item.left, width: item.width }}>{item.label}</a>
+                    ))}
+                  </div>
+                  <div className={styles.timelineLabel}>Historisk periode</div>
+                  <div className={styles.timelineLane}>
+                    {timelineItems.filter((item) => item.lane === "history").map((item) => (
+                      <a key={item.label} href={item.href} title={`${item.label}: ${item.sub}. Klikk for relasjonskort.`} className={`${styles.timelineBar} ${styles.timelineBarGreen} ${item.match(selectedObject) ? styles.timelineBarCurrent : ""}`} style={{ left: item.left, width: item.width }}>{item.label}</a>
+                    ))}
+                  </div>
+                  <div className={styles.timelineLabel}>Finans / økonomi</div>
+                  <div className={styles.timelineLane}>
+                    {timelineItems.filter((item) => item.lane === "finance").map((item) => (
+                      <a key={item.label} href={item.href} title={`${item.label}: ${item.sub}. Klikk for relasjonskort.`} className={`${styles.timelineBar} ${styles.timelineBarFinance} ${item.match(selectedObject) ? styles.timelineBarCurrent : ""}`} style={{ left: item.left, width: item.width }}>{item.label}</a>
+                    ))}
+                  </div>
+                  <div className={styles.timelineLabel}>Objekt / utgiver</div>
+                  <div className={styles.timelineLane}>
+                    <a href={`/relasjon/utgave/${selectedObject.issue.toLowerCase().replaceAll(" ", "-").replaceAll(".", "")}`} title={`${selectedObject.issue}. Klikk for utgave-/objektperiode.`} className={`${styles.timelineBar} ${styles.timelineBarPurple} ${styles.timelineBarCurrent}`} style={{ left: selectedObject.regent === "Oscar II" ? "10%" : selectedObject.regent === "Haakon VII" ? "38%" : selectedObject.regent === "Olav V" ? "66%" : "86%", width: selectedObject.regent === "Olav V" ? "18%" : "14%" }}>{selectedObject.issue}</a>
+                  </div>
                 </div>
+                <p className={styles.timelineHelp}>Aktiv periode er større og lysere. Hold over for rask info. Klikk på konge, periode, finanslag, objektperiode eller årstall for relasjonspresentasjon.</p>
               </section>
 
               <div className={styles.layout}>
@@ -309,7 +356,7 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
                 </main>
 
                 <aside className={styles.side}>
-                  <div className={styles.panel}><h3>Aktiv visning</h3><div className={styles.shareBtns}>{[["objekt","Objekt info"],["museum","Museum"],["kompakt","Kompakt"],["finans","Finans"]].map(([key, label]) => <button key={key} className={`${styles.mode} ${viewMode === key ? styles.modeActive : ""}`} type="button" onClick={() => setViewMode(key as Mode)}>{label}</button>)}</div></div>
+                  <div className={styles.panel}><h3>Aktiv visning</h3><div className={styles.shareBtns}>{[["objekt","Objekt info"],["museum","Museum"],["kompakt","Kompakt"],["finans","Finans"]].map(([key, label]) => <button key={key} className={`${styles.mode} ${viewMode === key ? styles.modeActive : ""}`} type="button" aria-pressed={viewMode === key} onClick={() => { setViewMode(key as Mode); if (key === "finans") setTab("finans"); }}>{label}</button>)}</div></div>
                   <div className={styles.panel}><h3>Status</h3>{[["heart","♡","Hjerte","Ønskeliste"],["star","★","Stjerne","Favoritt"],["collect","＋","Legg i samling","Min samling"],["share","↗","Del objekt","Visningslenke"],["compare","⇄","Sammenlign","Mot andre objekter"]].map(([id, icon, label, sub]) => <button key={id} className={`${styles.action} ${savedStates[id] ? styles.actionPrimary : ""}`} type="button" onClick={() => setSavedStates((prev) => ({ ...prev, [id]: !prev[id] }))}><span className={styles.icon}>{icon}</span><span>{label}<br/><small>{sub}</small></span></button>)}</div>
                   <div className={styles.panel}><h3>Del visning</h3><div className={styles.shareBtns}>{["6t", "12t", "18t", "24t", "48t"].map((item) => <button key={item} className={`${styles.pill} ${item === '12t' ? styles.pillActive : ''}`}>{item}</button>)}</div><div className={styles.field}><span>Katalog</span><strong>{selectedObject.catalogNumber}</strong></div><div className={styles.field}><span>Tilgang</span><strong>12 timer</strong></div><button className={`${styles.pill} ${styles.pillActive}`}>Generer lenke</button></div>
                 </aside>

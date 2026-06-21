@@ -1,4 +1,4 @@
-# Collectium Object Presentation Next.js package
+# Collectium Object Presentation Next.js package v4
 
 ## Routes
 
@@ -16,11 +16,27 @@ components/object/CollectiumObjectPresentationClient.tsx
 components/object/CollectiumObjectPresentationClient.module.css
 ```
 
-## Purpose
+## v4 changes
 
-- `/objektpresentasjon` is public demo/presentation mode with 10 dummy objects at the top.
-- `/objekt/[sourceKey]/[objectGroup]/[objectId]` is the real object presentation route.
-- The real route is prepared for login requirement and shared-link limited access.
+- Removed the member-side demo strip when test access is switched away from `Gjest / demo`.
+- Keeps `/objektpresentasjon` as public demo for new users, but makes Bronze/Silver/Gold/Platinum behave like logged-in/member presentation.
+- Keeps real object route `/objekt/[sourceKey]/[objectGroup]/[objectId]` without dummy selector.
+- Keeps the global app shell only; no internal sidebar or internal topbar.
+- Fixes the tab/view buttons so they visibly change the page mode:
+  - `IV I min samling`
+  - `V Relasjon objekter`
+  - `Objekt info`
+  - `Museum`
+  - `Kompakt`
+  - `Finans`
+- Adds active `data-view` behavior for object, museum, compact and finance mode.
+- Adds relation-style timeline with active/current highlight.
+- Timeline entries are links to relation routes:
+  - `/relasjon/regent/...`
+  - `/relasjon/periode/...`
+  - `/relasjon/finans/...`
+  - `/relasjon/publiseringsar/[year]`
+- Timeline uses CSS variables from the active skin so bar colors follow the selected/global design theme.
 
 ## Later API wiring
 
@@ -40,8 +56,3 @@ ct_v_object_relations_resolved
 ct_v_object_market_resolved
 ct_v_object_user_state_resolved
 ```
-
-
-## v3 shell-fix
-
-Denne versjonen fjerner lokal/nestet sidebar og lokal/nestet toppmeny fra objektpresentasjon. Siden skal ligge inne i eksisterende globale Collectium app-shell, slik at det bare finnes én sidebar og én toppbar på `app.collectium.no`. Skinbar og medlems-/demo-kontroller ligger fortsatt inne i selve objektpresentasjonen.
