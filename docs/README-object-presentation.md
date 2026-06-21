@@ -210,3 +210,33 @@ Endret objektpresentasjon slik at:
 Berørt fil:
 - components/object/CollectiumObjectPresentationClient.module.css
 
+## v17 faktiske statustall
+
+Statuspanelet bruker ikke lenger hardkodede demo-tall.
+
+Tidligere demoverdier:
+- Hjerte 48
+- Stjerne 21
+- Min samling 14
+- Auksjon 3
+- Nettbutikk 1
+- Del objekt 6
+- Sammenlign 33
+
+Ny regel:
+- Tall hentes fra GET /api/object/user-state
+- Oppslag skjer med source_key + object_group + object_id
+- Hvis API ikke returnerer faktiske tall, vises "–" i stedet for falske demo-tall
+
+Berørt fil:
+- components/object/CollectiumObjectPresentationClient.tsx
+
+Forventet API-data:
+- counts.heart / heart_count
+- counts.star / favorite_count
+- counts.collect / collection_count
+- counts.auction / active_auction_count
+- counts.shop / active_shop_count
+- counts.share / share_count
+- counts.compare / compare_count
+

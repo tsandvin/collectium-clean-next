@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * COLLECTIUM FILE HEADER
@@ -39,7 +39,7 @@
  * - ct_v_object_user_state_resolved
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./CollectiumObjectPresentationClient.module.css";
 
 type Tab = "samler" | "historie" | "finans" | "samling" | "relasjoner";
@@ -601,16 +601,6 @@ const coinGradingOptions: GradingOption[] = [
   },
 ];
 
-const statusCounts: Record<string, number> = {
-  heart: 48,
-  star: 21,
-  collect: 14,
-  auction: 3,
-  shop: 1,
-  share: 6,
-  compare: 33,
-};
-
 const membershipRank: Record<Membership, number> = {
   guest: 0,
   free: 1,
@@ -781,6 +771,15 @@ export default function CollectiumObjectPresentationClient({
   const [selectedId, setSelectedId] = useState(routeObject?.objectId ?? "9");
   const [timelineSpan, setTimelineSpan] = useState(154);
   const [savedStates, setSavedStates] = useState<Record<string, boolean>>({});
+  const [statusCounts, setStatusCounts] = useState<Record<string, number | null>>({
+    heart: null,
+    star: null,
+    collect: null,
+    auction: null,
+    shop: null,
+    share: null,
+    compare: null,
+  });
   const [imageSourceMode, setImageSourceMode] =
     useState<ImageSourceMode>("collectium");
   const [activeImageRole, setActiveImageRole] = useState<ImageRole>("forside");
@@ -814,6 +813,83 @@ export default function CollectiumObjectPresentationClient({
       catalogNumber: `${routeObject.sourceKey} ${routeObject.objectId}`,
     };
   }, [selectedId, routeObject]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadStatusCounts() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/user-state?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente statustall: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const counts =
+          payload?.counts ??
+          payload?.status_counts ??
+          payload?.object_status_counts ??
+          payload?.summary ??
+          payload?.data?.counts ??
+          payload?.data?.status_counts ??
+          payload?.data?.summary ??
+          payload;
+
+        const nextCounts: Record<string, number | null> = {
+          heart:
+            Number(counts?.heart ?? counts?.wishlist ?? counts?.heart_count ?? counts?.wishlist_count) || 0,
+          star:
+            Number(counts?.star ?? counts?.favorite ?? counts?.star_count ?? counts?.favorite_count) || 0,
+          collect:
+            Number(counts?.collect ?? counts?.collection ?? counts?.collection_count ?? counts?.in_collection_count) || 0,
+          auction:
+            Number(counts?.auction ?? counts?.auction_count ?? counts?.active_auction_count) || 0,
+          shop:
+            Number(counts?.shop ?? counts?.webshop ?? counts?.shop_count ?? counts?.active_shop_count) || 0,
+          share:
+            Number(counts?.share ?? counts?.share_count ?? counts?.active_share_count) || 0,
+          compare:
+            Number(counts?.compare ?? counts?.compare_count ?? counts?.related_compare_count) || 0,
+        };
+
+        if (!cancelled) {
+          setStatusCounts(nextCounts);
+        }
+      } catch (error) {
+        console.warn("Collectium: faktiske statustall mangler fra API", error);
+
+        if (!cancelled) {
+          setStatusCounts({
+            heart: null,
+            star: null,
+            collect: null,
+            auction: null,
+            shop: null,
+            share: null,
+            compare: null,
+          });
+        }
+      }
+    }
+
+    void loadStatusCounts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
 
   const isDemo = mode === "demo";
   const hasAccess = isDemo || isLoggedIn || isSharedLink;
@@ -1996,7 +2072,7 @@ export default function CollectiumObjectPresentationClient({
                           className={styles.actionCount}
                           title="Antall brukere/objekter med tilsvarende status"
                         >
-                          {statusCounts[action.id] ?? 0}
+                          {statusCounts[action.id] ?? "–"}
                         </span>
                       </button>
                     ))}
@@ -2034,3 +2110,4 @@ export default function CollectiumObjectPresentationClient({
     </div>
   );
 }
+
