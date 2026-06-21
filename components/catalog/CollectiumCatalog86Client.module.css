@@ -2471,185 +2471,81 @@
 
 /* COLLECTIUM CATALOG86 SMALL ACTION SWITCHES END */
 
-/* COLLECTIUM PATCH: right status switches subtle top edge START */
+/* COLLECTIUM PATCH: precise right status switch highlight START */
 /*
   Formål:
-  Kun høyre statusbrytere:
-  - Hjerte
-  - Stjerne
-  - Auksjon
-  - Nettbutikk
+  Presis patch på faktiske statusbryterklasser i:
+  C:\Users\Bruker\Pictures\Collectium clean rebuild\collectium-clean-next\components\catalog\CollectiumCatalog86Client.tsx
 
   Endring:
-  - Gjør toppmerket lysgrått i stedet for hvitt
-  - Gjør merket omtrent halvparten så tydelig/høyt
-  - Beholder patchen smal, kun på statusbryterne
+  - Det hvite toppmerket gjøres lysgrått.
+  - Merket gjøres omtrent halvparten så høyt/tydelig.
+  - Patch legges i riktig CSS module, ikke globalt.
+  - Resten av katalogkortet skal ikke påvirkes.
 */
 
-.rightStatusSwitch,
-.rightStatusButton,
-.rightRailSwitch,
-.rightRailStatus,
-.statusSwitch,
-.statusButton,
-.userStateSwitch,
-.userStateButton,
-.collectorStateSwitch,
-.collectorStateButton,
-.sideStatusSwitch,
-.sideStatusButton,
-.sideRailStatus,
-.sideRailSwitch,
-.actionStatusSwitch,
-.actionStatusButton,
-.marketStatusSwitch,
-.marketStatusButton {
+. {
   position: relative;
   isolation: isolate;
   overflow: hidden;
 }
 
-/* Toppmerket: lysgrått og ca halvparten av tidligere styrke/høyde */
-.rightStatusSwitch::before,
-.rightStatusButton::before,
-.rightRailSwitch::before,
-.rightRailStatus::before,
-.statusSwitch::before,
-.statusButton::before,
-.userStateSwitch::before,
-.userStateButton::before,
-.collectorStateSwitch::before,
-.collectorStateButton::before,
-.sideStatusSwitch::before,
-.sideStatusButton::before,
-.sideRailStatus::before,
-.sideRailSwitch::before,
-.actionStatusSwitch::before,
-.actionStatusButton::before,
-.marketStatusSwitch::before,
-.marketStatusButton::before {
+/*
+  Selve toppmerket.
+  Dette erstatter den hvite stripen med en svak lysgrå kant.
+*/
+.::before {
   content: "";
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: 1px;
   left: 14px;
   right: 14px;
-  height: 2px; /* omtrent halvparten */
+  height: 2px;
   pointer-events: none;
   border-radius: 999px;
-  border-top: 1px solid rgba(170, 176, 184, 0.22);
+  border-top: 1px solid rgba(174, 180, 188, 0.24);
   background:
     linear-gradient(
       180deg,
-      rgba(182, 188, 196, 0.08) 0%,
-      rgba(182, 188, 196, 0.035) 50%,
-      rgba(182, 188, 196, 0.00) 100%
+      rgba(174, 180, 188, 0.075) 0%,
+      rgba(174, 180, 188, 0.028) 48%,
+      rgba(174, 180, 188, 0.00) 100%
     ) !important;
-  opacity: 0.42; /* svakere enn før */
+  opacity: 0.40;
   box-shadow: none !important;
-  clip-path: inset(0 0 68% 0);
+  clip-path: inset(0 0 70% 0);
 }
 
-/* Diskret dybde beholdes kun på disse bryterne */
-.rightStatusSwitch,
-.rightStatusButton,
-.rightRailSwitch,
-.rightRailStatus,
-.statusSwitch,
-.statusButton,
-.userStateSwitch,
-.userStateButton,
-.collectorStateSwitch,
-.collectorStateButton,
-.sideStatusSwitch,
-.sideStatusButton,
-.sideRailStatus,
-.sideRailSwitch,
-.actionStatusSwitch,
-.actionStatusButton,
-.marketStatusSwitch,
-.marketStatusButton {
-  box-shadow:
-    inset 0 1px 0 rgba(230, 235, 242, 0.04),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.14),
-    0 3px 7px rgba(0, 0, 0, 0.09);
-}
-
-/* Større ikonfelt bare inni statusbryterne */
-.rightStatusSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.rightStatusButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.rightRailSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.rightRailStatus :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.statusSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.statusButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.userStateSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.userStateButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.collectorStateSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.collectorStateButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.sideStatusSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.sideStatusButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.sideRailStatus :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.sideRailSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.actionStatusSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.actionStatusButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.marketStatusSwitch :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg),
-.marketStatusButton :is(.icon, .statusIcon, .stateIcon, .switchIcon, svg) {
+/*
+  Større ikon inne i statusbryterne.
+*/
+. :is(svg, .icon, .Icon, .statusIcon, .stateIcon, .switchIcon) {
   width: 22px;
   height: 22px;
   min-width: 22px;
   min-height: 22px;
 }
 
-/* Ikke valgt: ikon som outline */
-.rightStatusSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.rightStatusButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.rightRailSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.rightRailStatus:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.statusSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.statusButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.userStateSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.userStateButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.collectorStateSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.collectorStateButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.sideStatusSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.sideStatusButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.sideRailStatus:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.sideRailSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.actionStatusSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.actionStatusButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.marketStatusSwitch:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg,
-.marketStatusButton:not(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]) svg {
+/*
+  Ikke valgt: ikon som ramme/outline.
+*/
+.(.active):not(.selected):not([aria-pressed="true"]):not([aria-selected="true"]):not([data-active="true"]):not([data-selected="true"]) :is(svg, .icon, .Icon, .statusIcon, .stateIcon, .switchIcon) {
   fill: transparent !important;
   stroke: currentColor !important;
   stroke-width: 2 !important;
   opacity: 0.88;
 }
 
-/* Valgt/aktiv: fylt ikon */
-.rightStatusSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.rightStatusButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.rightRailSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.rightRailStatus:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.statusSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.statusButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.userStateSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.userStateButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.collectorStateSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.collectorStateButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.sideStatusSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.sideStatusButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.sideRailStatus:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.sideRailSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.actionStatusSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.actionStatusButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.marketStatusSwitch:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg,
-.marketStatusButton:is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) svg {
+/*
+  Valgt/aktiv: ikon får sterkere fyll.
+*/
+.(.active, .selected, [aria-pressed="true"], [aria-selected="true"], [data-active="true"], [data-selected="true"]) :is(svg, .icon, .Icon, .statusIcon, .stateIcon, .switchIcon) {
   fill: currentColor !important;
   stroke: color-mix(in srgb, currentColor 70%, white 20%) !important;
   stroke-width: 1.1 !important;
   opacity: 1;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 30%, transparent));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 28%, transparent));
 }
-/* COLLECTIUM PATCH: right status switches subtle top edge END */
-
+/* COLLECTIUM PATCH: precise right status switch highlight END */
 
