@@ -42,7 +42,6 @@
 import { useMemo, useState } from "react";
 import styles from "./CollectiumObjectPresentationClient.module.css";
 
-type Skin = "museum" | "collectium" | "enkel" | "finans";
 type Tab = "samler" | "historie" | "finans" | "samling" | "relasjoner";
 type Mode = "objekt" | "museum" | "kompakt" | "finans";
 type Membership = "guest" | "free" | "bronze" | "silver" | "gold" | "platinum";
@@ -102,13 +101,6 @@ const demoObjects: ObjectItem[] = [
   { objectId: "420", sourceKey: "norske_sedler", objectGroup: "banknote", catalogNumber: "NS 420", title: "200 kroner · 1994 · moderne serie", denomination: "200 kroner", year: "1994", litra: "G", issue: "7. utgave", variant: "Moderne", signatures: "Norges Bank", regent: "Harald V", regentPeriod: "1991-", rarity: "Normal", quantity: "Høy", noteNumber: "200", noteText: "Norges Bank · Harald V · 1994", serial: "G 420" },
 ];
 
-const skinOptions: { key: Skin; label: string; color?: string }[] = [
-  { key: "collectium", label: "Collectium" },
-  { key: "enkel", label: "Enkel", color: "#2d5f90" },
-  { key: "museum", label: "Museum" },
-  { key: "finans", label: "Finans", color: "#42c46e" },
-];
-
 const timelineItems: TimelineItem[] = [
   { label: "Oscar II", sub: "1872-1905 · svensk-norsk union", left: "0%", width: "28%", href: "/relasjon/regent/oscar-ii", lane: "regent", match: (item) => item.regent === "Oscar II" },
   { label: "Haakon VII", sub: "1905-1957 · selvstendig Norge", left: "28%", width: "38%", href: "/relasjon/regent/haakon-vii", lane: "regent", match: (item) => item.regent === "Haakon VII" },
@@ -150,7 +142,7 @@ function DemoSelector({ selectedId, onSelect }: { selectedId: string; onSelect: 
       <div className={styles.demoHeader}>
         <div>
           <h1>Objektpresentasjon · demo for nye brukere</h1>
-          <p>Velg ett av 10 dummyobjekter for å se hvordan objektpresentasjon, relasjoner, brukerpanel og skins fungerer.</p>
+          <p>Velg ett av 10 dummyobjekter for å se hvordan objektpresentasjon, relasjoner og brukerpanel fungerer. Globalt skinn styres fra Collectium designpanelet.</p>
         </div>
       </div>
       <div className={styles.demoObjects}>
@@ -167,7 +159,6 @@ function DemoSelector({ selectedId, onSelect }: { selectedId: string; onSelect: 
 }
 
 export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = false, isSharedLink = false, routeObject }: Props) {
-  const [skin, setSkin] = useState<Skin>("museum");
   const [tab, setTab] = useState<Tab>("samler");
   const [viewMode, setViewMode] = useState<Mode>("objekt");
   const [membership, setMembership] = useState<Membership>(mode === "demo" ? "guest" : isLoggedIn ? "bronze" : "guest");
@@ -196,18 +187,10 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
     : [["Valør", selectedObject.denomination, selectedObject.objectGroup], ["Utgave", selectedObject.issue, selectedObject.year], ["Variant", selectedObject.litra, selectedObject.catalogNumber], ["Signatur", selectedObject.signatures, "signaturgruppe"], ["Regent", selectedObject.regent, selectedObject.regentPeriod], ["Objektnøkkel", selectedObject.objectId, "source + group + id"]];
 
   return (
-    <div className={styles.shell} data-skin={skin} data-view={viewMode}>
+    <div className={styles.shell} data-view={viewMode}>
       <main className={styles.main}>
         <div className={styles.content}>
           <div className={styles.modeBar}>
-            <div className={styles.skinbar}>
-              <span>Skinn</span>
-              {skinOptions.map((item) => (
-                <button key={item.key} type="button" className={`${styles.skinbtn} ${skin === item.key ? styles.skinbtnActive : ""}`} onClick={() => setSkin(item.key)}>
-                  <span className={styles.dot} style={item.color ? { background: item.color } : undefined} />{item.label}
-                </button>
-              ))}
-            </div>
             <div className={styles.membershipSelect}>
               <span className={styles.inlineNote}>{mode === "demo" ? "Test tilgang:" : "Tilgang:"}</span>
               <select className={styles.selectLike} value={membership} onChange={(event) => setMembership(event.target.value as Membership)}>
