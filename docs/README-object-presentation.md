@@ -40,3 +40,8 @@ ct_v_object_relations_resolved
 ct_v_object_market_resolved
 ct_v_object_user_state_resolved
 ```
+
+
+## v3 shell-fix
+
+Denne versjonen fjerner lokal/nestet sidebar og lokal/nestet toppmeny fra objektpresentasjon. Siden skal ligge inne i eksisterende globale Collectium app-shell, slik at det bare finnes én sidebar og én toppbar på `app.collectium.no`. Skinbar og medlems-/demo-kontroller ligger fortsatt inne i selve objektpresentasjonen.

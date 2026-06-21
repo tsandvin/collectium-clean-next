@@ -144,29 +144,6 @@ function DemoSelector({ selectedId, onSelect }: { selectedId: string; onSelect: 
   );
 }
 
-function Sidebar() {
-  return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>ⒸCollectium</div>
-      <div className={styles.beta}>Beta 8.6</div>
-      <nav>
-        <div className={styles.navGroup}>
-          <div className={styles.navTitle}>Hoved</div>
-          {[["⌂", "Index"], ["⌕", "Katalog"], ["▣", "Periodefilter"], ["□", "Objekt"], ["⌘", "Relasjoner"]].map(([icon, label]) => <a key={label} className={styles.navLink} href="#"><span className={styles.navIcon}>{icon}</span>{label}</a>)}
-        </div>
-        <div className={styles.navGroup}>
-          <div className={styles.navTitle}>Bruker</div>
-          {[["○", "Min side"], ["▤", "Min samling"]].map(([icon, label]) => <a key={label} className={styles.navLink} href="#"><span className={styles.navIcon}>{icon}</span>{label}</a>)}
-        </div>
-        <div className={styles.navGroup}>
-          <div className={styles.navTitle}>Marked</div>
-          {[["◇", "Auksjon"], ["▿", "Nettbutikk"], ["▤", "Forhandler"]].map(([icon, label]) => <a key={label} className={styles.navLink} href="#"><span className={styles.navIcon}>{icon}</span>{label}</a>)}
-        </div>
-      </nav>
-    </aside>
-  );
-}
-
 export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = false, isSharedLink = false, routeObject }: Props) {
   const [skin, setSkin] = useState<Skin>("museum");
   const [tab, setTab] = useState<Tab>("samler");
@@ -198,16 +175,7 @@ export default function CollectiumObjectPresentationClient({ mode, isLoggedIn = 
 
   return (
     <div className={styles.shell} data-skin={skin}>
-      <Sidebar />
       <main className={styles.main}>
-        <header className={styles.topbar}>
-          <input className={styles.search} placeholder="Søk i Collectium / bruker..." />
-          <div className={styles.topActions}>
-            <button className={styles.topButton}>Skjerm / Design</button>
-            <button className={`${styles.topButton} ${styles.topButtonPrimary}`}>{isLoggedIn ? "Min side" : "Logg inn"}</button>
-          </div>
-        </header>
-
         <div className={styles.content}>
           <div className={styles.modeBar}>
             <div className={styles.skinbar}>
