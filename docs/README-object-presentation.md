@@ -159,3 +159,13 @@ Tallene er UI-forberedelse for antall brukere/objekter med tilsvarende status, o
 - Auksjon og Nettbutikk er lagt inn over Del objekt.
 - Statuskort har farger etter type: rød, gull, blå, grønn og lilla.
 - Tidslinje-årstall er gjort større, fetere og kursiv.
+
+## v12 statusbrytere
+
+- Statusbrytere er justert til svakere skin-relatert uttrykk.
+- Regnbuepreget er dempet; hver bryter har svak tint inne i selve bryteren.
+- Ikonbakgrunn er fjernet.
+- Ikoner har tynn ramme og større størrelse.
+- Aktivt hjerte/stjerne/samling fyller selve ikonet, ikke hele raden.
+- Hover gir lett løft og skygge.
+- Det er lagt inn mer luft/mellomrom mellom statusbryterne.

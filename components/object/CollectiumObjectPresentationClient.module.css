@@ -2141,3 +2141,180 @@
 .actionPrimary {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ct-text, var(--text)) 16%, transparent), var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.16));
 }
+
+/* v12: status actions - subdued skin-based switches with outlined icons and hover spacing */
+.side {
+  gap: 18px;
+}
+.side .panel {
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 91%,
+    var(--ct-accent, var(--gold)) 5%
+  );
+}
+
+.action {
+  min-height: 78px !important;
+  margin: 0 0 12px !important;
+  padding: 15px 18px !important;
+  gap: 16px !important;
+  border-width: 1.2px !important;
+  border-style: solid !important;
+  border-radius: max(14px, var(--ct-radius-md, 10px)) !important;
+  color: var(--ct-text, var(--text)) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 88%, var(--ct-accent, var(--gold)) 6%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 94%, var(--ct-accent, var(--gold)) 3%)
+    ) !important;
+  border-color: color-mix(in srgb, var(--ct-border, var(--line)) 78%, var(--ct-accent, var(--gold)) 22%) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 9%, transparent) !important;
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease,
+    filter 170ms ease !important;
+}
+.action:last-child {
+  margin-bottom: 0 !important;
+}
+.action:hover,
+.action:focus-visible {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ct-accent, var(--gold)) 46%, var(--ct-border, var(--line)) 54%) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 82%, var(--ct-accent, var(--gold)) 10%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--ct-accent, var(--gold)) 5%)
+    ) !important;
+  box-shadow:
+    0 14px 28px color-mix(in srgb, var(--ct-accent, var(--gold)) 14%, transparent),
+    var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.14)) !important;
+}
+
+.action .icon,
+.icon {
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  border: 1.2px solid currentColor !important;
+  box-shadow: none !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+  font-style: normal !important;
+  opacity: 0.96;
+}
+.action[data-active="true"] .icon {
+  color: var(--ct-on-accent, #fff) !important;
+  background: currentColor !important;
+  border-color: transparent !important;
+}
+.action[data-active="true"] .icon::first-letter {
+  color: var(--ct-on-accent, #fff);
+}
+
+.actionText {
+  font-size: clamp(17px, 0.95vw, 20px) !important;
+  line-height: 1.06 !important;
+  font-weight: 950 !important;
+  font-style: italic !important;
+  letter-spacing: -0.018em !important;
+}
+.actionText small {
+  margin-top: 5px !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+  font-style: italic !important;
+  color: color-mix(in srgb, var(--ct-text, var(--text)) 68%, var(--ct-text-muted, var(--muted)) 32%) !important;
+  opacity: 0.94 !important;
+}
+.actionCount {
+  min-width: 34px !important;
+  height: auto !important;
+  margin-left: auto !important;
+  padding: 0 2px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(17px, 0.95vw, 20px) !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  font-style: italic !important;
+}
+
+.action[data-action="heart"] {
+  --action-tint: #c94a46;
+  border-color: color-mix(in srgb, var(--action-tint) 34%, var(--ct-border, var(--line)) 66%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
+}
+.action[data-action="heart"] .icon { color: color-mix(in srgb, var(--action-tint) 82%, var(--ct-text, var(--text)) 18%) !important; }
+.action[data-action="heart"][data-active="true"] .icon {
+  color: #d24a45 !important;
+  background: #d24a45 !important;
+  border-color: #d24a45 !important;
+  text-shadow: none !important;
+}
+
+.action[data-action="star"] {
+  --action-tint: #b99331;
+  border-color: color-mix(in srgb, var(--action-tint) 34%, var(--ct-border, var(--line)) 66%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 8%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
+}
+.action[data-action="star"] .icon { color: color-mix(in srgb, var(--action-tint) 88%, var(--ct-text, var(--text)) 12%) !important; }
+.action[data-action="star"][data-active="true"] .icon {
+  color: #c5a23b !important;
+  background: #c5a23b !important;
+  border-color: #c5a23b !important;
+  text-shadow: none !important;
+}
+
+.action[data-action="collect"],
+.action[data-action="shop"] {
+  --action-tint: #2a8c62;
+  border-color: color-mix(in srgb, var(--action-tint) 30%, var(--ct-border, var(--line)) 70%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
+}
+.action[data-action="collect"] .icon,
+.action[data-action="shop"] .icon { color: color-mix(in srgb, var(--action-tint) 82%, var(--ct-text, var(--text)) 18%) !important; }
+.action[data-action="collect"][data-active="true"] .icon {
+  color: #2a8c62 !important;
+  background: #2a8c62 !important;
+  border-color: #2a8c62 !important;
+  text-shadow: none !important;
+}
+
+.action[data-action="auction"] {
+  --action-tint: #2f77a9;
+  border-color: color-mix(in srgb, var(--action-tint) 31%, var(--ct-border, var(--line)) 69%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
+}
+.action[data-action="auction"] .icon { color: color-mix(in srgb, var(--action-tint) 84%, var(--ct-text, var(--text)) 16%) !important; }
+
+.action[data-action="share"] {
+  --action-tint: var(--ct-accent, var(--gold));
+  border-color: color-mix(in srgb, var(--action-tint) 30%, var(--ct-border, var(--line)) 70%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
+}
+.action[data-action="share"] .icon { color: color-mix(in srgb, var(--action-tint) 84%, var(--ct-text, var(--text)) 16%) !important; }
+
+.action[data-action="compare"] {
+  --action-tint: color-mix(in srgb, var(--ct-accent, var(--gold)) 62%, #7b66ce 38%);
+  border-color: color-mix(in srgb, var(--action-tint) 28%, var(--ct-border, var(--line)) 72%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 92%, var(--action-tint) 6%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 97%, var(--action-tint) 3%)) !important;
+}
+.action[data-action="compare"] .icon { color: color-mix(in srgb, var(--action-tint) 84%, var(--ct-text, var(--text)) 16%) !important; }
+
+.actionPrimary {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ct-accent, var(--gold)) 20%, transparent),
+    0 12px 24px color-mix(in srgb, var(--ct-accent, var(--gold)) 10%, transparent) !important;
+}
