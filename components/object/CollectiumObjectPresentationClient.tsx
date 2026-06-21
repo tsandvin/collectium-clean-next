@@ -605,6 +605,8 @@ const statusCounts: Record<string, number> = {
   heart: 48,
   star: 21,
   collect: 14,
+  auction: 3,
+  shop: 1,
   share: 6,
   compare: 33,
 };
@@ -1935,13 +1937,13 @@ export default function CollectiumObjectPresentationClient({
                     {[
                       {
                         id: "heart",
-                        icon: "♡",
+                        icon: savedStates.heart ? "♥" : "♡",
                         label: "Hjerte",
                         sub: "Ønskeliste",
                       },
                       {
                         id: "star",
-                        icon: "★",
+                        icon: savedStates.star ? "★" : "☆",
                         label: "Stjerne",
                         sub: "Favoritt",
                       },
@@ -1950,6 +1952,18 @@ export default function CollectiumObjectPresentationClient({
                         icon: "＋",
                         label: "Legg i samling",
                         sub: "Min samling",
+                      },
+                      {
+                        id: "auction",
+                        icon: "⚑",
+                        label: "Auksjon",
+                        sub: "Aktive treff",
+                      },
+                      {
+                        id: "shop",
+                        icon: "◆",
+                        label: "Nettbutikk",
+                        sub: "Aktive salg",
                       },
                       {
                         id: "share",
@@ -1967,6 +1981,8 @@ export default function CollectiumObjectPresentationClient({
                       <button
                         key={action.id}
                         className={`${styles.action} ${savedStates[action.id] ? styles.actionPrimary : ""}`}
+                        data-action={action.id}
+                        data-active={savedStates[action.id] ? "true" : "false"}
                         type="button"
                         onClick={() => toggleStatus(action.id, action.label)}
                       >

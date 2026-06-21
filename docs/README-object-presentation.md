@@ -150,3 +150,12 @@ Statuspanelet viser nå tall bak handlingene:
 ```
 
 Tallene er UI-forberedelse for antall brukere/objekter med tilsvarende status, og skal senere hentes fra user-state/count-API. Klikk på handlingene bokføres i endringsloggen i denne forhåndsvisningen.
+
+
+## v11 status og tidslinje
+
+- Statuskort er gjort større, fetere og kursiv i teksten.
+- Hjerte/stjerne viser rammeikon når ikke valgt og fylt ikon når valgt.
+- Auksjon og Nettbutikk er lagt inn over Del objekt.
+- Statuskort har farger etter type: rød, gull, blå, grønn og lilla.
+- Tidslinje-årstall er gjort større, fetere og kursiv.

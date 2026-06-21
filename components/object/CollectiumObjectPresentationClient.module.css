@@ -2029,3 +2029,115 @@
     grid-column: 1 / -1;
   }
 }
+
+
+/* v11: stronger status cards, outline/fill icons and bolder timeline years */
+.timelineTicks span {
+  font-size: clamp(13px, 0.72vw, 17px) !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+  letter-spacing: 0.035em !important;
+  color: color-mix(in srgb, var(--ct-text, var(--text)) 76%, var(--ct-accent, var(--gold)) 24%) !important;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 70%, transparent);
+}
+
+.action {
+  min-height: 72px;
+  border-radius: max(12px, var(--ct-radius-md, 10px));
+  border-width: 1.4px;
+  padding: 14px 16px !important;
+  gap: 14px !important;
+  font-weight: 900;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+.action:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.16));
+}
+.action .icon,
+.icon {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 34px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+}
+.actionText {
+  font-size: 18px;
+  line-height: 1.08;
+  font-weight: 950;
+  font-style: italic;
+  letter-spacing: -0.015em;
+}
+.actionText small {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 760;
+  font-style: italic;
+  opacity: 0.82;
+}
+.actionCount {
+  min-width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ct-text, var(--text)) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  font-style: italic;
+  padding: 0 !important;
+}
+.action[data-action="heart"] {
+  border-color: color-mix(in srgb, #d64b46 58%, var(--ct-border, var(--line)) 42%);
+  background: linear-gradient(135deg, color-mix(in srgb, #d64b46 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #d64b46 16%));
+}
+.action[data-action="heart"] .icon { color: #d64b46; }
+.action[data-action="heart"][data-active="true"] .icon { color: #e23c3c; text-shadow: 0 0 18px rgba(226, 60, 60, 0.32); }
+
+.action[data-action="star"] {
+  border-color: color-mix(in srgb, #cda73a 58%, var(--ct-border, var(--line)) 42%);
+  background: linear-gradient(135deg, color-mix(in srgb, #cda73a 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #cda73a 16%));
+}
+.action[data-action="star"] .icon { color: #cda73a; }
+.action[data-action="star"][data-active="true"] .icon { color: #e0b83c; text-shadow: 0 0 18px rgba(224, 184, 60, 0.28); }
+
+.action[data-action="auction"] {
+  border-color: color-mix(in srgb, #267dc4 62%, var(--ct-border, var(--line)) 38%);
+  background: linear-gradient(135deg, color-mix(in srgb, #267dc4 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #267dc4 16%));
+}
+.action[data-action="auction"] .icon { color: #267dc4; }
+
+.action[data-action="shop"],
+.action[data-action="collect"] {
+  border-color: color-mix(in srgb, #2c9468 62%, var(--ct-border, var(--line)) 38%);
+  background: linear-gradient(135deg, color-mix(in srgb, #2c9468 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #2c9468 16%));
+}
+.action[data-action="shop"] .icon,
+.action[data-action="collect"] .icon { color: #2c9468; }
+.action[data-action="collect"][data-active="true"] .icon { color: #21a56f; text-shadow: 0 0 18px rgba(33, 165, 111, 0.26); }
+
+.action[data-action="share"] {
+  border-color: color-mix(in srgb, var(--ct-accent, var(--gold)) 58%, var(--ct-border, var(--line)) 42%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-accent, var(--gold)) 16%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 86%, var(--ct-accent, var(--gold)) 14%));
+}
+.action[data-action="share"] .icon { color: var(--ct-accent, var(--gold)); }
+
+.action[data-action="compare"] {
+  border-color: color-mix(in srgb, #8a6ee8 54%, var(--ct-border, var(--line)) 46%);
+  background: linear-gradient(135deg, color-mix(in srgb, #8a6ee8 14%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 86%, #8a6ee8 14%));
+}
+.action[data-action="compare"] .icon { color: #8a6ee8; }
+
+.actionPrimary {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ct-text, var(--text)) 16%, transparent), var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.16));
+}
