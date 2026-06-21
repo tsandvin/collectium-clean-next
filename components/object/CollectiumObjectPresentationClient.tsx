@@ -617,27 +617,28 @@ function canSee(level: Membership, required: Membership) {
 function Field({
   label,
   value,
-  required = "free",
+  required,
   membership,
   href,
 }: {
   label: string;
-  value: string;
-  required?: Membership;
+  value?: string | number | null;
+  required: Membership;
   membership: Membership;
   href?: string;
 }) {
   const allowed = canSee(membership, required);
-}
+  const displayValue = value === null || value === undefined || value === "" ? "Ikke registrert" : value;
+
   return (
     <div className={styles.field}>
       <span>{label}</span>
       <strong>
         {allowed ? (
           href ? (
-            <a href={href}>{value}</a>
+            <a href={href}>{displayValue}</a>
           ) : (
-            value
+            displayValue
           )
         ) : (
           "Tomt felt · krever Bronze+"
@@ -2318,6 +2319,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
