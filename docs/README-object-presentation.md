@@ -195,3 +195,18 @@ Endret statuspanelet slik at:
 Berørt fil:
 - components/object/CollectiumObjectPresentationClient.module.css
 
+## v16 statusbrytere og segmentfaner
+
+Endret objektpresentasjon slik at:
+- statusbryterne er mer kompakte
+- tekst og tall i statusbryterne er mindre
+- ikonfelt/bakgrunn bak ikon er fjernet
+- ikonene er store og har tynn ramme
+- aktiv status fyller bare ikonrammen
+- bryterrammen er svak og skin-relatert
+- hover gir litt tydeligere ramme og lett skygge
+- hovedfanene I Samler, II Historie, III Finans, IV I min samling og V Relasjon objekter har lik design for aktiv, inaktiv og hover
+
+Berørt fil:
+- components/object/CollectiumObjectPresentationClient.module.css
+

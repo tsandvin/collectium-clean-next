@@ -2030,577 +2030,398 @@
   }
 }
 
+/* v16: compact status buttons and equal segment tabs
+   Krav:
+   - Statusbrytere mer kompakte
+   - Mindre tekst
+   - Ingen felt/bakgrunn bak ikon
+   - Store ikon med tynn ramme
+   - Aktiv status fyller kun ikonrammen
+   - Svak bryterramme, sterkere kun ved hover
+   - Lik design for hovedfaner Samler/Historie/Finans/Min samling/Relasjon
+*/
 
-/* v11: stronger status cards, outline/fill icons and bolder timeline years */
-.timelineTicks span {
-  font-size: clamp(13px, 0.72vw, 17px) !important;
-  font-weight: 900 !important;
-  font-style: italic !important;
-  letter-spacing: 0.035em !important;
-  color: color-mix(in srgb, var(--ct-text, var(--text)) 76%, var(--ct-accent, var(--gold)) 24%) !important;
-  text-shadow: 0 1px 0 color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 70%, transparent);
+/* ------------------------------------------------------------
+   Statuspanel / høyre handlingsbrytere
+------------------------------------------------------------ */
+
+.side .panel {
+  gap: 10px !important;
 }
 
 .action {
-  min-height: 72px;
-  border-radius: max(12px, var(--ct-radius-md, 10px));
-  border-width: 1.4px;
-  padding: 14px 16px !important;
-  gap: 14px !important;
-  font-weight: 900;
+  min-height: 52px !important;
+  margin: 0 0 10px !important;
+  padding: 8px 11px !important;
+  gap: 10px !important;
+
+  border-radius: max(12px, var(--ct-radius-md, 10px)) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 88%,
+    var(--action-tint, var(--ct-accent, var(--gold))) 12%
+  ) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--ct-panel-solid, var(--panel)) 97%,
+        var(--action-tint, var(--ct-accent, var(--gold))) 3%
+      ),
+      color-mix(
+        in srgb,
+        var(--ct-panel-solid, var(--panel)) 99%,
+        var(--action-tint, var(--ct-accent, var(--gold))) 1%
+      )
+    ) !important;
+
+  color: var(--ct-text, var(--text)) !important;
+
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #ffffff 2%, transparent) !important;
+
   transition:
     transform 160ms ease,
     border-color 160ms ease,
     background 160ms ease,
-    box-shadow 160ms ease;
-}
-.action:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.16));
-}
-.action .icon,
-.icon {
-  width: 46px !important;
-  height: 46px !important;
-  border-radius: 999px !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  font-size: 34px !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-  font-style: normal !important;
-}
-.actionText {
-  font-size: 18px;
-  line-height: 1.08;
-  font-weight: 950;
-  font-style: italic;
-  letter-spacing: -0.015em;
-}
-.actionText small {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 760;
-  font-style: italic;
-  opacity: 0.82;
-}
-.actionCount {
-  min-width: 34px !important;
-  height: 34px !important;
-  border: 0 !important;
-  background: transparent !important;
-  color: var(--ct-text, var(--text)) !important;
-  font-size: 18px !important;
-  font-weight: 950 !important;
-  font-style: italic;
-  padding: 0 !important;
-}
-.action[data-action="heart"] {
-  border-color: color-mix(in srgb, #d64b46 58%, var(--ct-border, var(--line)) 42%);
-  background: linear-gradient(135deg, color-mix(in srgb, #d64b46 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #d64b46 16%));
-}
-.action[data-action="heart"] .icon { color: #d64b46; }
-.action[data-action="heart"][data-active="true"] .icon { color: #e23c3c; text-shadow: 0 0 18px rgba(226, 60, 60, 0.32); }
-
-.action[data-action="star"] {
-  border-color: color-mix(in srgb, #cda73a 58%, var(--ct-border, var(--line)) 42%);
-  background: linear-gradient(135deg, color-mix(in srgb, #cda73a 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #cda73a 16%));
-}
-.action[data-action="star"] .icon { color: #cda73a; }
-.action[data-action="star"][data-active="true"] .icon { color: #e0b83c; text-shadow: 0 0 18px rgba(224, 184, 60, 0.28); }
-
-.action[data-action="auction"] {
-  border-color: color-mix(in srgb, #267dc4 62%, var(--ct-border, var(--line)) 38%);
-  background: linear-gradient(135deg, color-mix(in srgb, #267dc4 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #267dc4 16%));
-}
-.action[data-action="auction"] .icon { color: #267dc4; }
-
-.action[data-action="shop"],
-.action[data-action="collect"] {
-  border-color: color-mix(in srgb, #2c9468 62%, var(--ct-border, var(--line)) 38%);
-  background: linear-gradient(135deg, color-mix(in srgb, #2c9468 18%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 84%, #2c9468 16%));
-}
-.action[data-action="shop"] .icon,
-.action[data-action="collect"] .icon { color: #2c9468; }
-.action[data-action="collect"][data-active="true"] .icon { color: #21a56f; text-shadow: 0 0 18px rgba(33, 165, 111, 0.26); }
-
-.action[data-action="share"] {
-  border-color: color-mix(in srgb, var(--ct-accent, var(--gold)) 58%, var(--ct-border, var(--line)) 42%);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-accent, var(--gold)) 16%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 86%, var(--ct-accent, var(--gold)) 14%));
-}
-.action[data-action="share"] .icon { color: var(--ct-accent, var(--gold)); }
-
-.action[data-action="compare"] {
-  border-color: color-mix(in srgb, #8a6ee8 54%, var(--ct-border, var(--line)) 46%);
-  background: linear-gradient(135deg, color-mix(in srgb, #8a6ee8 14%, transparent), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 86%, #8a6ee8 14%));
-}
-.action[data-action="compare"] .icon { color: #8a6ee8; }
-
-.actionPrimary {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ct-text, var(--text)) 16%, transparent), var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.16));
+    box-shadow 160ms ease !important;
 }
 
-/* v12: status actions - subdued skin-based switches with outlined icons and hover spacing */
-.side {
-  gap: 18px;
-}
-.side .panel {
-  background: color-mix(
-    in srgb,
-    var(--ct-panel-solid, var(--panel)) 91%,
-    var(--ct-accent, var(--gold)) 5%
-  );
-}
-
-.action {
-  min-height: 78px !important;
-  margin: 0 0 12px !important;
-  padding: 15px 18px !important;
-  gap: 16px !important;
-  border-width: 1.2px !important;
-  border-style: solid !important;
-  border-radius: max(14px, var(--ct-radius-md, 10px)) !important;
-  color: var(--ct-text, var(--text)) !important;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 88%, var(--ct-accent, var(--gold)) 6%),
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 94%, var(--ct-accent, var(--gold)) 3%)
-    ) !important;
-  border-color: color-mix(in srgb, var(--ct-border, var(--line)) 78%, var(--ct-accent, var(--gold)) 22%) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 9%, transparent) !important;
-  transition:
-    transform 170ms ease,
-    border-color 170ms ease,
-    background 170ms ease,
-    box-shadow 170ms ease,
-    filter 170ms ease !important;
-}
 .action:last-child {
   margin-bottom: 0 !important;
 }
+
 .action:hover,
 .action:focus-visible {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--ct-accent, var(--gold)) 46%, var(--ct-border, var(--line)) 54%) !important;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 82%, var(--ct-accent, var(--gold)) 10%),
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--ct-accent, var(--gold)) 5%)
-    ) !important;
-  box-shadow:
-    0 14px 28px color-mix(in srgb, var(--ct-accent, var(--gold)) 14%, transparent),
-    var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.14)) !important;
-}
-
-.action .icon,
-.icon {
-  width: 44px !important;
-  height: 44px !important;
-  flex: 0 0 44px !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  border-radius: 12px !important;
-  background: transparent !important;
-  border: 1.2px solid currentColor !important;
-  box-shadow: none !important;
-  font-size: 28px !important;
-  line-height: 1 !important;
-  font-weight: 850 !important;
-  font-style: normal !important;
-  opacity: 0.96;
-}
-.action[data-active="true"] .icon {
-  color: var(--ct-on-accent, #fff) !important;
-  background: currentColor !important;
-  border-color: transparent !important;
-}
-.action[data-active="true"] .icon::first-letter {
-  color: var(--ct-on-accent, #fff);
-}
-
-.actionText {
-  font-size: clamp(17px, 0.95vw, 20px) !important;
-  line-height: 1.06 !important;
-  font-weight: 950 !important;
-  font-style: italic !important;
-  letter-spacing: -0.018em !important;
-}
-.actionText small {
-  margin-top: 5px !important;
-  font-size: 12px !important;
-  font-weight: 760 !important;
-  font-style: italic !important;
-  color: color-mix(in srgb, var(--ct-text, var(--text)) 68%, var(--ct-text-muted, var(--muted)) 32%) !important;
-  opacity: 0.94 !important;
-}
-.actionCount {
-  min-width: 34px !important;
-  height: auto !important;
-  margin-left: auto !important;
-  padding: 0 2px !important;
-  border: 0 !important;
-  background: transparent !important;
-  color: var(--ct-text, var(--text)) !important;
-  font-size: clamp(17px, 0.95vw, 20px) !important;
-  line-height: 1 !important;
-  font-weight: 950 !important;
-  font-style: italic !important;
-}
-
-.action[data-action="heart"] {
-  --action-tint: #c94a46;
-  border-color: color-mix(in srgb, var(--action-tint) 34%, var(--ct-border, var(--line)) 66%) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
-}
-.action[data-action="heart"] .icon { color: color-mix(in srgb, var(--action-tint) 82%, var(--ct-text, var(--text)) 18%) !important; }
-.action[data-action="heart"][data-active="true"] .icon {
-  color: #d24a45 !important;
-  background: #d24a45 !important;
-  border-color: #d24a45 !important;
-  text-shadow: none !important;
-}
-
-.action[data-action="star"] {
-  --action-tint: #b99331;
-  border-color: color-mix(in srgb, var(--action-tint) 34%, var(--ct-border, var(--line)) 66%) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 8%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
-}
-.action[data-action="star"] .icon { color: color-mix(in srgb, var(--action-tint) 88%, var(--ct-text, var(--text)) 12%) !important; }
-.action[data-action="star"][data-active="true"] .icon {
-  color: #c5a23b !important;
-  background: #c5a23b !important;
-  border-color: #c5a23b !important;
-  text-shadow: none !important;
-}
-
-.action[data-action="collect"],
-.action[data-action="shop"] {
-  --action-tint: #2a8c62;
-  border-color: color-mix(in srgb, var(--action-tint) 30%, var(--ct-border, var(--line)) 70%) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
-}
-.action[data-action="collect"] .icon,
-.action[data-action="shop"] .icon { color: color-mix(in srgb, var(--action-tint) 82%, var(--ct-text, var(--text)) 18%) !important; }
-.action[data-action="collect"][data-active="true"] .icon {
-  color: #2a8c62 !important;
-  background: #2a8c62 !important;
-  border-color: #2a8c62 !important;
-  text-shadow: none !important;
-}
-
-.action[data-action="auction"] {
-  --action-tint: #2f77a9;
-  border-color: color-mix(in srgb, var(--action-tint) 31%, var(--ct-border, var(--line)) 69%) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
-}
-.action[data-action="auction"] .icon { color: color-mix(in srgb, var(--action-tint) 84%, var(--ct-text, var(--text)) 16%) !important; }
-
-.action[data-action="share"] {
-  --action-tint: var(--ct-accent, var(--gold));
-  border-color: color-mix(in srgb, var(--action-tint) 30%, var(--ct-border, var(--line)) 70%) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 91%, var(--action-tint) 7%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--action-tint) 3%)) !important;
-}
-.action[data-action="share"] .icon { color: color-mix(in srgb, var(--action-tint) 84%, var(--ct-text, var(--text)) 16%) !important; }
-
-.action[data-action="compare"] {
-  --action-tint: color-mix(in srgb, var(--ct-accent, var(--gold)) 62%, #7b66ce 38%);
-  border-color: color-mix(in srgb, var(--action-tint) 28%, var(--ct-border, var(--line)) 72%) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 92%, var(--action-tint) 6%), color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 97%, var(--action-tint) 3%)) !important;
-}
-.action[data-action="compare"] .icon { color: color-mix(in srgb, var(--action-tint) 84%, var(--ct-text, var(--text)) 16%) !important; }
-
-.actionPrimary {
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--ct-accent, var(--gold)) 20%, transparent),
-    0 12px 24px color-mix(in srgb, var(--ct-accent, var(--gold)) 10%, transparent) !important;
-}
-
-/* v13: status switches - very weak row frame, large outlined/filled icons, smaller text */
-.action {
-  min-height: 72px !important;
-  margin: 0 0 14px !important;
-  padding: 13px 16px !important;
-  gap: 15px !important;
-  border-width: 0.8px !important;
-  border-style: solid !important;
-  border-radius: max(13px, var(--ct-radius-md, 10px)) !important;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 94%, var(--action-tint, var(--ct-accent, var(--gold))) 4%),
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 97%, var(--action-tint, var(--ct-accent, var(--gold))) 2%)
-    ) !important;
-  border-color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 15%, var(--ct-border, var(--line)) 85%) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 5%, transparent) !important;
-}
-.action:hover,
-.action:focus-visible {
-  transform: translateY(-2px) !important;
-  border-color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 32%, var(--ct-border, var(--line)) 68%) !important;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 89%, var(--action-tint, var(--ct-accent, var(--gold))) 7%),
-      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 95%, var(--action-tint, var(--ct-accent, var(--gold))) 3%)
-    ) !important;
-  box-shadow:
-    0 12px 24px color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 10%, transparent),
-    var(--ct-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.12)) !important;
-}
-.action .icon,
-.icon {
-  width: 54px !important;
-  height: 54px !important;
-  flex: 0 0 54px !important;
-  border-radius: 14px !important;
-  border: 1px solid color-mix(in srgb, var(--action-tint, currentColor) 55%, var(--ct-border, var(--line)) 45%) !important;
-  background: transparent !important;
-  color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 88%, var(--ct-text, var(--text)) 12%) !important;
-  font-size: 33px !important;
-  font-weight: 850 !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 4%, transparent) !important;
-}
-.action[data-active="true"] .icon {
-  background: var(--action-tint, var(--ct-accent, var(--gold))) !important;
-  border-color: color-mix(in srgb, var(--action-tint, var(--ct-accent, var(--gold))) 72%, var(--ct-border, var(--line)) 28%) !important;
-  color: var(--ct-on-accent, #ffffff) !important;
-  text-shadow: none !important;
-}
-.actionText {
-  font-size: clamp(14px, 0.82vw, 16px) !important;
-  line-height: 1.08 !important;
-  font-weight: 840 !important;
-  font-style: italic !important;
-  letter-spacing: -0.01em !important;
-}
-.actionText small {
-  margin-top: 4px !important;
-  font-size: clamp(10px, 0.62vw, 11px) !important;
-  line-height: 1.15 !important;
-  font-weight: 650 !important;
-  font-style: italic !important;
-  opacity: 0.82 !important;
-}
-.actionCount {
-  min-width: 26px !important;
-  font-size: clamp(15px, 0.82vw, 17px) !important;
-  font-weight: 860 !important;
-  font-style: italic !important;
-}
-.action[data-action="heart"] { --action-tint: #c94a46; }
-.action[data-action="star"] { --action-tint: #b99331; }
-.action[data-action="collect"] { --action-tint: #2a8c62; }
-.action[data-action="auction"] { --action-tint: #2f77a9; }
-.action[data-action="shop"] { --action-tint: #2a8c62; }
-.action[data-action="share"] { --action-tint: var(--ct-accent, var(--gold)); }
-.action[data-action="compare"] { --action-tint: color-mix(in srgb, var(--ct-accent, var(--gold)) 64%, #7b66ce 36%); }
-
-/* v15: object presentation status buttons
-   Krav:
-   - svak ramme på bryter
-   - hover kan gi litt tydeligere ramme/skygge
-   - ingen felt/bakgrunn bak ikon
-   - store ikon med tynn ramme
-   - aktiv status fyller kun ikonrammen
-   - mindre tekst i bryterne
-*/
-.statusCard .action,
-.statusPanel .action,
-.action {
-  min-height: 58px !important;
-  margin: 0 0 14px !important;
-  padding: 10px 14px !important;
-  gap: 14px !important;
-
-  border: 1px solid color-mix(
-    in srgb,
-    var(--ct-border, rgba(255,255,255,0.18)) 82%,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 18%
-  ) !important;
-
-  border-radius: max(14px, var(--ct-radius-md, 12px)) !important;
-
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 96%, var(--action-tint, var(--ct-accent, #c7a45a)) 4%),
-      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 98%, var(--action-tint, var(--ct-accent, #c7a45a)) 2%)
-    ) !important;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,0.025),
-    0 1px 0 rgba(255,255,255,0.025) !important;
-
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease !important;
-}
-
-.statusCard .action:hover,
-.statusPanel .action:hover,
-.action:hover,
-.statusCard .action:focus-visible,
-.statusPanel .action:focus-visible,
-.action:focus-visible {
-  transform: translateY(-2px) !important;
+  transform: translateY(-1px) !important;
 
   border-color: color-mix(
     in srgb,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 34%,
-    var(--ct-border, rgba(255,255,255,0.22)) 66%
+    var(--ct-border, var(--line)) 70%,
+    var(--action-tint, var(--ct-accent, var(--gold))) 30%
   ) !important;
 
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--ct-panel-solid, var(--panel)) 94%,
+        var(--action-tint, var(--ct-accent, var(--gold))) 6%
+      ),
+      color-mix(
+        in srgb,
+        var(--ct-panel-solid, var(--panel)) 98%,
+        var(--action-tint, var(--ct-accent, var(--gold))) 2%
+      )
+    ) !important;
+
   box-shadow:
-    0 12px 26px color-mix(in srgb, var(--action-tint, var(--ct-accent, #c7a45a)) 10%, transparent),
-    var(--ct-shadow-soft, 0 12px 28px rgba(0,0,0,0.16)) !important;
+    0 8px 18px color-mix(
+      in srgb,
+      var(--action-tint, var(--ct-accent, var(--gold))) 8%,
+      transparent
+    ),
+    var(--ct-shadow-soft, 0 8px 20px rgba(0, 0, 0, 0.12)) !important;
 }
 
-/* Ikonet er selve ikonflaten. Ikke egen boks/felt bak ikonet. */
-.statusCard .action .icon,
-.statusPanel .action .icon,
-.action .icon,
-.icon {
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px !important;
-  flex: 0 0 48px !important;
+/* Ikonet er selve rammen. Ingen felt/boks bak ikon. */
+.action .icon {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  flex: 0 0 42px !important;
 
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
 
-  border: 1px solid color-mix(
-    in srgb,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 58%,
-    var(--ct-border, rgba(255,255,255,0.16)) 42%
-  ) !important;
-
-  border-radius: 14px !important;
-
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-
-  color: color-mix(
-    in srgb,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 90%,
-    var(--ct-text, #ffffff) 10%
-  ) !important;
-
-  font-size: 33px !important;
-  line-height: 1 !important;
-  font-weight: 420 !important;
-  font-style: normal !important;
-  text-shadow: none !important;
-}
-
-/* Aktiv status fyller bare ikonet, ikke hele bryteren. */
-.statusCard .action[data-active="true"] .icon,
-.statusPanel .action[data-active="true"] .icon,
-.action[data-active="true"] .icon,
-.actionPrimary .icon {
-  background: color-mix(
-    in srgb,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 78%,
-    var(--ct-panel-solid, var(--ct-panel, #161616)) 22%
-  ) !important;
+  border-radius: 12px !important;
+  border-width: 1px !important;
+  border-style: solid !important;
 
   border-color: color-mix(
     in srgb,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 70%,
-    var(--ct-border, rgba(255,255,255,0.18)) 30%
+    var(--action-tint, var(--ct-accent, var(--gold))) 50%,
+    var(--ct-border, var(--line)) 50%
+  ) !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  box-shadow: none !important;
+  text-shadow: none !important;
+
+  color: color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, var(--gold))) 86%,
+    var(--ct-text, var(--text)) 14%
+  ) !important;
+
+  font-size: 29px !important;
+  line-height: 1 !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+}
+
+/* Aktiv: bare ikonrammen fylles. Selve bryteren holdes svak. */
+.action[data-active="true"] .icon,
+.actionPrimary .icon {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--action-tint, var(--ct-accent, var(--gold))) 88%,
+        var(--ct-panel-solid, var(--panel)) 12%
+      ),
+      color-mix(
+        in srgb,
+        var(--action-tint, var(--ct-accent, var(--gold))) 76%,
+        var(--ct-panel-solid, var(--panel)) 24%
+      )
+    ) !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, var(--gold))) 72%,
+    var(--ct-border, var(--line)) 28%
   ) !important;
 
   color: var(--ct-on-accent, #ffffff) !important;
 }
 
-/* Aktiv rad skal fortsatt være rolig, ikke kraftig farget. */
-.statusCard .action[data-active="true"],
-.statusPanel .action[data-active="true"],
+/* Aktiv rad skal ikke få sterk farge. */
 .action[data-active="true"],
 .actionPrimary {
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 84%,
+    var(--action-tint, var(--ct-accent, var(--gold))) 16%
+  ) !important;
+
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 95%, var(--action-tint, var(--ct-accent, #c7a45a)) 5%),
-      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 98%, var(--action-tint, var(--ct-accent, #c7a45a)) 2%)
+      color-mix(
+        in srgb,
+        var(--ct-panel-solid, var(--panel)) 96%,
+        var(--action-tint, var(--ct-accent, var(--gold))) 4%
+      ),
+      color-mix(
+        in srgb,
+        var(--ct-panel-solid, var(--panel)) 99%,
+        var(--action-tint, var(--ct-accent, var(--gold))) 1%
+      )
     ) !important;
 
-  border-color: color-mix(
-    in srgb,
-    var(--ct-border, rgba(255,255,255,0.18)) 80%,
-    var(--action-tint, var(--ct-accent, #c7a45a)) 20%
-  ) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #ffffff 2%, transparent) !important;
 }
 
-/* Mindre tekst i statusbryterne. */
-.statusCard .actionText,
-.statusPanel .actionText,
+/* Mindre tekst i bryterne. */
 .actionText {
-  font-size: clamp(11px, 0.68vw, 13px) !important;
-  line-height: 1.08 !important;
-  font-weight: 740 !important;
+  font-size: clamp(10px, 0.62vw, 12px) !important;
+  line-height: 1.05 !important;
+  font-weight: 720 !important;
   font-style: italic !important;
   letter-spacing: -0.01em !important;
 }
 
-.statusCard .actionText small,
-.statusPanel .actionText small,
 .actionText small {
   display: inline-block !important;
-  margin-top: 4px !important;
-  font-size: clamp(8.5px, 0.54vw, 10px) !important;
-  line-height: 1.12 !important;
-  font-weight: 600 !important;
+  margin-top: 3px !important;
+  font-size: clamp(8px, 0.48vw, 9.5px) !important;
+  line-height: 1.08 !important;
+  font-weight: 560 !important;
   font-style: italic !important;
-  opacity: 0.72 !important;
+  opacity: 0.68 !important;
 }
 
-.statusCard .actionCount,
-.statusPanel .actionCount,
 .actionCount {
-  min-width: 22px !important;
-  font-size: clamp(12px, 0.68vw, 14px) !important;
+  min-width: 20px !important;
+  margin-left: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+
+  color: color-mix(
+    in srgb,
+    var(--ct-text, var(--text)) 82%,
+    var(--ct-text-muted, var(--muted)) 18%
+  ) !important;
+
+  font-size: clamp(11px, 0.6vw, 13px) !important;
   line-height: 1 !important;
-  font-weight: 780 !important;
+  font-weight: 760 !important;
   font-style: italic !important;
   text-align: right !important;
 }
 
-/* Fargene er bare tints, ikke sterke rammer. */
+/* Farger brukes kun som svake tints. Ikke sterke rammer. */
 .action[data-action="heart"] {
-  --action-tint: #c85855;
+  --action-tint: #c85752;
 }
 
 .action[data-action="star"] {
-  --action-tint: #b89a3e;
+  --action-tint: #b79a3d;
 }
 
 .action[data-action="collect"] {
-  --action-tint: #36a36f;
+  --action-tint: #2f9369;
 }
 
 .action[data-action="auction"] {
-  --action-tint: #3d82b9;
+  --action-tint: #3b7fae;
 }
 
 .action[data-action="shop"] {
-  --action-tint: #2f9b70;
+  --action-tint: #2f9369;
 }
 
 .action[data-action="share"] {
-  --action-tint: color-mix(in srgb, var(--ct-accent, #c7a45a) 78%, #a98a36 22%);
+  --action-tint: color-mix(
+    in srgb,
+    var(--ct-accent, var(--gold)) 78%,
+    #b9983d 22%
+  );
 }
 
 .action[data-action="compare"] {
-  --action-tint: color-mix(in srgb, var(--ct-accent, #c7a45a) 52%, #8f82d8 48%);
+  --action-tint: color-mix(
+    in srgb,
+    var(--ct-accent, var(--gold)) 54%,
+    #8f80d8 46%
+  );
 }
 
-/* v15-end */
+/* ------------------------------------------------------------
+   Hovedfaner: I Samler / II Historie / III Finans
+   IV I min samling / V Relasjon objekter
+------------------------------------------------------------ */
+
+.segmentTabs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.segmentTab {
+  min-height: 32px !important;
+  padding: 7px 12px !important;
+
+  border-radius: max(10px, var(--ct-radius-sm, 8px)) !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 86%,
+    var(--ct-accent, var(--gold)) 14%
+  ) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--ct-accent, var(--gold)) 3%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 99%, var(--ct-accent, var(--gold)) 1%)
+    ) !important;
+
+  color: color-mix(
+    in srgb,
+    var(--ct-text, var(--text)) 82%,
+    var(--ct-text-muted, var(--muted)) 18%
+  ) !important;
+
+  font-size: clamp(10px, 0.62vw, 12px) !important;
+  line-height: 1 !important;
+  font-weight: 680 !important;
+  font-style: italic !important;
+  letter-spacing: -0.01em !important;
+
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 2%, transparent) !important;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.segmentTab:hover,
+.segmentTab:focus-visible {
+  transform: translateY(-1px) !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 68%,
+    var(--ct-accent, var(--gold)) 32%
+  ) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 92%, var(--ct-accent, var(--gold)) 7%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 97%, var(--ct-accent, var(--gold)) 3%)
+    ) !important;
+
+  color: var(--ct-text, var(--text)) !important;
+
+  box-shadow:
+    0 8px 18px color-mix(in srgb, var(--ct-accent, var(--gold)) 8%, transparent),
+    var(--ct-shadow-soft, 0 8px 20px rgba(0, 0, 0, 0.12)) !important;
+}
+
+.segmentTabActive,
+.segmentTabActive:nth-child(4),
+.segmentTabActive:nth-child(5) {
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 58%,
+    var(--ct-accent, var(--gold)) 42%
+  ) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 88%, var(--ct-accent, var(--gold)) 10%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 95%, var(--ct-accent, var(--gold)) 4%)
+    ) !important;
+
+  color: var(--ct-text, var(--text)) !important;
+  font-weight: 820 !important;
+
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ct-accent, var(--gold)) 9%, transparent),
+    0 6px 16px color-mix(in srgb, var(--ct-accent, var(--gold)) 7%, transparent) !important;
+}
+
+/* IV og V kan ligge til høyre, men skal ikke ha annet design. */
+.segmentTab:nth-child(4) {
+  margin-left: auto !important;
+}
+
+.segmentTab:nth-child(4),
+.segmentTab:nth-child(5) {
+  border-style: solid !important;
+}
+
+/* Mobil: alle faner flyter naturlig. */
+@media (max-width: 760px) {
+  .segmentTab:nth-child(4) {
+    margin-left: 0 !important;
+  }
+
+  .segmentTab {
+    flex: 1 1 auto !important;
+  }
+}
+
+/* v16-end */
 
