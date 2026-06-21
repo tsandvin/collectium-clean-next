@@ -42,3 +42,24 @@ Globalt design styres av eksisterende Collectium shell og globale CSS-variabler.
 - `ct_v_object_relations_resolved`
 - `ct_v_object_market_resolved`
 - `ct_v_object_user_state_resolved`
+
+## v7 - Egne spesifikasjoner og bildevisning
+
+Endret etter krav:
+
+- `IV I min samling` har nå redigerbare egne spesifikasjoner delt i undergrupper:
+  - Kjøp: kjøpeår, kjøpsdato, pris, forhandler, auksjon og merknad fra selger.
+  - Kvalitet og tilstand: egen kvalitet, gradering, tilstand, tilstandsmerknad og privat/samtykkestyrt proveniens.
+  - Bilder: maks 10 egne bilder i lokal forhåndsvisning.
+- Endringer bokføres i en synlig endringslogg i UI. Senere skal dette kobles til et skrive-API og loggtabell, ikke direkte til katalogsannheten.
+- Bildeområdet øverst har bryter for `Collectium` og `Egne` ved bildefanene Forside, Bakside, Gjennomlysning, Variant og Detalj.
+- Klikk på hovedbilde åpner fullskjerm bildevisning med mørk transparent overlay, bildeområde ca. 80% av skjermhøyde, knapper og tekstbeskrivelse under.
+- Egne bilder vises også i hovedbildefeltet når bilde-bryteren står på `Egne`.
+
+Planlagt DB/API-kobling:
+
+- `GET /api/object/user-state` for lesing av brukerens samlingsstatus.
+- `POST /api/object/user-specs` for skriving av egne spesifikasjoner.
+- `POST /api/object/user-images` for opplasting av egne bilder, maks 10 per brukerobjekt.
+- `POST /api/object/change-log` eller sentral audit-logg for bokføring av endringer.
+- Aktuelle tabeller/views: `ct_user_collection_object_specs`, private provenance-tabeller, private image/document-tabeller, `ct_v_object_user_state_resolved`.

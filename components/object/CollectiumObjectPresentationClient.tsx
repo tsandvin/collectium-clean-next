@@ -45,6 +45,8 @@ import styles from "./CollectiumObjectPresentationClient.module.css";
 type Tab = "samler" | "historie" | "finans" | "samling" | "relasjoner";
 type Mode = "objekt" | "museum" | "kompakt" | "finans";
 type Membership = "guest" | "free" | "bronze" | "silver" | "gold" | "platinum";
+type ImageSourceMode = "collectium" | "own";
+type ImageRole = "forside" | "bakside" | "gjennomlysning" | "variant" | "detalj";
 
 type TimelineItem = {
   label: string;
@@ -54,6 +56,21 @@ type TimelineItem = {
   href: string;
   lane: "regent" | "history" | "finance" | "object";
   match: (item: ObjectItem) => boolean;
+};
+
+type OwnImage = {
+  id: string;
+  role: ImageRole;
+  label: string;
+  url: string;
+  description: string;
+};
+
+type ChangeLogEntry = {
+  id: string;
+  field: string;
+  value: string;
+  at: string;
 };
 
 type ObjectItem = {
@@ -451,6 +468,14 @@ function makeTimelineTicks(start: number, end: number) {
   );
 }
 
+const imageRoles: Array<{ key: ImageRole; label: string; description: string }> = [
+  { key: "forside", label: "Forside", description: "Hovedbilde/front fra valgt bildekilde." },
+  { key: "bakside", label: "Bakside", description: "Bakside/revers for objektet." },
+  { key: "gjennomlysning", label: "Gjennomlysning", description: "Gjennomlysning/transmitted light for kontroll av papir og vannmerke." },
+  { key: "variant", label: "Variant", description: "Variant-/detaljbilde koblet til utgave eller litra." },
+  { key: "detalj", label: "Detalj", description: "Detaljbilde av kvalitet, skade, signatur, hjørne eller annen observasjon." },
+];
+
 const membershipRank: Record<Membership, number> = {
   guest: 0,
   free: 1,
@@ -493,6 +518,35 @@ function Field({
         )}
       </strong>
     </div>
+  );
+}
+
+function EditableField({
+  label,
+  value,
+  onChange,
+  required = "bronze",
+  membership,
+  placeholder = "Ikke registrert",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: Membership;
+  membership: Membership;
+  placeholder?: string;
+}) {
+  const allowed = canSee(membership, required);
+  return (
+    <label className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}>
+      <span>{label}</span>
+      <input
+        value={allowed ? value : ""}
+        placeholder={allowed ? placeholder : "Låst · krever Bronze+"}
+        disabled={!allowed}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
   );
 }
 
@@ -547,6 +601,24 @@ export default function CollectiumObjectPresentationClient({
   const [selectedId, setSelectedId] = useState(routeObject?.objectId ?? "9");
   const [timelineSpan, setTimelineSpan] = useState(154);
   const [savedStates, setSavedStates] = useState<Record<string, boolean>>({});
+  const [imageSourceMode, setImageSourceMode] = useState<ImageSourceMode>("collectium");
+  const [activeImageRole, setActiveImageRole] = useState<ImageRole>("forside");
+  const [isImageOpen, setIsImageOpen] = useState(false);
+  const [ownImages, setOwnImages] = useState<OwnImage[]>([]);
+  const [ownInfo, setOwnInfo] = useState<Record<string, string>>({
+    purchaseDate: "",
+    purchaseYear: "",
+    purchasePrice: "",
+    dealer: "",
+    auction: "",
+    sellerNotes: "",
+    quality: "",
+    grade: "",
+    condition: "",
+    conditionNotes: "",
+    provenance: "",
+  });
+  const [changeLog, setChangeLog] = useState<ChangeLogEntry[]>([]);
 
   const selectedObject = useMemo(() => {
     const found =
@@ -577,6 +649,48 @@ export default function CollectiumObjectPresentationClient({
     endYear: Math.min(horizonEnd, objectYear + 8),
     href: `/relasjon/utgave/${selectedObject.issue.toLowerCase().replaceAll(" ", "-").replaceAll(".", "")}`,
   };
+
+  const activeImageMeta = imageRoles.find((role) => role.key === activeImageRole) ?? imageRoles[0];
+  const activeOwnImage = ownImages.find((image) => image.role === activeImageRole);
+  const activeImageUrl = imageSourceMode === "own" ? activeOwnImage?.url : undefined;
+  const activeImageDescription =
+    imageSourceMode === "own"
+      ? activeOwnImage?.description ?? "Eget bilde er ikke registrert for denne fanen ennå."
+      : `Collectium-bilde: ${activeImageMeta.description} Kilde: variant_obverse / reverse / transmitted_light / variant / detail.`;
+
+  function writeLog(field: string, value: string) {
+    setChangeLog((prev) => [
+      {
+        id: `${field}-${Date.now()}`,
+        field,
+        value: value || "Tomt felt",
+        at: new Date().toLocaleString("no-NO"),
+      },
+      ...prev.slice(0, 19),
+    ]);
+  }
+
+  function updateOwnInfo(field: string, value: string) {
+    setOwnInfo((prev) => ({ ...prev, [field]: value }));
+    writeLog(field, value);
+  }
+
+  function addOwnImages(files: FileList | null) {
+    if (!files?.length) return;
+    const remaining = Math.max(0, 10 - ownImages.length);
+    const selected = Array.from(files).slice(0, remaining);
+    if (!selected.length) return;
+    const created = selected.map((file, index) => ({
+      id: `${Date.now()}-${index}-${file.name}`,
+      role: activeImageRole,
+      label: file.name,
+      url: URL.createObjectURL(file),
+      description: `Eget ${activeImageMeta.label.toLowerCase()}-bilde lagt til av bruker.`,
+    }));
+    setOwnImages((prev) => [...prev, ...created]);
+    writeLog("bilder", `${created.length} bilde(r) lagt til under ${activeImageMeta.label}`);
+    setImageSourceMode("own");
+  }
 
   const keyData =
     viewMode === "finans"
@@ -655,39 +769,65 @@ export default function CollectiumObjectPresentationClient({
               <section className={styles.hero}>
                 <div className={styles.heroGrid}>
                   <div className={styles.noteImage}>
-                    <div className={styles.notePaper}>
-                      <div className={styles.num}>
-                        {selectedObject.noteNumber}
-                      </div>
-                      <div className={styles.seal} />
-                      <div className={styles.noteLine} />
-                      <div className={styles.noteText}>
-                        {selectedObject.noteText}
-                      </div>
-                      <div className={styles.noteSerial}>
-                        {selectedObject.serial}
-                      </div>
+                    <button
+                      type="button"
+                      className={styles.notePaperButton}
+                      onClick={() => setIsImageOpen(true)}
+                      title="Åpne bilde i fullskjerm"
+                    >
+                      {activeImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          className={styles.ownImagePreview}
+                          src={activeImageUrl}
+                          alt={`${activeImageMeta.label} eget bilde`}
+                        />
+                      ) : (
+                        <div className={styles.notePaper}>
+                          <div className={styles.num}>
+                            {selectedObject.noteNumber}
+                          </div>
+                          <div className={styles.seal} />
+                          <div className={styles.noteLine} />
+                          <div className={styles.noteText}>
+                            {selectedObject.noteText}
+                          </div>
+                          <div className={styles.noteSerial}>
+                            {selectedObject.serial}
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                    <div className={styles.imageSourceSwitch}>
+                      <button
+                        type="button"
+                        className={`${styles.pill} ${imageSourceMode === "collectium" ? styles.pillActive : ""}`}
+                        onClick={() => setImageSourceMode("collectium")}
+                      >
+                        Collectium
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.pill} ${imageSourceMode === "own" ? styles.pillActive : ""}`}
+                        onClick={() => setImageSourceMode("own")}
+                      >
+                        Egne ({ownImages.length}/10)
+                      </button>
                     </div>
                     <div className={styles.imageControls}>
-                      {[
-                        "Forside",
-                        "Bakside",
-                        "Gjennomlysning",
-                        "Variant",
-                        "Detalj",
-                      ].map((label, index) => (
+                      {imageRoles.map((role) => (
                         <button
-                          key={label}
-                          className={`${styles.pill} ${index === 0 ? styles.pillActive : ""}`}
+                          key={role.key}
+                          className={`${styles.pill} ${activeImageRole === role.key ? styles.pillActive : ""}`}
                           type="button"
+                          onClick={() => setActiveImageRole(role.key)}
                         >
-                          {label}
+                          {role.label}
                         </button>
                       ))}
                     </div>
                     <div className={styles.fallback}>
-                      Bildekilde: variant_obverse / reverse / transmitted light.
-                      Dersom alle er null: Bilde ikke registrert.
+                      {activeImageDescription}
                     </div>
                   </div>
                   <div className={styles.heroText}>
@@ -732,6 +872,58 @@ export default function CollectiumObjectPresentationClient({
                   </div>
                 </div>
               </section>
+
+              {isImageOpen ? (
+                <div className={styles.imageModal} role="dialog" aria-modal="true">
+                  <button
+                    type="button"
+                    className={styles.imageModalBackdrop}
+                    aria-label="Lukk bildevisning"
+                    onClick={() => setIsImageOpen(false)}
+                  />
+                  <section className={styles.imageModalPanel}>
+                    <button
+                      type="button"
+                      className={styles.imageModalClose}
+                      onClick={() => setIsImageOpen(false)}
+                    >
+                      ×
+                    </button>
+                    <div className={styles.imageModalImage}>
+                      {activeImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={activeImageUrl} alt={`${activeImageMeta.label} eget bilde`} />
+                      ) : (
+                        <div className={styles.notePaper}>
+                          <div className={styles.num}>{selectedObject.noteNumber}</div>
+                          <div className={styles.seal} />
+                          <div className={styles.noteLine} />
+                          <div className={styles.noteText}>{selectedObject.noteText}</div>
+                          <div className={styles.noteSerial}>{selectedObject.serial}</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.imageModalFooter}>
+                      <div>
+                        <strong>{activeImageMeta.label}</strong>
+                        <p>{activeImageDescription}</p>
+                      </div>
+                      <div className={styles.imageControls}>
+                        {imageRoles.map((role) => (
+                          <button
+                            key={role.key}
+                            className={`${styles.pill} ${activeImageRole === role.key ? styles.pillActive : ""}`}
+                            type="button"
+                            onClick={() => setActiveImageRole(role.key)}
+                          >
+                            {role.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              ) : null}
 
               <div className={styles.tabsRow}>
                 <div className={styles.leftTabs}>
@@ -1221,87 +1413,151 @@ export default function CollectiumObjectPresentationClient({
                       className={`${styles.panel} ${!canSee(effectiveMembership, "bronze") ? styles.lockedPanel : ""}`}
                     >
                       <h3>Kjøp</h3>
-                      <Field
+                      <EditableField
                         membership={effectiveMembership}
-                        required="bronze"
-                        label="Dato"
-                        value="Ikke registrert"
+                        label="Kjøpeår"
+                        value={ownInfo.purchaseYear}
+                        onChange={(value: string) => updateOwnInfo("purchaseYear", value)}
+                        placeholder="f.eks. 2025"
                       />
-                      <Field
+                      <EditableField
                         membership={effectiveMembership}
-                        required="bronze"
-                        label="Sted"
-                        value="Ikke registrert"
+                        label="Kjøpsdato"
+                        value={ownInfo.purchaseDate}
+                        onChange={(value: string) => updateOwnInfo("purchaseDate", value)}
+                        placeholder="f.eks. 2025-09-14"
                       />
-                      <Field
+                      <EditableField
                         membership={effectiveMembership}
-                        required="bronze"
-                        label="Kjøpt av/fra"
-                        value="Ikke registrert"
-                      />
-                      <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Pris"
-                        value="Ikke registrert"
+                        value={ownInfo.purchasePrice}
+                        onChange={(value: string) => updateOwnInfo("purchasePrice", value)}
+                        placeholder="f.eks. 1 250 NOK"
+                      />
+                      <EditableField
+                        membership={effectiveMembership}
+                        label="Forhandler"
+                        value={ownInfo.dealer}
+                        onChange={(value: string) => updateOwnInfo("dealer", value)}
+                        placeholder="Forhandler/navn"
+                      />
+                      <EditableField
+                        membership={effectiveMembership}
+                        label="Auksjon"
+                        value={ownInfo.auction}
+                        onChange={(value: string) => updateOwnInfo("auction", value)}
+                        placeholder="Auksjonshus / lot / nummer"
+                      />
+                      <EditableField
+                        membership={effectiveMembership}
+                        label="Merknad fra selger"
+                        value={ownInfo.sellerNotes}
+                        onChange={(value: string) => updateOwnInfo("sellerNotes", value)}
+                        placeholder="Tekst fra selger, kvittering eller auksjonsbeskrivelse"
                       />
                     </div>
                     <div
                       className={`${styles.panel} ${!canSee(effectiveMembership, "bronze") ? styles.lockedPanel : ""}`}
                     >
-                      <h3>Kvalitet og notat</h3>
-                      <Field
+                      <h3>Kvalitet</h3>
+                      <EditableField
                         membership={effectiveMembership}
-                        required="bronze"
-                        label="Min kvalitet"
-                        value="Ikke vurdert"
+                        label="Egen kvalitet"
+                        value={ownInfo.quality}
+                        onChange={(value: string) => updateOwnInfo("quality", value)}
+                        placeholder="Egen vurdering"
                       />
-                      <Field
+                      <EditableField
                         membership={effectiveMembership}
-                        required="bronze"
                         label="Gradering"
-                        value="Ikke registrert"
+                        value={ownInfo.grade}
+                        onChange={(value: string) => updateOwnInfo("grade", value)}
+                        placeholder="f.eks. 0, 01, XF, UNC"
                       />
-                      <Field
+                      <EditableField
                         membership={effectiveMembership}
-                        required="bronze"
-                        label="Synlighet"
-                        value="Privat"
+                        label="Tilstand"
+                        value={ownInfo.condition}
+                        onChange={(value: string) => updateOwnInfo("condition", value)}
+                        placeholder="Bretter, hjørner, flekker, rift, hull"
+                      />
+                      <EditableField
+                        membership={effectiveMembership}
+                        label="Tilstandsmerknad"
+                        value={ownInfo.conditionNotes}
+                        onChange={(value: string) => updateOwnInfo("conditionNotes", value)}
+                        placeholder="Fri tekst om skade, reparasjon eller observasjon"
+                      />
+                      <EditableField
+                        membership={effectiveMembership}
+                        label="Proveniens"
+                        value={ownInfo.provenance}
+                        onChange={(value: string) => updateOwnInfo("provenance", value)}
+                        placeholder="Privat/samtykkestyrt proveniens"
                       />
                       <div className={styles.fallback}>
-                        Private samlingsdata hentes fra brukerstatus/user
-                        collection views når user_id finnes.
+                        Endringer bokføres i loggen og skal senere skrives via samlings-API, ikke direkte til katalogsannheten.
                       </div>
                     </div>
                     <div
-                      className={styles.panel}
+                      className={`${styles.panel} ${!canSee(effectiveMembership, "bronze") ? styles.lockedPanel : ""}`}
                       style={{ gridColumn: "1 / -1" }}
                     >
-                      <h3>Egne spesifikasjoner</h3>
-                      <Field
-                        membership={effectiveMembership}
-                        required="bronze"
-                        label="Papirfølelse"
-                        value="Henter fra ct_user_collection_object_specs"
-                      />
-                      <Field
-                        membership={effectiveMembership}
-                        required="bronze"
-                        label="Hjørner"
-                        value="Henter"
-                      />
-                      <Field
-                        membership={effectiveMembership}
-                        required="bronze"
-                        label="Vannmerke"
-                        value="Henter"
-                      />
-                      <Field
-                        membership={effectiveMembership}
-                        required="bronze"
-                        label="Proveniens"
-                        value="Samtykkestyrt / privat"
-                      />
+                      <h3>Bilder</h3>
+                      <div className={styles.imageUploadRow}>
+                        <div>
+                          <strong>Egne bilder</strong>
+                          <p>Legg inn maks 10 bilder. Bildene kan vises i bildefeltet øverst når bryteren står på Egne.</p>
+                        </div>
+                        <label className={styles.uploadButton}>
+                          Legg til bilde
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            disabled={!canSee(effectiveMembership, "bronze") || ownImages.length >= 10}
+                            onChange={(event) => addOwnImages(event.target.files)}
+                          />
+                        </label>
+                      </div>
+                      <div className={styles.ownImageGrid}>
+                        {ownImages.length ? (
+                          ownImages.map((image) => (
+                            <button
+                              key={image.id}
+                              type="button"
+                              className={styles.ownImageThumb}
+                              onClick={() => {
+                                setActiveImageRole(image.role);
+                                setImageSourceMode("own");
+                                setIsImageOpen(true);
+                              }}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={image.url} alt={image.label} />
+                              <span>{image.label}</span>
+                            </button>
+                          ))
+                        ) : (
+                          <div className={styles.lockedText}>Ingen egne bilder registrert.</div>
+                        )}
+                      </div>
+                    </div>
+                    <div className={styles.panel} style={{ gridColumn: "1 / -1" }}>
+                      <h3>Endringslogg</h3>
+                      {changeLog.length ? (
+                        <div className={styles.logList}>
+                          {changeLog.map((entry) => (
+                            <div key={entry.id} className={styles.logEntry}>
+                              <span>{entry.at}</span>
+                              <strong>{entry.field}</strong>
+                              <em>{entry.value}</em>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className={styles.fallback}>Ingen endringer bokført i denne forhåndsvisningen.</div>
+                      )}
                     </div>
                   </section>
 

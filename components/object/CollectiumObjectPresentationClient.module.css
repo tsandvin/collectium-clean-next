@@ -339,3 +339,244 @@
   .timelineControls{width:100%;justify-content:flex-start}
   .timelineTicks{margin-left:0}
 }
+
+/* v7: Egne spesifikasjoner, egne bilder og fullskjerm bildevisning */
+.notePaperButton {
+  display:block;
+  width:100%;
+  border:0;
+  padding:0;
+  margin:0;
+  background:transparent;
+  cursor:zoom-in;
+  text-align:initial;
+}
+.notePaperButton:focus-visible {
+  outline:2px solid var(--ct-accent, var(--gold));
+  outline-offset:4px;
+}
+.ownImagePreview {
+  display:block;
+  width:100%;
+  height:238px;
+  object-fit:contain;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:color-mix(in srgb, var(--ct-panel-soft, var(--panel)) 88%, black 12%);
+}
+.imageSourceSwitch {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.editField {
+  display:grid;
+  grid-template-columns:minmax(130px, .42fr) minmax(0, 1fr);
+  align-items:center;
+  gap:12px;
+  border:1px solid color-mix(in srgb, var(--ct-border, var(--line)) 76%, transparent);
+  border-radius:max(6px, var(--ct-radius-sm, 6px));
+  background:color-mix(in srgb, var(--ct-panel-soft, var(--panel)) 82%, var(--ct-accent) 5%);
+  padding:8px 10px;
+  margin-bottom:7px;
+}
+.editField span {
+  color:var(--ct-muted, var(--muted));
+  font-size:12px;
+}
+.editField input {
+  width:100%;
+  min-width:0;
+  border:1px solid color-mix(in srgb, var(--ct-border, var(--line)) 82%, transparent);
+  border-radius:max(5px, var(--ct-radius-sm, 6px));
+  background:var(--ct-input-bg, var(--panel2));
+  color:var(--ct-text, var(--text));
+  padding:8px 10px;
+  font:inherit;
+}
+.editField input:focus {
+  outline:2px solid color-mix(in srgb, var(--ct-accent, var(--gold)) 42%, transparent);
+  border-color:var(--ct-accent, var(--gold));
+}
+.editFieldLocked {
+  opacity:.62;
+}
+.imageUploadRow {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  border:1px solid color-mix(in srgb, var(--ct-border, var(--line)) 76%, transparent);
+  border-radius:12px;
+  background:color-mix(in srgb, var(--ct-panel-soft, var(--panel)) 84%, var(--ct-accent) 4%);
+  padding:14px;
+  margin-bottom:14px;
+}
+.imageUploadRow p {
+  margin:4px 0 0;
+  color:var(--ct-muted, var(--muted));
+  font-size:13px;
+}
+.uploadButton {
+  position:relative;
+  overflow:hidden;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--ct-accent, var(--gold));
+  border-radius:999px;
+  background:var(--ct-accent, var(--gold));
+  color:var(--ct-on-accent, #fff);
+  padding:10px 14px;
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.uploadButton input {
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+.ownImageGrid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(135px, 1fr));
+  gap:10px;
+}
+.ownImageThumb {
+  border:1px solid var(--ct-border, var(--line));
+  border-radius:10px;
+  background:color-mix(in srgb, var(--ct-panel-soft, var(--panel)) 88%, var(--ct-accent) 4%);
+  color:var(--ct-text, var(--text));
+  padding:8px;
+  display:grid;
+  gap:7px;
+  cursor:pointer;
+  text-align:left;
+}
+.ownImageThumb img {
+  width:100%;
+  height:92px;
+  object-fit:cover;
+  border-radius:7px;
+}
+.ownImageThumb span {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--ct-muted, var(--muted));
+  font-size:12px;
+}
+.logList {
+  display:grid;
+  gap:8px;
+  max-height:240px;
+  overflow:auto;
+}
+.logEntry {
+  display:grid;
+  grid-template-columns:150px 160px minmax(0, 1fr);
+  gap:10px;
+  border:1px solid color-mix(in srgb, var(--ct-border, var(--line)) 70%, transparent);
+  border-radius:9px;
+  background:color-mix(in srgb, var(--ct-panel-soft, var(--panel)) 86%, var(--ct-accent) 3%);
+  padding:9px 10px;
+  font-size:12px;
+}
+.logEntry span {
+  color:var(--ct-muted, var(--muted));
+}
+.logEntry strong {
+  color:var(--ct-text, var(--text));
+}
+.logEntry em {
+  min-width:0;
+  overflow-wrap:anywhere;
+  color:var(--ct-text-soft, var(--muted));
+}
+.imageModal {
+  position:fixed;
+  inset:0;
+  z-index:2147482000;
+  display:grid;
+  place-items:center;
+  padding:clamp(18px, 3vw, 46px);
+}
+.imageModalBackdrop {
+  position:absolute;
+  inset:0;
+  border:0;
+  background:rgba(0,0,0,.76);
+  cursor:zoom-out;
+}
+.imageModalPanel {
+  position:relative;
+  z-index:1;
+  width:min(96vw, 1500px);
+  max-height:96vh;
+  display:grid;
+  grid-template-rows:minmax(0, 1fr) auto;
+  gap:14px;
+}
+.imageModalClose {
+  position:absolute;
+  top:-16px;
+  right:-16px;
+  z-index:2;
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.32);
+  background:rgba(0,0,0,.74);
+  color:#fff;
+  font-size:26px;
+  cursor:pointer;
+}
+.imageModalImage {
+  height:80vh;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:18px;
+  background:rgba(8,8,8,.82);
+  padding:18px;
+  overflow:hidden;
+}
+.imageModalImage img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.imageModalImage .notePaper {
+  width:min(100%, 1200px);
+  height:min(72vh, 620px);
+}
+.imageModalFooter {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  padding:14px 16px;
+}
+.imageModalFooter p {
+  margin:4px 0 0;
+  color:rgba(255,255,255,.72);
+}
+@media(max-width:760px){
+  .editField,
+  .logEntry {
+    grid-template-columns:1fr;
+  }
+  .imageUploadRow,
+  .imageModalFooter {
+    flex-direction:column;
+  }
+  .imageModalImage {
+    height:70vh;
+  }
+}
