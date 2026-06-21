@@ -4,574 +4,415 @@
  * COLLECTIUM FILE HEADER
  *
  * Overskrift:
- * Test Visning Live Editor v7
+ * Test / Visning live editor v6
  *
- * Definering / formal:
- * En-fils Next.js/React testside for live redigering av Collectium UI 8.6.
- * Siden tester visningskort, objektpresentasjon, relasjonspresentasjon,
- * brytere, API, views, felt og bokser med inspector/editor pa side-, boks-,
- * felt-, bryter- og tekstniva.
+ * Definering / formål:
+ * Én-fil Next.js/React testside for Collectium UI/UX 8.6. Siden tester
+ * visningskort, objektpresentasjon, relasjonspresentasjon, brytere, API,
+ * views, felt og bokser med live CSS-/tekst-/størrelseseditor.
  *
- * Bruksomrade:
- * /test/visning. Brukes som kontrollert UI-lab for a se hvilken CSS, selector,
- * token, feature_key, API-route og view som styrer valgt element.
+ * Bruksområde:
+ * Route: /test/visning
+ * Brukes som visuell og teknisk informasjonseditor før komponentene deles opp
+ * i globale komponenter, CSS-moduler og API-koblede Neon views.
  *
- * Berorte sider / routes:
+ * Berørte sider / routes:
  * - /test/visning
+ * - senere referanse for /objekt/[sourceKey]/[objectGroup]/[objectId]
+ * - senere referanse for /relasjon/[relationType]/[relationKey]
  *
- * Berorte DB-brytere / feature_keys:
- * - Testside bruker statisk data, men viser forventede keys:
+ * Berørte DB-brytere / feature_keys:
+ * - filter.master.view
+ * - filter.period.simple.view
  * - object.presentation.view
  * - object.relations.view
  * - object.market.view
  * - object.user_state.view
+ * - relation.presentation.view
  * - catalog.object.open
+ * - collection.item.add
+ * - collection.wishlist.toggle
+ * - collection.favorite.toggle
  *
- * Berorte API-ruter:
+ * Berørte API-ruter:
+ * - GET /api/filter/master
+ * - GET /api/filter/period/simple
  * - GET /api/object/presentation
  * - GET /api/object/relations
  * - GET /api/object/market
  * - GET /api/object/user-state
- * - GET /api/period86/timeline
- * - GET /api/catalog/filters
+ * - GET /api/relations/[relationType]/[relationKey]
  *
- * Berorte tabeller / views:
+ * Berørte tabeller / views:
+ * - ct_v_period_filter_options
  * - ct_v_object_presentation_resolved
  * - ct_v_no_banknote_object_presentation
  * - ct_v_object_relations_resolved
  * - ct_v_object_market_resolved
  * - ct_v_object_user_state_resolved
- * - ct_v_period_filter_options
  *
  * Dataretning:
- * Statisk UI-testdata -> Next.js -> React -> UI.
- * Produksjon: Neon DB -> API/backend -> Next.js -> React -> UI.
+ * Neon resolved views → API route → React state → UI editor preview
  *
  * Logging:
- * Ikke aktivert pa testside.
+ * Ikke aktiv logging. Testside markerer feature/API/view i editorpanelet.
  *
  * Versjon:
- * UI86-TEST-VISNING-LIVE-EDITOR-V7
+ * UI86-TEST-VISNING-LIVE-EDITOR-V6
  */
 
-import React, { CSSProperties, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 type Skin = "collectium" | "enkel" | "museum" | "finans";
 type MainTab = "visningskort" | "objekt" | "relasjon" | "brytere" | "api" | "view" | "felt" | "bokser";
-type ObjectTab = "samler" | "historie" | "finans" | "samling";
-type EditLevel = "side" | "boks" | "felt" | "bryter" | "tekst";
+type Segment = "samler" | "historie" | "finans" | "minsamling";
 
 type InspectMeta = {
   id: string;
-  label: string;
-  level: EditLevel;
-  file: string;
+  title: string;
   selector: string;
-  cssGroup: string;
-  description: string;
-  featureKey?: string;
-  api?: string;
-  view?: string;
-  field?: string;
-  href?: string;
+  cssSection: keyof typeof CSS_SECTIONS;
+  feature: string;
+  api: string;
+  view: string;
+  href: string;
+  level: "side" | "boks" | "felt" | "bryter" | "tekst";
   defaultText?: string;
 };
 
-type OverrideStyle = {
-  width?: string;
-  height?: string;
-  padding?: string;
-  margin?: string;
-  background?: string;
-  color?: string;
-  borderColor?: string;
-  borderRadius?: string;
-  fontSize?: string;
-  transform?: string;
+type EditorStyle = Pick<React.CSSProperties, "width" | "height" | "padding" | "margin" | "background" | "color" | "border" | "borderRadius" | "fontSize" | "transform">;
+
+const CSS_SECTIONS = {
+  "01 Global / testside": `.ctLivePage{\n  --bg:#f7f4eb;\n  --panel:#fffdf7;\n  --ink:#173e32;\n  --muted:#7f938a;\n  --line:#d7cdbb;\n  --accent:#c8a75a;\n  --accent2:#2d7f63;\n  --danger:#d96767;\n  --blue:#3f86bc;\n  min-height:100vh;\n  background:var(--bg);\n  color:var(--ink);\n  font-family:Georgia, 'Times New Roman', serif;\n}\n.ctPreviewInner{\n  width:90%;\n  margin:0 auto;\n  padding:26px 0 70px;\n}\n.ctTopTitle h1{font-size:38px;line-height:1;margin:0;letter-spacing:-.03em;}\n.ctTopTitle p{margin:0 0 6px;text-transform:uppercase;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:800;}\n.ctTopTitle span{font-size:13px;color:var(--muted);}\n`,
+  "02 Skins": `.ctLivePage[data-skin='collectium']{--bg:#f7f4eb;--panel:#fffdf7;--ink:#173e32;--muted:#789088;--line:#d8cfbf;--accent:#c8a75a;--accent2:#317c62;}\n.ctLivePage[data-skin='enkel']{--bg:#eef5fb;--panel:#ffffff;--ink:#163c65;--muted:#6f89a7;--line:#c9ddef;--accent:#1d5f9e;--accent2:#2e82bd;}\n.ctLivePage[data-skin='museum']{--bg:#12110f;--panel:#1e1e1f;--ink:#fff6df;--muted:#9b8d77;--line:#4c3f2c;--accent:#d0aa55;--accent2:#71a575;}\n.ctLivePage[data-skin='finans']{--bg:#0d1a20;--panel:#182832;--ink:#e9f7ff;--muted:#83a6b5;--line:#294552;--accent:#28b783;--accent2:#2ed39c;}\n`,
+  "03 Layout / filter": `.ctControlBar{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;margin:18px 0 10px;}\n.ctFilterBox{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.05);}\n.ctFilterBox label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800;margin-bottom:6px;}\n.ctFilterBox select,.ctFilterBox input{width:100%;height:38px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 85%,var(--bg));color:var(--ink);font-weight:800;padding:0 10px;}\n.ctAreaRow{display:flex;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding:10px 0;margin:12px 0;}\n.ctChip{border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 75%,var(--bg));color:var(--ink);border-radius:999px;padding:8px 13px;font-weight:800;font-size:12px;}\n`,
+  "04 Tidslinje / periode": `.ctTimelinePanel{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px;margin:14px 0 24px;overflow:hidden;}\n.ctTimelineHeader{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:14px;}\n.ctTimelineGrid{display:grid;grid-template-columns:96px 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:color-mix(in srgb,var(--panel) 88%,var(--bg));}\n.ctTimelineYears{grid-column:2;display:grid;grid-template-columns:repeat(12,1fr);font-size:11px;color:var(--muted);border-bottom:1px solid var(--line);}\n.ctTimelineYears span{padding:8px;border-left:1px solid color-mix(in srgb,var(--line) 70%,transparent);}\n.ctLaneLabel{padding:11px 12px;font-weight:900;font-size:12px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--panel) 80%,var(--bg));}\n.ctLane{position:relative;height:42px;border-top:1px solid var(--line);background:repeating-linear-gradient(90deg,transparent 0,transparent 8.25%,color-mix(in srgb,var(--line) 45%,transparent) 8.33%);}\n.ctPeriodBar{position:absolute;top:8px;height:25px;border-radius:8px;background:var(--accent);color:#fff;font-weight:900;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 10px;box-shadow:0 6px 14px rgba(0,0,0,.16);}\n.ctPeriodBar.green{background:var(--accent2);}\n.ctPeriodBar.purple{background:#8e62b7;}\n.ctPeriodBar.blue{background:#2d6fa7;}\n`,
+  "05 Visningskort": `.ctCardGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}\n.ctObjectCard{position:relative;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px;box-shadow:0 18px 42px rgba(0,0,0,.08);}\n.ctObjectCard::after,.ctPanel::after{content:'Collectium';position:absolute;right:14px;bottom:7px;font-size:8px;color:var(--muted);font-style:italic;}\n.ctHorizontalCard{display:grid;grid-template-columns:170px 1fr 145px;gap:12px;min-height:166px;}\n.ctListCard{display:grid;grid-template-columns:220px 1fr 160px;gap:14px;align-items:center;min-height:124px;}\n.ctMuseumGrid,.ctStandingGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}\n.ctNote{position:relative;border:1px solid var(--line);border-radius:10px;min-height:132px;background:repeating-linear-gradient(135deg,rgba(0,0,0,.025) 0,rgba(0,0,0,.025) 8px,transparent 8px,transparent 18px),color-mix(in srgb,var(--panel) 70%,var(--bg));overflow:hidden;}\n.ctNote strong{font-size:48px;opacity:.18;margin:18px;display:block;}\n.ctNote em{position:absolute;left:18px;bottom:18px;letter-spacing:.24em;font-size:11px;font-weight:900;font-style:normal;}\n.ctNote i{position:absolute;right:22px;bottom:24px;width:52px;height:72px;border-radius:50% 50% 10px 10px;background:radial-gradient(circle at 45% 30%,#fff7df,var(--accent));opacity:.75;}\n.ctObjectTitle{font-size:24px;margin:0 0 10px;line-height:1.05;letter-spacing:-.02em;}\n.ctFieldGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;}\n.ctMiniField{border-bottom:1px dashed var(--line);padding:0 0 7px;}\n.ctMiniField span{display:block;text-transform:uppercase;font-size:9px;letter-spacing:.14em;color:var(--muted);font-weight:900;}\n.ctMiniField strong{font-size:14px;}\n`,
+  "06 Objektpresentasjon": `.ctObjectPresentation{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start;}\n.ctHero{display:grid;grid-template-columns:minmax(380px,.92fr) 1fr;gap:22px;border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:20px;position:relative;margin-bottom:22px;}\n.ctHeroNote{min-height:260px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(140deg,rgba(0,0,0,.18),transparent),color-mix(in srgb,var(--panel) 70%,var(--bg));position:relative;}\n.ctHeroNote strong{font-size:58px;color:var(--accent);opacity:.38;position:absolute;left:28px;top:20px;}\n.ctHero h2{font-size:44px;line-height:.96;margin:16px 0 16px;letter-spacing:-.04em;}\n.ctKicker{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;}\n.ctStats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:18px;}\n.ctStats div{padding:12px;border-left:1px solid var(--line);}\n.ctStats div:first-child{border-left:0;}\n.ctStats span{display:block;text-transform:uppercase;font-size:9px;color:var(--muted);letter-spacing:.14em;font-weight:900;}\n.ctStats strong{font-size:18px;}\n.ctObjectTabs{display:flex;gap:12px;margin:0 0 16px;}\n.ctObjectTabs button{background:transparent;border:0;color:var(--muted);font-size:15px;text-transform:uppercase;letter-spacing:.08em;font-family:inherit;padding:10px 0;border-bottom:1px solid transparent;cursor:pointer;}\n.ctObjectTabs button.active{color:var(--ink);border-color:var(--accent);font-weight:900;}\n.ctPanelGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}\n.ctPanel{position:relative;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:16px;min-height:145px;}\n.ctPanel.wide{grid-column:1/-1;}\n.ctRow{display:grid;grid-template-columns:140px 1fr;gap:10px;border-bottom:1px dashed var(--line);padding:8px 0;font-size:13px;}\n.ctRow span{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.12em;font-weight:900;}\n.ctRow strong{text-align:right;}\n.ctSidePanel{position:sticky;top:16px;display:grid;gap:12px;}\n.ctActionButton{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 78%,var(--bg));color:var(--ink);font-weight:900;padding:12px;cursor:pointer;}\n.ctActionButton.gold{background:var(--accent);color:#fff;}\n`,
+  "07 Relasjonspresentasjon": `.ctRelationPage{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:20px;display:grid;grid-template-columns:.8fr 1.2fr;gap:18px;}\n.ctRelationBadge{width:88px;height:88px;border-radius:20px;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:38px;font-weight:900;}\n.ctBioGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}\n.ctBioCard{border:1px solid var(--line);border-radius:12px;padding:12px;background:color-mix(in srgb,var(--panel) 82%,var(--bg));}\n.ctBioCard span{display:block;text-transform:uppercase;letter-spacing:.13em;font-size:9px;color:var(--muted);font-weight:900;margin-bottom:6px;}\n.ctRelationList{display:grid;gap:9px;margin-top:14px;}\n.ctRelationLink{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);text-decoration:none;background:color-mix(in srgb,var(--panel) 80%,var(--bg));}\n`,
+  "08 Editor / inspector": `.ctEditorShell{position:fixed;inset:0;z-index:9999;background:var(--bg);display:grid;grid-template-columns:450px 1fr;}\n.ctCodePanel{border-right:1px solid var(--line);background:color-mix(in srgb,var(--panel) 88%,#000);padding:14px;overflow:auto;}\n.ctCodePanel textarea{width:100%;min-height:260px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:#071016;color:#d6fff0;font:12px/1.45 Consolas,monospace;padding:12px;}\n.ctEditorGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}\n.ctEditorGrid label{font-size:11px;color:var(--muted);display:grid;gap:3px;}\n.ctEditorGrid input{height:32px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 72%,#000);color:var(--ink);padding:0 8px;}\n.ctPreviewSplit{overflow:auto;}\n.ctInspectorMark{outline:2px solid #1677ff!important;outline-offset:3px;box-shadow:0 0 0 9999px rgba(0,0,0,.04),0 0 0 6px rgba(22,119,255,.12)!important;}\n.ctResizeMode{position:relative!important;resize:both!important;overflow:auto!important;min-width:80px;min-height:44px;}\n.ctResizeMode::before{content:'';position:absolute;inset:-7px;border:1px dashed #1677ff;pointer-events:none;}\n.ctResizeMode::after{content:'↘';position:absolute;right:-12px;bottom:-12px;width:20px;height:20px;border:1px solid #1677ff;background:#fff;color:#1677ff;border-radius:50%;display:grid;place-items:center;font-size:12px;z-index:3;}\n.ctContextMenu{position:fixed;z-index:10000;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:8px;display:grid;gap:6px;min-width:220px;}\n.ctContextMenu button{border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ink);padding:9px;text-align:left;font-weight:800;cursor:pointer;}\n`,
 };
 
-const FILE_PATH = "app/test/visning/page.tsx";
+const META: Record<string, InspectMeta> = {
+  page: { id: "page", title: "Global testside", selector: ".ctLivePage", cssSection: "01 Global / testside", feature: "template.test.view", api: "Ingen", view: "Ingen", href: "/test/visning", level: "side" },
+  filters: { id: "filters", title: "Filter Master", selector: ".ctControlBar .ctFilterBox", cssSection: "03 Layout / filter", feature: "filter.master.view", api: "GET /api/filter/master", view: "ct_filter_master_registry / ct_v_period_filter_options", href: "/admin/system/filter-master", level: "boks" },
+  timeline: { id: "timeline", title: "Periodefilter tidslinje", selector: ".ctTimelinePanel", cssSection: "04 Tidslinje / periode", feature: "filter.period.simple.view", api: "GET /api/filter/period/simple", view: "ct_v_period_filter_options", href: "/filter/periode", level: "boks" },
+  card: { id: "card", title: "Visningskort", selector: ".ctObjectCard", cssSection: "05 Visningskort", feature: "catalog.object.open", api: "GET /api/object/presentation", view: "ct_v_object_presentation_resolved", href: "/objekt/norske_sedler/banknote/1459", level: "boks" },
+  objectHero: { id: "objectHero", title: "Objektpresentasjon hero", selector: ".ctHero", cssSection: "06 Objektpresentasjon", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation", href: "/objekt/norske_sedler/banknote/1459", level: "boks" },
+  objectTabs: { id: "objectTabs", title: "Objektpresentasjon faner", selector: ".ctObjectTabs button", cssSection: "06 Objektpresentasjon", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_object_presentation_resolved", href: "/objekt/norske_sedler/banknote/1459?segment=historie", level: "bryter" },
+  sideActions: { id: "sideActions", title: "Brukerhandlinger / I min samling", selector: ".ctSidePanel .ctActionButton", cssSection: "06 Objektpresentasjon", feature: "object.user_state.view / collection.item.add", api: "GET /api/object/user-state", view: "ct_v_object_user_state_resolved", href: "/min-side/samling", level: "bryter" },
+  relation: { id: "relation", title: "Relasjonspresentasjon", selector: ".ctRelationPage", cssSection: "07 Relasjonspresentasjon", feature: "relation.presentation.view", api: "GET /api/relations/[relationType]/[relationKey]", view: "relation detail views", href: "/relasjon/regent/oscar-ii", level: "boks" },
+  apiList: { id: "apiList", title: "API / view / bryter-liste", selector: ".ctApiMatrix", cssSection: "08 Editor / inspector", feature: "admin.system.api_map.view", api: "GET /api/system/api-map", view: "ct_feature_action_routes", href: "/admin/system/mariadb-neon", level: "felt" },
+  topTitle: { id: "topTitle", title: "Sidetittel / tekst", selector: ".ctTopTitle h1", cssSection: "01 Global / testside", feature: "template.test.view", api: "Ingen", view: "Ingen", href: "/test/visning", level: "tekst", defaultText: "Test / Visning live editor" },
+  skinButton: { id: "skinButton", title: "Skin-bryter", selector: ".ctChip[data-editor='skin-button']", cssSection: "03 Layout / filter", feature: "template.skin.switch", api: "Lokal UI", view: "Ingen", href: "/test/visning", level: "bryter" },
+  filterSelect: { id: "filterSelect", title: "Filterfelt / rullegardin", selector: ".ctFilterBox select", cssSection: "03 Layout / filter", feature: "filter.master.view", api: "GET /api/filter/master", view: "ct_filter_master_registry", href: "/admin/system/filter-master", level: "felt" },
+  cardTitle: { id: "cardTitle", title: "Visningskort tittel", selector: ".ctObjectTitle", cssSection: "05 Visningskort", feature: "catalog.object.open", api: "GET /api/object/presentation", view: "ct_v_object_presentation_resolved", href: "/objekt/norske_sedler/banknote/1459", level: "tekst", defaultText: "100 kroner · 1. utgave · 1877 · Seddelpapir" },
+  miniField: { id: "miniField", title: "Visningskort felt", selector: ".ctMiniField", cssSection: "05 Visningskort", feature: "catalog.object.open", api: "GET /api/object/presentation", view: "ct_v_object_presentation_resolved", href: "/objekt/norske_sedler/banknote/1459", level: "felt" },
+  heroTitle: { id: "heroTitle", title: "Objektpresentasjon tittel", selector: ".ctHero h2", cssSection: "06 Objektpresentasjon", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation", href: "/objekt/norske_sedler/banknote/1459", level: "tekst", defaultText: "100 kroner · 1. utgave · 1877 · Seddelpapir" },
+  heroLead: { id: "heroLead", title: "Objektpresentasjon ingress", selector: ".ctHero p", cssSection: "06 Objektpresentasjon", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation", href: "/objekt/norske_sedler/banknote/1459", level: "tekst", defaultText: "Tidlig hovedvalør fra den norske seddelhistorien — utgitt under Oscar II i unionstiden. Sjelden i alle kvaliteter, ekstremt sjelden over 45 XF." },
+  panel: { id: "panel", title: "Objektpresentasjon boks/panel", selector: ".ctPanel", cssSection: "06 Objektpresentasjon", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_object_presentation_resolved", href: "/objekt/norske_sedler/banknote/1459", level: "boks" },
+  panelRow: { id: "panelRow", title: "Objektpresentasjon felt/rad", selector: ".ctRow", cssSection: "06 Objektpresentasjon", feature: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_object_presentation_resolved", href: "/objekt/norske_sedler/banknote/1459", level: "felt" },
+  actionButton: { id: "actionButton", title: "Sidepanel bryter/knapp", selector: ".ctActionButton", cssSection: "06 Objektpresentasjon", feature: "collection.item.add / collection.wishlist.toggle", api: "GET /api/object/user-state", view: "ct_v_object_user_state_resolved", href: "/min-side/samling", level: "bryter" },
+};
 
-const cssGroups = [
-  {
-    key: "global",
-    label: "Global testside",
-    selectors: [":root", ".ctPage", ".ctWorkspace", ".ctPanel", ".ctSignature"],
-  },
-  {
-    key: "filter",
-    label: "Filter og periode",
-    selectors: [".ctFilterRail", ".ctFilterCard", ".ctSelect", ".ctTimeline", ".ctLane", ".ctPeriodBar"],
-  },
-  {
-    key: "visningskort",
-    label: "Visningskort",
-    selectors: [".ctCard", ".ctCardHorizontal", ".ctCardList", ".ctCardMuseum", ".ctCardStanding"],
-  },
-  {
-    key: "objekt",
-    label: "Objektpresentasjon",
-    selectors: [".ctObjectHero", ".ctNote", ".ctObjectTabs", ".ctObjectGrid", ".ctSideActions"],
-  },
-  {
-    key: "relasjon",
-    label: "Relasjonspresentasjon",
-    selectors: [".ctRelationHero", ".ctRelationTimeline", ".ctRelationList"],
-  },
-  {
-    key: "editor",
-    label: "Inspector/editor",
-    selectors: [".ctSplit", ".ctCodePanel", ".ctInspectorMark", ".ctResizeHandle"],
-  },
+const FILTERS = {
+  land: ["Norge", "Sverige", "Danmark", "Skandinavia"],
+  source: ["norske_sedler", "norske_mynter", "verdibrev", "ct_sn_relasjoner"],
+  objectGroup: ["banknote", "coin", "security", "relation"],
+  regent: ["Oscar II", "Karl XV", "Haakon VII", "Olav V", "Harald V"],
+  period: ["1810-2024", "1872-1905", "1905-1957", "1957-1991"],
+};
+
+const API_ROWS = [
+  ["Filter Master", "filter.master.view", "GET /api/filter/master", "ct_filter_master_registry"],
+  ["Periodefilter", "filter.period.simple.view", "GET /api/filter/period/simple", "ct_v_period_filter_options"],
+  ["Objektpresentasjon", "object.presentation.view", "GET /api/object/presentation", "ct_v_object_presentation_resolved"],
+  ["Relasjoner", "object.relations.view", "GET /api/object/relations", "ct_v_object_relations_resolved"],
+  ["Marked", "object.market.view", "GET /api/object/market", "ct_v_object_market_resolved"],
+  ["I min samling", "object.user_state.view", "GET /api/object/user-state", "ct_v_object_user_state_resolved"],
+  ["Relasjonsside", "relation.presentation.view", "GET /api/relations/regent/oscar-ii", "relation detail views"],
 ];
 
-const baseCss = `/* Collectium test/visning v7 - original CSS-kilde */
-:root {
-  --ct-bg: #f6f3ec;
-  --ct-page: #fffdf8;
-  --ct-panel: #ffffff;
-  --ct-panel-2: #f2f7ef;
-  --ct-text: #173c2f;
-  --ct-muted: #7f9288;
-  --ct-line: rgba(25, 80, 55, .18);
-  --ct-line-soft: rgba(25, 80, 55, .10);
-  --ct-accent: #2f805d;
-  --ct-accent-2: #c9a55b;
-  --ct-red: #ef7d72;
-  --ct-blue: #6aa5de;
-  --ct-radius: 14px;
-  --ct-shadow: 0 24px 70px rgba(27, 48, 38, .12);
-  --ct-font-serif: Georgia, 'Times New Roman', serif;
-  --ct-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+function mergeCss(parts: Record<string, string>) {
+  return Object.values(parts).join("\n\n");
 }
 
-[data-skin="collectium"] {
-  --ct-bg: #0e1724; --ct-page: #111c2c; --ct-panel: #162235; --ct-panel-2: #1c2b44;
-  --ct-text: #f2f7ff; --ct-muted: #9fb1c8; --ct-line: rgba(125, 179, 255, .28);
-  --ct-line-soft: rgba(125, 179, 255, .13); --ct-accent: #7db3ff; --ct-accent-2: #b8d6ff;
-}
-[data-skin="enkel"] {
-  --ct-bg: #eef2f6; --ct-page: #f8fafc; --ct-panel: #ffffff; --ct-panel-2: #f7f9fb;
-  --ct-text: #162332; --ct-muted: #697789; --ct-line: rgba(42, 70, 95, .20);
-  --ct-line-soft: rgba(42, 70, 95, .09); --ct-accent: #2d5f90; --ct-accent-2: #234d76;
-}
-[data-skin="museum"] {
-  --ct-bg: #0b0b0a; --ct-page: #11100f; --ct-panel: #171717; --ct-panel-2: #1b1b1a;
-  --ct-text: #f4efe7; --ct-muted: #aaa296; --ct-line: rgba(203, 163, 83, .26);
-  --ct-line-soft: rgba(203, 163, 83, .12); --ct-accent: #c9a55b; --ct-accent-2: #e4c46e;
-}
-[data-skin="finans"] {
-  --ct-bg: #07110c; --ct-page: #0d1711; --ct-panel: #111d15; --ct-panel-2: #142319;
-  --ct-text: #eefaf0; --ct-muted: #9db8a6; --ct-line: rgba(69, 190, 112, .26);
-  --ct-line-soft: rgba(69, 190, 112, .11); --ct-accent: #42c46e; --ct-accent-2: #b8f5c8;
+function useTextOverrides() {
+  const [text, setText] = useState<Record<string, string>>({});
+  const get = (key: string, fallback: string) => text[key] ?? fallback;
+  const set = (key: string, value: string) => setText((old) => ({ ...old, [key]: value }));
+  const reset = (key: string) => setText((old) => { const next = { ...old }; delete next[key]; return next; });
+  return { get, set, reset, text };
 }
 
-.ctPage { min-height: 100vh; background: radial-gradient(circle at 28% 0%, color-mix(in srgb, var(--ct-accent) 18%, transparent), transparent 35%), var(--ct-bg); color: var(--ct-text); font-family: var(--ct-font-serif); }
-.ctWorkspace { width: 90%; margin: 0 auto; padding: 22px 0 90px; }
-.ctPanel { position: relative; border: 1px solid var(--ct-line); border-radius: var(--ct-radius); background: linear-gradient(180deg, color-mix(in srgb, var(--ct-panel) 94%, white), var(--ct-panel)); box-shadow: var(--ct-shadow); }
-.ctSignature::after { content: "____________ Collectium"; position: absolute; right: 16px; bottom: 8px; color: var(--ct-accent); font-size: 8px; letter-spacing: .12em; opacity: .78; }
-.ctFilterRail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
-.ctFilterCard { padding: 13px; border: 1px solid var(--ct-line); border-radius: 13px; background: color-mix(in srgb, var(--ct-panel) 90%, var(--ct-accent) 5%); }
-.ctSelect { width: 100%; border: 1px solid var(--ct-line); border-radius: 10px; padding: 10px 12px; background: var(--ct-page); color: var(--ct-text); }
-.ctTimeline { padding: 18px; margin: 14px 0 28px; overflow: hidden; }
-.ctTimelineScale { display: grid; grid-template-columns: repeat(9, 1fr); font-size: 12px; color: var(--ct-muted); margin-bottom: 14px; }
-.ctLane { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; align-items: center; margin: 8px 0; }
-.ctLaneTrack { position: relative; height: 35px; border: 1px solid var(--ct-line-soft); border-radius: 9px; background: color-mix(in srgb, var(--ct-panel-2) 80%, transparent); }
-.ctPeriodBar { position: absolute; top: 4px; bottom: 4px; border-radius: 8px; background: linear-gradient(180deg, var(--ct-accent-2), var(--ct-accent)); color: var(--ct-page); font: 700 11px var(--ct-font-sans); display: grid; place-items: center; padding: 0 8px; overflow: hidden; white-space: nowrap; }
-.ctTabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
-.ctTab { border: 1px solid var(--ct-line); color: var(--ct-muted); background: var(--ct-panel); border-radius: 999px; padding: 9px 13px; cursor: pointer; }
-.ctTabActive { color: var(--ct-page); background: linear-gradient(180deg, var(--ct-accent-2), var(--ct-accent)); border-color: transparent; }
-.ctCardGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.ctCard { padding: 12px; min-height: 150px; }
-.ctCardHorizontal { display: grid; grid-template-columns: 170px minmax(0, 1fr) 138px; gap: 12px; }
-.ctCardList { display: grid; grid-template-columns: 250px minmax(0, 1fr) 130px; gap: 12px; min-height: 126px; }
-.ctCardMuseum { display: grid; grid-template-columns: 1fr; gap: 12px; min-height: 230px; }
-.ctCardStanding { min-height: 430px; display: flex; flex-direction: column; gap: 12px; }
-.ctNote { position: relative; min-height: 125px; border: 1px solid var(--ct-line); border-radius: 10px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--ct-panel-2) 82%, transparent), color-mix(in srgb, var(--ct-panel-2) 82%, transparent) 8px, transparent 8px, transparent 16px); overflow: hidden; }
-.ctNoteNumber { position: absolute; left: 18px; top: 8px; font-size: 52px; color: color-mix(in srgb, var(--ct-text) 18%, transparent); }
-.ctNoteSeal { position: absolute; right: 22px; bottom: 18px; width: 58px; height: 72px; border-radius: 50% 50% 12px 12px; background: radial-gradient(circle at 45% 35%, var(--ct-accent-2), color-mix(in srgb, var(--ct-accent) 50%, #000)); opacity: .72; }
-.ctObjectHero { display: grid; grid-template-columns: minmax(360px, 1fr) minmax(420px, 1.25fr); gap: 24px; padding: 22px; }
-.ctObjectTitle { font-size: clamp(34px, 4vw, 58px); line-height: .98; margin: 18px 0; letter-spacing: -.03em; }
-.ctObjectGrid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 18px; }
-.ctBoxGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.ctInfoBox { padding: 18px; min-height: 150px; }
-.ctField { display: flex; justify-content: space-between; gap: 14px; border-bottom: 1px dashed var(--ct-line-soft); padding: 9px 0; color: var(--ct-muted); }
-.ctField strong { color: var(--ct-text); text-align: right; }
-.ctSideActions { display: flex; flex-direction: column; gap: 12px; }
-.ctAction { border: 1px solid var(--ct-line); border-radius: 11px; background: var(--ct-panel); color: var(--ct-text); padding: 12px; text-align: left; cursor: pointer; }
-.ctRelationHero { padding: 22px; }
-.ctRelationList { display: grid; gap: 10px; }
-.ctRelationRow { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--ct-line-soft); border-radius: 12px; padding: 13px; }
-.ctCodePanel { width: 450px; flex: 0 0 450px; min-height: 100vh; background: #071018; color: #d8edf2; border-right: 1px solid #1e4256; padding: 14px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-.ctInspectorMark { outline: 2px solid #0877ff !important; outline-offset: 2px; box-shadow: 0 0 0 9999px rgba(0, 20, 40, .10); }
-.ctResizeHandle { position: absolute; width: 12px; height: 12px; border: 2px solid #0877ff; background: white; z-index: 20; }
-`;
-
-const metaList: InspectMeta[] = [
-  { id: "page", label: "Testsiden", level: "side", file: FILE_PATH, selector: ".ctPage, .ctWorkspace", cssGroup: "global", description: "Global sideflate, 5% margin og skin-token-basert bakgrunn.", featureKey: "test.visning.view", api: "none", view: "none" },
-  { id: "filter.master", label: "Masterfilter", level: "boks", file: FILE_PATH, selector: ".ctFilterRail .ctFilterCard", cssGroup: "filter", description: "Filterrad med Neon-lignende rullegardiner for land/kilde/type/marked.", featureKey: "catalog.filters", api: "GET /api/catalog/filters", view: "ct_filter_master_registry" },
-  { id: "timeline", label: "Periode/tidslinje", level: "boks", file: FILE_PATH, selector: ".ctTimeline, .ctLane, .ctPeriodBar", cssGroup: "filter", description: "Tidslinje med konger/regenter, historisk periode, finans/okonomi og objekt/utgiver.", featureKey: "period86.timeline.view", api: "GET /api/period86/timeline", view: "ct_v_period_filter_options" },
-  { id: "card.horizontal", label: "Horisontalt visningskort", level: "boks", file: FILE_PATH, selector: ".ctCard.ctCardHorizontal", cssGroup: "visningskort", description: "Kompakt horisontalt kort, to i bredden pa desktop.", featureKey: "catalog.object.open", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
-  { id: "card.list", label: "Listekort", level: "boks", file: FILE_PATH, selector: ".ctCard.ctCardList", cssGroup: "visningskort", description: "Kompakt listevisning med bilde, identitet og statusfelt.", featureKey: "catalog.view", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
-  { id: "card.museum", label: "Museumskort", level: "boks", file: FILE_PATH, selector: ".ctCard.ctCardMuseum", cssGroup: "visningskort", description: "Museumvisning, stablet to i bredden pa desktop.", featureKey: "catalog.museum.view", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
-  { id: "card.standing", label: "Staende kort", level: "boks", file: FILE_PATH, selector: ".ctCard.ctCardStanding", cssGroup: "visningskort", description: "Staende visningskort, to i bredden pa desktop.", featureKey: "catalog.view", api: "GET /api/catalog/search", view: "ct_v_catalog_objects_resolved" },
-  { id: "object.hero", label: "Objektpresentasjon hero", level: "boks", file: FILE_PATH, selector: ".ctObjectHero", cssGroup: "objekt", description: "Toppfelt for full objektpresentasjon, bygget etter opplastet objektpresentasjon v10.", featureKey: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation" },
-  { id: "object.title", label: "Objekttittel", level: "tekst", file: FILE_PATH, selector: ".ctObjectTitle", cssGroup: "objekt", description: "Tittelmodell for objektpresentasjon.", featureKey: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation", field: "collectium_title_no", defaultText: "10 kroner · 1979 · 1 005 · BH" },
-  { id: "object.box.identity", label: "Identitet-boks", level: "boks", file: FILE_PATH, selector: ".ctInfoBox.identity", cssGroup: "objekt", description: "Boks for katalognummer, tittel, valor, ar, litra.", featureKey: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation" },
-  { id: "field.value", label: "Felt: Valør", level: "felt", file: FILE_PATH, selector: ".ctField[data-field='denomination_raw_no']", cssGroup: "objekt", description: "Feltverdi for valor i objektpresentasjon.", featureKey: "object.presentation.view", api: "GET /api/object/presentation", view: "ct_v_no_banknote_object_presentation", field: "denomination_raw_no", defaultText: "10 kroner" },
-  { id: "action.collection", label: "Bryter: Legg i samling", level: "bryter", file: FILE_PATH, selector: ".ctAction.primary", cssGroup: "objekt", description: "Handling for a legge objekt i brukerens samling.", featureKey: "collection.item.add", api: "POST /api/collection/items", view: "ct_v_object_user_state_resolved" },
-  { id: "relation.hero", label: "Relasjonspresentasjon", level: "boks", file: FILE_PATH, selector: ".ctRelationHero", cssGroup: "relasjon", description: "Relasjonsside for node, for eksempel Olav V eller 1979.", featureKey: "object.relations.view", api: "GET /api/object/relations", view: "ct_v_object_relations_resolved" },
-];
-
-const metaMap = Object.fromEntries(metaList.map((m) => [m.id, m]));
-
-const tabs: { key: MainTab; label: string }[] = [
-  { key: "visningskort", label: "Visningskort" },
-  { key: "objekt", label: "Objektpresentasjon" },
-  { key: "relasjon", label: "Relasjonpresentasjon" },
-  { key: "brytere", label: "Brytere" },
-  { key: "api", label: "API" },
-  { key: "view", label: "View" },
-  { key: "felt", label: "Felt" },
-  { key: "bokser", label: "Bokser" },
-];
-
-const objectTabs: { key: ObjectTab; label: string }[] = [
-  { key: "samler", label: "Samler" },
-  { key: "historie", label: "Historie" },
-  { key: "finans", label: "Finans" },
-  { key: "samling", label: "I min samling" },
-];
-
-const periodRows = [
-  {
-    label: "Konge / regent",
-    bars: [
-      { label: "Karl XV 1859-1872", left: 5, width: 18 },
-      { label: "Oscar II 1872-1905", left: 22, width: 32 },
-      { label: "Haakon VII 1905-1957", left: 54, width: 46 },
-    ],
-  },
-  {
-    label: "Historisk periode",
-    bars: [
-      { label: "Unionstid", left: 0, width: 54 },
-      { label: "Selvstendig Norge", left: 54, width: 46 },
-    ],
-  },
-  {
-    label: "Finans / okonomi",
-    bars: [
-      { label: "Bank- og pengekrise 1816-1905", left: 10, width: 44 },
-      { label: "Mellomkrig / kriseokonomi 1918-1939", left: 62, width: 21 },
-    ],
-  },
-  {
-    label: "Objekt / utgiver",
-    bars: [{ label: "Norske sedler / 5. utgave 1966-1983", left: 78, width: 14 }],
-  },
-];
-
-function cssSnippet(meta: InspectMeta, override?: OverrideStyle, text?: string) {
-  const overrideLines = override
-    ? Object.entries(override)
-        .filter(([, value]) => value)
-        .map(([key, value]) => `  ${key.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase())}: ${value};`)
-        .join("\n")
-    : "";
-  const textLine = text && meta.level === "tekst" ? `\n/* textContent: ${text} */` : "";
-  return `/* ${meta.label}\n   file: ${meta.file}\n   selector: ${meta.selector}\n   level: ${meta.level}\n   feature_key: ${meta.featureKey ?? "none"}\n   api: ${meta.api ?? "none"}\n   view: ${meta.view ?? "none"}\n   field: ${meta.field ?? "none"}\n   description: ${meta.description}\n*/\n${meta.selector} {\n${overrideLines || "  /* bruk editoren til a legge inn width, height, color, background, padding osv. */"}\n}${textLine}`;
-}
-
-function makeStyle(style?: OverrideStyle): CSSProperties {
-  if (!style) return {};
-  return {
-    width: style.width,
-    height: style.height,
-    padding: style.padding,
-    margin: style.margin,
-    background: style.background,
-    color: style.color,
-    borderColor: style.borderColor,
-    borderRadius: style.borderRadius,
-    fontSize: style.fontSize,
-    transform: style.transform,
-  };
-}
-
-export default function TestVisningEditorV7() {
-  const [skin, setSkin] = useState<Skin>("museum");
+export default function TestVisningLiveEditor() {
+  const [skin, setSkin] = useState<Skin>("collectium");
   const [mainTab, setMainTab] = useState<MainTab>("objekt");
-  const [objectTab, setObjectTab] = useState<ObjectTab>("samler");
-  const [selectedId, setSelectedId] = useState("object.hero");
+  const [segment, setSegment] = useState<Segment>("samler");
   const [split, setSplit] = useState(false);
-  const [resizeMode, setResizeMode] = useState(false);
-  const [overrides, setOverrides] = useState<Record<string, OverrideStyle>>({});
-  const [textOverrides, setTextOverrides] = useState<Record<string, string>>({});
-  const [copied, setCopied] = useState(false);
-  const selected = metaMap[selectedId] || metaMap["page"];
+  const [selected, setSelected] = useState<InspectMeta>(META.objectHero);
+  const [context, setContext] = useState<{ x: number; y: number } | null>(null);
+  const [resizeId, setResizeId] = useState<string | null>(null);
+  const [cssParts, setCssParts] = useState<Record<string, string>>(CSS_SECTIONS);
+  const [styleOverrides, setStyleOverrides] = useState<Record<string, EditorStyle>>({});
+  const textEditor = useTextOverrides();
 
-  const inspect = (id: string) => {
-    setSelectedId(id);
-    setSplit(true);
+  const css = useMemo(() => mergeCss(cssParts), [cssParts]);
+
+  const inspect = (event: React.MouseEvent<HTMLElement>, key: keyof typeof META) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setSelected(META[key]);
+    setContext({ x: event.clientX, y: event.clientY });
   };
 
-  const editStyle = (key: keyof OverrideStyle, value: string) => {
-    setOverrides((prev) => ({ ...prev, [selectedId]: { ...(prev[selectedId] || {}), [key]: value || undefined } }));
+  const selectedClass = (key: keyof typeof META) => [
+    selected.id === META[key].id ? "ctInspectorMark" : "",
+    resizeId === META[key].id ? "ctResizeMode" : "",
+  ].filter(Boolean).join(" ");
+
+  const styleFor = (key: keyof typeof META): React.CSSProperties => styleOverrides[META[key].id] || {};
+
+  const setStyleProp = (prop: keyof EditorStyle, value: string) => {
+    setStyleOverrides((old) => ({
+      ...old,
+      [selected.id]: { ...(old[selected.id] || {}), [prop]: value || undefined },
+    }));
   };
 
   const resetSelected = () => {
-    setOverrides((prev) => {
-      const next = { ...prev };
-      delete next[selectedId];
-      return next;
-    });
-    setTextOverrides((prev) => {
-      const next = { ...prev };
-      delete next[selectedId];
-      return next;
-    });
-    setResizeMode(false);
+    setCssParts((old) => ({ ...old, [selected.cssSection]: CSS_SECTIONS[selected.cssSection] }));
+    setStyleOverrides((old) => { const next = { ...old }; delete next[selected.id]; return next; });
+    textEditor.reset(selected.id);
+    setResizeId(null);
   };
 
   const copySelected = async () => {
-    const code = cssSnippet(selected, overrides[selectedId], textOverrides[selectedId]);
-    await navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    const inlineStyle = styleOverrides[selected.id] || {};
+    const snippet = [
+      `Collectium inspector snippet`,
+      `Fil: app/test/visning/page.tsx`,
+      `Valgt: ${selected.title}`,
+      `Nivå: ${selected.level}`,
+      `Selector: ${selected.selector}`,
+      `Feature: ${selected.feature}`,
+      `API: ${selected.api}`,
+      `View: ${selected.view}`,
+      `Felt/link: ${selected.href}`,
+      `Beskrivelse: ${selected.title}`,
+      `Inline override: ${JSON.stringify(inlineStyle, null, 2)}`,
+      `CSS-seksjon: ${selected.cssSection}`,
+      cssParts[selected.cssSection],
+    ].join("\n");
+    try { await navigator.clipboard.writeText(snippet); } catch {}
   };
 
-  const helper = (id: string, className = "", extra?: CSSProperties) => ({
-    className: `${className} ${selectedId === id ? "ctInspectorMark" : ""}`,
-    style: { ...makeStyle(overrides[id]), ...extra },
-    onContextMenu: (event: React.MouseEvent) => {
-      event.preventDefault();
-      inspect(id);
-    },
-    onClick: (event: React.MouseEvent) => {
-      if ((event.altKey || event.metaKey) && metaMap[id]) inspect(id);
-    },
-    "data-edit-id": id,
-  });
+  const updateSelectedCss = (value: string) => {
+    setCssParts((old) => ({ ...old, [selected.cssSection]: value }));
+  };
 
-  const currentCode = useMemo(() => cssSnippet(selected, overrides[selectedId], textOverrides[selectedId]), [selected, overrides, selectedId, textOverrides]);
+  const resetSelectedCss = resetSelected;
 
-  const preview = (
-    <div data-skin={skin} {...helper("page", "ctPage")}>
-      <style dangerouslySetInnerHTML={{ __html: baseCss }} />
-      <div className="ctWorkspace">
-        <TopBar skin={skin} setSkin={setSkin} split={split} setSplit={setSplit} />
+  const page = (
+    <div className="ctLivePage" data-skin={skin} onClick={() => setContext(null)} onContextMenu={(e) => inspect(e, "page")}>
+      <style>{css}</style>
+      <div className="ctPreviewInner">
+        <TopHeader skin={skin} setSkin={setSkin} split={split} setSplit={setSplit} selected={selected} inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} textEditor={textEditor} />
+        <FilterHeader inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} />
+        <TimelinePanel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} />
 
-        <section {...helper("filter.master", "ctFilterRail")}>
-          <FilterCard title="Masterfilter" labels={["Land", "Kilde", "Objektgruppe", "Marked"]} values={["Norge", "Norske sedler", "Banknote", "Alle"]} />
-          <FilterCard title="Samlerfilter" labels={["Hjerte", "Stjerne", "Min samling", "Deling"]} values={["Alle", "Alle", "Alle", "12t"]} />
-          <FilterCard title="Forhandlerfilter" labels={["Auksjon", "Nettbutikk", "Innlevering", "Fee"]} values={["Alle", "Alle", "Under kontroll", "Standard"]} />
-          <FilterCard title="Objektfilter" labels={["Valør", "År", "Litra", "Utgave"]} values={["10 kroner", "1979", "BH", "5. utgave"]} />
-        </section>
-
-        <section {...helper("timeline", "ctTimeline ctPanel ctSignature")}>
-          <div className="ctTimelineScale">{[1810, 1840, 1870, 1900, 1930, 1960, 1990, 2020, 2024].map((y) => <span key={y}>{y}</span>)}</div>
-          {periodRows.map((row) => (
-            <div className="ctLane" key={row.label}>
-              <strong>{row.label}</strong>
-              <div className="ctLaneTrack">
-                {row.bars.map((bar) => (
-                  <span key={bar.label} className="ctPeriodBar" style={{ left: `${bar.left}%`, width: `${bar.width}%` }}>{bar.label}</span>
-                ))}
-              </div>
-            </div>
+        <nav className="ctObjectTabs" onContextMenu={(e) => inspect(e, "objectTabs")}>
+          {(["visningskort", "objekt", "relasjon", "brytere", "api", "view", "felt", "bokser"] as MainTab[]).map((tab) => (
+            <button key={tab} className={mainTab === tab ? "active" : ""} onClick={() => setMainTab(tab)}>{tab}</button>
           ))}
-        </section>
-
-        <nav className="ctTabs">
-          {tabs.map((tab) => <button key={tab.key} className={`ctTab ${mainTab === tab.key ? "ctTabActive" : ""}`} onClick={() => setMainTab(tab.key)}>{tab.label}</button>)}
         </nav>
 
-        {mainTab === "visningskort" && <DisplayCards helper={helper} />}
-        {mainTab === "objekt" && <ObjectPresentation helper={helper} objectTab={objectTab} setObjectTab={setObjectTab} textOverrides={textOverrides} />}
-        {mainTab === "relasjon" && <RelationPresentation helper={helper} />}
-        {mainTab === "brytere" && <SystemList title="Brytere / feature_keys" rows={metaList.filter((m) => m.featureKey).map((m) => [m.label, m.featureKey || "", m.api || ""])} />}
-        {mainTab === "api" && <SystemList title="API-ruter" rows={metaList.filter((m) => m.api).map((m) => [m.api || "", m.label, m.featureKey || ""])} />}
-        {mainTab === "view" && <SystemList title="Views" rows={metaList.filter((m) => m.view).map((m) => [m.view || "", m.label, m.field || ""])} />}
-        {mainTab === "felt" && <SystemList title="Felt" rows={metaList.filter((m) => m.level === "felt" || m.field).map((m) => [m.field || m.label, m.selector, m.view || ""])} />}
-        {mainTab === "bokser" && <SystemList title="Bokser" rows={metaList.filter((m) => m.level === "boks" || m.level === "side").map((m) => [m.label, m.selector, m.description])} />}
+        {mainTab === "visningskort" && <Visningskort inspect={inspect} selectedClass={selectedClass} getText={textEditor.get} styleFor={styleFor} />}
+        {mainTab === "objekt" && <ObjectPresentation inspect={inspect} selectedClass={selectedClass} segment={segment} setSegment={setSegment} getText={textEditor.get} styleFor={styleFor} />}
+        {mainTab === "relasjon" && <RelationPresentation inspect={inspect} selectedClass={selectedClass} getText={textEditor.get} styleFor={styleFor} />}
+        {mainTab === "brytere" && <Matrix title="Brytere / feature keys" rows={API_ROWS.map(r => [r[0], r[1], r[2], r[3]])} inspect={inspect} />}
+        {mainTab === "api" && <Matrix title="API-ruter" rows={API_ROWS.map(r => [r[0], r[2], r[1], r[3]])} inspect={inspect} />}
+        {mainTab === "view" && <Matrix title="Views / kilde" rows={API_ROWS.map(r => [r[0], r[3], r[1], r[2]])} inspect={inspect} />}
+        {mainTab === "felt" && <Matrix title="Feltstruktur" rows={fieldRows()} inspect={inspect} />}
+        {mainTab === "bokser" && <Matrix title="Bokser / CSS-nivå" rows={boxRows()} inspect={inspect} />}
       </div>
+      {context && <ContextMenu x={context.x} y={context.y} selected={selected} onEdit={() => setSplit(true)} onResize={() => setResizeId(selected.id)} onText={() => setSplit(true)} />}
+      {!split && <FloatingEditorButton onClick={() => setSplit(true)} />}
     </div>
   );
 
-  return split ? (
-    <div className="ctSplit" style={{ display: "flex", minHeight: "100vh", width: "100%" }}>
-      <CodePanel
-        selected={selected}
-        selectedId={selectedId}
-        overrides={overrides[selectedId] || {}}
-        textValue={textOverrides[selectedId] ?? selected.defaultText ?? ""}
-        setTextValue={(value: string) => setTextOverrides((prev) => ({ ...prev, [selectedId]: value }))}
-        editStyle={editStyle}
-        resetSelected={resetSelected}
-        copySelected={copySelected}
-        copied={copied}
-        currentCode={currentCode}
-        resizeMode={resizeMode}
-        setResizeMode={setResizeMode}
-        close={() => setSplit(false)}
-      />
-      <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-        {preview}
-        {resizeMode && <ResizeOverlay />}
+  if (split) {
+    return (
+      <div className="ctLivePage ctEditorShell" data-skin={skin}>
+        <style>{css}</style>
+        <aside className="ctCodePanel">
+          <h2>Live CSS-editor</h2>
+          <p><strong>Valgt:</strong> {selected.title}</p>
+          <p><strong>Fil:</strong> app/test/visning/page.tsx</p>
+          <p><strong>Selector:</strong> <code>{selected.selector}</code></p>
+          <p><strong>Nivå:</strong> {selected.level}</p>
+          <div style={{ display: "grid", gap: 8, margin: "12px 0" }}>
+            <button className="ctActionButton gold" onClick={() => setSplit(false)}>Lukk full screen split</button>
+            <button className="ctActionButton" onClick={resetSelectedCss}>Reset valgt felt/boks/tekst til original</button>
+            <button className="ctActionButton" onClick={() => setResizeId(selected.id)}>Endre størrelse på valgt felt</button>
+            <button className="ctActionButton" onClick={copySelected}>Kopier kode/snippet for valgt element</button>
+          </div>
+          <h3>Direkte felt-/boksredigering</h3>
+          <div className="ctEditorGrid">
+            {(["width","height","padding","margin","background","color","border","borderRadius","fontSize","transform"] as (keyof EditorStyle)[]).map((prop) => (
+              <label key={prop}>{prop}<input value={(styleOverrides[selected.id]?.[prop] as string) || ""} onChange={(event: React.ChangeEvent<HTMLInputElement>) => setStyleProp(prop, event.target.value)} placeholder="CSS-verdi" /></label>
+            ))}
+          </div>
+          <h3>CSS-trestruktur</h3>
+          {Object.keys(CSS_SECTIONS).map((key) => (
+            <button key={key} className="ctActionButton" onClick={() => setSelected({ ...selected, cssSection: key as keyof typeof CSS_SECTIONS })}>{key}</button>
+          ))}
+          <h3>Original kode</h3>
+          <textarea readOnly value={CSS_SECTIONS[selected.cssSection]} />
+          <h3>Editert kode</h3>
+          <textarea value={cssParts[selected.cssSection]} onChange={(event) => updateSelectedCss(event.target.value)} />
+          <h3>Tekst for valgt felt</h3>
+          <input style={{ width: "100%", height: 38 }} value={textEditor.text[selected.id] ?? selected.defaultText ?? ""} placeholder="Skriv ny tekst for valgt felt..." onChange={(event: React.ChangeEvent<HTMLInputElement>) => textEditor.set(selected.id, event.target.value)} />
+          <h3>Kilde / bryter / API / view</h3>
+          <p><strong>Feature:</strong> {selected.feature}</p>
+          <p><strong>API:</strong> {selected.api}</p>
+          <p><strong>View:</strong> {selected.view}</p>
+          <p><strong>Link:</strong> {selected.href}</p>
+        </aside>
+        <section className="ctPreviewSplit">{page}</section>
       </div>
-    </div>
-  ) : preview;
+    );
+  }
+
+  return page;
 }
 
-function TopBar({ skin, setSkin, split, setSplit }: { skin: Skin; setSkin: (skin: Skin) => void; split: boolean; setSplit: (value: boolean) => void }) {
+function TopHeader({ skin, setSkin, split, setSplit, selected, inspect, selectedClass, styleFor, textEditor }: { skin: Skin; setSkin: (s: Skin) => void; split: boolean; setSplit: (v: boolean) => void; selected: InspectMeta; inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties; textEditor: ReturnType<typeof useTextOverrides> }) {
   return (
-    <header style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 18 }}>
-      <div>
-        <p style={{ margin: 0, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--ct-muted)", fontSize: 12 }}>Collectium UI/UX 8.6 · Live editor</p>
-        <h1 style={{ margin: "4px 0 0", fontSize: 34, fontFamily: "var(--ct-font-sans)" }}>Test / Visning</h1>
+    <header style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "flex-start" }}>
+      <div className={`ctTopTitle ${selectedClass("topTitle")}`} style={styleFor("topTitle")} onContextMenu={(e) => inspect(e, "topTitle")}>
+        <p>Periodefilter · Masterfilter · UI/UX 8.6</p>
+        <h1>{textEditor.get("topTitle", "Test / Visning live editor")}</h1>
+        <span>Høyreklikk felt, boks, bryter eller tekst for CSS, størrelse, lenke, API, view og redigering.</span>
       </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-        {(["collectium", "enkel", "museum", "finans"] as Skin[]).map((s) => <button key={s} className={`ctTab ${skin === s ? "ctTabActive" : ""}`} onClick={() => setSkin(s)}>{s}</button>)}
-        <button className="ctTab ctTabActive" onClick={() => setSplit(!split)}>{split ? "Lukk split" : "Global CSS / split"}</button>
+      <div style={{ minWidth: 420, display: "grid", gap: 10 }}>
+        <div className="ctAreaRow" style={{ justifyContent: "flex-end", margin: 0, border: 0 }}>
+          {(["collectium", "enkel", "museum", "finans"] as Skin[]).map((s) => <button key={s} data-editor="skin-button" className={`ctChip ${selectedClass("skinButton")}`} style={{ ...styleFor("skinButton"), background: skin === s ? "var(--accent)" : styleFor("skinButton").background, color: skin === s ? "#fff" : styleFor("skinButton").color }} onContextMenu={(event) => inspect(event, "skinButton")} onClick={() => setSkin(s)}>{s}</button>)}
+        </div>
+        <button className="ctChip" onClick={() => setSplit(!split)}>Global CSS / full screen split</button>
+        <small>Valgt: {selected.title} · {selected.selector}</small>
       </div>
     </header>
   );
 }
 
-function FilterCard({ title, labels, values }: { title: string; labels: string[]; values: string[] }) {
+function FilterHeader({ inspect, selectedClass, styleFor }: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) {
   return (
-    <div className="ctFilterCard">
-      <strong style={{ display: "block", marginBottom: 8, letterSpacing: ".12em", textTransform: "uppercase", fontSize: 12 }}>{title}</strong>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        {labels.map((label, index) => (
-          <label key={label} style={{ fontSize: 11, color: "var(--ct-muted)", display: "grid", gap: 4 }}>
-            {label}
-            <select className="ctSelect" defaultValue={values[index]}>
-              <option>{values[index]}</option>
-              <option>Alle</option>
-              <option>Norge</option>
-              <option>Oscar II</option>
-              <option>Olav V</option>
-            </select>
-          </label>
-        ))}
+    <section className={selectedClass("filters")} onContextMenu={(e) => inspect(e, "filters")}>
+      <div className="ctControlBar">
+        <div className="ctFilterBox"><label>Master filter</label><select className={selectedClass("filterSelect")} style={styleFor("filterSelect")} onContextMenu={(e) => inspect(e, "filterSelect")}><option>{FILTERS.land[0]} · {FILTERS.source[0]} · {FILTERS.objectGroup[0]}</option>{FILTERS.land.map(v => <option key={v}>{v}</option>)}</select></div>
+        <div className="ctFilterBox"><label>Samler filter</label><select className={selectedClass("filterSelect")} style={styleFor("filterSelect")} onContextMenu={(e) => inspect(e, "filterSelect")}><option>Hjerte · Stjerne · Min samling · Deling</option><option>Ønskeliste</option><option>Favoritter</option></select></div>
+        <div className="ctFilterBox"><label>Forhandler filter</label><select className={selectedClass("filterSelect")} style={styleFor("filterSelect")} onContextMenu={(e) => inspect(e, "filterSelect")}><option>Auksjon · Nettbutikk · Innlevering · Fee</option><option>Aktive auksjoner</option><option>Nettbutikk salg</option></select></div>
+        <div className="ctFilterBox"><label>Objektfilter</label><select className={selectedClass("filterSelect")} style={styleFor("filterSelect")} onContextMenu={(e) => inspect(e, "filterSelect")}><option>Valør · År · Litra · Utgave · Variant</option><option>100 kroner</option><option>Oscar II</option></select></div>
       </div>
-    </div>
+      <div className="ctAreaRow"><strong style={{ marginRight: 8 }}>Område</strong>{["Norge", "Sedler", "Norske sedler", "Standardutgave", "1877", "Oscar II"].map(v => <button className="ctChip" key={v}>{v}</button>)}</div>
+    </section>
   );
 }
 
-function NoteImage({ wide = false }: { wide?: boolean }) {
+function TimelinePanel({ inspect, selectedClass, styleFor }: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) {
+  const years = [1810, 1830, 1850, 1870, 1890, 1910, 1930, 1950, 1970, 1990, 2010, 2024];
   return (
-    <div className="ctNote" style={{ minHeight: wide ? 170 : undefined }}>
-      <span className="ctNoteNumber">100</span>
-      <span className="ctNoteSeal" />
-      <span style={{ position: "absolute", left: 16, bottom: 16, letterSpacing: ".18em", fontSize: 11, fontWeight: 700 }}>NORGES BANK</span>
-    </div>
+    <section className={`ctTimelinePanel ${selectedClass("timeline")}`} style={styleFor("timeline")} onContextMenu={(e) => inspect(e, "timeline")}>
+      <div className="ctTimelineHeader"><div><p className="ctKicker">Periodefilter / tidslinje</p><h2 style={{ margin: "8px 0 0" }}>Konger, perioder og objektkontekst</h2></div><div className="ctAreaRow" style={{ border: 0, margin: 0 }}><button className="ctChip">Objektpresentasjon</button><button className="ctChip">Relasjonpresentasjon</button><button className="ctChip">Periode 8.6</button><button className="ctChip">Index / Finans</button></div></div>
+      <div className="ctTimelineGrid">
+        <div />
+        <div className="ctTimelineYears">{years.map(y => <span key={y}>{y}</span>)}</div>
+        <div className="ctLaneLabel">Konge / regent</div><div className="ctLane"><div className="ctPeriodBar" style={{ left: "25%", width: "24%" }}>Oscar II 1872-1905</div><div className="ctPeriodBar" style={{ left: "50%", width: "24%" }}>Haakon VII 1905-1957</div><div className="ctPeriodBar" style={{ left: "74%", width: "19%" }}>Olav V 1957-1991</div></div>
+        <div className="ctLaneLabel">Historisk periode</div><div className="ctLane"><div className="ctPeriodBar green" style={{ left: "0%", width: "50%" }}>Unionstid</div><div className="ctPeriodBar green" style={{ left: "50%", width: "50%" }}>Selvstendig Norge</div></div>
+        <div className="ctLaneLabel">Finans / økonomi</div><div className="ctLane"><div className="ctPeriodBar blue" style={{ left: "26%", width: "28%" }}>Bank- og pengeutvikling</div><div className="ctPeriodBar blue" style={{ left: "70%", width: "16%" }}>Oljealder</div></div>
+        <div className="ctLaneLabel">Signatur / person</div><div className="ctLane"><div className="ctPeriodBar purple" style={{ left: "29%", width: "20%" }}>Winge / Getz</div><div className="ctPeriodBar purple" style={{ left: "50%", width: "30%" }}>Hambro / Lie</div></div>
+      </div>
+    </section>
   );
 }
 
-function MiniStatus() {
-  return <div style={{ display: "grid", gap: 7 }}><button className="ctAction">♥ Hjerte 0</button><button className="ctAction">★ Stjerne 0</button><button className="ctAction">⚑ Auksjon 3</button><button className="ctAction">◆ Nettbutikk 1</button><button className="ctAction">Ikke estimert</button></div>;
-}
-
-function DisplayCards({ helper }: { helper: (id: string, className?: string, extra?: CSSProperties) => any }) {
+function Visningskort({ inspect, selectedClass, getText, styleFor }: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; getText: (k: string, f: string) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) {
   return (
-    <section style={{ display: "grid", gap: 20 }}>
+    <section onContextMenu={(e) => inspect(e, "card")}>
       <h2>Visningskort</h2>
+      <h3>Horisontal · kompakt · to i bredden</h3>
       <div className="ctCardGrid">
-        <article {...helper("card.horizontal", "ctCard ctCardHorizontal ctPanel ctSignature")}><NoteImage /><CardText /><MiniStatus /></article>
-        <article {...helper("card.horizontal", "ctCard ctCardHorizontal ctPanel ctSignature")}><NoteImage /><CardText /><MiniStatus /></article>
+        {[1, 2].map((n) => <ObjectCard key={n} type="horizontal" selectedClass={selectedClass("card")} getText={getText} inspect={inspect} styleFor={styleFor} selectedClassFn={selectedClass} />)}
       </div>
       <h3>Liste · kompakt</h3>
-      <div className="ctCardGrid"><article {...helper("card.list", "ctCard ctCardList ctPanel ctSignature")}><NoteImage wide /><CardText /><MiniStatus /></article><article {...helper("card.list", "ctCard ctCardList ctPanel ctSignature")}><NoteImage wide /><CardText /><MiniStatus /></article></div>
+      <ObjectCard type="list" selectedClass={selectedClass("card")} getText={getText} inspect={inspect} styleFor={styleFor} selectedClassFn={selectedClass} />
       <h3>Museum · to i bredden</h3>
-      <div className="ctCardGrid"><article {...helper("card.museum", "ctCard ctCardMuseum ctPanel ctSignature")}><NoteImage wide /><CardText /></article><article {...helper("card.museum", "ctCard ctCardMuseum ctPanel ctSignature")}><NoteImage wide /><CardText /></article></div>
+      <div className="ctMuseumGrid"><ObjectCard type="museum" selectedClass={selectedClass("card")} getText={getText} inspect={inspect} styleFor={styleFor} selectedClassFn={selectedClass} /><ObjectCard type="museum" selectedClass={selectedClass("card")} getText={getText} inspect={inspect} styleFor={styleFor} selectedClassFn={selectedClass} /></div>
       <h3>Stående · to i bredden</h3>
-      <div className="ctCardGrid"><article {...helper("card.standing", "ctCard ctCardStanding ctPanel ctSignature")}><NoteImage wide /><CardText /><MiniStatus /></article><article {...helper("card.standing", "ctCard ctCardStanding ctPanel ctSignature")}><NoteImage wide /><CardText /><MiniStatus /></article></div>
+      <div className="ctStandingGrid"><ObjectCard type="standing" selectedClass={selectedClass("card")} getText={getText} inspect={inspect} styleFor={styleFor} selectedClassFn={selectedClass} /><ObjectCard type="standing" selectedClass={selectedClass("card")} getText={getText} inspect={inspect} styleFor={styleFor} selectedClassFn={selectedClass} /></div>
     </section>
   );
 }
 
-function CardText() {
-  return <div><h3 style={{ margin: "0 0 8px", fontSize: 24 }}>10 kroner · 1979 · BH</h3><div className="ctField"><span>Valør</span><strong>10 kroner</strong></div><div className="ctField"><span>Utgave</span><strong>1966-1983</strong></div><div className="ctField"><span>Variant</span><strong>Standard</strong></div><p style={{ color: "var(--ct-muted)", fontSize: 13 }}>norske_sedler · banknote · NS 1005</p></div>;
-}
+function Note() { return <div className="ctNote"><strong>100</strong><i /><em>NORGES BANK</em></div>; }
 
-function ObjectPresentation({ helper, objectTab, setObjectTab, textOverrides }: { helper: any; objectTab: ObjectTab; setObjectTab: (t: ObjectTab) => void; textOverrides: Record<string, string> }) {
+function ObjectCard({ type, selectedClass, selectedClassFn, getText, inspect, styleFor }: { type: "horizontal" | "list" | "museum" | "standing"; selectedClass: string; selectedClassFn: (key: keyof typeof META) => string; getText: (k: string, f: string) => string; inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; styleFor: (key: keyof typeof META) => React.CSSProperties }) {
+  const className = type === "horizontal" ? "ctHorizontalCard" : type === "list" ? "ctListCard" : "";
   return (
-    <section>
-      <article {...helper("object.hero", "ctObjectHero ctPanel ctSignature")}>
-        <NoteImage wide />
-        <div>
-          <span className="ctTab ctTabActive">Norge · Seddel · Norske sedler · Standardutgave</span>
-          <h2 {...helper("object.title", "ctObjectTitle")}>{textOverrides["object.title"] || "10 kroner · 1979 · 1 005 · BH"}</h2>
-          <p style={{ fontSize: 17, color: "var(--ct-muted)", maxWidth: 720 }}>Objektpresentasjon for hovedobjekt fra hovedkatalogen. Ikke relasjonsside. Relasjoner vises som klikkbare noder og egne faner.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 1, border: "1px solid var(--ct-line-soft)", borderRadius: 12, overflow: "hidden" }}>
-            <div style={{ padding: 14 }}><small>Valør</small><strong style={{ display: "block" }}>10 kroner</strong></div><div style={{ padding: 14 }}><small>Regent</small><strong style={{ display: "block" }}>Olav V</strong></div><div style={{ padding: 14 }}><small>Utgave</small><strong style={{ display: "block" }}>1966-1983</strong></div>
-          </div>
+    <article className={`ctObjectCard ${className} ${selectedClass}`} style={styleFor("card")} onContextMenu={(e) => inspect(e, "card")}>
+      <Note />
+      <div>
+        <h2 className={`ctObjectTitle ${selectedClassFn("cardTitle")}`} style={styleFor("cardTitle")} onContextMenu={(e) => inspect(e, "cardTitle")}>{getText("cardTitle", "100 kroner · 1. utgave · 1877 · Seddelpapir")}</h2>
+        <div className="ctFieldGrid">
+          <MiniField label="Valør" value="100 kroner" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Utgave" value="1877–1902" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Variant" value="Ikke registrert" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Sjeldenhet" value="RRR" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} />
         </div>
-      </article>
-      <nav className="ctTabs">{objectTabs.map((tab) => <button key={tab.key} className={`ctTab ${objectTab === tab.key ? "ctTabActive" : ""}`} onClick={() => setObjectTab(tab.key)}>{tab.label}</button>)}</nav>
-      <div className="ctObjectGrid">
-        <main>
-          {objectTab === "samler" && <div className="ctBoxGrid"><InfoBox helper={helper} id="object.box.identity" title="Identitet" rows={[ ["Katalognummer", "NS 1005"], ["Collectium tittel", "10 kroner · 1979"], ["Valør", "10 kroner"], ["År", "1979"], ["Litra", "BH"] ]} /><InfoBox title="Utgave" rows={[ ["Valørutgave", "5. utgave"], ["Variant", "Standardutgave"], ["Signatur", "Getz Wold / Sagård"], ["Regent", "Olav V"] ]} /><InfoBox title="Sjeldenhet" rows={[ ["Katalogvurdering", "Vanlig"], ["Mengde", "4 939 000"], ["Status", "Basis klar"] ]} /></div>}
-          {objectTab === "historie" && <div className="ctBoxGrid"><InfoBox title="Periode" rows={[ ["Regentperiode", "1957-1991"], ["Utgaveperiode", "1966-1983"], ["Hovedperiode", "Selvstendig Norge"] ]} /><InfoBox title="Relasjoner" rows={[ ["Regent", "Olav V"], ["År", "1979"], ["Signatur", "Getz Wold / Sagård"] ]} /><InfoBox title="Kontekst" rows={[ ["Finanshistorie", "Oljealder"], ["Objektperiode", "5. utgave"] ]} /></div>}
-          {objectTab === "finans" && <div className="ctBoxGrid"><InfoBox title="Marked" rows={[ ["Markedsverdi", "Mangler"], ["Trend", "Ikke beregnet"], ["Auksjon", "Ikke registrert"] ]} /><InfoBox title="Prisgrunnlag" rows={[ ["Observasjoner", "Mangler"], ["Grade values", "Mangler"] ]} /><InfoBox title="Index" rows={[ ["Kjøpekraft", "Henter"], ["Rente/metall", "Henter"] ]} /></div>}
-          {objectTab === "samling" && <div className="ctBoxGrid"><InfoBox title="Kjøp" rows={[ ["Dato", "Ikke registrert"], ["Sted", "Ikke registrert"], ["Pris", "Ikke registrert"] ]} /><InfoBox title="Kvalitet" rows={[ ["Min kvalitet", "Ikke vurdert"], ["Synlighet", "Privat"] ]} /><InfoBox title="Egne spesifikasjoner" rows={[ ["Papirfølelse", "Henter"], ["Proveniens", "Privat/samtykke"] ]} /></div>}
-        </main>
-        <aside className="ctSideActions"><button {...helper("action.collection", "ctAction ctTabActive")}>＋ Legg i samling</button><button className="ctAction">♡ Hjerte</button><button className="ctAction">★ Stjerne</button><button className="ctAction">↗ Del objekt</button></aside>
+        <p style={{ color: "var(--muted)", fontSize: 12 }}>norske_sedler · banknote · NS 1459</p>
+        <div className="ctAreaRow" style={{ border: 0, padding: 0 }}><button className="ctChip">Åpne objekt</button><button className="ctChip">Se relasjon</button><button className="ctChip">Legg i samling</button></div>
       </div>
+      <div><MiniField label="Hjerte" value="0" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Stjerne" value="0" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Auksjon" value="3" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Nettbutikk" value="1" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /><MiniField label="Estimert" value="Ikke vurdert" inspect={inspect} styleFor={styleFor} selectedClass={selectedClassFn("miniField")} /></div>
+    </article>
+  );
+}
+
+function MiniField({ label, value, inspect, styleFor, selectedClass }: { label: string; value: string; inspect?: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; styleFor?: (key: keyof typeof META) => React.CSSProperties; selectedClass?: string }) { return <div className={`ctMiniField ${selectedClass || ""}`} style={styleFor ? styleFor("miniField") : undefined} onContextMenu={inspect ? (e) => inspect(e, "miniField") : undefined}><span>{label}</span><strong>{value}</strong></div>; }
+
+function ObjectPresentation({ inspect, selectedClass, segment, setSegment, getText, styleFor }: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; segment: Segment; setSegment: (s: Segment) => void; getText: (k: string, f: string) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) {
+  return (
+    <section className="ctObjectPresentation">
+      <main>
+        <article className={`ctHero ${selectedClass("objectHero")}`} style={styleFor("objectHero")} onContextMenu={(e) => inspect(e, "objectHero")}>
+          <div className="ctHeroNote"><strong>100</strong></div>
+          <div><span className="ctKicker">Norge · seddel · Norske sedler · standardutgave</span><h2 className={selectedClass("heroTitle")} style={styleFor("heroTitle")} onContextMenu={(e) => inspect(e, "heroTitle")}>{getText("heroTitle", "100 kroner · 1. utgave · 1877 · Seddelpapir")}</h2><p className={selectedClass("heroLead")} style={styleFor("heroLead")} onContextMenu={(e) => inspect(e, "heroLead")}>{getText("heroLead", "Tidlig hovedvalør fra den norske seddelhistorien — utgitt under Oscar II i unionstiden. Sjelden i alle kvaliteter, ekstremt sjelden over 45 XF.")}</p><div className="ctStats"><div><span>Markedsverdi</span><strong>15 000 kr</strong></div><div><span>Trend 12 mnd</span><strong>↗ 4,2 %</strong></div><div><span>Sjeldenhet</span><strong>RRR</strong></div><div><span>Konge</span><strong>Oscar II</strong></div></div></div>
+        </article>
+        <nav className={`ctObjectTabs ${selectedClass("objectTabs")}`} onContextMenu={(e) => inspect(e, "objectTabs")}>
+          {(["samler", "historie", "finans", "minsamling"] as Segment[]).map((s) => <button key={s} className={segment === s ? "active" : ""} onClick={() => setSegment(s)}>{s === "minsamling" ? "I min samling" : s}</button>)}
+        </nav>
+        {segment === "samler" && <SamlerPanels inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} />}
+        {segment === "historie" && <HistoriePanels inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} />}
+        {segment === "finans" && <FinansPanels inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} />}
+        {segment === "minsamling" && <MinSamlingPanels inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} />}
+      </main>
+      <aside className={`ctSidePanel ${selectedClass("sideActions")}`} style={styleFor("sideActions")} onContextMenu={(e) => inspect(e, "sideActions")}><SideActions inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} getText={getText} /></aside>
     </section>
   );
 }
 
-function InfoBox({ title, rows, helper, id }: { title: string; rows: string[][]; helper?: any; id?: string }) {
-  const props = helper && id ? helper(id, "ctInfoBox ctPanel ctSignature identity") : { className: "ctInfoBox ctPanel ctSignature" };
-  return <section {...props}><h3>{title}</h3>{rows.map(([k, v]) => <div key={k} className="ctField" data-field={k === "Valør" ? "denomination_raw_no" : undefined}><span>{k}</span><strong>{v}</strong></div>)}</section>;
+function SamlerPanels({inspect, selectedClass, styleFor}: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) { return <div className="ctPanelGrid"><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Identitet" rows={[['Katalognummer','NS 1 459'],['Valør','100 kroner'],['Objektår','1877–1905'],['Land','Norge']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Utgave" rows={[['Valørutgave','100 kroner'],['Litra','Ikke registrert'],['Variant','Ikke registrert'],['Utgivelsesår','1877–1905']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Raritet" rows={[['Estimert sjeldenhet','Sjelden'],['Katalogvurdering','Sjelden'],['Signaturmengde','Winge/Getz']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Bilder" wide rows={[['Forside','Henter'],['Bakside','Henter'],['Gjennomlysning FS','Henter'],['Variant bakside','Henter']]} /></div>; }
+function HistoriePanels({inspect, selectedClass, styleFor}: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) { return <div className="ctPanelGrid"><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Konge · regent" rows={[['Regent','Oscar II'],['Tidsrom','1872–1905'],['Union','Svensk-norsk']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Signatur · motiv" rows={[['Signatur','Winge / Getz'],['Motiv','Riksvåpen'],['Kilde','ct_v_catalog_relations']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Historisk kontekst" wide rows={[['Historiske hendelser','Industrialisering, jernbanevekst'],['Statsminister','Frederik Stang'],['Relasjon','/relasjon/regent/oscar-ii']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Relasjoner" wide rows={[['Konge','Oscar II'],['Signatur','Winge/Getz'],['Utgave','1. utgave'],['Kilde','Norske sedler']]} /></div>; }
+function FinansPanels({inspect, selectedClass, styleFor}: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) { return <div className="ctPanelGrid"><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Markedsverdi per kvalitet" rows={[['Verdi 45 XF','15 000 kr'],['Trend 12 mnd','↗ 4,2 %'],['Likviditet','Moderat']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Marked og salg" rows={[['Auksjoner i år','3'],['Nettbutikk','Ikke listet'],['Sist solgt','19 200 kr · sept 2025']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Publiseringsår" rows={[['Publisert','1877'],['Relaterte sedler','4 valører'],['Kjøpekraft i dag','~ 7 850 kr']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Renter · metall" rows={[['Utlånsrente','Henter'],['Gull USD/oz','$20,67'],['SEK-DKK','Henter']]} /></div>; }
+function MinSamlingPanels({inspect, selectedClass, styleFor}: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) { return <div className="ctPanelGrid"><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Kjøp" rows={[['Dato','Ikke registrert'],['Sted','Ikke registrert'],['Pris','Ikke registrert']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Kvalitet" rows={[['Min kvalitet','Ikke vurdert'],['Gradering','Ikke vurdert'],['Synlighet','Privat']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Notater" rows={[['Egne notater','Skriv ditt notat ...'],['Historikk','Åpne']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Filer" rows={[['Kvittering','Ingen'],['Egne bilder','0'],['Forside scan','Ingen']]} /><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Egne spesifikasjoner" wide rows={[['Papirfølelse','Henter fra ct_user_collection_object_specs'],['Hjørner','Henter'],['Farge','Henter'],['Vannmerke','Henter'],['Proveniens','Henter'],['Egen tagg','Henter']]} /></div>; }
+
+function Panel({ title, rows, wide, inspect, selectedClass, styleFor }: { title: string; rows: [string, string][]; wide?: boolean; inspect?: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass?: (key: keyof typeof META) => string; styleFor?: (key: keyof typeof META) => React.CSSProperties }) { return <section className={`ctPanel ${wide ? 'wide' : ''} ${selectedClass ? selectedClass("panel") : ""}`} style={styleFor ? styleFor("panel") : undefined} onContextMenu={inspect ? (e) => inspect(e, "panel") : undefined}><h3>{title}</h3>{rows.map(([a,b]) => <div className={`ctRow ${selectedClass ? selectedClass("panelRow") : ""}`} style={styleFor ? styleFor("panelRow") : undefined} onContextMenu={inspect ? (e) => inspect(e, "panelRow") : undefined} key={a}><span>{a}</span><strong>{b}</strong></div>)}</section>; }
+function SideActions({ inspect, selectedClass, styleFor, getText }: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; styleFor: (key: keyof typeof META) => React.CSSProperties; getText: (k: string, f: string) => string }) { return <><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Aktiv visning" rows={[["Horisontal","aktiv"],["Museum","valg"],["Kompakt","valg"]]} /><section className={`ctPanel ${selectedClass("panel")}`} style={styleFor("panel")} onContextMenu={(e) => inspect(e, "panel")}><h3>Status</h3>{["Hjerte","Stjerne",getText("actionButton", "Legg i samling"),"Del objekt","Sammenlign"].map((v,i) => <button key={v} style={styleFor("actionButton")} onContextMenu={(e) => inspect(e, "actionButton")} className={`ctActionButton ${selectedClass("actionButton")} ${i===2?"gold":""}`}>{v}</button>)}</section><Panel inspect={inspect} selectedClass={selectedClass} styleFor={styleFor} title="Del visning" rows={[["6t","valg"],["12t","aktiv"],["Katalog","NS 1 459"],["Tilgang","12 timer"]]} /></>; }
+
+function RelationPresentation({ inspect, selectedClass, getText, styleFor }: { inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void; selectedClass: (key: keyof typeof META) => string; getText: (k: string, f: string) => string; styleFor: (key: keyof typeof META) => React.CSSProperties }) {
+  return <section className={`ctRelationPage ${selectedClass("relation")}`} style={styleFor("relation")} onContextMenu={(e) => inspect(e, "relation")}><div><div className="ctRelationBadge">O2</div><h2>{getText("relation", "Oscar II")}</h2><p>Regentperiode 1872–1905. Koblet til unionstid, 1. utgave, Winge/Getz, Riksvåpen og norske sedler.</p><div className="ctRelationList"><a className="ctRelationLink" href="/relasjon/regent/oscar-ii">Regentperiode <span>→</span></a><a className="ctRelationLink" href="/relasjon/periode/unionstid">Unionstid <span>→</span></a><a className="ctRelationLink" href="/katalog?regent=oscar-ii">Filtrert katalog <span>→</span></a></div></div><div><h3>Bio / definisjon</h3><div className="ctBioGrid">{['Hva er dette?','Hvorfor er det viktig?','Når eksisterte det?','Hvem var involvert?','Hva betyr det historisk?','Hva betyr det finansielt?'].map(v => <div className="ctBioCard" key={v}><span>{v}</span><strong>Henter fra relation detail view</strong></div>)}</div></div></section>;
 }
 
-function RelationPresentation({ helper }: { helper: any }) {
-  return <section {...helper("relation.hero", "ctRelationHero ctPanel ctSignature")}><h2 style={{ fontSize: 42, marginTop: 0 }}>Relasjon · Olav V</h2><p style={{ color: "var(--ct-muted)", fontSize: 16 }}>Kunnskapsside for relasjonsnode. Viser periode, objekter, videre relasjoner og tidskontekst.</p><div className="ctRelationList"><div className="ctRelationRow"><strong>Regentperiode</strong><span>1957-1991</span></div><div className="ctRelationRow"><strong>Relaterte sedler</strong><span>5. utgave · 1966-1983</span></div><div className="ctRelationRow"><strong>Periodefilter</strong><span>Selvstendig Norge · Oljealder</span></div><div className="ctRelationRow"><strong>Href</strong><span>/relasjon/regent/olav-v</span></div></div></section>;
-}
+function Matrix({ title, rows, inspect }: { title: string; rows: string[][]; inspect: (e: React.MouseEvent<HTMLElement>, key: keyof typeof META) => void }) { return <section className="ctPanel wide ctApiMatrix" onContextMenu={(e) => inspect(e, "apiList")}><h2>{title}</h2>{rows.map((r) => <div className="ctRow" key={r.join('|')} style={{ gridTemplateColumns: "1fr 1.3fr 1.4fr 1.5fr" }}>{r.map(c => <strong key={c} style={{ textAlign: 'left' }}>{c}</strong>)}</div>)}</section>; }
+function fieldRows() { return [['Objektnøkkel','source_key + object_group + object_id','ct_v_object_presentation_resolved','/api/object/presentation'],['Relasjon','relation_type + relation_slug + relation_href','ct_v_object_relations_resolved','/api/object/relations'],['Marked','market_value + trend + grade_values','ct_v_object_market_resolved','/api/object/market'],['Brukerstatus','wishlist + favorite + collection','ct_v_object_user_state_resolved','/api/object/user-state']]; }
+function boxRows() { return [['Global side','.ctLivePage','01 Global / testside','page'],['Filterbokser','.ctFilterBox','03 Layout / filter','boks'],['Tidslinje','.ctTimelinePanel / .ctPeriodBar','04 Tidslinje / periode','boks'],['Visningskort','.ctObjectCard','05 Visningskort','boks'],['Objektpresentasjon','.ctHero / .ctPanel','06 Objektpresentasjon','boks/felt'],['Relasjonsside','.ctRelationPage','07 Relasjonspresentasjon','boks']]; }
 
-function SystemList({ title, rows }: { title: string; rows: string[][] }) {
-  return <section className="ctPanel ctSignature" style={{ padding: 20 }}><h2>{title}</h2><div style={{ display: "grid", gap: 8 }}>{rows.map((row, i) => <div key={i} className="ctRelationRow">{row.map((cell, j) => <span key={j}>{cell}</span>)}</div>)}</div></section>;
-}
-
-function CodePanel({ selected, overrides, textValue, setTextValue, editStyle, resetSelected, copySelected, copied, currentCode, resizeMode, setResizeMode, close }: any) {
-  return (
-    <aside className="ctCodePanel">
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}><strong>Inspector / CSS editor</strong><button onClick={close}>Lukk</button></div>
-      <p style={{ color: "#88b8c8", fontSize: 12 }}>Høyreklikk element i forhåndsvisning for å velge. Feltet markeres som Inspect i Chrome.</p>
-      <h3>{selected.label}</h3>
-      <div style={{ fontSize: 12, lineHeight: 1.65 }}>
-        <div>Level: <b>{selected.level}</b></div><div>File: <b>{selected.file}</b></div><div>Selector: <b>{selected.selector}</b></div><div>Feature: <b>{selected.featureKey || "none"}</b></div><div>API: <b>{selected.api || "none"}</b></div><div>View: <b>{selected.view || "none"}</b></div><div>Field: <b>{selected.field || "none"}</b></div>
-      </div>
-      <h4>Rediger boks/felt/bryter</h4>
-      <EditorInput label="Width" value={overrides.width || ""} onChange={(v: string) => editStyle("width", v)} placeholder="340px / 100%" />
-      <EditorInput label="Height" value={overrides.height || ""} onChange={(v: string) => editStyle("height", v)} placeholder="180px" />
-      <EditorInput label="Padding" value={overrides.padding || ""} onChange={(v: string) => editStyle("padding", v)} placeholder="20px" />
-      <EditorInput label="Margin" value={overrides.margin || ""} onChange={(v: string) => editStyle("margin", v)} placeholder="0 0 12px" />
-      <EditorInput label="Bakgrunn" value={overrides.background || ""} onChange={(v: string) => editStyle("background", v)} placeholder="#1b1b1a / var(--ct-panel)" />
-      <EditorInput label="Tekstfarge" value={overrides.color || ""} onChange={(v: string) => editStyle("color", v)} placeholder="#fff / var(--ct-text)" />
-      <EditorInput label="Border color" value={overrides.borderColor || ""} onChange={(v: string) => editStyle("borderColor", v)} placeholder="var(--ct-accent)" />
-      <EditorInput label="Radius" value={overrides.borderRadius || ""} onChange={(v: string) => editStyle("borderRadius", v)} placeholder="12px" />
-      <EditorInput label="Font size" value={overrides.fontSize || ""} onChange={(v: string) => editStyle("fontSize", v)} placeholder="18px" />
-      <EditorInput label="Transform" value={overrides.transform || ""} onChange={(v: string) => editStyle("transform", v)} placeholder="translateX(10px)" />
-      {selected.level === "tekst" || selected.defaultText ? <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 12 }}>Tekst<textarea value={textValue} onChange={(e) => setTextValue(e.target.value)} rows={3} style={{ background: "#0b1a23", color: "#d8edf2", border: "1px solid #24485a", borderRadius: 8, padding: 8 }} /></label> : null}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "12px 0" }}><button onClick={() => setResizeMode(!resizeMode)}>{resizeMode ? "Lukk resize" : "Endre størrelse"}</button><button onClick={copySelected}>{copied ? "Kopiert" : "Kopier kode"}</button><button onClick={resetSelected}>Reset original</button></div>
-      <h4>CSS-trestruktur</h4>
-      <details open><summary>{selected.cssGroup}</summary><pre style={{ whiteSpace: "pre-wrap", fontSize: 11 }}>{currentCode}</pre></details>
-      {cssGroups.map((group) => <details key={group.key}><summary>{group.label}</summary><ul>{group.selectors.map((s) => <li key={s}>{s}</li>)}</ul></details>)}
-      <h4>Original global CSS</h4><details><summary>Vis originalkilde</summary><pre style={{ whiteSpace: "pre-wrap", fontSize: 10 }}>{baseCss}</pre></details>
-    </aside>
-  );
-}
-
-function EditorInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return <label style={{ display: "grid", gap: 4, marginTop: 8, fontSize: 12 }}>{label}<input value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} style={{ background: "#0b1a23", color: "#d8edf2", border: "1px solid #24485a", borderRadius: 8, padding: 8 }} /></label>;
-}
-
-function ResizeOverlay() {
-  return <div style={{ pointerEvents: "none", position: "fixed", inset: 0, zIndex: 50 }}><span className="ctResizeHandle" style={{ left: 460, top: 20 }} /><span className="ctResizeHandle" style={{ right: 20, top: 20 }} /><span className="ctResizeHandle" style={{ right: 20, bottom: 20 }} /><span className="ctResizeHandle" style={{ left: 460, bottom: 20 }} /></div>;
-}
+function ContextMenu({ x, y, selected, onEdit, onResize, onText }: { x: number; y: number; selected: InspectMeta; onEdit: () => void; onResize: () => void; onText: () => void }) { return <div className="ctContextMenu" style={{ left: x, top: y }} onClick={(e) => e.stopPropagation()}><strong>{selected.title}</strong><small>{selected.selector}</small><button onClick={onEdit}>Åpne CSS i kodefelt</button><button onClick={onResize}>Endre størrelse på valgt felt</button><button onClick={onText}>Endre tekst</button><a className="ctChip" href={selected.href}>Åpne link: {selected.href}</a></div>; }
+function FloatingEditorButton({ onClick }: { onClick: () => void }) { return <button onClick={onClick} style={{ position: 'fixed', right: 20, bottom: 20, zIndex: 999, borderRadius: 999, padding: '12px 16px', background: 'var(--accent)', color: '#fff', border: 0, fontWeight: 900 }}>CSS / split</button>; }
