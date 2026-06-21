@@ -25,7 +25,7 @@
  * - GET /api/object/user-state
  */
 
-import CollectiumObjectPresentationClient from "../../../../components/object/CollectiumObjectPresentationClient";
+import CollectiumObjectPresentationClient from "../../../../../components/object/CollectiumObjectPresentationClient";
 
 type PageProps = {
   params: Promise<{
