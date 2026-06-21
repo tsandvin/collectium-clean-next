@@ -767,6 +767,28 @@ export default function CollectiumObjectPresentationClient({
           {hasAccess ? (
             <>
               <section className={styles.hero}>
+                <div className={styles.heroViewTabs} aria-label="Objektvisning">
+                  <span className={styles.heroViewLabel}>Visning</span>
+                  {[
+                    ["objekt", "Objekt info"],
+                    ["museum", "Museum"],
+                    ["kompakt", "Kompakt"],
+                    ["finans", "Finans"],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      className={`${styles.viewTab} ${viewMode === key ? styles.viewTabActive : ""}`}
+                      type="button"
+                      aria-pressed={viewMode === key}
+                      onClick={() => {
+                        setViewMode(key as Mode);
+                        if (key === "finans") setTab("finans");
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <div className={styles.heroGrid}>
                   <div className={styles.noteImage}>
                     <button
@@ -798,27 +820,33 @@ export default function CollectiumObjectPresentationClient({
                         </div>
                       )}
                     </button>
-                    <div className={styles.imageSourceSwitch}>
-                      <button
-                        type="button"
-                        className={`${styles.pill} ${imageSourceMode === "collectium" ? styles.pillActive : ""}`}
-                        onClick={() => setImageSourceMode("collectium")}
-                      >
-                        Collectium
-                      </button>
-                      <button
-                        type="button"
-                        className={`${styles.pill} ${imageSourceMode === "own" ? styles.pillActive : ""}`}
-                        onClick={() => setImageSourceMode("own")}
-                      >
-                        Egne ({ownImages.length}/10)
-                      </button>
+                    <div className={styles.imageMetaBar}>
+                      <div>
+                        <span className={styles.imageMetaKicker}>Bildefelt</span>
+                        <strong>{selectedObject.noteText}</strong>
+                      </div>
+                      <div className={styles.imageSourceSwitch}>
+                        <button
+                          type="button"
+                          className={`${styles.sourceTab} ${imageSourceMode === "collectium" ? styles.sourceTabActive : ""}`}
+                          onClick={() => setImageSourceMode("collectium")}
+                        >
+                          Collectium
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.sourceTab} ${imageSourceMode === "own" ? styles.sourceTabActive : ""}`}
+                          onClick={() => setImageSourceMode("own")}
+                        >
+                          Egne ({ownImages.length}/10)
+                        </button>
+                      </div>
                     </div>
                     <div className={styles.imageControls}>
                       {imageRoles.map((role) => (
                         <button
                           key={role.key}
-                          className={`${styles.pill} ${activeImageRole === role.key ? styles.pillActive : ""}`}
+                          className={`${styles.imageRoleTab} ${activeImageRole === role.key ? styles.imageRoleTabActive : ""}`}
                           type="button"
                           onClick={() => setActiveImageRole(role.key)}
                         >
@@ -826,8 +854,9 @@ export default function CollectiumObjectPresentationClient({
                         </button>
                       ))}
                     </div>
-                    <div className={styles.fallback}>
-                      {activeImageDescription}
+                    <div className={styles.imageCaption}>
+                      <span>{activeImageMeta.label}</span>
+                      <p>{activeImageDescription}</p>
                     </div>
                   </div>
                   <div className={styles.heroText}>
@@ -926,53 +955,20 @@ export default function CollectiumObjectPresentationClient({
               ) : null}
 
               <div className={styles.tabsRow}>
-                <div className={styles.leftTabs}>
+                <div className={styles.segmentTabs} aria-label="Objektpresentasjon faner">
                   {[
                     ["samler", "I Samler"],
                     ["historie", "II Historie"],
                     ["finans", "III Finans"],
-                  ].map(([key, label]) => (
-                    <button
-                      key={key}
-                      className={`${styles.tab} ${tab === key ? styles.tabActive : ""}`}
-                      type="button"
-                      aria-pressed={tab === key}
-                      onClick={() => setTab(key as Tab)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <div className={styles.rightTabs}>
-                  {[
                     ["samling", "IV I min samling"],
                     ["relasjoner", "V Relasjon objekter"],
                   ].map(([key, label]) => (
                     <button
                       key={key}
-                      className={`${styles.tab} ${tab === key ? styles.tabActive : ""}`}
+                      className={`${styles.segmentTab} ${tab === key ? styles.segmentTabActive : ""}`}
                       type="button"
                       aria-pressed={tab === key}
                       onClick={() => setTab(key as Tab)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                  {[
-                    ["objekt", "Objekt info"],
-                    ["museum", "Museum"],
-                    ["kompakt", "Kompakt"],
-                    ["finans", "Finans"],
-                  ].map(([key, label]) => (
-                    <button
-                      key={key}
-                      className={`${styles.mode} ${viewMode === key ? styles.modeActive : ""}`}
-                      type="button"
-                      aria-pressed={viewMode === key}
-                      onClick={() => {
-                        setViewMode(key as Mode);
-                        if (key === "finans") setTab("finans");
-                      }}
                     >
                       {label}
                     </button>
@@ -1634,30 +1630,6 @@ export default function CollectiumObjectPresentationClient({
                 </main>
 
                 <aside className={styles.side}>
-                  <div className={styles.panel}>
-                    <h3>Aktiv visning</h3>
-                    <div className={styles.shareBtns}>
-                      {[
-                        ["objekt", "Objekt info"],
-                        ["museum", "Museum"],
-                        ["kompakt", "Kompakt"],
-                        ["finans", "Finans"],
-                      ].map(([key, label]) => (
-                        <button
-                          key={key}
-                          className={`${styles.mode} ${viewMode === key ? styles.modeActive : ""}`}
-                          type="button"
-                          aria-pressed={viewMode === key}
-                          onClick={() => {
-                            setViewMode(key as Mode);
-                            if (key === "finans") setTab("finans");
-                          }}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                   <div className={styles.panel}>
                     <h3>Status</h3>
                     {[

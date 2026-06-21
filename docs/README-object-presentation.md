@@ -63,3 +63,35 @@ Planlagt DB/API-kobling:
 - `POST /api/object/user-images` for opplasting av egne bilder, maks 10 per brukerobjekt.
 - `POST /api/object/change-log` eller sentral audit-logg for bokføring av endringer.
 - Aktuelle tabeller/views: `ct_user_collection_object_specs`, private provenance-tabeller, private image/document-tabeller, `ct_v_object_user_state_resolved`.
+
+---
+
+## v8 – bildeområde og faner
+
+Endringene i v8 gjelder bare objektpresentasjonens lokale innholdskomponent. Global shell, global topbar/sidebar og global skin-provider endres ikke.
+
+### Bildeområde
+
+- Bildeområdet er gjort renere og mer samlet.
+- Bildeforklaring ligger nå som egen `imageCaption` under bildeknappene.
+- Collectium/Egne er beholdt som bildekildebryter, men er visuelt strammet inn som kildefaner.
+- Forside/Bakside/Gjennomlysning/Variant/Detalj er egne bildefaner med skin-relatert aktiv/inaktiv tilstand.
+- Klikk på bilde åpner fortsatt fullskjermvisning.
+
+### Hovedfaner
+
+Hovedfanene er samlet i én tydelig rad:
+
+```text
+I Samler
+II Historie
+III Finans
+IV I min samling
+V Relasjon objekter
+```
+
+Fanene vises som tekstfaner uten tung ramme. Aktiv og inaktiv status bruker svake globale skin-relaterte farger. `IV I min samling` får ekstra tydelig aktivmarkering når valgt, fordi den representerer private bruker-/samlerdata.
+
+### Visningsbrytere
+
+`Objekt info`, `Museum`, `Kompakt` og `Finans` er flyttet opp over bilde-/heroområdet som egne visningsfaner. Disse styrer `data-view` og skal ikke ligge blandet med hovedfanene.
