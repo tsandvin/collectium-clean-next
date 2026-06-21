@@ -1,4 +1,4 @@
-# Collectium objektpresentasjon v6 - global design og tidslinjeskala
+﻿# Collectium objektpresentasjon v6 - global design og tidslinjeskala
 
 ## Endringsformål
 Denne pakken bygger videre på v5 og retter objektpresentasjonen slik at siden arver global Collectium-design fra `globals.css`, `themes.css` og `CollectiumSkinProvider`.
@@ -181,3 +181,17 @@ Denne versjonen demper statusbryterne etter designkravet:
 - aktiv status fyller ikonet, ikke hele bryteren
 - mindre tekst i bryterne
 - mer luft mellom bryterne
+
+## v15 statusbrytere
+
+Endret statuspanelet slik at:
+- bryterrammen er svak og skin-relatert
+- hover gir litt tydeligere ramme og skygge
+- ikonfelt/bakgrunn bak ikon er fjernet
+- ikonet er stort og har tynn ramme
+- aktiv status fyller kun selve ikonrammen
+- tekst og tall i bryterne er mindre
+
+Berørt fil:
+- components/object/CollectiumObjectPresentationClient.module.css
+

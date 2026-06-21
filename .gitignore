@@ -99,3 +99,9 @@ _collectium-backup/
 _collectium-install/
 _collectium-page-design-check/
 install-periodfilter-system-design-v2-complete.ps1
+
+# Collectium local backups and reports
+*.bak-*
+_collectium-reports/
+$BuildLog
+*.ps1.bak

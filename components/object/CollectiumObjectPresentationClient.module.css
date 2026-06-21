@@ -1,4 +1,4 @@
-/*
+﻿/*
  * COLLECTIUM CSS HEADER
  *
  * Overskrift:
@@ -2398,3 +2398,209 @@
 .action[data-action="shop"] { --action-tint: #2a8c62; }
 .action[data-action="share"] { --action-tint: var(--ct-accent, var(--gold)); }
 .action[data-action="compare"] { --action-tint: color-mix(in srgb, var(--ct-accent, var(--gold)) 64%, #7b66ce 36%); }
+
+/* v15: object presentation status buttons
+   Krav:
+   - svak ramme på bryter
+   - hover kan gi litt tydeligere ramme/skygge
+   - ingen felt/bakgrunn bak ikon
+   - store ikon med tynn ramme
+   - aktiv status fyller kun ikonrammen
+   - mindre tekst i bryterne
+*/
+.statusCard .action,
+.statusPanel .action,
+.action {
+  min-height: 58px !important;
+  margin: 0 0 14px !important;
+  padding: 10px 14px !important;
+  gap: 14px !important;
+
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, rgba(255,255,255,0.18)) 82%,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 18%
+  ) !important;
+
+  border-radius: max(14px, var(--ct-radius-md, 12px)) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 96%, var(--action-tint, var(--ct-accent, #c7a45a)) 4%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 98%, var(--action-tint, var(--ct-accent, #c7a45a)) 2%)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.025),
+    0 1px 0 rgba(255,255,255,0.025) !important;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease !important;
+}
+
+.statusCard .action:hover,
+.statusPanel .action:hover,
+.action:hover,
+.statusCard .action:focus-visible,
+.statusPanel .action:focus-visible,
+.action:focus-visible {
+  transform: translateY(-2px) !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 34%,
+    var(--ct-border, rgba(255,255,255,0.22)) 66%
+  ) !important;
+
+  box-shadow:
+    0 12px 26px color-mix(in srgb, var(--action-tint, var(--ct-accent, #c7a45a)) 10%, transparent),
+    var(--ct-shadow-soft, 0 12px 28px rgba(0,0,0,0.16)) !important;
+}
+
+/* Ikonet er selve ikonflaten. Ikke egen boks/felt bak ikonet. */
+.statusCard .action .icon,
+.statusPanel .action .icon,
+.action .icon,
+.icon {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  flex: 0 0 48px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1px solid color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 58%,
+    var(--ct-border, rgba(255,255,255,0.16)) 42%
+  ) !important;
+
+  border-radius: 14px !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+
+  color: color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 90%,
+    var(--ct-text, #ffffff) 10%
+  ) !important;
+
+  font-size: 33px !important;
+  line-height: 1 !important;
+  font-weight: 420 !important;
+  font-style: normal !important;
+  text-shadow: none !important;
+}
+
+/* Aktiv status fyller bare ikonet, ikke hele bryteren. */
+.statusCard .action[data-active="true"] .icon,
+.statusPanel .action[data-active="true"] .icon,
+.action[data-active="true"] .icon,
+.actionPrimary .icon {
+  background: color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 78%,
+    var(--ct-panel-solid, var(--ct-panel, #161616)) 22%
+  ) !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 70%,
+    var(--ct-border, rgba(255,255,255,0.18)) 30%
+  ) !important;
+
+  color: var(--ct-on-accent, #ffffff) !important;
+}
+
+/* Aktiv rad skal fortsatt være rolig, ikke kraftig farget. */
+.statusCard .action[data-active="true"],
+.statusPanel .action[data-active="true"],
+.action[data-active="true"],
+.actionPrimary {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 95%, var(--action-tint, var(--ct-accent, #c7a45a)) 5%),
+      color-mix(in srgb, var(--ct-panel-solid, var(--ct-panel, #161616)) 98%, var(--action-tint, var(--ct-accent, #c7a45a)) 2%)
+    ) !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, rgba(255,255,255,0.18)) 80%,
+    var(--action-tint, var(--ct-accent, #c7a45a)) 20%
+  ) !important;
+}
+
+/* Mindre tekst i statusbryterne. */
+.statusCard .actionText,
+.statusPanel .actionText,
+.actionText {
+  font-size: clamp(11px, 0.68vw, 13px) !important;
+  line-height: 1.08 !important;
+  font-weight: 740 !important;
+  font-style: italic !important;
+  letter-spacing: -0.01em !important;
+}
+
+.statusCard .actionText small,
+.statusPanel .actionText small,
+.actionText small {
+  display: inline-block !important;
+  margin-top: 4px !important;
+  font-size: clamp(8.5px, 0.54vw, 10px) !important;
+  line-height: 1.12 !important;
+  font-weight: 600 !important;
+  font-style: italic !important;
+  opacity: 0.72 !important;
+}
+
+.statusCard .actionCount,
+.statusPanel .actionCount,
+.actionCount {
+  min-width: 22px !important;
+  font-size: clamp(12px, 0.68vw, 14px) !important;
+  line-height: 1 !important;
+  font-weight: 780 !important;
+  font-style: italic !important;
+  text-align: right !important;
+}
+
+/* Fargene er bare tints, ikke sterke rammer. */
+.action[data-action="heart"] {
+  --action-tint: #c85855;
+}
+
+.action[data-action="star"] {
+  --action-tint: #b89a3e;
+}
+
+.action[data-action="collect"] {
+  --action-tint: #36a36f;
+}
+
+.action[data-action="auction"] {
+  --action-tint: #3d82b9;
+}
+
+.action[data-action="shop"] {
+  --action-tint: #2f9b70;
+}
+
+.action[data-action="share"] {
+  --action-tint: color-mix(in srgb, var(--ct-accent, #c7a45a) 78%, #a98a36 22%);
+}
+
+.action[data-action="compare"] {
+  --action-tint: color-mix(in srgb, var(--ct-accent, #c7a45a) 52%, #8f82d8 48%);
+}
+
+/* v15-end */
+
