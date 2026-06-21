@@ -628,6 +628,137 @@ function Field({
   href?: string;
 }) {
   const allowed = canSee(membership, required);
+  const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
+
+  const objectCatalogLabel =
+    selectedObject.catalogNumber ||
+    selectedObject.sourceCatalogNumber ||
+    selectedObject.localCatalogNumber ||
+    `NS ${selectedObject.objectId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShareRecipients() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/share-list?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente delingsliste: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const rows =
+          payload?.shares ??
+          payload?.items ??
+          payload?.data?.shares ??
+          payload?.data?.items ??
+          [];
+
+        const nextRows = Array.isArray(rows)
+          ? rows.map((row) => ({
+              email: String(row.email ?? row.recipient_email ?? row.recipientEmail ?? "Ukjent mottaker"),
+              accessLabel: String(row.access_label ?? row.accessLabel ?? row.duration_label ?? "Delt visning"),
+              expiresAt: String(row.expires_at ?? row.expiresAt ?? row.valid_until ?? ""),
+              membershipOffer: String(
+                row.membership_offer ??
+                  row.membershipOffer ??
+                  row.receiver_offer ??
+                  "Mottaker kan få medlemsrabatt etter delingsregel",
+              ),
+            }))
+          : [];
+
+        if (!cancelled) {
+          setSharedRecipients(nextRows);
+        }
+      } catch (error) {
+        console.warn("Collectium: delingsliste mangler eller krever innlogging", error);
+
+        if (!cancelled) {
+          setSharedRecipients([]);
+        }
+      }
+    }
+
+    void loadShareRecipients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
+
+  async function generateObjectShareLink() {
+    setShareStatus("Genererer lenke ...");
+
+    const payload = {
+      source_key: selectedObject.sourceKey,
+      object_group: selectedObject.objectGroup,
+      object_id: selectedObject.objectId,
+      duration_hours: shareDuration,
+      access_scope: "object_view",
+      catalog_label: objectCatalogLabel,
+      membership_offer: {
+        enabled: true,
+        receiver_rule: "shared_object_trial_or_discount",
+        note_no:
+          "Mottaker får tidsbegrenset tilgang til objektet og kan få medlemsrabatt etter Collectium delingsregel.",
+      },
+    };
+
+    try {
+      const response = await fetch("/api/object/share-create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const link =
+        result?.share_url ??
+        result?.shareUrl ??
+        result?.url ??
+        result?.link ??
+        result?.data?.share_url ??
+        result?.data?.shareUrl ??
+        "";
+
+      if (!link) {
+        throw new Error("API returnerte ikke share_url.");
+      }
+
+      setGeneratedShareLink(link);
+      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
+    } catch (error) {
+      console.warn("Collectium: share-create API mangler eller feilet", error);
+
+      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
+
+      setGeneratedShareLink(fallback);
+      setShareStatus(
+        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
+      );
+    }
+  }
   return (
     <div className={styles.field}>
       <span>{label}</span>
@@ -662,6 +793,137 @@ function EditableField({
   placeholder?: string;
 }) {
   const allowed = canSee(membership, required);
+  const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
+
+  const objectCatalogLabel =
+    selectedObject.catalogNumber ||
+    selectedObject.sourceCatalogNumber ||
+    selectedObject.localCatalogNumber ||
+    `NS ${selectedObject.objectId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShareRecipients() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/share-list?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente delingsliste: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const rows =
+          payload?.shares ??
+          payload?.items ??
+          payload?.data?.shares ??
+          payload?.data?.items ??
+          [];
+
+        const nextRows = Array.isArray(rows)
+          ? rows.map((row) => ({
+              email: String(row.email ?? row.recipient_email ?? row.recipientEmail ?? "Ukjent mottaker"),
+              accessLabel: String(row.access_label ?? row.accessLabel ?? row.duration_label ?? "Delt visning"),
+              expiresAt: String(row.expires_at ?? row.expiresAt ?? row.valid_until ?? ""),
+              membershipOffer: String(
+                row.membership_offer ??
+                  row.membershipOffer ??
+                  row.receiver_offer ??
+                  "Mottaker kan få medlemsrabatt etter delingsregel",
+              ),
+            }))
+          : [];
+
+        if (!cancelled) {
+          setSharedRecipients(nextRows);
+        }
+      } catch (error) {
+        console.warn("Collectium: delingsliste mangler eller krever innlogging", error);
+
+        if (!cancelled) {
+          setSharedRecipients([]);
+        }
+      }
+    }
+
+    void loadShareRecipients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
+
+  async function generateObjectShareLink() {
+    setShareStatus("Genererer lenke ...");
+
+    const payload = {
+      source_key: selectedObject.sourceKey,
+      object_group: selectedObject.objectGroup,
+      object_id: selectedObject.objectId,
+      duration_hours: shareDuration,
+      access_scope: "object_view",
+      catalog_label: objectCatalogLabel,
+      membership_offer: {
+        enabled: true,
+        receiver_rule: "shared_object_trial_or_discount",
+        note_no:
+          "Mottaker får tidsbegrenset tilgang til objektet og kan få medlemsrabatt etter Collectium delingsregel.",
+      },
+    };
+
+    try {
+      const response = await fetch("/api/object/share-create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const link =
+        result?.share_url ??
+        result?.shareUrl ??
+        result?.url ??
+        result?.link ??
+        result?.data?.share_url ??
+        result?.data?.shareUrl ??
+        "";
+
+      if (!link) {
+        throw new Error("API returnerte ikke share_url.");
+      }
+
+      setGeneratedShareLink(link);
+      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
+    } catch (error) {
+      console.warn("Collectium: share-create API mangler eller feilet", error);
+
+      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
+
+      setGeneratedShareLink(fallback);
+      setShareStatus(
+        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
+      );
+    }
+  }
   return (
     <label
       className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
@@ -695,6 +957,137 @@ function SelectField({
   helper?: string;
 }) {
   const allowed = canSee(membership, required);
+  const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
+
+  const objectCatalogLabel =
+    selectedObject.catalogNumber ||
+    selectedObject.sourceCatalogNumber ||
+    selectedObject.localCatalogNumber ||
+    `NS ${selectedObject.objectId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShareRecipients() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/share-list?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente delingsliste: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const rows =
+          payload?.shares ??
+          payload?.items ??
+          payload?.data?.shares ??
+          payload?.data?.items ??
+          [];
+
+        const nextRows = Array.isArray(rows)
+          ? rows.map((row) => ({
+              email: String(row.email ?? row.recipient_email ?? row.recipientEmail ?? "Ukjent mottaker"),
+              accessLabel: String(row.access_label ?? row.accessLabel ?? row.duration_label ?? "Delt visning"),
+              expiresAt: String(row.expires_at ?? row.expiresAt ?? row.valid_until ?? ""),
+              membershipOffer: String(
+                row.membership_offer ??
+                  row.membershipOffer ??
+                  row.receiver_offer ??
+                  "Mottaker kan få medlemsrabatt etter delingsregel",
+              ),
+            }))
+          : [];
+
+        if (!cancelled) {
+          setSharedRecipients(nextRows);
+        }
+      } catch (error) {
+        console.warn("Collectium: delingsliste mangler eller krever innlogging", error);
+
+        if (!cancelled) {
+          setSharedRecipients([]);
+        }
+      }
+    }
+
+    void loadShareRecipients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
+
+  async function generateObjectShareLink() {
+    setShareStatus("Genererer lenke ...");
+
+    const payload = {
+      source_key: selectedObject.sourceKey,
+      object_group: selectedObject.objectGroup,
+      object_id: selectedObject.objectId,
+      duration_hours: shareDuration,
+      access_scope: "object_view",
+      catalog_label: objectCatalogLabel,
+      membership_offer: {
+        enabled: true,
+        receiver_rule: "shared_object_trial_or_discount",
+        note_no:
+          "Mottaker får tidsbegrenset tilgang til objektet og kan få medlemsrabatt etter Collectium delingsregel.",
+      },
+    };
+
+    try {
+      const response = await fetch("/api/object/share-create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const link =
+        result?.share_url ??
+        result?.shareUrl ??
+        result?.url ??
+        result?.link ??
+        result?.data?.share_url ??
+        result?.data?.shareUrl ??
+        "";
+
+      if (!link) {
+        throw new Error("API returnerte ikke share_url.");
+      }
+
+      setGeneratedShareLink(link);
+      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
+    } catch (error) {
+      console.warn("Collectium: share-create API mangler eller feilet", error);
+
+      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
+
+      setGeneratedShareLink(fallback);
+      setShareStatus(
+        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
+      );
+    }
+  }
   return (
     <label
       className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
@@ -727,6 +1120,137 @@ function DemoSelector({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
+  const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
+
+  const objectCatalogLabel =
+    selectedObject.catalogNumber ||
+    selectedObject.sourceCatalogNumber ||
+    selectedObject.localCatalogNumber ||
+    `NS ${selectedObject.objectId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShareRecipients() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/share-list?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente delingsliste: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const rows =
+          payload?.shares ??
+          payload?.items ??
+          payload?.data?.shares ??
+          payload?.data?.items ??
+          [];
+
+        const nextRows = Array.isArray(rows)
+          ? rows.map((row) => ({
+              email: String(row.email ?? row.recipient_email ?? row.recipientEmail ?? "Ukjent mottaker"),
+              accessLabel: String(row.access_label ?? row.accessLabel ?? row.duration_label ?? "Delt visning"),
+              expiresAt: String(row.expires_at ?? row.expiresAt ?? row.valid_until ?? ""),
+              membershipOffer: String(
+                row.membership_offer ??
+                  row.membershipOffer ??
+                  row.receiver_offer ??
+                  "Mottaker kan få medlemsrabatt etter delingsregel",
+              ),
+            }))
+          : [];
+
+        if (!cancelled) {
+          setSharedRecipients(nextRows);
+        }
+      } catch (error) {
+        console.warn("Collectium: delingsliste mangler eller krever innlogging", error);
+
+        if (!cancelled) {
+          setSharedRecipients([]);
+        }
+      }
+    }
+
+    void loadShareRecipients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
+
+  async function generateObjectShareLink() {
+    setShareStatus("Genererer lenke ...");
+
+    const payload = {
+      source_key: selectedObject.sourceKey,
+      object_group: selectedObject.objectGroup,
+      object_id: selectedObject.objectId,
+      duration_hours: shareDuration,
+      access_scope: "object_view",
+      catalog_label: objectCatalogLabel,
+      membership_offer: {
+        enabled: true,
+        receiver_rule: "shared_object_trial_or_discount",
+        note_no:
+          "Mottaker får tidsbegrenset tilgang til objektet og kan få medlemsrabatt etter Collectium delingsregel.",
+      },
+    };
+
+    try {
+      const response = await fetch("/api/object/share-create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const link =
+        result?.share_url ??
+        result?.shareUrl ??
+        result?.url ??
+        result?.link ??
+        result?.data?.share_url ??
+        result?.data?.shareUrl ??
+        "";
+
+      if (!link) {
+        throw new Error("API returnerte ikke share_url.");
+      }
+
+      setGeneratedShareLink(link);
+      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
+    } catch (error) {
+      console.warn("Collectium: share-create API mangler eller feilet", error);
+
+      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
+
+      setGeneratedShareLink(fallback);
+      setShareStatus(
+        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
+      );
+    }
+  }
   return (
     <section className={styles.demoStrip}>
       <div className={styles.demoHeader}>
@@ -771,6 +1295,15 @@ export default function CollectiumObjectPresentationClient({
   const [selectedId, setSelectedId] = useState(routeObject?.objectId ?? "9");
   const [timelineSpan, setTimelineSpan] = useState(154);
   const [savedStates, setSavedStates] = useState<Record<string, boolean>>({});
+  const [shareDuration, setShareDuration] = useState<6 | 12 | 18 | 24 | 48>(12);
+  const [generatedShareLink, setGeneratedShareLink] = useState<string>("");
+  const [shareStatus, setShareStatus] = useState<string>("");
+  const [sharedRecipients, setSharedRecipients] = useState<Array<{
+    email: string;
+    accessLabel: string;
+    expiresAt: string;
+    membershipOffer: string;
+  }>>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number | null>>({
     heart: null,
     star: null,
@@ -886,7 +1419,138 @@ export default function CollectiumObjectPresentationClient({
 
     void loadStatusCounts();
 
+    const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
+
+  const objectCatalogLabel =
+    selectedObject.catalogNumber ||
+    selectedObject.sourceCatalogNumber ||
+    selectedObject.localCatalogNumber ||
+    `NS ${selectedObject.objectId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShareRecipients() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/share-list?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente delingsliste: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const rows =
+          payload?.shares ??
+          payload?.items ??
+          payload?.data?.shares ??
+          payload?.data?.items ??
+          [];
+
+        const nextRows = Array.isArray(rows)
+          ? rows.map((row) => ({
+              email: String(row.email ?? row.recipient_email ?? row.recipientEmail ?? "Ukjent mottaker"),
+              accessLabel: String(row.access_label ?? row.accessLabel ?? row.duration_label ?? "Delt visning"),
+              expiresAt: String(row.expires_at ?? row.expiresAt ?? row.valid_until ?? ""),
+              membershipOffer: String(
+                row.membership_offer ??
+                  row.membershipOffer ??
+                  row.receiver_offer ??
+                  "Mottaker kan få medlemsrabatt etter delingsregel",
+              ),
+            }))
+          : [];
+
+        if (!cancelled) {
+          setSharedRecipients(nextRows);
+        }
+      } catch (error) {
+        console.warn("Collectium: delingsliste mangler eller krever innlogging", error);
+
+        if (!cancelled) {
+          setSharedRecipients([]);
+        }
+      }
+    }
+
+    void loadShareRecipients();
+
     return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
+
+  async function generateObjectShareLink() {
+    setShareStatus("Genererer lenke ...");
+
+    const payload = {
+      source_key: selectedObject.sourceKey,
+      object_group: selectedObject.objectGroup,
+      object_id: selectedObject.objectId,
+      duration_hours: shareDuration,
+      access_scope: "object_view",
+      catalog_label: objectCatalogLabel,
+      membership_offer: {
+        enabled: true,
+        receiver_rule: "shared_object_trial_or_discount",
+        note_no:
+          "Mottaker får tidsbegrenset tilgang til objektet og kan få medlemsrabatt etter Collectium delingsregel.",
+      },
+    };
+
+    try {
+      const response = await fetch("/api/object/share-create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const link =
+        result?.share_url ??
+        result?.shareUrl ??
+        result?.url ??
+        result?.link ??
+        result?.data?.share_url ??
+        result?.data?.shareUrl ??
+        "";
+
+      if (!link) {
+        throw new Error("API returnerte ikke share_url.");
+      }
+
+      setGeneratedShareLink(link);
+      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
+    } catch (error) {
+      console.warn("Collectium: share-create API mangler eller feilet", error);
+
+      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
+
+      setGeneratedShareLink(fallback);
+      setShareStatus(
+        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
+      );
+    }
+  }
+  return () => {
       cancelled = true;
     };
   }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
@@ -1026,6 +1690,137 @@ export default function CollectiumObjectPresentationClient({
           ["Objektnøkkel", selectedObject.objectId, "source + group + id"],
         ];
 
+  const shareDurations: Array<6 | 12 | 18 | 24 | 48> = [6, 12, 18, 24, 48];
+
+  const objectCatalogLabel =
+    selectedObject.catalogNumber ||
+    selectedObject.sourceCatalogNumber ||
+    selectedObject.localCatalogNumber ||
+    `NS ${selectedObject.objectId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShareRecipients() {
+      const params = new URLSearchParams({
+        source_key: selectedObject.sourceKey,
+        object_group: selectedObject.objectGroup,
+        object_id: selectedObject.objectId,
+      });
+
+      try {
+        const response = await fetch(`/api/object/share-list?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Kunne ikke hente delingsliste: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        const rows =
+          payload?.shares ??
+          payload?.items ??
+          payload?.data?.shares ??
+          payload?.data?.items ??
+          [];
+
+        const nextRows = Array.isArray(rows)
+          ? rows.map((row) => ({
+              email: String(row.email ?? row.recipient_email ?? row.recipientEmail ?? "Ukjent mottaker"),
+              accessLabel: String(row.access_label ?? row.accessLabel ?? row.duration_label ?? "Delt visning"),
+              expiresAt: String(row.expires_at ?? row.expiresAt ?? row.valid_until ?? ""),
+              membershipOffer: String(
+                row.membership_offer ??
+                  row.membershipOffer ??
+                  row.receiver_offer ??
+                  "Mottaker kan få medlemsrabatt etter delingsregel",
+              ),
+            }))
+          : [];
+
+        if (!cancelled) {
+          setSharedRecipients(nextRows);
+        }
+      } catch (error) {
+        console.warn("Collectium: delingsliste mangler eller krever innlogging", error);
+
+        if (!cancelled) {
+          setSharedRecipients([]);
+        }
+      }
+    }
+
+    void loadShareRecipients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
+
+  async function generateObjectShareLink() {
+    setShareStatus("Genererer lenke ...");
+
+    const payload = {
+      source_key: selectedObject.sourceKey,
+      object_group: selectedObject.objectGroup,
+      object_id: selectedObject.objectId,
+      duration_hours: shareDuration,
+      access_scope: "object_view",
+      catalog_label: objectCatalogLabel,
+      membership_offer: {
+        enabled: true,
+        receiver_rule: "shared_object_trial_or_discount",
+        note_no:
+          "Mottaker får tidsbegrenset tilgang til objektet og kan få medlemsrabatt etter Collectium delingsregel.",
+      },
+    };
+
+    try {
+      const response = await fetch("/api/object/share-create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const link =
+        result?.share_url ??
+        result?.shareUrl ??
+        result?.url ??
+        result?.link ??
+        result?.data?.share_url ??
+        result?.data?.shareUrl ??
+        "";
+
+      if (!link) {
+        throw new Error("API returnerte ikke share_url.");
+      }
+
+      setGeneratedShareLink(link);
+      setShareStatus(`Delingslenke generert for ${shareDuration} timer.`);
+    } catch (error) {
+      console.warn("Collectium: share-create API mangler eller feilet", error);
+
+      const fallback = `${window.location.origin}/objekt/${selectedObject.sourceKey}/${selectedObject.objectGroup}/${selectedObject.objectId}?share=test&duration=${shareDuration}t`;
+
+      setGeneratedShareLink(fallback);
+      setShareStatus(
+        "API for deling mangler. Viser midlertidig lokal forhåndsvisningslenke til share-create er koblet.",
+      );
+    }
+  }
   return (
     <div className={styles.shell} data-view={viewMode}>
       <main className={styles.main}>
@@ -2101,6 +2896,89 @@ export default function CollectiumObjectPresentationClient({
                       Generer lenke
                     </button>
                   </div>
+      {/* v18-share-panel-start */}
+      <div className={`${styles.panel} ${styles.shareViewPanel}`}>
+        <h3>Del visning</h3>
+
+        <div className={styles.shareDurationRow} aria-label="Velg tilgangstid for delt visning">
+          {shareDurations.map((duration) => (
+            <button
+              key={duration}
+              type="button"
+              className={`${styles.shareDurationButton} ${
+                shareDuration === duration ? styles.shareDurationButtonActive : ""
+              }`}
+              onClick={() => setShareDuration(duration)}
+              aria-pressed={shareDuration === duration}
+            >
+              {duration}t
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.shareMetaGrid}>
+          <div className={styles.shareMetaField}>
+            <span>Katalog</span>
+            <strong>{objectCatalogLabel}</strong>
+          </div>
+          <div className={styles.shareMetaField}>
+            <span>Tilgang</span>
+            <strong>{shareDuration} timer</strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={styles.shareGenerateButton}
+          onClick={generateObjectShareLink}
+        >
+          Generer lenke
+        </button>
+
+        {shareStatus ? (
+          <p className={styles.shareStatusText}>{shareStatus}</p>
+        ) : null}
+
+        {generatedShareLink ? (
+          <div className={styles.generatedShareLink}>
+            <span>Lenke</span>
+            <a href={generatedShareLink} target="_blank" rel="noreferrer">
+              {generatedShareLink}
+            </a>
+          </div>
+        ) : null}
+
+        <div className={styles.shareOfferBox}>
+          <strong>Mottakerfordel</strong>
+          <span>
+            Mottaker får tidsbegrenset tilgang til objektet. Ved registrering kan mottaker
+            kobles til Collectium medlemsrabatt etter delingsregelen.
+          </span>
+        </div>
+
+        <div className={styles.shareRecipientList}>
+          <strong>Delte e-poster</strong>
+          {sharedRecipients.length > 0 ? (
+            sharedRecipients.map((recipient) => (
+              <div key={`${recipient.email}-${recipient.expiresAt}`} className={styles.shareRecipientItem}>
+                <span>{recipient.email}</span>
+                <small>
+                  {recipient.accessLabel}
+                  {recipient.expiresAt ? ` · ${recipient.expiresAt}` : ""}
+                </small>
+                <small>{recipient.membershipOffer}</small>
+              </div>
+            ))
+          ) : (
+            <p>
+              Ingen registrerte e-postmottakere vises ennå. Listen fylles fra
+              /api/object/share-list når innlogget bruker har delt objektet.
+            </p>
+          )}
+        </div>
+      </div>
+      {/* v18-share-panel-end */}
+
                 </aside>
               </div>
             </>
@@ -2110,4 +2988,5 @@ export default function CollectiumObjectPresentationClient({
     </div>
   );
 }
+
 

@@ -240,3 +240,20 @@ Forventet API-data:
 - counts.share / share_count
 - counts.compare / compare_count
 
+## v18 avansert deling
+
+Endret objektpresentasjon slik at Del objekt / Visningslenke ikke lenger ligger som statusbryter.
+
+Ny modell:
+- Del visning er egen modul i høyre panel.
+- Valgbare tider: 6t, 12t, 18t, 24t, 48t.
+- Viser katalognummer og valgt tilgangstid.
+- Generer lenke bruker POST /api/object/share-create.
+- Innlogget bruker kan få liste over tidligere delte e-poster fra GET /api/object/share-list.
+- Mottakerfordel/medlemsrabatt forklares i delingsmodulen.
+- Deling skal senere kobles til ct_object_share_links, ct_object_share_link_items og logging.
+
+Berørte filer:
+- components/object/CollectiumObjectPresentationClient.tsx
+- components/object/CollectiumObjectPresentationClient.module.css
+

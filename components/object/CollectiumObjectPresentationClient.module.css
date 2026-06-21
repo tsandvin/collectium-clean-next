@@ -2425,3 +2425,272 @@
 
 /* v16-end */
 
+/* v18: advanced share view panel
+   Del objekt er ikke statusbryter. Deling ligger i egen Del visning-modul.
+*/
+.shareViewPanel {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.shareDurationRow {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.shareDurationButton {
+  min-height: 30px !important;
+  padding: 7px 11px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 84%,
+    var(--ct-accent, var(--gold)) 16%
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 96%,
+    var(--ct-accent, var(--gold)) 4%
+  ) !important;
+  color: color-mix(
+    in srgb,
+    var(--ct-text, var(--text)) 80%,
+    var(--ct-text-muted, var(--muted)) 20%
+  ) !important;
+  font-size: clamp(9px, 0.55vw, 10.5px) !important;
+  font-weight: 760 !important;
+  font-style: italic !important;
+  cursor: pointer !important;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.shareDurationButton:hover,
+.shareDurationButton:focus-visible {
+  transform: translateY(-1px) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 62%,
+    var(--ct-accent, var(--gold)) 38%
+  ) !important;
+  box-shadow:
+    0 8px 18px color-mix(in srgb, var(--ct-accent, var(--gold)) 8%, transparent),
+    var(--ct-shadow-soft, 0 8px 20px rgba(0, 0, 0, 0.12)) !important;
+}
+
+.shareDurationButtonActive {
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 54%,
+    var(--ct-accent, var(--gold)) 46%
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 88%,
+    var(--ct-accent, var(--gold)) 12%
+  ) !important;
+  color: var(--ct-text, var(--text)) !important;
+}
+
+.shareMetaGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.shareMetaField {
+  min-width: 0 !important;
+  padding: 9px 10px !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 88%,
+    var(--ct-accent, var(--gold)) 12%
+  ) !important;
+  border-radius: 12px !important;
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 96%,
+    var(--ct-accent, var(--gold)) 4%
+  ) !important;
+}
+
+.shareMetaField span {
+  display: block !important;
+  margin-bottom: 4px !important;
+  color: var(--ct-text-muted, var(--muted)) !important;
+  font-size: 9px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.shareMetaField strong {
+  display: block !important;
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(11px, 0.7vw, 13px) !important;
+  font-weight: 760 !important;
+  font-style: italic !important;
+  overflow-wrap: anywhere !important;
+}
+
+.shareGenerateButton {
+  width: 100% !important;
+  min-height: 34px !important;
+  border-radius: 12px !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 70%,
+    var(--ct-accent, var(--gold)) 30%
+  ) !important;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 88%, var(--ct-accent, var(--gold)) 12%),
+    color-mix(in srgb, var(--ct-panel-solid, var(--panel)) 96%, var(--ct-accent, var(--gold)) 4%)
+  ) !important;
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(10px, 0.62vw, 12px) !important;
+  font-weight: 820 !important;
+  font-style: italic !important;
+  cursor: pointer !important;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.shareGenerateButton:hover,
+.shareGenerateButton:focus-visible {
+  transform: translateY(-1px) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 50%,
+    var(--ct-accent, var(--gold)) 50%
+  ) !important;
+  box-shadow:
+    0 10px 22px color-mix(in srgb, var(--ct-accent, var(--gold)) 10%, transparent),
+    var(--ct-shadow-soft, 0 8px 20px rgba(0, 0, 0, 0.12)) !important;
+}
+
+.shareStatusText {
+  margin: 0 !important;
+  color: var(--ct-text-muted, var(--muted)) !important;
+  font-size: clamp(9px, 0.56vw, 10.5px) !important;
+  line-height: 1.35 !important;
+  font-style: italic !important;
+}
+
+.generatedShareLink {
+  display: grid !important;
+  gap: 5px !important;
+  padding: 9px 10px !important;
+  border-radius: 12px !important;
+  border: 1px dashed color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 72%,
+    var(--ct-accent, var(--gold)) 28%
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 94%,
+    var(--ct-accent, var(--gold)) 6%
+  ) !important;
+}
+
+.generatedShareLink span {
+  color: var(--ct-text-muted, var(--muted)) !important;
+  font-size: 9px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.generatedShareLink a {
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(9px, 0.55vw, 10.5px) !important;
+  overflow-wrap: anywhere !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 3px !important;
+}
+
+.shareOfferBox {
+  display: grid !important;
+  gap: 4px !important;
+  padding: 10px !important;
+  border-radius: 12px !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 86%,
+    var(--ct-accent, var(--gold)) 14%
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 96%,
+    var(--ct-accent, var(--gold)) 4%
+  ) !important;
+}
+
+.shareOfferBox strong {
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(10px, 0.6vw, 11.5px) !important;
+  font-weight: 800 !important;
+  font-style: italic !important;
+}
+
+.shareOfferBox span {
+  color: var(--ct-text-muted, var(--muted)) !important;
+  font-size: clamp(8.5px, 0.52vw, 10px) !important;
+  line-height: 1.35 !important;
+}
+
+.shareRecipientList {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.shareRecipientList > strong {
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(10px, 0.6vw, 11.5px) !important;
+  font-weight: 800 !important;
+  font-style: italic !important;
+}
+
+.shareRecipientList p {
+  margin: 0 !important;
+  color: var(--ct-text-muted, var(--muted)) !important;
+  font-size: clamp(8.5px, 0.52vw, 10px) !important;
+  line-height: 1.35 !important;
+}
+
+.shareRecipientItem {
+  display: grid !important;
+  gap: 2px !important;
+  padding: 8px 9px !important;
+  border-radius: 10px !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--ct-border, var(--line)) 88%,
+    var(--ct-accent, var(--gold)) 12%
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--ct-panel-solid, var(--panel)) 97%,
+    var(--ct-accent, var(--gold)) 3%
+  ) !important;
+}
+
+.shareRecipientItem span {
+  color: var(--ct-text, var(--text)) !important;
+  font-size: clamp(9px, 0.55vw, 10.5px) !important;
+  font-weight: 760 !important;
+}
+
+.shareRecipientItem small {
+  color: var(--ct-text-muted, var(--muted)) !important;
+  font-size: clamp(8px, 0.48vw, 9.5px) !important;
+  line-height: 1.25 !important;
+}
+
+/* v18-end */
+
