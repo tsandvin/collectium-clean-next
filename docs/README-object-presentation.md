@@ -95,3 +95,58 @@ Fanene vises som tekstfaner uten tung ramme. Aktiv og inaktiv status bruker svak
 ### Visningsbrytere
 
 `Objekt info`, `Museum`, `Kompakt` og `Finans` er flyttet opp over bilde-/heroområdet som egne visningsfaner. Disse styrer `data-view` og skal ikke ligge blandet med hovedfanene.
+
+## v9 – bildeområde og faneplassering
+
+Endringene i v9 er avgrenset til objektpresentasjonens bilde-/hero-område og faner:
+
+- `Visning / Objekt info / Museum / Kompakt / Finans` ligger nå på høyre side over hero-rammen.
+- `Forside / Bakside / Gjennomlysning / Variant / Detalj` og bildeforklaring ligger på samme rad.
+- Bildeforklaringen ligger til høyre for bildefanene og bruker global skin-relatert svak bakgrunn.
+- `IV I min samling` og `V Relasjon objekter` skyves til høyre i hovedfaneraden.
+- `I Samler / II Historie / III Finans` beholdes til venstre.
+- Aktiv og inaktiv fane bruker global `--ct-*` tokenlogikk fra global skin/design.
+- Finans- og Objekt-info-visning får tydeligere hero-ramme uten lokal skinmotor.
+
+## v10 – Min samling: kvalitet, gradering og statuslogg
+
+Endringene i v10 gjelder `IV I min samling` og høyre statuspanel.
+
+### Kvalitet og tilstand
+
+- `Gradering` er endret fra fritekst til rullegardin.
+- Valg i rullegardinen fyller automatisk ut `Egen kvalitet`, `Tilstand` og `Tilstandsmerknad`.
+- For seddel brukes modell:
+  - `rarity_title_no` → gradering/tilstand
+  - `collectium_description_no` → tilstandsbeskrivelse/merknad
+  - `quality_label_no` → egen kvalitet
+- For mynt brukes modell:
+  - `grade_title_no` → gradering/tilstand
+  - `grade_name_en` joines inn i merknad
+  - `quality_label_no` → egen kvalitet
+- Valg bokføres i lokal endringslogg i UI som forberedelse til audit-logg/API.
+- Feltet skal senere skrives via bruker-/samling-API, ikke direkte til katalogobjektet.
+
+Planlagt API/write:
+
+```text
+POST /api/object/user-specs
+POST /api/object/change-log
+ct_user_collection_object_specs
+ct_user_object_change_log / sentral audit-logg
+ct_v_object_user_state_resolved
+```
+
+### Statushandlinger
+
+Statuspanelet viser nå tall bak handlingene:
+
+```text
+♡ Hjerte / Ønskeliste
+★ Stjerne / Favoritt
+＋ Legg i samling / Min samling
+↗ Del objekt / Visningslenke
+⇄ Sammenlign / Mot andre objekter
+```
+
+Tallene er UI-forberedelse for antall brukere/objekter med tilsvarende status, og skal senere hentes fra user-state/count-API. Klikk på handlingene bokføres i endringsloggen i denne forhåndsvisningen.

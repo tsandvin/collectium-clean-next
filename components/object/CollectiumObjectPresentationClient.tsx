@@ -46,7 +46,23 @@ type Tab = "samler" | "historie" | "finans" | "samling" | "relasjoner";
 type Mode = "objekt" | "museum" | "kompakt" | "finans";
 type Membership = "guest" | "free" | "bronze" | "silver" | "gold" | "platinum";
 type ImageSourceMode = "collectium" | "own";
-type ImageRole = "forside" | "bakside" | "gjennomlysning" | "variant" | "detalj";
+type ImageRole =
+  | "forside"
+  | "bakside"
+  | "gjennomlysning"
+  | "variant"
+  | "detalj";
+
+type GradingOption = {
+  key: string;
+  label: string;
+  count: number;
+  rarityTitleNo?: string;
+  collectiumDescriptionNo?: string;
+  gradeTitleNo?: string;
+  gradeNameEn?: string;
+  qualityLabelNo?: string;
+};
 
 type TimelineItem = {
   label: string;
@@ -468,13 +484,130 @@ function makeTimelineTicks(start: number, end: number) {
   );
 }
 
-const imageRoles: Array<{ key: ImageRole; label: string; description: string }> = [
-  { key: "forside", label: "Forside", description: "Hovedbilde/front fra valgt bildekilde." },
-  { key: "bakside", label: "Bakside", description: "Bakside/revers for objektet." },
-  { key: "gjennomlysning", label: "Gjennomlysning", description: "Gjennomlysning/transmitted light for kontroll av papir og vannmerke." },
-  { key: "variant", label: "Variant", description: "Variant-/detaljbilde koblet til utgave eller litra." },
-  { key: "detalj", label: "Detalj", description: "Detaljbilde av kvalitet, skade, signatur, hjørne eller annen observasjon." },
+const imageRoles: Array<{
+  key: ImageRole;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "forside",
+    label: "Forside",
+    description: "Hovedbilde/front fra valgt bildekilde.",
+  },
+  {
+    key: "bakside",
+    label: "Bakside",
+    description: "Bakside/revers for objektet.",
+  },
+  {
+    key: "gjennomlysning",
+    label: "Gjennomlysning",
+    description:
+      "Gjennomlysning/transmitted light for kontroll av papir og vannmerke.",
+  },
+  {
+    key: "variant",
+    label: "Variant",
+    description: "Variant-/detaljbilde koblet til utgave eller litra.",
+  },
+  {
+    key: "detalj",
+    label: "Detalj",
+    description:
+      "Detaljbilde av kvalitet, skade, signatur, hjørne eller annen observasjon.",
+  },
 ];
+
+const banknoteGradingOptions: GradingOption[] = [
+  {
+    key: "banknote_unc",
+    label: "UNC / Usirkulert",
+    count: 12,
+    rarityTitleNo: "Usirkulert",
+    collectiumDescriptionNo:
+      "Seddel uten synlig sirkulasjonsslitasje. Kontroller hjørner, press, vask, rifter og lysgjennomgang.",
+    qualityLabelNo: "Seddel · topp kvalitet",
+  },
+  {
+    key: "banknote_01",
+    label: "01 / Nesten usirkulert",
+    count: 31,
+    rarityTitleNo: "Nesten usirkulert",
+    collectiumDescriptionNo:
+      "Svært høy kvalitet med minimal håndtering. Små merker eller svak fold kan forekomme.",
+    qualityLabelNo: "Seddel · høy kvalitet",
+  },
+  {
+    key: "banknote_1plus",
+    label: "1+ / Pen sirkulert",
+    count: 64,
+    rarityTitleNo: "Pen sirkulert",
+    collectiumDescriptionNo:
+      "Sirkulert seddel med tydelige, men moderate bruksspor. Kontroller flekker, hjørner og papirfølelse.",
+    qualityLabelNo: "Seddel · samlerkvalitet",
+  },
+  {
+    key: "banknote_1",
+    label: "1 / Sirkulert",
+    count: 108,
+    rarityTitleNo: "Sirkulert",
+    collectiumDescriptionNo:
+      "Vanlig sirkulert kvalitet. Slitasje, folder og mindre merker må beskrives i tilstandsmerknad.",
+    qualityLabelNo: "Seddel · sirkulert",
+  },
+  {
+    key: "banknote_2",
+    label: "2 / Svak kvalitet",
+    count: 17,
+    rarityTitleNo: "Svak kvalitet",
+    collectiumDescriptionNo:
+      "Betydelig slitasje eller skader. Dokumenter rifter, hull, tape, vask, restaurering og mangler.",
+    qualityLabelNo: "Seddel · skadet/slitt",
+  },
+];
+
+const coinGradingOptions: GradingOption[] = [
+  {
+    key: "coin_unc",
+    label: "UNC / MS",
+    count: 9,
+    gradeTitleNo: "Usirkulert",
+    gradeNameEn: "Uncirculated",
+    qualityLabelNo: "Mynt · usirkulert",
+  },
+  {
+    key: "coin_xf",
+    label: "XF / 01",
+    count: 27,
+    gradeTitleNo: "Svært pen",
+    gradeNameEn: "Extremely Fine",
+    qualityLabelNo: "Mynt · høy kvalitet",
+  },
+  {
+    key: "coin_vf",
+    label: "VF / 1+",
+    count: 73,
+    gradeTitleNo: "Pen",
+    gradeNameEn: "Very Fine",
+    qualityLabelNo: "Mynt · samlerkvalitet",
+  },
+  {
+    key: "coin_f",
+    label: "F / 1",
+    count: 101,
+    gradeTitleNo: "Sirkulert",
+    gradeNameEn: "Fine",
+    qualityLabelNo: "Mynt · sirkulert",
+  },
+];
+
+const statusCounts: Record<string, number> = {
+  heart: 48,
+  star: 21,
+  collect: 14,
+  share: 6,
+  compare: 33,
+};
 
 const membershipRank: Record<Membership, number> = {
   guest: 0,
@@ -538,7 +671,9 @@ function EditableField({
 }) {
   const allowed = canSee(membership, required);
   return (
-    <label className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}>
+    <label
+      className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
+    >
       <span>{label}</span>
       <input
         value={allowed ? value : ""}
@@ -546,6 +681,49 @@ function EditableField({
         disabled={!allowed}
         onChange={(event) => onChange(event.target.value)}
       />
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  required = "bronze",
+  membership,
+  helper,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ key: string; label: string; count?: number }>;
+  required?: Membership;
+  membership: Membership;
+  helper?: string;
+}) {
+  const allowed = canSee(membership, required);
+  return (
+    <label
+      className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
+    >
+      <span>{label}</span>
+      <select
+        value={allowed ? value : ""}
+        disabled={!allowed}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">
+          {allowed ? "Velg kvalitet" : "Låst · krever Bronze+"}
+        </option>
+        {options.map((option) => (
+          <option key={option.key} value={option.key}>
+            {option.label}
+            {typeof option.count === "number" ? ` · ${option.count}` : ""}
+          </option>
+        ))}
+      </select>
+      {helper ? <small className={styles.fieldHelper}>{helper}</small> : null}
     </label>
   );
 }
@@ -601,7 +779,8 @@ export default function CollectiumObjectPresentationClient({
   const [selectedId, setSelectedId] = useState(routeObject?.objectId ?? "9");
   const [timelineSpan, setTimelineSpan] = useState(154);
   const [savedStates, setSavedStates] = useState<Record<string, boolean>>({});
-  const [imageSourceMode, setImageSourceMode] = useState<ImageSourceMode>("collectium");
+  const [imageSourceMode, setImageSourceMode] =
+    useState<ImageSourceMode>("collectium");
   const [activeImageRole, setActiveImageRole] = useState<ImageRole>("forside");
   const [isImageOpen, setIsImageOpen] = useState(false);
   const [ownImages, setOwnImages] = useState<OwnImage[]>([]);
@@ -650,12 +829,17 @@ export default function CollectiumObjectPresentationClient({
     href: `/relasjon/utgave/${selectedObject.issue.toLowerCase().replaceAll(" ", "-").replaceAll(".", "")}`,
   };
 
-  const activeImageMeta = imageRoles.find((role) => role.key === activeImageRole) ?? imageRoles[0];
-  const activeOwnImage = ownImages.find((image) => image.role === activeImageRole);
-  const activeImageUrl = imageSourceMode === "own" ? activeOwnImage?.url : undefined;
+  const activeImageMeta =
+    imageRoles.find((role) => role.key === activeImageRole) ?? imageRoles[0];
+  const activeOwnImage = ownImages.find(
+    (image) => image.role === activeImageRole,
+  );
+  const activeImageUrl =
+    imageSourceMode === "own" ? activeOwnImage?.url : undefined;
   const activeImageDescription =
     imageSourceMode === "own"
-      ? activeOwnImage?.description ?? "Eget bilde er ikke registrert for denne fanen ennå."
+      ? (activeOwnImage?.description ??
+        "Eget bilde er ikke registrert for denne fanen ennå.")
       : `Collectium-bilde: ${activeImageMeta.description} Kilde: variant_obverse / reverse / transmitted_light / variant / detail.`;
 
   function writeLog(field: string, value: string) {
@@ -688,8 +872,61 @@ export default function CollectiumObjectPresentationClient({
       description: `Eget ${activeImageMeta.label.toLowerCase()}-bilde lagt til av bruker.`,
     }));
     setOwnImages((prev) => [...prev, ...created]);
-    writeLog("bilder", `${created.length} bilde(r) lagt til under ${activeImageMeta.label}`);
+    writeLog(
+      "bilder",
+      `${created.length} bilde(r) lagt til under ${activeImageMeta.label}`,
+    );
     setImageSourceMode("own");
+  }
+
+  const gradingOptions =
+    selectedObject.objectGroup === "coin"
+      ? coinGradingOptions
+      : banknoteGradingOptions;
+
+  function applyGradingChoice(choiceKey: string) {
+    const choice = gradingOptions.find((option) => option.key === choiceKey);
+    if (!choice) {
+      updateOwnInfo("grade", "");
+      return;
+    }
+
+    if (selectedObject.objectGroup === "coin") {
+      setOwnInfo((prev) => ({
+        ...prev,
+        grade: choice.key,
+        quality: choice.qualityLabelNo ?? "",
+        condition: choice.gradeTitleNo ?? "",
+        conditionNotes: choice.gradeNameEn
+          ? `Hentet fra grade_name_en / quality_label_no: ${choice.gradeNameEn}`
+          : "",
+      }));
+      writeLog(
+        "Gradering",
+        `${choice.label} → grade_title_no=${choice.gradeTitleNo ?? ""}, grade_name_en=${choice.gradeNameEn ?? ""}, quality_label_no=${choice.qualityLabelNo ?? ""}`,
+      );
+      return;
+    }
+
+    setOwnInfo((prev) => ({
+      ...prev,
+      grade: choice.key,
+      quality: choice.qualityLabelNo ?? "",
+      condition: choice.rarityTitleNo ?? "",
+      conditionNotes: choice.collectiumDescriptionNo ?? "",
+    }));
+    writeLog(
+      "Gradering",
+      `${choice.label} → rarity_title_no=${choice.rarityTitleNo ?? ""}, collectium_description_no=${choice.collectiumDescriptionNo ?? ""}`,
+    );
+  }
+
+  function toggleStatus(id: string, label: string) {
+    setSavedStates((prev) => {
+      const nextValue = !prev[id];
+      writeLog(label, nextValue ? "Valgt / aktivert" : "Fjernet / deaktivert");
+      return { ...prev, [id]: nextValue };
+    });
   }
 
   const keyData =
@@ -822,7 +1059,9 @@ export default function CollectiumObjectPresentationClient({
                     </button>
                     <div className={styles.imageMetaBar}>
                       <div>
-                        <span className={styles.imageMetaKicker}>Bildefelt</span>
+                        <span className={styles.imageMetaKicker}>
+                          Bildefelt
+                        </span>
                         <strong>{selectedObject.noteText}</strong>
                       </div>
                       <div className={styles.imageSourceSwitch}>
@@ -842,21 +1081,23 @@ export default function CollectiumObjectPresentationClient({
                         </button>
                       </div>
                     </div>
-                    <div className={styles.imageControls}>
-                      {imageRoles.map((role) => (
-                        <button
-                          key={role.key}
-                          className={`${styles.imageRoleTab} ${activeImageRole === role.key ? styles.imageRoleTabActive : ""}`}
-                          type="button"
-                          onClick={() => setActiveImageRole(role.key)}
-                        >
-                          {role.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className={styles.imageCaption}>
-                      <span>{activeImageMeta.label}</span>
-                      <p>{activeImageDescription}</p>
+                    <div className={styles.imageNavRow}>
+                      <div className={styles.imageControls}>
+                        {imageRoles.map((role) => (
+                          <button
+                            key={role.key}
+                            className={`${styles.imageRoleTab} ${activeImageRole === role.key ? styles.imageRoleTabActive : ""}`}
+                            type="button"
+                            onClick={() => setActiveImageRole(role.key)}
+                          >
+                            {role.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className={styles.imageCaption}>
+                        <span>{activeImageMeta.label}</span>
+                        <p>{activeImageDescription}</p>
+                      </div>
                     </div>
                   </div>
                   <div className={styles.heroText}>
@@ -903,7 +1144,11 @@ export default function CollectiumObjectPresentationClient({
               </section>
 
               {isImageOpen ? (
-                <div className={styles.imageModal} role="dialog" aria-modal="true">
+                <div
+                  className={styles.imageModal}
+                  role="dialog"
+                  aria-modal="true"
+                >
                   <button
                     type="button"
                     className={styles.imageModalBackdrop}
@@ -921,14 +1166,23 @@ export default function CollectiumObjectPresentationClient({
                     <div className={styles.imageModalImage}>
                       {activeImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={activeImageUrl} alt={`${activeImageMeta.label} eget bilde`} />
+                        <img
+                          src={activeImageUrl}
+                          alt={`${activeImageMeta.label} eget bilde`}
+                        />
                       ) : (
                         <div className={styles.notePaper}>
-                          <div className={styles.num}>{selectedObject.noteNumber}</div>
+                          <div className={styles.num}>
+                            {selectedObject.noteNumber}
+                          </div>
                           <div className={styles.seal} />
                           <div className={styles.noteLine} />
-                          <div className={styles.noteText}>{selectedObject.noteText}</div>
-                          <div className={styles.noteSerial}>{selectedObject.serial}</div>
+                          <div className={styles.noteText}>
+                            {selectedObject.noteText}
+                          </div>
+                          <div className={styles.noteSerial}>
+                            {selectedObject.serial}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -955,7 +1209,10 @@ export default function CollectiumObjectPresentationClient({
               ) : null}
 
               <div className={styles.tabsRow}>
-                <div className={styles.segmentTabs} aria-label="Objektpresentasjon faner">
+                <div
+                  className={styles.segmentTabs}
+                  aria-label="Objektpresentasjon faner"
+                >
                   {[
                     ["samler", "I Samler"],
                     ["historie", "II Historie"],
@@ -1413,86 +1670,114 @@ export default function CollectiumObjectPresentationClient({
                         membership={effectiveMembership}
                         label="Kjøpeår"
                         value={ownInfo.purchaseYear}
-                        onChange={(value: string) => updateOwnInfo("purchaseYear", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("purchaseYear", value)
+                        }
                         placeholder="f.eks. 2025"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Kjøpsdato"
                         value={ownInfo.purchaseDate}
-                        onChange={(value: string) => updateOwnInfo("purchaseDate", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("purchaseDate", value)
+                        }
                         placeholder="f.eks. 2025-09-14"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Pris"
                         value={ownInfo.purchasePrice}
-                        onChange={(value: string) => updateOwnInfo("purchasePrice", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("purchasePrice", value)
+                        }
                         placeholder="f.eks. 1 250 NOK"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Forhandler"
                         value={ownInfo.dealer}
-                        onChange={(value: string) => updateOwnInfo("dealer", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("dealer", value)
+                        }
                         placeholder="Forhandler/navn"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Auksjon"
                         value={ownInfo.auction}
-                        onChange={(value: string) => updateOwnInfo("auction", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("auction", value)
+                        }
                         placeholder="Auksjonshus / lot / nummer"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Merknad fra selger"
                         value={ownInfo.sellerNotes}
-                        onChange={(value: string) => updateOwnInfo("sellerNotes", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("sellerNotes", value)
+                        }
                         placeholder="Tekst fra selger, kvittering eller auksjonsbeskrivelse"
                       />
                     </div>
                     <div
                       className={`${styles.panel} ${!canSee(effectiveMembership, "bronze") ? styles.lockedPanel : ""}`}
                     >
-                      <h3>Kvalitet</h3>
+                      <h3>Kvalitet og tilstand</h3>
+                      <SelectField
+                        membership={effectiveMembership}
+                        label="Gradering"
+                        value={ownInfo.grade}
+                        onChange={applyGradingChoice}
+                        options={gradingOptions}
+                        helper={
+                          selectedObject.objectGroup === "coin"
+                            ? "Mynt: grade_title_no + grade_name_en joines til quality_label_no."
+                            : "Seddel: rarity_title_no fyller gradering, collectium_description_no fyller tilstand/merknad."
+                        }
+                      />
                       <EditableField
                         membership={effectiveMembership}
                         label="Egen kvalitet"
                         value={ownInfo.quality}
-                        onChange={(value: string) => updateOwnInfo("quality", value)}
-                        placeholder="Egen vurdering"
-                      />
-                      <EditableField
-                        membership={effectiveMembership}
-                        label="Gradering"
-                        value={ownInfo.grade}
-                        onChange={(value: string) => updateOwnInfo("grade", value)}
-                        placeholder="f.eks. 0, 01, XF, UNC"
+                        onChange={(value: string) =>
+                          updateOwnInfo("quality", value)
+                        }
+                        placeholder="Fylles fra valgt gradering eller overstyres av bruker"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Tilstand"
                         value={ownInfo.condition}
-                        onChange={(value: string) => updateOwnInfo("condition", value)}
-                        placeholder="Bretter, hjørner, flekker, rift, hull"
+                        onChange={(value: string) =>
+                          updateOwnInfo("condition", value)
+                        }
+                        placeholder="Fylles fra valgt gradering"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Tilstandsmerknad"
                         value={ownInfo.conditionNotes}
-                        onChange={(value: string) => updateOwnInfo("conditionNotes", value)}
-                        placeholder="Fri tekst om skade, reparasjon eller observasjon"
+                        onChange={(value: string) =>
+                          updateOwnInfo("conditionNotes", value)
+                        }
+                        placeholder="Autofyll fra Collectium-beskrivelse eller fri tekst"
                       />
                       <EditableField
                         membership={effectiveMembership}
                         label="Proveniens"
                         value={ownInfo.provenance}
-                        onChange={(value: string) => updateOwnInfo("provenance", value)}
+                        onChange={(value: string) =>
+                          updateOwnInfo("provenance", value)
+                        }
                         placeholder="Privat/samtykkestyrt proveniens"
                       />
                       <div className={styles.fallback}>
-                        Endringer bokføres i loggen og skal senere skrives via samlings-API, ikke direkte til katalogsannheten.
+                        Innlogget Bronze+ kan endre kvalitet og egne felt. Valg
+                        bokføres i endringsloggen og skal senere skrives via
+                        collection/user-state API, ikke direkte til
+                        katalogsannheten.
                       </div>
                     </div>
                     <div
@@ -1503,7 +1788,10 @@ export default function CollectiumObjectPresentationClient({
                       <div className={styles.imageUploadRow}>
                         <div>
                           <strong>Egne bilder</strong>
-                          <p>Legg inn maks 10 bilder. Bildene kan vises i bildefeltet øverst når bryteren står på Egne.</p>
+                          <p>
+                            Legg inn maks 10 bilder. Bildene kan vises i
+                            bildefeltet øverst når bryteren står på Egne.
+                          </p>
                         </div>
                         <label className={styles.uploadButton}>
                           Legg til bilde
@@ -1511,8 +1799,13 @@ export default function CollectiumObjectPresentationClient({
                             type="file"
                             accept="image/*"
                             multiple
-                            disabled={!canSee(effectiveMembership, "bronze") || ownImages.length >= 10}
-                            onChange={(event) => addOwnImages(event.target.files)}
+                            disabled={
+                              !canSee(effectiveMembership, "bronze") ||
+                              ownImages.length >= 10
+                            }
+                            onChange={(event) =>
+                              addOwnImages(event.target.files)
+                            }
                           />
                         </label>
                       </div>
@@ -1535,11 +1828,16 @@ export default function CollectiumObjectPresentationClient({
                             </button>
                           ))
                         ) : (
-                          <div className={styles.lockedText}>Ingen egne bilder registrert.</div>
+                          <div className={styles.lockedText}>
+                            Ingen egne bilder registrert.
+                          </div>
                         )}
                       </div>
                     </div>
-                    <div className={styles.panel} style={{ gridColumn: "1 / -1" }}>
+                    <div
+                      className={styles.panel}
+                      style={{ gridColumn: "1 / -1" }}
+                    >
                       <h3>Endringslogg</h3>
                       {changeLog.length ? (
                         <div className={styles.logList}>
@@ -1552,7 +1850,9 @@ export default function CollectiumObjectPresentationClient({
                           ))}
                         </div>
                       ) : (
-                        <div className={styles.fallback}>Ingen endringer bokført i denne forhåndsvisningen.</div>
+                        <div className={styles.fallback}>
+                          Ingen endringer bokført i denne forhåndsvisningen.
+                        </div>
                       )}
                     </div>
                   </section>
@@ -1633,28 +1933,54 @@ export default function CollectiumObjectPresentationClient({
                   <div className={styles.panel}>
                     <h3>Status</h3>
                     {[
-                      ["heart", "♡", "Hjerte", "Ønskeliste"],
-                      ["star", "★", "Stjerne", "Favoritt"],
-                      ["collect", "＋", "Legg i samling", "Min samling"],
-                      ["share", "↗", "Del objekt", "Visningslenke"],
-                      ["compare", "⇄", "Sammenlign", "Mot andre objekter"],
-                    ].map(([id, icon, label, sub]) => (
+                      {
+                        id: "heart",
+                        icon: "♡",
+                        label: "Hjerte",
+                        sub: "Ønskeliste",
+                      },
+                      {
+                        id: "star",
+                        icon: "★",
+                        label: "Stjerne",
+                        sub: "Favoritt",
+                      },
+                      {
+                        id: "collect",
+                        icon: "＋",
+                        label: "Legg i samling",
+                        sub: "Min samling",
+                      },
+                      {
+                        id: "share",
+                        icon: "↗",
+                        label: "Del objekt",
+                        sub: "Visningslenke",
+                      },
+                      {
+                        id: "compare",
+                        icon: "⇄",
+                        label: "Sammenlign",
+                        sub: "Mot andre objekter",
+                      },
+                    ].map((action) => (
                       <button
-                        key={id}
-                        className={`${styles.action} ${savedStates[id] ? styles.actionPrimary : ""}`}
+                        key={action.id}
+                        className={`${styles.action} ${savedStates[action.id] ? styles.actionPrimary : ""}`}
                         type="button"
-                        onClick={() =>
-                          setSavedStates((prev) => ({
-                            ...prev,
-                            [id]: !prev[id],
-                          }))
-                        }
+                        onClick={() => toggleStatus(action.id, action.label)}
                       >
-                        <span className={styles.icon}>{icon}</span>
-                        <span>
-                          {label}
+                        <span className={styles.icon}>{action.icon}</span>
+                        <span className={styles.actionText}>
+                          {action.label}
                           <br />
-                          <small>{sub}</small>
+                          <small>{action.sub}</small>
+                        </span>
+                        <span
+                          className={styles.actionCount}
+                          title="Antall brukere/objekter med tilsvarende status"
+                        >
+                          {statusCounts[action.id] ?? 0}
                         </span>
                       </button>
                     ))}
