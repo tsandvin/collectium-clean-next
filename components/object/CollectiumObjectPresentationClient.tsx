@@ -90,6 +90,7 @@ type ChangeLogEntry = {
 };
 
 type ObjectItem = {
+  [key: string]: unknown;
   objectId: string;
   sourceKey: string;
   objectGroup: string;
@@ -521,18 +522,18 @@ const imageRoles: Array<{
 const banknoteGradingOptions: GradingOption[] = [
   {
     key: "banknote_unc",
-    label: "UNC / Usirkulert",
+    label: "0 / Usirkulert",
     count: 12,
-    rarityTitleNo: "Usirkulert",
+    rarityTitleNo: "0 / Usirkulert",
     collectiumDescriptionNo:
       "Seddel uten synlig sirkulasjonsslitasje. Kontroller hjørner, press, vask, rifter og lysgjennomgang.",
-    qualityLabelNo: "Seddel · topp kvalitet",
+    qualityLabelNo: "Seddel · 0 kvalitet",
   },
   {
     key: "banknote_01",
-    label: "01 / Nesten usirkulert",
+    label: "01 / Nesten 0 / Usirkulert",
     count: 31,
-    rarityTitleNo: "Nesten usirkulert",
+    rarityTitleNo: "Nesten 0 / Usirkulert",
     collectiumDescriptionNo:
       "Svært høy kvalitet med minimal håndtering. Små merker eller svak fold kan forekomme.",
     qualityLabelNo: "Seddel · høy kvalitet",
@@ -571,9 +572,9 @@ const coinGradingOptions: GradingOption[] = [
     key: "coin_unc",
     label: "UNC / MS",
     count: 9,
-    gradeTitleNo: "Usirkulert",
+    gradeTitleNo: "0 / Usirkulert",
     gradeNameEn: "Uncirculated",
-    qualityLabelNo: "Mynt · usirkulert",
+    qualityLabelNo: "Mynt · 0 / Usirkulert",
   },
   {
     key: "coin_xf",
@@ -617,54 +618,46 @@ function canSee(level: Membership, required: Membership) {
 function Field({
   label,
   value,
-  required,
-  membership,
+  subtle,
   href,
 }: {
   label: string;
   value?: string | number | null;
-  required: Membership;
-  membership: Membership;
+  subtle?: boolean;
   href?: string;
 }) {
-  const allowed = canSee(membership, required);
-  const displayValue = value === null || value === undefined || value === "" ? "Ikke registrert" : value;
+  const content = value ?? "Mangler";
 
   return (
-    <div className={styles.field}>
+    <div className={`${styles.field} ${subtle ? styles.fieldSubtle : ""}`}>
       <span>{label}</span>
-      <strong>
-        {allowed ? (
-          href ? (
-            <a href={href}>{displayValue}</a>
-          ) : (
-            displayValue
-          )
-        ) : (
-          "Tomt felt · krever Bronze+"
-        )}
-      </strong>
+      {href ? (
+        <a href={href}>
+          <strong>{content}</strong>
+        </a>
+      ) : (
+        <strong>{content}</strong>
+      )}
     </div>
   );
 }
-
 function EditableField({
   label,
   value,
-  onChange,
-  required = "bronze",
+  placeholder,
   membership,
-  placeholder = "Ikke registrert",
+  required = "bronze",
+  onChange,
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
-  required?: Membership;
-  membership: Membership;
   placeholder?: string;
+  membership: Membership;
+  required?: Membership;
+  onChange: (value: string) => void;
 }) {
   const allowed = canSee(membership, required);
-}
+
   return (
     <label
       className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
@@ -681,49 +674,83 @@ function EditableField({
 }
 
 function SelectField({
+  membership,
   label,
   value,
-  onChange,
   options,
-  required = "bronze",
-  membership,
   helper,
+  required = "bronze",
+  disabled = false,
+  lockedLabel,
+  onChange,
 }: {
+  membership: Membership;
   label: string;
   value: string;
-  onChange: (value: string) => void;
-  options: Array<{ key: string; label: string; count?: number }>;
-  required?: Membership;
-  membership: Membership;
+  options: Array<
+    | string
+    | {
+        value?: string;
+        key?: string;
+        id?: string;
+        label?: string;
+        name?: string;
+        title?: string;
+        description?: string | null;
+        summary?: string | null;
+        href?: string | null;
+      }
+  >;
   helper?: string;
+  required?: Membership;
+  disabled?: boolean;
+  lockedLabel?: string;
+  onChange: (value: string) => void;
 }) {
-  const allowed = canSee(membership, required);
-}
+  const membershipAllowed = canSee(membership, required);
+  const showOptions = options.length > 0;
+  const selectValue = value || "";
+  const isDisabled = disabled || !membershipAllowed || !showOptions;
+
   return (
-    <label
-      className={`${styles.editField} ${!allowed ? styles.editFieldLocked : ""}`}
-    >
+    <label className={styles.editableField}>
       <span>{label}</span>
       <select
-        value={allowed ? value : ""}
-        disabled={!allowed}
+        className={styles.input}
+        value={selectValue}
+        disabled={isDisabled}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">
-          {allowed ? "Velg kvalitet" : "Låst · krever Bronze+"}
-        </option>
-        {options.map((option) => (
-          <option key={option.key} value={option.key}>
-            {option.label}
-            {typeof option.count === "number" ? ` · ${option.count}` : ""}
+        {!showOptions ? (
+          <option value="">
+            {label.includes("gradering")
+              ? "Ingen graderinger hentet fra Neon"
+              : lockedLabel ?? "Ingen valg hentet fra databasen"}
           </option>
-        ))}
+        ) : (
+          options.map((option, index) => {
+            const optionValue =
+              typeof option === "string"
+                ? option
+                : String(option.value ?? option.key ?? option.id ?? option.label ?? index);
+
+            const optionLabel =
+              typeof option === "string"
+                ? option
+                : String(option.label ?? option.name ?? option.title ?? optionValue);
+
+            return (
+              <option key={`${optionValue}-${index}`} value={optionValue}>
+                {optionLabel}
+              </option>
+            );
+          })
+        )}
       </select>
-      {helper ? <small className={styles.fieldHelper}>{helper}</small> : null}
+      {helper ? <small>{helper}</small> : null}
     </label>
   );
 }
-
 function DemoSelector({
   selectedId,
   onSelect,
@@ -731,7 +758,6 @@ function DemoSelector({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
-}
   return (
     <section className={styles.demoStrip}>
       <div className={styles.demoHeader}>
@@ -745,7 +771,7 @@ function DemoSelector({
         </div>
       </div>
       <div className={styles.demoObjects}>
-        {demoObjects.map((item) => (
+        {demoObjects.map((item, index) => (
           <button
             key={item.objectId}
             type="button"
@@ -761,6 +787,8 @@ function DemoSelector({
     </section>
   );
 }
+
+
 
 export default function CollectiumObjectPresentationClient({
   mode,
@@ -779,6 +807,10 @@ export default function CollectiumObjectPresentationClient({
   const [shareDuration, setShareDuration] = useState<6 | 12 | 18 | 24 | 48>(12);
   const [generatedShareLink, setGeneratedShareLink] = useState<string>("");
   const [shareStatus, setShareStatus] = useState<string>("");
+  const [shareRecipientEmail, setShareRecipientEmail] = useState<string>("");
+  const [selectedRarityValue, setSelectedRarityValue] = useState<string>("");
+  const [selectedGradeValue, setSelectedGradeValue] = useState<string>("");
+  const [qualityConditionOptions, setQualityConditionOptions] = useState<{ rarityOptions: unknown[]; gradeOptions: unknown[] }>({ rarityOptions: [], gradeOptions: [] });
   const [sharedRecipients, setSharedRecipients] = useState<Array<{
     email: string;
     accessLabel: string;
@@ -899,8 +931,8 @@ export default function CollectiumObjectPresentationClient({
     }
 
     void loadStatusCounts();
-}
-  return () => {
+
+    return () => {
       cancelled = true;
     };
   }, [selectedObject.sourceKey, selectedObject.objectGroup, selectedObject.objectId]);
@@ -971,6 +1003,7 @@ useEffect(() => {
 
   async function generateObjectShareLink() {
     setShareStatus("Genererer lenke ...");
+    setGeneratedShareLink("");
 
     const payload = {
       source_key: selectedObject.sourceKey,
@@ -1000,7 +1033,35 @@ useEffect(() => {
       if (!response.ok) {
         throw new Error(`Kunne ikke generere delingslenke: ${response.status}`);
       }
-}
+
+      const result = await response.json().catch(() => ({}));
+
+      const nextShareLink =
+        result.share_url ||
+        result.shareUrl ||
+        result.url ||
+        result.link ||
+        result.href ||
+        result.data?.share_url ||
+        result.data?.shareUrl ||
+        result.data?.url ||
+        "";
+
+      if (!nextShareLink) {
+        throw new Error("API svarte OK, men returnerte ingen delingslenke.");
+      }
+
+      setGeneratedShareLink(nextShareLink);
+      setShareStatus("Delingslenke generert.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Kunne ikke generere delingslenke.";
+
+      setShareStatus(message);
+    }
+  }
   function buildObjectCatalogLabel() {
     const objectFields = selectedObject as typeof selectedObject & {
       catalogNumber?: string;
@@ -1021,6 +1082,283 @@ useEffect(() => {
   const hasAccess = isDemo || isLoggedIn || isSharedLink;
   const effectiveMembership: Membership =
     isSharedLink && !isLoggedIn ? "free" : membership;
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadQualityConditionOptions() {
+      try {
+        const response = await fetch(
+          `/api/object/quality-condition-options?object_group=${selectedObject.objectGroup}`,
+          { cache: "no-store" },
+        );
+
+        const payload = await response.json();
+
+        if (!cancelled && payload?.ok) {
+          setQualityConditionOptions({
+            rarityOptions: Array.isArray(payload.rarityOptions) ? payload.rarityOptions : [],
+            gradeOptions: Array.isArray(payload.gradeOptions) ? payload.gradeOptions : [],
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setQualityConditionOptions({ rarityOptions: [], gradeOptions: [] });
+        }
+      }
+    }
+
+    loadQualityConditionOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedObject.objectGroup]);
+  const selectedObjectData = selectedObject as unknown as Record<string, unknown>;
+
+  const qualityHeading = String(
+    ownInfo.grade ||
+      selectedObjectData.grade_title_no ||
+      selectedObjectData.gradeTitleNo ||
+      selectedObjectData.quality_label_no ||
+      selectedObjectData.qualityLabelNo ||
+      "",
+  );
+
+  const qualityDescription = String(
+    selectedObjectData.grade_description_no ||
+      selectedObjectData.gradeDescriptionNo ||
+      selectedObjectData.quality_summary_no ||
+      selectedObjectData.qualitySummaryNo ||
+      "",
+  );
+
+  const rarityHeading = String(
+    selectedObjectData.rarity_title_no ||
+      selectedObjectData.rarityTitleNo ||
+      selectedObjectData.rarity_display_label ||
+      selectedObjectData.rarityDisplayLabel ||
+      selectedObjectData.rarity ||
+      "",
+  );
+
+  const rarityDescription = String(
+    selectedObjectData.collectium_description_no ||
+      selectedObjectData.collectiumDescriptionNo ||
+      selectedObjectData.rarity_description_no ||
+      selectedObjectData.rarityDescriptionNo ||
+      "",
+  );
+
+  const normalizeQualityConditionOption = (
+    option: unknown,
+    index: number,
+  ): {
+    value: string;
+    label: string;
+    description: string | null;
+    summary?: string | null;
+    percentage?: string | null;
+    multiplier?: string | null;
+    rarityName?: string | null;
+    quantityLabel?: string | null;
+    collectionValueMultiplier?: string | null;
+  } => {
+    const row =
+      option && typeof option === "object"
+        ? (option as Record<string, unknown>)
+        : { value: option, label: option };
+
+    const label = String(
+      row.label ??
+        row.grade_title_no ??
+        row.gradeTitleNo ??
+        row.rarity_title_no ??
+        row.rarityTitleNo ??
+        row.rarity_name_no ??
+        row.rarityNameNo ??
+        row.quality_label_no ??
+        row.qualityLabelNo ??
+        row.name ??
+        row.title ??
+        row.value ??
+        index,
+    );
+
+    const value = String(row.value ?? row.key ?? row.id ?? label);
+
+    const descriptionRaw =
+      row.description ??
+      row.grade_description_no ??
+      row.gradeDescriptionNo ??
+      row.collectium_description_no ??
+      row.collectiumDescriptionNo ??
+      row.rarity_description_no ??
+      row.rarityDescriptionNo ??
+      null;
+
+    return {
+      value,
+      label,
+      description: descriptionRaw == null ? null : String(descriptionRaw),
+      summary:
+        row.summary == null && row.quality_summary_no == null && row.qualitySummaryNo == null
+          ? null
+          : String(row.summary ?? row.quality_summary_no ?? row.qualitySummaryNo),
+      percentage:
+        row.percentage == null ? null : String(row.percentage),
+      multiplier:
+        row.multiplier == null ? null : String(row.multiplier),
+      rarityName:
+        row.rarityName == null && row.rarity_name_no == null
+          ? null
+          : String(row.rarityName ?? row.rarity_name_no),
+      quantityLabel:
+        row.quantityLabel == null && row.quantity_label == null
+          ? null
+          : String(row.quantityLabel ?? row.quantity_label),
+      collectionValueMultiplier:
+        row.collectionValueMultiplier == null && row.collection_value_multiplier == null
+          ? null
+          : String(row.collectionValueMultiplier ?? row.collection_value_multiplier),
+    };
+  };
+
+  const gradeSourceOptions =
+    qualityConditionOptions.gradeOptions.length > 0
+      ? qualityConditionOptions.gradeOptions
+      : Array.isArray(selectedObjectData.gradeOptions) && selectedObjectData.gradeOptions.length > 0
+        ? selectedObjectData.gradeOptions
+        : [];
+
+  const gradeSelectOptions = gradeSourceOptions.map(normalizeQualityConditionOption);
+
+  const raritySourceOptions =
+    qualityConditionOptions.rarityOptions.length > 0
+      ? qualityConditionOptions.rarityOptions
+      : Array.isArray(selectedObjectData.rarityOptions) && selectedObjectData.rarityOptions.length > 0
+        ? selectedObjectData.rarityOptions
+        : [
+            {
+              value: String(
+                selectedObjectData.rarity_title_no ??
+                  selectedObjectData.rarityTitleNo ??
+                  selectedObjectData.rarity ??
+                  "vanlig",
+              ),
+              label: [
+                String(
+                  selectedObjectData.rarity_title_no ??
+                    selectedObjectData.rarityTitleNo ??
+                    selectedObjectData.rarity ??
+                    "Vanlig",
+                ),
+                String(
+                  selectedObjectData.rarity_quantity_label ??
+                    selectedObjectData.quantity_label ??
+                    selectedObjectData.quantityLabel ??
+                    "200",
+                ),
+                String(
+                  selectedObjectData.collection_value_multiplier ??
+                    selectedObjectData.collectionValueMultiplier ??
+                    selectedObjectData.rarity_multiplier ??
+                    "100%",
+                ),
+              ].filter(Boolean).join(" • "),
+              description:
+                selectedObjectData.collectium_description_no ??
+                selectedObjectData.collectiumDescriptionNo ??
+                selectedObjectData.rarity_description_no ??
+                selectedObjectData.rarityDescriptionNo ??
+                "Sjeldenhet følger katalogobjektet og har ingen registrert beskrivelse.",
+            },
+          ];
+
+  const raritySelectOptions = raritySourceOptions
+    .map(normalizeQualityConditionOption)
+    .filter((option) => option.label && option.label !== "undefined");
+
+  const rawSelectedRarityValue =
+    selectedRarityValue || raritySelectOptions[0]?.value || "";
+
+  const selectedRarity =
+    raritySelectOptions.find((option) => option.value === rawSelectedRarityValue) ??
+    raritySelectOptions.find((option) => option.label === rawSelectedRarityValue) ??
+    null;
+
+  const activeRarityValue = selectedRarity?.value ?? rawSelectedRarityValue;
+  const userRoleRaw = String(
+    selectedObjectData.userRole ??
+      selectedObjectData.role ??
+      selectedObjectData.accountRole ??
+      selectedObjectData.membershipRole ??
+      "",
+  ).toLowerCase();
+
+  const canEditRarity =
+    selectedObjectData.canEditRarity === true ||
+    selectedObjectData.isDealer === true ||
+    selectedObjectData.isForhandler === true ||
+    selectedObjectData.isAdmin === true ||
+    userRoleRaw === "admin" ||
+    userRoleRaw === "collectium_admin" ||
+    userRoleRaw === "dealer" ||
+    userRoleRaw === "forhandler";
+
+
+  const rawSelectedGradeValue = selectedGradeValue || ownInfo.grade || gradeSelectOptions[0]?.value || "";
+
+  const selectedGrade =
+    gradeSelectOptions.find((option) => option.value === rawSelectedGradeValue) ??
+    gradeSelectOptions.find((option) => option.label === rawSelectedGradeValue) ??
+    null;
+
+  const activeGradeValue = selectedGrade?.value ?? rawSelectedGradeValue;
+  async function logGradeChange(nextGradeValue: string) {
+    const nextGrade = gradeSelectOptions.find((option) => option.value === nextGradeValue) ?? null;
+
+    try {
+      await fetch("/api/object/grade-change-log", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          changed_by_user_id:
+            selectedObjectData.user_id ??
+            selectedObjectData.userId ??
+            selectedObjectData.changed_by_user_id ??
+            selectedObjectData.changedByUserId ??
+            null,
+          object_id:
+            selectedObjectData.object_id ??
+            selectedObjectData.objectId ??            null,
+          object_group: selectedObject.objectGroup,
+          source_key:
+            selectedObjectData.source_key ??
+            selectedObjectData.sourceKey ??
+            "norske_sedler",
+          object_name:
+            selectedObjectData.object_name ??
+            selectedObjectData.objectName ??
+            selectedObject.title ??
+            selectedObject.name ??
+            null,
+          previous_grade: ownInfo.grade || null,
+          new_grade: nextGradeValue,
+          new_grade_label: nextGrade?.label ?? nextGradeValue,
+          grade_description: nextGrade?.description ?? null,
+        }),
+      });
+    } catch {
+      // Loggfeil skal ikke stoppe brukerens valg i frontend.
+    }
+  }
+
+  const qualityChangeHistory =
+    selectedGrade && ownInfo.grade && activeGradeValue !== ownInfo.grade
+      ? `Tidligere kvalitet: ${ownInfo.grade} · endret ${new Date().getFullYear()}`
+      : "";
   const onlyCore = !canSee(effectiveMembership, "bronze");
   const objectYear = Number(selectedObject.year) || 1979;
   const halfSpan = Math.max(22, timelineSpan / 2);
@@ -1143,40 +1481,28 @@ useEffect(() => {
           ["Grade values", "Mangler", "{}"],
           ["Prisgrunnlag", "Mangler", "observasjoner"],
         ]
-      : [
-          ["Valør", selectedObject.denomination, selectedObject.objectGroup],
-          ["Utgave", selectedObject.issue, selectedObject.year],
-          ["Variant", selectedObject.litra, selectedObject.catalogNumber],
-          ["Signatur", selectedObject.signatures, "signaturgruppe"],
-          ["Regent", selectedObject.regent, selectedObject.regentPeriod],
-          ["Objektnøkkel", selectedObject.objectId, "source + group + id"],
-        ];
-}
+      : viewMode === "museum"
+        ? [
+            ["Historie info", "Mangler", "historisk datagrunnlag"],
+            ["Varianter", "Ikke beregnet", "varianter av denne"],
+            ["Utgaver", "Ikke beregnet", "utgaver i samme serie"],
+            ["Periode", selectedObject.issue, selectedObject.year],
+            ["Regent", selectedObject.regent, selectedObject.regentPeriod],
+            ["Relasjoner", "Ikke beregnet", "periode / utgave / variant"],
+          ]
+        : [
+            ["Samler info", "Mangler", "samleraktivitet"],
+            ["Samlet av", "Ikke beregnet", "antall samlere"],
+            ["Aktivitet", "Ikke beregnet", "hjerte / stjerne / samling"],
+            ["Objektstatus", "Hovedobjekt", "katalog"],
+            ["Deling", "Ikke beregnet", "visningslenker"],
+            ["Samlingsdata", "Mangler", "brukerdata"],
+          ];
+
   return (
     <div className={styles.shell} data-view={viewMode}>
       <main className={styles.main}>
         <div className={styles.content}>
-          <div className={styles.modeBar}>
-            <div className={styles.membershipSelect}>
-              <span className={styles.inlineNote}>
-                {mode === "demo" ? "Test tilgang:" : "Tilgang:"}
-              </span>
-              <select
-                className={styles.selectLike}
-                value={membership}
-                onChange={(event) =>
-                  setMembership(event.target.value as Membership)
-                }
-              >
-                <option value="guest">Gjest / demo</option>
-                <option value="free">Free</option>
-                <option value="bronze">Bronze</option>
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
-              </select>
-            </div>
-          </div>
 
           {isDemo && membership === "guest" ? (
             <DemoSelector selectedId={selectedId} onSelect={setSelectedId} />
@@ -1207,8 +1533,7 @@ useEffect(() => {
 
           {hasAccess ? (
             <>
-              <section className={styles.hero}>
-                <div className={styles.heroViewTabs} aria-label="Objektvisning">
+              <div className={styles.heroTabsOverFrame} aria-label="Objektvisning">
                   <span className={styles.heroViewLabel}>Visning</span>
                   {[
                     ["objekt", "Objekt info"],
@@ -1230,6 +1555,7 @@ useEffect(() => {
                     </button>
                   ))}
                 </div>
+              <section className={styles.hero}>
                 <div className={styles.heroGrid}>
                   <div className={styles.noteImage}>
                     <button
@@ -1298,7 +1624,7 @@ useEffect(() => {
                           </button>
                         ))}
                       </div>
-                      <div className={styles.imageCaption}>
+                      <div className={`${styles.imageCaption} ${styles.imageBottomInlinePolish}`}>
                         <span>{activeImageMeta.label}</span>
                         <p>{activeImageDescription}</p>
                       </div>
@@ -1316,32 +1642,50 @@ useEffect(() => {
                       {selectedObject.signatures} og regent{" "}
                       {selectedObject.regent}.
                     </p>
-                    <div className={styles.metaMini}>
-                      <div className={styles.mini}>
-                        <span className={styles.label}>Kilde</span>
-                        <span className={styles.value}>Norske sedler</span>
-                        <span className={styles.sub}>
-                          {selectedObject.sourceKey}
-                        </span>
+                    <div className={styles.objectIdentityStack}>
+                      <div className={styles.objectIdentityLine}>
+                        <span>ID / katalognummer</span>
+                        <strong>{selectedObject.catalogNumber}</strong>
+                        <em>
+                          {selectedObject.sourceKey} · {selectedObject.objectGroup} · {selectedObject.objectId}
+                        </em>
                       </div>
-                      <div className={styles.mini}>
-                        <span className={styles.label}>Objektgruppe</span>
-                        <span className={styles.value}>Banknote</span>
-                        <span className={styles.sub}>
-                          {selectedObject.objectGroup}
-                        </span>
+
+                      <div className={styles.objectIdentityLine}>
+                        <span>URL</span>
+                        <strong>
+                          /objekt/{selectedObject.sourceKey}/{selectedObject.objectGroup}/{selectedObject.objectId}
+                        </strong>
                       </div>
-                      <div className={styles.mini}>
-                        <span className={`${styles.value} ${styles.valueBig}`}>
-                          {selectedObject.objectId}
-                        </span>
-                        <span className={styles.sub}>source + group + id</span>
+
+                      <div className={styles.objectKeyInfoGrid}>
+                        <div>
+                          <span>Valør / objekt</span>
+                          <strong>{selectedObject.denomination}</strong>
+                        </div>
+                        <div>
+                          <span>Utgave / periode</span>
+                          <strong>{selectedObject.issue}</strong>
+                          <em>{selectedObject.year}</em>
+                        </div>
+                        <div>
+                          <span>Variant / nummer</span>
+                          <strong>{selectedObject.litra}</strong>
+                          <em>{selectedObject.catalogNumber}</em>
+                        </div>
+                        <div>
+                          <span>Regent / person</span>
+                          <strong>{selectedObject.regent}</strong>
+                        </div>
+                        <div>
+                          <span>Sjeldenhet</span>
+                          <strong>Ikke vurdert</strong>
+                        </div>
+                        <div>
+                          <span>Kvalitet</span>
+                          <strong>Ikke vurdert</strong>
+                        </div>
                       </div>
-                    </div>
-                    <div className={styles.modeNarrative}>
-                      {onlyCore
-                        ? "Free/gjest ser kjerneinformasjon. Tomme felt viser hva Bronze+ åpner."
-                        : "Bronze+ viser samler-, historie-, finans- og min samling-felter etter tilgang."}
                     </div>
                   </div>
                 </div>
@@ -1412,31 +1756,6 @@ useEffect(() => {
                 </div>
               ) : null}
 
-              <div className={styles.tabsRow}>
-                <div
-                  className={styles.segmentTabs}
-                  aria-label="Objektpresentasjon faner"
-                >
-                  {[
-                    ["samler", "I Samler"],
-                    ["historie", "II Historie"],
-                    ["finans", "III Finans"],
-                    ["samling", "IV I min samling"],
-                    ["relasjoner", "V Relasjon objekter"],
-                  ].map(([key, label]) => (
-                    <button
-                      key={key}
-                      className={`${styles.segmentTab} ${tab === key ? styles.segmentTabActive : ""}`}
-                      type="button"
-                      aria-pressed={tab === key}
-                      onClick={() => setTab(key as Tab)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <section className={styles.keyrow}>
                 <div className={styles.keygrid}>
                   {keyData.map(([label, value, sub]) => (
@@ -1499,7 +1818,7 @@ useEffect(() => {
                   <div className={styles.timelineLane}>
                     {timelineItems
                       .filter((item) => item.lane === "regent")
-                      .map((item) => (
+                      .map((item, index) => (
                         <a
                           key={item.label}
                           href={item.href}
@@ -1520,7 +1839,7 @@ useEffect(() => {
                   <div className={styles.timelineLane}>
                     {timelineItems
                       .filter((item) => item.lane === "history")
-                      .map((item) => (
+                      .map((item, index) => (
                         <a
                           key={item.label}
                           href={item.href}
@@ -1541,7 +1860,7 @@ useEffect(() => {
                   <div className={styles.timelineLane}>
                     {timelineItems
                       .filter((item) => item.lane === "finance")
-                      .map((item) => (
+                      .map((item, index) => (
                         <a
                           key={item.label}
                           href={item.href}
@@ -1582,6 +1901,33 @@ useEffect(() => {
                 </p>
               </section>
 
+
+              <div className={styles.tabsRow}>
+                <div
+                  className={styles.segmentTabs}
+                  aria-label="Objektpresentasjon faner"
+                >
+                  {[
+                    ["samler", "I Samler"],
+                    ["historie", "II Historie"],
+                    ["finans", "Finans"],
+                    ["samling", "IV I min samling"],
+                    ["relasjoner", "V Relasjon objekter"],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      className={`${styles.segmentTab} ${tab === key ? styles.segmentTabActive : ""}`}
+                      type="button"
+                      aria-pressed={tab === key}
+                      onClick={() => setTab(key as Tab)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+
               <div className={styles.layout}>
                 <main className={styles.mainPanels}>
                   <section
@@ -1590,29 +1936,24 @@ useEffect(() => {
                     <div className={styles.panel}>
                       <h3>Identitet</h3>
                       <Field
-                        membership={effectiveMembership}
                         label="Katalognummer"
                         value={selectedObject.catalogNumber}
                       />
                       <Field
-                        membership={effectiveMembership}
                         label="Collectium-tittel"
                         value={selectedObject.title}
                       />
                       <Field
-                        membership={effectiveMembership}
                         label="Valør"
                         value={selectedObject.denomination}
                         href="/relasjon/valor/10-kroner"
                       />
                       <Field
-                        membership={effectiveMembership}
                         label="År"
                         value={selectedObject.year}
                         href={`/relasjon/ar/${selectedObject.year}`}
                       />
                       <Field
-                        membership={effectiveMembership}
                         label="Litra"
                         value={selectedObject.litra}
                       />
@@ -1622,26 +1963,18 @@ useEffect(() => {
                     >
                       <h3>Utgave og variant</h3>
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Valørutgave / serie"
                         value={selectedObject.issue}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Variant"
                         value={selectedObject.variant}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Signatur"
                         value={selectedObject.signatures}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Regent"
                         value={selectedObject.regent}
                       />
@@ -1651,26 +1984,18 @@ useEffect(() => {
                     >
                       <h3>Sjeldenhet og mengde</h3>
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Katalogvurdering"
                         value={selectedObject.rarity}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Estimert mengde"
                         value={selectedObject.quantity}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Signaturmengde"
                         value="Hentes fra seddel-view"
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Status"
                         value="Basis klar"
                       />
@@ -1681,17 +2006,14 @@ useEffect(() => {
                     >
                       <h3>Bilde og fallback</h3>
                       <Field
-                        membership={effectiveMembership}
                         label="Forside"
                         value="variant_obverse_image_path · henter"
                       />
                       <Field
-                        membership={effectiveMembership}
                         label="Bakside"
                         value="variant_reverse_image_path · henter"
                       />
                       <Field
-                        membership={effectiveMembership}
                         label="Gjennomlysning"
                         value="transmitted_light · henter"
                       />
@@ -1727,26 +2049,18 @@ useEffect(() => {
                     <div className={styles.panel}>
                       <h3>Regent · signatur · motiv</h3>
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Regent"
                         value={selectedObject.regent}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Regentperiode"
                         value={selectedObject.regentPeriod}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Signaturgruppe"
                         value={selectedObject.signatures}
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Hovedperiode"
                         value="Selvstendig Norge / Unionstid"
                       />
@@ -1807,26 +2121,18 @@ useEffect(() => {
                     <div className={styles.panel}>
                       <h3>Marked og salg</h3>
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Markedsverdi"
                         value="Mangler markedsverdi"
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Trend 12 mnd"
                         value="Ikke beregnet trend"
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Auksjon"
                         value="Ikke registrert på auksjon"
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="bronze"
                         label="Nettbutikk"
                         value="Ikke registrert i nettbutikk"
                       />
@@ -1834,20 +2140,14 @@ useEffect(() => {
                     <div className={styles.panel}>
                       <h3>Indexkobling</h3>
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Kjøpekraft"
                         value="Henter"
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Lønn / befolkning"
                         value="Henter"
                       />
                       <Field
-                        membership={effectiveMembership}
-                        required="silver"
                         label="Rente / metall"
                         value="Henter"
                       />
@@ -1929,18 +2229,62 @@ useEffect(() => {
                       className={`${styles.panel} ${!canSee(effectiveMembership, "bronze") ? styles.lockedPanel : ""}`}
                     >
                       <h3>Kvalitet og tilstand</h3>
-                      <SelectField
-                        membership={effectiveMembership}
-                        label="Gradering"
-                        value={ownInfo.grade}
-                        onChange={applyGradingChoice}
-                        options={gradingOptions}
-                        helper={
-                          selectedObject.objectGroup === "coin"
-                            ? "Mynt: grade_title_no + grade_name_en joines til quality_label_no."
-                            : "Seddel: rarity_title_no fyller gradering, collectium_description_no fyller tilstand/merknad."
-                        }
-                      />
+                      <div className={styles.qualityConditionBlock}>
+                        <div className={styles.qualityFieldGroup}>
+                          <SelectField
+                            membership={effectiveMembership}
+                            label="Velg sjeldenhet"
+                            value={activeRarityValue}
+                            onChange={canEditRarity ? setSelectedRarityValue : () => undefined}
+                            options={raritySelectOptions}
+                            disabled={!canEditRarity}
+                            lockedLabel="Kun forhandler/admin kan endre sjeldenhet"
+                            helper="Sjeldenhet kommer fra katalog/register og kan bare endres av forhandler/admin."
+                          />
+
+                          {selectedRarity ? (
+                            <div className={styles.autoDescriptionBox}>
+                              <strong>{selectedRarity.label}</strong>
+                              <p>
+                                {selectedRarity.description ||
+                                  "Sjeldenhet følger katalogobjektet og har ingen registrert beskrivelse."}
+                              </p>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className={styles.qualityFieldGroup}>
+                          <SelectField
+                            membership={effectiveMembership}
+                            label={
+                              selectedObject.objectGroup === "coin"
+                                ? "Velg myntgradering"
+                                : "Velg seddelgradering"
+                            }
+                            value={activeGradeValue}
+                            onChange={(value: string) => {
+                              setSelectedGradeValue(value);
+                              applyGradingChoice(value);
+                              logGradeChange(value);
+                            }}
+                            options={gradeSelectOptions}
+                          />
+
+                          <div className={styles.autoDescriptionBox}>
+                              <strong>Beskrivelse av kvalitet</strong>
+                              {selectedGrade?.summary ? <p>{selectedGrade.summary}</p> : null}
+                              <p>
+                                {selectedGrade?.description ||
+                                  "Velg seddelgradering. Beskrivelsen fra Neon vises automatisk her."}
+                              </p>
+                              {qualityChangeHistory ? (
+                                <small className={styles.qualityChangeHistory}>
+                                  {qualityChangeHistory}
+                                </small>
+                              ) : null}
+                            </div>
+                        </div>
+                      </div>
                       <EditableField
                         membership={effectiveMembership}
                         label="Egen kvalitet"
@@ -2045,8 +2389,8 @@ useEffect(() => {
                       <h3>Endringslogg</h3>
                       {changeLog.length ? (
                         <div className={styles.logList}>
-                          {changeLog.map((entry) => (
-                            <div key={entry.id} className={styles.logEntry}>
+                          {changeLog.map((entry, index) => (
+                            <div key={`${entry.id}-${index}`} className={styles.logEntry}>
                               <span>{entry.at}</span>
                               <strong>{entry.field}</strong>
                               <em>{entry.value}</em>
@@ -2179,7 +2523,7 @@ useEffect(() => {
                         label: "Sammenlign",
                         sub: "Mot andre objekter",
                       },
-                    ].map((action) => (
+                    ].map((action, index) => (
                       <button
                         key={action.id}
                         className={`${styles.action} ${savedStates[action.id] ? styles.actionPrimary : ""}`}
@@ -2203,30 +2547,6 @@ useEffect(() => {
                       </button>
                     ))}
                   </div>
-                  <div className={styles.panel}>
-                    <h3>Del visning</h3>
-                    <div className={styles.shareBtns}>
-                      {["6t", "12t", "18t", "24t", "48t"].map((item) => (
-                        <button
-                          key={item}
-                          className={`${styles.pill} ${item === "12t" ? styles.pillActive : ""}`}
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-                    <div className={styles.field}>
-                      <span>Katalog</span>
-                      <strong>{objectCatalogLabel}</strong>
-                    </div>
-                    <div className={styles.field}>
-                      <span>Tilgang</span>
-                      <strong>12 timer</strong>
-                    </div>
-                    <button className={`${styles.pill} ${styles.pillActive}`}>
-                      Generer lenke
-                    </button>
-                  </div>
       {/* v18-share-panel-start */}
       <div className={`${styles.panel} ${styles.shareViewPanel}`}>
         <h3>Del visning</h3>
@@ -2248,6 +2568,15 @@ useEffect(() => {
         </div>
 
         <div className={styles.shareMetaGrid}>
+          <label className={styles.shareMetaField}>
+            <span>E-post mottaker</span>
+            <input
+              type="email"
+              value={shareRecipientEmail}
+              placeholder="mottaker@epost.no"
+              onChange={(event) => setShareRecipientEmail(event.target.value)}
+            />
+          </label>
           <div className={styles.shareMetaField}>
             <span>Katalog</span>
             <strong>{objectCatalogLabel}</strong>
@@ -2319,6 +2648,42 @@ useEffect(() => {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
